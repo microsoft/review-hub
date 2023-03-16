@@ -14,9 +14,9 @@
 
 - Otherwise take the following steps in updating your solution.
 
-- Pull the latest changes from master.
+- Pull the latest changes from main.
 
-- If you would like to retain any changes done on the solution in your environment. First follow the export guide, skipping the pull request step. This should merge the changes from master with your changes. Then follow the remainder of the import guide.
+- If you would like to retain any changes done on the solution in your environment. First follow the export guide, skipping the pull request step. This should merge the changes from main with your changes. Then follow the remainder of the import guide.
 
 - Pack the solution file using power platform cli, as shown in the code snippet.
 
@@ -32,7 +32,7 @@ pac solution pack --zipfile desired-zip-file-name --folder path-to-repo/ReviewHu
 
 - Export the solution as unmanaged, and download the zip file.
 
-- Checkout from master to a new branch within your local repo.
+- Checkout from main to a new branch within your local repo.
 
 - Extract the zip file using the power apps cli to unpack the solution, as shown in the code snippet.
 

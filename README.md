@@ -41,7 +41,7 @@ The following connections are utilized within the solution. There a Data Loss Po
 
 - Clone the repository to your local machine 
 ```
- git clone https://github.com/your-username/power-apps-project.git
+git clone https://github.com/your-username/power-apps-project.git
 ```
 - Import the zipped solution file, present within the solution files folder into your environment.
 
