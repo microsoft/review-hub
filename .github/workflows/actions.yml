@@ -13,7 +13,7 @@ jobs:
         uses: actions/checkout@v2
       - name: Install Power Platform CLI
         run: |
-          npm install -g powerplatform-cli
+          npm install -g pac-cli
       - name: Code Quality Check
         run: |
           pac pcf scan --path .
