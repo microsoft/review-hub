@@ -1,0 +1,61 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<savedqueries xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <savedquery>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>0</CanBeDeleted>
+    <isquickfindquery>0</isquickfindquery>
+    <isprivate>0</isprivate>
+    <isdefault>1</isdefault>
+    <savedqueryid>{eb7e6f03-de2f-445d-8e75-4dbddc48986f}</savedqueryid>
+    <layoutxml>
+      <grid name="resultset" jump="craf2_title" select="1" icon="1" preview="1">
+        <row name="result" id="craf2_reviewhub_scorecardautomationid">
+          <cell name="craf2_title" width="150" />
+          <cell name="craf2_boardtype" width="100" />
+          <cell name="craf2_product" width="100" />
+          <cell name="craf2_dayofcreationpermonth" width="100" />
+          <cell name="craf2_automationstartdate" width="100" />
+          <cell name="craf2_reviewownerdisplayname" width="100" />
+          <cell name="craf2_reviewownerprincipalemail" width="100" />
+          <cell name="craf2_template" width="100" />
+          <cell name="craf2_lastcreationmonth" width="100" />
+          <cell name="craf2_pausedsincemonth" width="100" />
+          <cell name="createdon" width="125" />
+          <cell name="createdby" width="100" />
+          <cell name="modifiedon" width="100" />
+          <cell name="modifiedby" width="100" />
+        </row>
+      </grid>
+    </layoutxml>
+    <querytype>0</querytype>
+    <fetchxml>
+      <fetch version="1.0" mapping="logical">
+        <entity name="craf2_reviewhub_scorecardautomation">
+          <attribute name="craf2_reviewhub_scorecardautomationid" />
+          <attribute name="craf2_title" />
+          <attribute name="createdon" />
+          <order attribute="craf2_title" descending="false" />
+          <filter type="and">
+            <condition attribute="statecode" operator="eq" value="0" />
+          </filter>
+          <attribute name="craf2_boardtype" />
+          <attribute name="craf2_product" />
+          <attribute name="craf2_dayofcreationpermonth" />
+          <attribute name="craf2_automationstartdate" />
+          <attribute name="craf2_reviewownerprincipalemail" />
+          <attribute name="craf2_template" />
+          <attribute name="craf2_lastcreationmonth" />
+          <attribute name="craf2_pausedsincemonth" />
+          <attribute name="createdby" />
+          <attribute name="modifiedon" />
+          <attribute name="modifiedby" />
+          <attribute name="craf2_reviewownerdisplayname" />
+        </entity>
+      </fetch>
+    </fetchxml>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <LocalizedNames>
+      <LocalizedName description="Active ReviewHub_ScorecardAutomations" languagecode="1033" />
+    </LocalizedNames>
+  </savedquery>
+</savedqueries>

@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<savedqueries xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <savedquery>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>0</CanBeDeleted>
+    <isquickfindquery>0</isquickfindquery>
+    <isprivate>0</isprivate>
+    <isdefault>1</isdefault>
+    <savedqueryid>{861565cd-06a1-4d3e-9307-4a0e88825ea4}</savedqueryid>
+    <layoutxml>
+      <grid name="resultset" jump="craf2_userprincipalemail" select="1" icon="1" preview="1">
+        <row name="result" id="craf2_reviewhub_usersid">
+          <cell name="craf2_userprincipalemail" width="195" />
+          <cell name="craf2_userdisplayname" width="100" />
+          <cell name="craf2_userrole" width="100" />
+          <cell name="createdby" width="100" />
+          <cell name="createdon" width="100" />
+        </row>
+      </grid>
+    </layoutxml>
+    <querytype>0</querytype>
+    <fetchxml>
+      <fetch version="1.0" mapping="logical">
+        <entity name="craf2_reviewhub_users">
+          <attribute name="craf2_reviewhub_usersid" />
+          <attribute name="craf2_userprincipalemail" />
+          <order attribute="craf2_userprincipalemail" descending="false" />
+          <filter type="and">
+            <condition attribute="statecode" operator="eq" value="0" />
+          </filter>
+          <attribute name="craf2_userdisplayname" />
+          <attribute name="craf2_userrole" />
+          <attribute name="createdby" />
+          <attribute name="createdon" />
+        </entity>
+      </fetch>
+    </fetchxml>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <LocalizedNames>
+      <LocalizedName description="Active ReviewHub_Users" languagecode="1033" />
+    </LocalizedNames>
+  </savedquery>
+</savedqueries>

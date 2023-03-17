@@ -1,0 +1,482 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_office365": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "chub_sharedoffice365_aaf4a"
+        },
+        "api": {
+          "name": "shared_office365"
+        }
+      },
+      "shared_commondataserviceforapps_1": {
+        "impersonation": {},
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "chub_sharedcommondataserviceforapps_72f86"
+        },
+        "api": {
+          "name": "shared_commondataserviceforapps"
+        }
+      },
+      "shared_approvals": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "chub_sharedapprovals_32174"
+        },
+        "api": {
+          "name": "shared_approvals"
+        }
+      },
+      "shared_azuread": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "chub_sharedazuread_edb08"
+        },
+        "api": {
+          "name": "shared_azuread"
+        }
+      },
+      "shared_office365users": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "chub_sharedoffice365users_3cce7"
+        },
+        "api": {
+          "name": "shared_office365users"
+        }
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        },
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        },
+        "EnvVar - ReviewHub - Notification Email (chub_EnvVarReviewHubNotificationEmail)": {
+          "defaultValue": "reviewhub-noreply@microsoft.com",
+          "type": "String",
+          "metadata": {
+            "schemaName": "chub_EnvVarReviewHubNotificationEmail"
+          }
+        },
+        "EnvVar - ReviewHub - Team Email (chub_EnvVarReviewHubTeamEmail)": {
+          "defaultValue": "dtpreviewhub@microsoft.com",
+          "type": "String",
+          "metadata": {
+            "schemaName": "chub_EnvVarReviewHubTeamEmail"
+          }
+        },
+        "EnvVar - ReviewHub - Read Only Access (chub_EnvVarReviewHubReadOnlyAccess)": {
+          "defaultValue": "fc1ad010-85b0-44e8-b8c3-1d487f7421f7",
+          "type": "String",
+          "metadata": {
+            "schemaName": "chub_EnvVarReviewHubReadOnlyAccess"
+          }
+        },
+        "EnvVar - ReviewHub - Admins (chub_EnvVarReviewHubAdmins)": {
+          "defaultValue": "mbalogun@microsoft.com; limuzira@microsoft.com; nofoefule@microsoft.com",
+          "type": "String",
+          "metadata": {
+            "schemaName": "chub_EnvVarReviewHubAdmins"
+          }
+        }
+      },
+      "triggers": {
+        "When_a_row_is_added,_modified_or_deleted": {
+          "metadata": {
+            "operationMetadataId": "96031b78-587e-48b0-ae69-8315a0c75ee1"
+          },
+          "type": "OpenApiConnectionWebhook",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+              "connectionName": "shared_commondataserviceforapps_1",
+              "operationId": "SubscribeWebhookTrigger"
+            },
+            "parameters": {
+              "subscriptionRequest/message": 4,
+              "subscriptionRequest/entityname": "craf2_reviewhub_userrequest",
+              "subscriptionRequest/scope": 2,
+              "subscriptionRequest/name": "d960b6c3-ae38-ed11-bba2-000d3a5bc542"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        }
+      },
+      "actions": {
+        "Check_If_the_its_a_new_row": {
+          "actions": {
+            "Send_Initiaition_Email": {
+              "runAfter": {},
+              "metadata": {
+                "operationMetadataId": "21b5e399-ede6-42bc-8d87-e65642b72dc6"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
+                  "connectionName": "shared_office365",
+                  "operationId": "SendEmailV2"
+                },
+                "parameters": {
+                  "emailMessage/To": "@triggerOutputs()?['body/craf2_email']",
+                  "emailMessage/Subject": "Review Hub Access Request",
+                  "emailMessage/Body": "<p>Hi @{outputs('Get_user_profile_(V2)')?['body/displayName']},<br>\n<br>\nYour request has been submitted succussessfully. It will be reviewed and you will be notified when the status has been updated.<br>\n<br>\nFor more information checkout the <a href=\"https://msazure.visualstudio.com/One/_wiki/wikis/DTP%20Insights%20and%20Analytics%20wiki/261059/Access-Control\">Review Hub Wiki</a> &nbsp;or email the Review Hub Feature Team at dtpreviewhub@microsoft.com.<br>\n<br>\nRegards,<br>\nReview Hub Feature Team.</p>",
+                  "emailMessage/From": "@parameters('EnvVar - ReviewHub - Notification Email (chub_EnvVarReviewHubNotificationEmail)')",
+                  "emailMessage/Cc": "@parameters('EnvVar - ReviewHub - Team Email (chub_EnvVarReviewHubTeamEmail)')",
+                  "emailMessage/ReplyTo": "@parameters('EnvVar - ReviewHub - Team Email (chub_EnvVarReviewHubTeamEmail)')",
+                  "emailMessage/Importance": "Normal"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "Get_User_Request": {
+              "runAfter": {
+                "Start_and_wait_for_an_approval": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "96331183-b132-457e-8ee8-672b46c684bb"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "connectionName": "shared_commondataserviceforapps_1",
+                  "operationId": "ListRecords"
+                },
+                "parameters": {
+                  "entityName": "craf2_reviewhub_userrequests",
+                  "$filter": "craf2_email eq '@{triggerOutputs()?['body/craf2_email']}'",
+                  "$orderby": "modifiedon desc",
+                  "$top": 1
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "Compose": {
+              "runAfter": {
+                "Get_User_Request": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "c0607351-be1b-40dc-afe5-ca5c3acda9c3"
+              },
+              "type": "Compose",
+              "inputs": "@first(outputs('Get_User_Request')?['body/value'])?['chub_decision@OData.Community.Display.V1.FormattedValue']"
+            },
+            "Check_if_approval_status_is_pending": {
+              "actions": {
+                "Is_Request_Approved": {
+                  "actions": {
+                    "Update_User_Request_to_Approved": {
+                      "runAfter": {},
+                      "metadata": {
+                        "operationMetadataId": "4acb9118-70f6-4368-a433-f5d2c03c7b31"
+                      },
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                          "connectionName": "shared_commondataserviceforapps_1",
+                          "operationId": "UpdateRecord"
+                        },
+                        "parameters": {
+                          "entityName": "craf2_reviewhub_userrequests",
+                          "recordId": "@first(outputs('Get_User_Request')?['body/value'])?['craf2_reviewhub_userrequestid']",
+                          "item/chub_approvercomments": "@first(outputs('Start_and_wait_for_an_approval')?['body/responses'])?['comments']",
+                          "item/chub_approveremail": "@first(outputs('Start_and_wait_for_an_approval')?['body/responses'])?['responder/userPrincipalName']",
+                          "item/chub_decision": 840660000,
+                          "item/chub_decisiondate": "@first(outputs('Start_and_wait_for_an_approval')?['body/responses'])?['responseDate']"
+                        },
+                        "authentication": "@parameters('$authentication')"
+                      }
+                    }
+                  },
+                  "runAfter": {},
+                  "else": {
+                    "actions": {
+                      "Update_User_Request_to_Rejected": {
+                        "runAfter": {},
+                        "metadata": {
+                          "operationMetadataId": "ac741485-a62a-44ab-b253-d520c1ac17f7"
+                        },
+                        "type": "OpenApiConnection",
+                        "inputs": {
+                          "host": {
+                            "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                            "connectionName": "shared_commondataserviceforapps_1",
+                            "operationId": "UpdateRecord"
+                          },
+                          "parameters": {
+                            "entityName": "craf2_reviewhub_userrequests",
+                            "recordId": "@first(outputs('Get_User_Request')?['body/value'])?['craf2_reviewhub_userrequestid']",
+                            "item/chub_approvercomments": "@first(outputs('Start_and_wait_for_an_approval')?['body/responses'])?['comments']",
+                            "item/chub_approveremail": "@first(outputs('Start_and_wait_for_an_approval')?['body/responses'])?['responder/userPrincipalName']",
+                            "item/chub_decision": 840660002,
+                            "item/chub_decisiondate": "@first(outputs('Start_and_wait_for_an_approval')?['body/responses'])?['responseDate']"
+                          },
+                          "authentication": "@parameters('$authentication')"
+                        }
+                      }
+                    }
+                  },
+                  "expression": {
+                    "equals": [
+                      "@outputs('Start_and_wait_for_an_approval')?['body/outcome']",
+                      "Approve"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "e5cba486-35ce-4cd8-8780-12033c13eac1"
+                  },
+                  "type": "If"
+                }
+              },
+              "runAfter": {
+                "Compose": [
+                  "Succeeded"
+                ]
+              },
+              "expression": {
+                "equals": [
+                  "@first(outputs('Get_User_Request')?['body/value'])?['chub_decision@OData.Community.Display.V1.FormattedValue']",
+                  "Pending"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "9c1073a5-e5ab-4652-879e-d02389db3ef3"
+              },
+              "type": "If"
+            },
+            "Start_and_wait_for_an_approval": {
+              "runAfter": {
+                "Send_Initiaition_Email": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "309e2759-248f-4017-878f-9143ade43f4e"
+              },
+              "type": "OpenApiConnectionWebhook",
+              "inputs": {
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_approvals",
+                  "connectionName": "shared_approvals",
+                  "operationId": "StartAndWaitForAnApproval"
+                },
+                "parameters": {
+                  "approvalType": "Basic",
+                  "WebhookApprovalCreationInput/title": "Review Hub Access Request",
+                  "WebhookApprovalCreationInput/assignedTo": "@parameters('EnvVar - ReviewHub - Admins (chub_EnvVarReviewHubAdmins)')",
+                  "WebhookApprovalCreationInput/details": "@{outputs('Get_user_profile_(V2)')?['body/displayName']} has requested for access to the Review Hub application with the following justification.\n\nJustification : \n@{triggerOutputs()?['body/craf2_justification']}",
+                  "WebhookApprovalCreationInput/requestor": "@{triggerOutputs()?['body/craf2_email']};",
+                  "WebhookApprovalCreationInput/enableNotifications": true,
+                  "WebhookApprovalCreationInput/enableReassignment": true
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            }
+          },
+          "runAfter": {
+            "Get_user_profile_(V2)": [
+              "Succeeded"
+            ]
+          },
+          "else": {
+            "actions": {
+              "Check_if_it_is_rejected": {
+                "actions": {
+                  "Send_Rejection_Email": {
+                    "runAfter": {},
+                    "metadata": {
+                      "operationMetadataId": "21b5e399-ede6-42bc-8d87-e65642b72dc6"
+                    },
+                    "type": "OpenApiConnection",
+                    "inputs": {
+                      "host": {
+                        "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
+                        "connectionName": "shared_office365",
+                        "operationId": "SendEmailV2"
+                      },
+                      "parameters": {
+                        "emailMessage/To": "@triggerOutputs()?['body/craf2_email']",
+                        "emailMessage/Subject": "Review Hub Access Request",
+                        "emailMessage/Body": "<p>Hi @{outputs('Get_user_profile_(V2)')?['body/displayName']},<br>\n<br>\nYour request to access Review Hub was rejected.<br>\n<br>\nFor more information check out the <a href=\"https://msazure.visualstudio.com/One/_wiki/wikis/DTP%20Insights%20and%20Analytics%20wiki/261059/Access-Control\">Review Hub Wiki</a> or the Review &nbsp;Hub Feature Team at <a href=\"mailto:dtpreviewhub@microsoft.com\">dtpreviewhub@microsoft.com</a>.<br>\n<br>\nRegards,<br>\nReview Hub Fea ture Team.</p>",
+                        "emailMessage/From": "@parameters('EnvVar - ReviewHub - Notification Email (chub_EnvVarReviewHubNotificationEmail)')",
+                        "emailMessage/Cc": "@parameters('EnvVar - ReviewHub - Team Email (chub_EnvVarReviewHubTeamEmail)')",
+                        "emailMessage/ReplyTo": "@parameters('EnvVar - ReviewHub - Team Email (chub_EnvVarReviewHubTeamEmail)')",
+                        "emailMessage/Importance": "Normal"
+                      },
+                      "authentication": "@parameters('$authentication')"
+                    }
+                  }
+                },
+                "runAfter": {},
+                "else": {
+                  "actions": {
+                    "Check_if_is_is_approved": {
+                      "actions": {
+                        "Check_group_membership_(V2)": {
+                          "runAfter": {},
+                          "metadata": {
+                            "operationMetadataId": "95386da4-e153-4b97-afe1-cd531bfbac78"
+                          },
+                          "type": "OpenApiConnection",
+                          "inputs": {
+                            "host": {
+                              "apiId": "/providers/Microsoft.PowerApps/apis/shared_azuread",
+                              "connectionName": "shared_azuread",
+                              "operationId": "CheckMemberGroupsV2"
+                            },
+                            "parameters": {
+                              "id": "@outputs('Get_user_profile_(V2)')?['body/id']",
+                              "body/groupIds": [
+                                "@parameters('EnvVar - ReviewHub - Read Only Access (chub_EnvVarReviewHubReadOnlyAccess)')"
+                              ]
+                            },
+                            "authentication": "@parameters('$authentication')"
+                          }
+                        },
+                        "User_Exists": {
+                          "actions": {},
+                          "runAfter": {
+                            "Check_group_membership_(V2)": [
+                              "Succeeded"
+                            ]
+                          },
+                          "else": {
+                            "actions": {
+                              "Add_user_to_group": {
+                                "runAfter": {},
+                                "metadata": {
+                                  "operationMetadataId": "9fb5dac6-5824-4576-9fed-7977850edd67"
+                                },
+                                "type": "OpenApiConnection",
+                                "inputs": {
+                                  "host": {
+                                    "apiId": "/providers/Microsoft.PowerApps/apis/shared_azuread",
+                                    "connectionName": "shared_azuread",
+                                    "operationId": "AddUserToGroup"
+                                  },
+                                  "parameters": {
+                                    "id": "@parameters('EnvVar - ReviewHub - Read Only Access (chub_EnvVarReviewHubReadOnlyAccess)')",
+                                    "body/@odata.id": "@outputs('Get_user_profile_(V2)')?['body/id']"
+                                  },
+                                  "authentication": "@parameters('$authentication')"
+                                }
+                              },
+                              "Send_Approved_Email": {
+                                "runAfter": {
+                                  "Add_user_to_group": [
+                                    "Succeeded"
+                                  ]
+                                },
+                                "metadata": {
+                                  "operationMetadataId": "21b5e399-ede6-42bc-8d87-e65642b72dc6"
+                                },
+                                "type": "OpenApiConnection",
+                                "inputs": {
+                                  "host": {
+                                    "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
+                                    "connectionName": "shared_office365",
+                                    "operationId": "SendEmailV2"
+                                  },
+                                  "parameters": {
+                                    "emailMessage/To": "@triggerOutputs()?['body/craf2_email']",
+                                    "emailMessage/Subject": "Review Hub Access Request",
+                                    "emailMessage/Body": "<p>Hi @{outputs('Get_user_profile_(V2)')?['body/displayName']},<br>\n<br>\nYour request to access Review Hub was approved. You should recieve and email from ReviewHubAccess-ReadOnlyGroup signifying you now have access.<br>\n<br>\nAfterwards, you can go to <a href=\"https://aka.ms/reviewhub\">Review Hub</a> Application .<br>\n<br>\nRegards,<br>\nReview Hub Feature Team.</p>",
+                                    "emailMessage/From": "@parameters('EnvVar - ReviewHub - Notification Email (chub_EnvVarReviewHubNotificationEmail)')",
+                                    "emailMessage/Cc": "@parameters('EnvVar - ReviewHub - Team Email (chub_EnvVarReviewHubTeamEmail)')",
+                                    "emailMessage/ReplyTo": "@parameters('EnvVar - ReviewHub - Team Email (chub_EnvVarReviewHubTeamEmail)')",
+                                    "emailMessage/Importance": "Normal"
+                                  },
+                                  "authentication": "@parameters('$authentication')"
+                                }
+                              }
+                            }
+                          },
+                          "expression": {
+                            "greater": [
+                              "@length(outputs('Check_group_membership_(V2)')?['body/value'])",
+                              0
+                            ]
+                          },
+                          "metadata": {
+                            "operationMetadataId": "ccfa7509-2ae8-41a7-bf08-90502f3d1d81"
+                          },
+                          "type": "If"
+                        }
+                      },
+                      "runAfter": {},
+                      "expression": {
+                        "equals": [
+                          "@triggerOutputs()?['body/_chub_decision_label']",
+                          "Approved"
+                        ]
+                      },
+                      "metadata": {
+                        "operationMetadataId": "e315c894-d1cc-478b-9b79-1a02905b6994"
+                      },
+                      "type": "If"
+                    }
+                  }
+                },
+                "expression": {
+                  "equals": [
+                    "@triggerOutputs()?['body/_chub_decision_label']",
+                    "Declined"
+                  ]
+                },
+                "metadata": {
+                  "operationMetadataId": "f5039f3a-3233-4d3e-8e63-456713fbcfe3"
+                },
+                "type": "If"
+              }
+            }
+          },
+          "expression": {
+            "equals": [
+              "@triggerOutputs()?['body/_chub_decision_label']",
+              "Pending"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "35df5ed7-a6b7-494c-a239-56ff5231adbc"
+          },
+          "type": "If"
+        },
+        "Get_user_profile_(V2)": {
+          "runAfter": {},
+          "metadata": {
+            "operationMetadataId": "c098f4a0-f9f2-449d-b12c-c369fcb9ffe7"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365users",
+              "connectionName": "shared_office365users",
+              "operationId": "UserProfile_V2"
+            },
+            "parameters": {
+              "id": "@triggerOutputs()?['body/craf2_email']"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        }
+      }
+    },
+    "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+}

@@ -1,0 +1,1712 @@
+scn_SS_AutoCreateCards As screen:
+
+    btn_BulkDelete_ACC As button:
+        BorderColor: =Self.Fill
+        Fill: =REDWARNINGCOLOR
+        Font: =FontStyle
+        FontWeight: =FontWeight.Bold
+        Height: =btn_BulkUpdate_ACC.Height
+        HoverBorderColor: =Self.BorderColor
+        HoverColor: =Self.Fill
+        HoverFill: =Self.Color
+        OnSelect: |-
+            =UpdateContext({var_show_delete: true});
+        RadiusBottomLeft: =25
+        RadiusBottomRight: =25
+        RadiusTopLeft: =25
+        RadiusTopRight: =25
+        Size: =11
+        Text: ="Bulk Delete"
+        Visible: =btn_BulkUpdate_ACC.Visible
+        Width: =btn_BulkUpdate_ACC.Width
+        X: =btn_BulkUpdate_ACC.X
+        Y: =btn_BulkUpdate_ACC.Y + btn_BulkUpdate_ACC.Height + 30
+        ZIndex: =1
+
+    btn_BulkUpdate_ACC As button:
+        BorderColor: =Self.Fill
+        Fill: =BlueControlDarkBackground
+        Font: =FontStyle
+        FontWeight: =FontWeight.Bold
+        Height: =35
+        HoverColor: =Self.Fill
+        HoverFill: =Self.Color
+        OnSelect: =Set(var_bulk_update_visible_ACC, true);
+        RadiusBottomLeft: =25
+        RadiusBottomRight: =25
+        RadiusTopLeft: =25
+        RadiusTopRight: =25
+        Size: =11
+        Text: ="Bulk Update"
+        Visible: |-
+            =CountRows(Filter(glry_Search_ACC.AllItems, ThisRecord.check_Selected_ACC.Value = true)) > 1 
+            && var_bulk_update_visible_ACC <> true
+            && var_EditACC_AddNew <> true
+        Width: =130
+        X: =ctn_Search_ACC.X + ctn_Search_ACC.Width + 17 + (ctn_Edit_ACC.Width - Self.Width) * 0.50
+        Y: =ctn_Search_ACC.Y + (ctn_Search_ACC.Height - Self.Height*2 - 30) * 0.50 
+        ZIndex: =2
+
+    ctn_Edit_ACC As groupContainer:
+        Height: =btn_EditACC_Save.Y + btn_EditACC_Save.Height + 25
+        Visible: =!IsBlankOrError(record_Edit_This_Automation) || var_EditACC_AddNew || var_bulk_update_visible_ACC
+        Width: =App.Width - Self.X - 15
+        X: =ctn_Search_ACC.X + ctn_Search_ACC.Width + 20
+        Y: =ctn_Search_ACC.Y
+        ZIndex: =3
+
+        Back_Edit_ACC As button:
+            BorderColor: =Top_Edit_ACC.Fill
+            DisabledBorderColor: =Self.BorderColor
+            DisabledFill: =RGBA(0, 0, 0, 0)
+            DisplayMode: =DisplayMode.Disabled
+            Font: =FontStyle
+            Height: =Parent.Height - Self.Y - 1
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Text: =""
+            Width: =Parent.Width - 2
+            X: =1
+            Y: =Top_Edit_ACC.Height - 1
+            ZIndex: =1
+
+        btn_EditACC_Cancel As button:
+            BorderColor: =Self.Fill
+            Fill: =GRAYCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =25
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Self.Fill
+            HoverFill: =Self.Color
+            OnSelect: |-
+                =Concurrent(
+                    Set(var_EditACC_PauseThisAutomation, false),
+                    Set(record_Edit_This_Automation, Blank()),
+                    Set(var_EditACC_AddNew, false),
+                    Set(var_ACC_SelectAll, false),
+                    Set(var_bulk_update_visible_ACC, false),
+                    Reset(dtpk_EditACC_PauseDate),
+                    Reset(combo_NewACC_Product),
+                    Reset(check_SelectAll_ACC),
+                    Select(btn_ACC_Reset)
+                    //Clear(cln_selectedScoreCards_ACC)
+                )
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Size: =10
+            Text: ="Cancel"
+            Width: =90
+            X: =btn_EditACC_Save.Width + btn_EditACC_Save.X + 30
+            Y: =btn_EditACC_Save.Y
+            ZIndex: =2
+
+        btn_EditACC_Save As button:
+            BorderColor: =Self.Fill
+            DisplayMode: |-
+                =If(
+                    var_EditACC_AddNew,
+                    //If user is adding new record and there is no duplicated automation.
+                    If( 
+                        IsBlankOrError(
+                            LookUp(
+                                ReviewHub_ScorecardAutomations, 
+                                ThisRecord.craf2_BoardType.craf2_boardtypeid = dpdn_ACC_BoardType.Selected.BoardTypeID 
+                                    && ThisRecord.craf2_Product.craf2_productid = combo_NewACC_Product.Selected.ProductID
+                            )
+                        ),
+                        DisplayMode.Edit,
+                        DisplayMode.Disabled
+                    ),
+                    DisplayMode.Edit
+                )
+            Fill: =BlueControlDarkBackground
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =25
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Self.Fill
+            HoverFill: =Self.Color
+            OnSelect: |
+                =Set(var_bulk_update_visible_ACC, false);
+                If(
+                    var_EditACC_AddNew,
+                    //Add New Record
+                    Patch(
+                        ReviewHub_ScorecardAutomations,
+                        Defaults(ReviewHub_ScorecardAutomations),
+                        {
+                            Title: dpdn_EditACC_BoardType.Selected.BoardTypeName & ": " & combo_NewACC_Product.Selected.ProductName,
+                            BoardType: LookUp(ReviewHub_BoardTypes, ThisRecord.craf2_boardtypeid = dpdn_EditACC_BoardType.Selected.BoardTypeID),
+                            Product: LookUp(ReviewHub_Products, ThisRecord.craf2_productid = combo_NewACC_Product.Selected.ProductID),
+                            Template: LookUp(ReviewHub_MetricTemplates, ThisRecord.craf2_templateid = dpdn_EditACC_Template.Selected.TemplateID),
+                            ReviewOwnerDisplayName: combo_EditACC_ReviewOwner.Selected.DisplayName,
+                            ReviewOwnerPrincipalEmail: combo_EditACC_ReviewOwner.Selected.UserPrincipalName,
+                            DayOfCreationPerMonth: dpdn_EditACC_DayOfCreation.Selected.Value,
+                            AutomationStartDate: DateValue(Month(dtpk_EditACC_AutoStart.SelectedDate) & "/01/" & Year(dtpk_EditACC_AutoStart.SelectedDate)),
+                            PausedSinceMonth: 
+                            If(
+                                dtpk_EditACC_PauseDate.Visible && !IsBlankOrError(dtpk_EditACC_PauseDate.SelectedDate), 
+                                DateValue(Month(dtpk_EditACC_PauseDate.SelectedDate) & "/01/" & Year(dtpk_EditACC_PauseDate.SelectedDate)),
+                                Blank()
+                            )
+                        }
+                    ),
+                    If(
+                        CountRows(Filter(glry_Search_ACC.AllItems, ThisRecord.check_Selected_ACC.Value = true)) > 1,
+                        //Bulk Update
+                        ForAll(
+                            Filter(glry_Search_ACC.AllItems, ThisRecord.check_Selected_ACC.Value = true),
+                            Patch(
+                                ReviewHub_ScorecardAutomations,
+                                LookUp(
+                                    ReviewHub_ScorecardAutomations,
+                                    ThisRecord.craf2_reviewhub_scorecardautomationid = RecordUID
+                                ),
+                                {
+                                    DayOfCreationPerMonth: dpdn_EditACC_DayOfCreation.Selected.Value
+                                },
+                                {
+                                    PausedSinceMonth: 
+                                    If(
+                                        !IsBlankOrError(dtpk_EditACC_PauseDate.SelectedDate), 
+                                        DateValue(Month(dtpk_EditACC_PauseDate.SelectedDate) & "/01/" & Year(dtpk_EditACC_PauseDate.SelectedDate)),
+                                        Blank()
+                                    )
+                                }
+                            )
+                        ),
+                        //Select one row to Update One Existing Record.
+                        Patch(
+                            ReviewHub_ScorecardAutomations,
+                            LookUp(
+                                ReviewHub_ScorecardAutomations, 
+                                ThisRecord.craf2_reviewhub_scorecardautomationid = record_Edit_This_Automation.RecordUID 
+                            ),
+                            {
+                                Template: LookUp(ReviewHub_MetricTemplates, ThisRecord.craf2_templateid = dpdn_EditACC_Template.Selected.TemplateID),
+                                ReviewOwnerDisplayName: combo_EditACC_ReviewOwner.Selected.DisplayName,
+                                ReviewOwnerPrincipalEmail: combo_EditACC_ReviewOwner.Selected.UserPrincipalName,
+                                DayOfCreationPerMonth: dpdn_EditACC_DayOfCreation.Selected.Value,
+                                PausedSinceMonth: 
+                                If(
+                                    dtpk_EditACC_PauseDate.Visible && !IsBlankOrError(dtpk_EditACC_PauseDate.SelectedDate), 
+                                    DateValue(Month(dtpk_EditACC_PauseDate.SelectedDate) & "/01/" & Year(dtpk_EditACC_PauseDate.SelectedDate)),
+                                    Blank()
+                                )
+                            }
+                        )
+                    )
+                );
+                
+                Select(btn_EditACC_Cancel);
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Size: =10
+            Text: ="Save"
+            Width: =90
+            X: =dpdn_EditACC_BoardType.X
+            Y: |-
+                =If(
+                    var_EditACC_AddNew,
+                    If(
+                        lbl_ACC_AlreadyExisted.Visible,
+                        lbl_ACC_AlreadyExisted.Y + lbl_ACC_AlreadyExisted.Height + 5,
+                        dtpk_EditACC_AutoStart.Y + dtpk_EditACC_AutoStart.Height + 20
+                    ),
+                    bttn_EditACC_DeletePauseDt.Y + bttn_EditACC_DeletePauseDt.Height + 20
+                )
+            ZIndex: =3
+
+        lbl_ACC_AlreadyExisted As label:
+            AutoHeight: =true
+            Color: =RGBA(255, 0, 0, 1)
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            PaddingBottom: =2
+            PaddingLeft: =15
+            Size: =12
+            Text: ="The automation is already existing."
+            Visible: =btn_EditACC_Save.DisplayMode = DisplayMode.Disabled
+            Width: =Parent.Width
+            Y: =dtpk_EditACC_AutoStart.Y + dtpk_EditACC_AutoStart.Height + 5
+            ZIndex: =4
+
+        dtpk_EditACC_AutoStart As datepicker:
+            BorderColor: =GRAYCOLOR
+            BorderThickness: =1
+            DefaultDate: =DateValue(Month(Today()) & "/01/" & Year(Today()))
+            Font: =FontStyle
+            Height: =30
+            IconBackground: =GrayControlBackground
+            IconFill: =Color.Black
+            InputTextPlaceholder: ="MM/DD/YYYY"//If(IsBlank(Self.SelectedDate), Text(Date(2001,12,31), Self.Format, Self.Language))
+            PaddingLeft: =10
+            PaddingTop: =5
+            Size: =12
+            Visible: =var_EditACC_AddNew
+            Width: =145
+            X: =15
+            Y: =lbl_NewACC_AutoStart.Y + lbl_NewACC_AutoStart.Height
+            ZIndex: =5
+
+        lbl_NewACC_AutoStart As label:
+            AutoHeight: =true
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =25
+            PaddingBottom: =3
+            PaddingLeft: =15
+            PaddingTop: =3
+            Size: =12
+            Text: ="Automation Start Month (Only Take the Month Start Date)"
+            Visible: =var_EditACC_AddNew
+            Width: =Parent.Width
+            Y: =dpdn_EditACC_DayOfCreation.Y + dpdn_EditACC_DayOfCreation.Height + 10
+            ZIndex: =6
+
+        bttn_EditACC_DeletePauseDt As button:
+            Align: =Align.Left
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =0
+            Color: =BlueControlDarkBackground
+            Fill: =RGBA(0, 0, 0, 0)
+            Font: =FontStyle
+            FontWeight: =FontWeight.Normal
+            HoverColor: =Color.Purple
+            HoverFill: =Self.Fill
+            OnSelect: |-
+                =If(
+                    !IsBlankOrError(record_Edit_This_Automation),
+                    Set(
+                        record_Edit_This_Automation, 
+                        Patch(
+                            record_Edit_This_Automation,
+                            {
+                                craf2_pausedsincemonth: Blank()
+                            }
+                        )
+                    ),
+                    Set(
+                        record_BulkEdit_Automations_NoPauseDate,
+                        true
+                    )
+                );
+                Set(var_EditACC_PauseThisAutomation, true);
+                Reset(dtpk_EditACC_PauseDate)
+            PressedColor: =Self.Color
+            PressedFill: =Self.Fill
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Size: =11
+            Text: ="Resume this automation (Delete the pause date)"
+            Underline: =true
+            Visible: =dtpk_EditACC_PauseDate.Visible
+            Width: =Parent.Width - Self.X * 2
+            X: =15
+            Y: =dtpk_EditACC_PauseDate.Y + dtpk_EditACC_PauseDate.Height
+            ZIndex: =7
+
+        dtpk_EditACC_PauseDate As datepicker:
+            BorderColor: =GRAYCOLOR
+            BorderThickness: =1
+            DefaultDate: |-
+                =If(
+                    !IsBlankOrError(record_Edit_This_Automation),
+                    record_Edit_This_Automation.craf2_pausedsincemonth,
+                    If(
+                        record_BulkEdit_Automations_NoPauseDate,
+                        Blank(),
+                        LookUp(glry_Search_ACC.AllItems, ThisRecord.check_Selected_ACC.Value = true).craf2_pausedsincemonth
+                    )
+                )
+            FocusedBorderThickness: =Self.BorderThickness
+            Font: =FontStyle
+            Height: =30
+            IconBackground: =GrayControlBackground
+            IconFill: =Color.Black
+            InputTextPlaceholder: ="MM/DD/YYYY"//If(IsBlank(Self.SelectedDate), Text(Date(2001,12,31), Self.Format, Self.Language))
+            PaddingLeft: =10
+            PaddingTop: =5
+            Size: =12
+            Visible: |-
+                =If(
+                    var_EditACC_AddNew,
+                    false,
+                    !bttn_EditACC_IsPaused.Visible 
+                )
+            Width: |+
+                =155
+                
+            X: =15
+            Y: =lbl_EditACC_PausedSince.Y + lbl_EditACC_PausedSince.Height
+            ZIndex: =8
+
+        lbl_EditACC_PausedSince As label:
+            AutoHeight: =true
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =25
+            PaddingBottom: =3
+            PaddingLeft: =15
+            PaddingTop: =0
+            Size: =12
+            Text: ="Pause this automation since (Only take the Month Start Date)"
+            Visible: =!var_EditACC_AddNew 
+            Width: =Parent.Width
+            Y: =dpdn_EditACC_DayOfCreation.Y+dpdn_EditACC_DayOfCreation.Height + 10
+            ZIndex: =9
+
+        dpdn_EditACC_DayOfCreation As dropdown:
+            BorderColor: =GRAYCOLOR
+            BorderThickness: =1
+            ChevronBackground: =GrayControlBackground
+            ChevronFill: =RGBA(0, 0, 0, 1)
+            ChevronHoverBackground: =Self.HoverFill
+            ChevronHoverFill: =Self.ChevronFill
+            Default: |-
+                =If(
+                    !IsBlankOrError(record_Edit_This_Automation),
+                    record_Edit_This_Automation.craf2_dayofcreationpermonth,
+                    LookUp(glry_Search_ACC.AllItems, ThisRecord.check_Selected_ACC.Value = true).craf2_dayofcreationpermonth
+                )
+            Font: =FontStyle
+            Height: =30
+            HoverFill: =BlueControlLightBackground
+            Items: =Sequence(15, 1)
+            PaddingBottom: =5
+            PaddingTop: =5
+            PressedColor: =Self.Color
+            PressedFill: =Self.HoverFill
+            SelectionColor: =Self.Color
+            SelectionFill: =Self.Fill
+            Size: =11
+            Width: =85
+            X: =15
+            Y: =lbl_EditACC_DayOfCreation.Y + lbl_EditACC_DayOfCreation.Height
+            ZIndex: =10
+
+        lbl_EditACC_DayOfCreation As label:
+            AutoHeight: =true
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =25
+            PaddingBottom: =3
+            PaddingLeft: =15
+            PaddingTop: =3
+            Size: =12
+            Text: ="Day to Create (Per Month) (E.g., 5th of every month)"
+            Width: =Parent.Width
+            Y: |-
+                =If(
+                    var_bulk_update_visible_ACC,
+                    Top_Edit_ACC.Y + Top_Edit_ACC.Height + 10,
+                    combo_EditACC_ReviewOwner.Y + combo_EditACC_ReviewOwner.Height + 10
+                )
+            ZIndex: =11
+
+        img_ReviewOwner_ACC As image:
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            Height: =60
+            Image: |-
+                =If(
+                    !IsBlankOrError(combo_EditACC_ReviewOwner.Selected.UserPrincipalName),
+                    Office365Users.UserPhotoV2(combo_EditACC_ReviewOwner.Selected.UserPrincipalName), 
+                    Blank()
+                )
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Visible: |-
+                =If(
+                    !IsBlankOrError(combo_EditACC_ReviewOwner.Selected.UserPrincipalName),
+                    Office365Users.UserPhotoMetadata(combo_EditACC_ReviewOwner.Selected.UserPrincipalName).HasPhoto, 
+                    false
+                ) && !var_bulk_update_visible_ACC
+            Width: =Self.Height
+            X: =Parent.Width - Self.Width - 15
+            Y: =lbl_EditACC_ReviewOwner.Y
+            ZIndex: =12
+
+        combo_EditACC_ReviewOwner As combobox:
+            BorderColor: =GRAYCOLOR
+            BorderThickness: =1
+            ChevronBackground: =GrayControlBackground
+            ChevronFill: =RGBA(0, 0, 0, 1)
+            ChevronHoverBackground: =Self.HoverFill
+            ChevronHoverFill: =Self.ChevronFill
+            DefaultSelectedItems: |-
+                =If(
+                    !IsBlankOrError(record_Edit_This_Automation), 
+                    {
+                        UserPrincipalName: record_Edit_This_Automation.craf2_reviewownerprincipalemail,
+                        DisplayName: record_Edit_This_Automation.craf2_reviewownerdisplayname
+                    }
+                )
+            DisplayFields: =["DisplayName","UserPrincipalName","Picture"]
+            FocusedBorderThickness: =Self.BorderThickness
+            Font: =FontStyle
+            Height: =30
+            HoverFill: =BlueControlLightBackground
+            InputTextPlaceholder: ="(Search by name or principal email alias)"
+            Items: |-
+                =Office365Users.SearchUserV2({searchTerm: Trim(Self.SearchText)}).value
+            OnChange: =
+            PressedFill: =BlueNaviHightLightBackground
+            SearchFields: =["UserPrincipalName", "DisplayName"]
+            SearchItems: |-
+                =Search(Office365Users.SearchUserV2({searchTerm: Trim(Self.SearchText)}).value,combo_EditACC_ReviewOwner.SearchText,"UserPrincipalName","DisplayName")
+            SelectionFill: =BlueNaviHightLightBackground
+            SelectMultiple: =false
+            Size: =12
+            Template: =ListItemTemplate.Double
+            Tooltip: =
+            Visible: =lbl_EditACC_Template.Visible
+            Width: |-
+                =If(
+                    img_ReviewOwner_ACC.Visible,
+                    img_ReviewOwner_ACC.X - Self.X - 10,
+                    Parent.Width - Self.X * 2
+                )
+            X: =15
+            Y: =lbl_EditACC_ReviewOwner.Y + lbl_EditACC_ReviewOwner.Height
+            ZIndex: =14
+
+        lbl_EditACC_ReviewOwner As label:
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =30
+            PaddingLeft: =15
+            PaddingTop: =0
+            Size: =12
+            Text: ="Review Owner"
+            Visible: =lbl_EditACC_Template.Visible
+            Width: =Parent.Width
+            Y: =dpdn_EditACC_Template.Y + dpdn_EditACC_Template.Height + 10
+            ZIndex: =15
+
+        dpdn_EditACC_Template As dropdown:
+            BorderColor: =GRAYCOLOR
+            BorderThickness: =1
+            ChevronBackground: =GrayControlBackground
+            ChevronFill: =RGBA(0, 0, 0, 1)
+            ChevronHoverBackground: =Self.HoverFill
+            ChevronHoverFill: =Self.ChevronFill
+            Default: |-
+                =If(
+                    !IsBlankOrError(record_Edit_This_Automation),
+                    record_Edit_This_Automation.craf2_Template.TemplateName
+                )
+            FocusedBorderThickness: =Self.BorderThickness
+            Font: =FontStyle
+            Height: =30
+            HoverFill: =BlueControlLightBackground
+            Items: |-
+                =Filter(
+                RenameColumns(
+                    ShowColumns(
+                        ReviewHub_MetricTemplates,
+                        "craf2_templateid", "craf2_templatename", "craf2_TemplateBoardType"
+                    ),
+                    "craf2_templateid", "TemplateID", 
+                    "craf2_templatename", "TemplateName", 
+                    "craf2_TemplateBoardType", "TemplateBoardTypeRec"
+                ), 
+                    ThisRecord.TemplateBoardTypeRec.craf2_boardtypename = dpdn_EditACC_BoardType.Selected.BoardTypeName
+                    && ThisRecord.TemplateID in var_DisplayMetricTemplateID.TemplateID
+                )
+            PressedFill: =Self.HoverFill
+            SelectionColor: =Self.Color
+            SelectionFill: =Self.Fill
+            Size: =11
+            Visible: =lbl_EditACC_Template.Visible
+            Width: |
+                =195
+            X: =15
+            Y: =lbl_EditACC_Template.Y + lbl_EditACC_Template.Height
+            ZIndex: =16
+
+        lbl_EditACC_Template As label:
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =30
+            PaddingBottom: =0
+            PaddingLeft: =15
+            PaddingTop: =0
+            Size: =12
+            Text: ="Template Used"
+            Visible: =!var_bulk_update_visible_ACC
+            Width: =Parent.Width
+            Y: =combo_NewACC_Product.Y + combo_NewACC_Product.Height + 10
+            ZIndex: =17
+
+        combo_NewACC_Product As combobox:
+            BorderColor: =GRAYCOLOR
+            BorderThickness: =1
+            ChevronBackground: =GrayControlBackground
+            ChevronFill: =RGBA(0, 0, 0, 1)
+            ChevronHoverBackground: =Self.HoverFill
+            ChevronHoverFill: =Self.ChevronFill
+            DefaultSelectedItems: |-
+                =If(
+                    !IsBlankOrError(record_Edit_This_Automation), 
+                    LookUp(
+                        RenameColumns(
+                            ShowColumns(
+                                ReviewHub_Products,
+                                "craf2_productid", "craf2_productname"
+                            ),
+                            "craf2_productid", "ProductID", 
+                            "craf2_productname", "ProductName"
+                        ),
+                        ThisRecord.ProductID = record_Edit_This_Automation.craf2_Product.ProductID
+                    )
+                )
+            DisabledColor: =GRAYCOLOR
+            DisplayFields: =["ProductName"]
+            DisplayMode: =If(var_EditACC_AddNew, DisplayMode.Edit, DisplayMode.Disabled)
+            FocusedBorderThickness: =Self.BorderThickness
+            Font: =FontStyle
+            Height: =30
+            HoverFill: =BlueControlLightBackground
+            InputTextPlaceholder: ="Find a product"
+            Items: |-
+                =RenameColumns(
+                    ShowColumns(
+                        ReviewHub_Products,
+                        "craf2_productid", "craf2_productname"
+                    ),
+                    "craf2_productid", "ProductID", 
+                    "craf2_productname", "ProductName"
+                )
+            PaddingLeft: =10
+            PressedColor: =Self.Color
+            PressedFill: =Self.HoverFill
+            SearchFields: =["ProductName"]
+            SearchItems: |-
+                =Search(RenameColumns(
+                    ShowColumns(
+                        ReviewHub_Products,
+                        "craf2_productid", "craf2_productname"
+                    ),
+                    "craf2_productid", "ProductID", 
+                    "craf2_productname", "ProductName"
+                ),combo_NewACC_Product.SearchText,"ProductName")
+            SelectionColor: =Self.Color
+            SelectionFill: =Self.Fill
+            SelectMultiple: =false
+            Size: =11
+            Visible: =!var_bulk_update_visible_ACC
+            Width: =Parent.Width - Self.X * 2
+            X: =15
+            Y: =lbl_NewACC_Product.Y + lbl_NewACC_Product.Height
+            ZIndex: =18
+
+        lbl_NewACC_Product As label:
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =30
+            PaddingBottom: =0
+            PaddingLeft: =15
+            PaddingTop: =0
+            Size: =12
+            Text: ="Product"
+            Visible: =!var_bulk_update_visible_ACC
+            Width: =Parent.Width
+            Y: =dpdn_EditACC_BoardType.Y + dpdn_EditACC_BoardType.Height + 10
+            ZIndex: =19
+
+        dpdn_EditACC_BoardType As dropdown:
+            BorderColor: =GRAYCOLOR
+            BorderThickness: =1
+            ChevronBackground: =GrayControlBackground
+            ChevronFill: =Color.Black
+            ChevronHoverBackground: =Self.HoverFill
+            ChevronHoverFill: =Self.ChevronFill
+            Default: |-
+                =If(
+                    !IsBlankOrError(record_Edit_This_Automation), 
+                    record_Edit_This_Automation.craf2_BoardType.BoardTypeName,
+                    dpdn_ACC_BoardType.Selected.BoardTypeName
+                )
+            DisplayMode: =If(var_EditACC_AddNew, DisplayMode.Edit, DisplayMode.Disabled)
+            FocusedBorderThickness: =Self.BorderThickness
+            Font: =FontStyle
+            Height: =30
+            HoverFill: =BlueControlLightBackground
+            Items: |-
+                =RenameColumns(
+                    Filter(
+                    AddColumns(
+                        ShowColumns(
+                            ReviewHub_BoardTypes,
+                            "craf2_boardtypeid", "craf2_boardtypename", "craf2_isdisplayinapp"
+                        ), "IsDisplayInApp", If(Text(craf2_isdisplayinapp)="Yes", true, false)
+                    ),
+                    ThisRecord.IsDisplayInApp = true && (IsAdmin || (IsCoordinator && ThisRecord.craf2_boardtypeid in IsCoordinator_BoardTypes))
+                    ),
+                    "craf2_boardtypeid", "BoardTypeID",
+                    "craf2_boardtypename", "BoardTypeName"
+                )
+            PressedFill: =Self.HoverFill
+            SelectionColor: =Self.Color
+            SelectionFill: =Self.Fill
+            Size: =11
+            Visible: =lbl_EditACC_BoardType.Visible
+            Width: |
+                =195
+            X: =15
+            Y: =lbl_EditACC_BoardType.Y + lbl_EditACC_BoardType.Height
+            ZIndex: =20
+
+        lbl_EditACC_BoardType As label:
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =30
+            PaddingBottom: =0
+            PaddingLeft: =15
+            PaddingTop: =0
+            Size: =12
+            Text: ="Board Type"
+            Visible: =!var_bulk_update_visible_ACC
+            Width: =Parent.Width
+            Y: |
+                =Top_Edit_ACC.Y + Top_Edit_ACC.Height + 5
+            ZIndex: =21
+
+        bttn_EditACC_IsPaused As button:
+            Align: =Align.Left
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =0
+            Color: =LEFTNAVBKGDCOLOR
+            Fill: =RGBA(0, 0, 0, 0)
+            Font: =FontStyle
+            FontWeight: =FontWeight.Normal
+            Height: =35
+            HoverColor: =Color.Purple
+            HoverFill: =Self.Fill
+            OnSelect: =Set(var_EditACC_PauseThisAutomation, true)
+            PressedColor: =Self.Color
+            PressedFill: =Self.Fill
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Size: =11
+            Text: ="No pause date, but I want to set a pause date."
+            Underline: =true
+            Visible: |-
+                =If(
+                    var_EditACC_AddNew,
+                    false,
+                    IsBlankOrError(record_Edit_This_Automation.craf2_pausedsincemonth) && !var_EditACC_PauseThisAutomation && !var_bulk_update_visible_ACC
+                )
+            Width: =Parent.Width - 30
+            X: =15
+            Y: =lbl_EditACC_PausedSince.Y + lbl_EditACC_PausedSince.Height
+            ZIndex: =22
+
+        Top_Edit_ACC As button:
+            Align: =Align.Left
+            BorderColor: =Self.Fill
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =0
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =Color.Black
+            DisabledFill: =Self.Fill
+            DisplayMode: =DisplayMode.Disabled
+            Fill: =SUBGROUPCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =60
+            HoverFill: =Self.Fill
+            PaddingLeft: =20
+            RadiusBottomLeft: |
+                =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: |
+                =25
+            RadiusTopRight: |
+                =25
+            Size: =14
+            Text: |-
+                =If(
+                    var_EditACC_AddNew,
+                    "Adding New Automation",
+                    If(
+                        var_bulk_update_visible_ACC,
+                        "Bulk Update (Records: " 
+                            & CountRows(Filter(glry_Search_ACC.AllItems, ThisRecord.check_Selected_ACC.Value = true)) & ")",
+                        "Editing an existing Automation"
+                    )
+                )
+            Width: =Parent.Width
+            ZIndex: =23
+
+        btn_ACC_Reset As button:
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =0
+            Color: =BlueControlDarkBackground
+            Fill: =RGBA(0, 0, 0, 0)
+            Font: =FontStyle
+            HoverColor: =Color.Purple
+            HoverFill: =Self.Fill
+            OnSelect: |-
+                =Concurrent(
+                    Reset(dpdn_EditACC_BoardType), Reset(combo_NewACC_Product), Reset(dpdn_EditACC_Template), Reset(dpdn_EditACC_DayOfCreation),
+                
+                    Reset(combo_EditACC_ReviewOwner), Reset(dtpk_EditACC_PauseDate),  Reset(dtpk_EditACC_AutoStart),
+                    Set(
+                        record_BulkEdit_Automations_NoPauseDate,
+                        false
+                    )
+                )
+            PressedColor: =Self.Color
+            PressedFill: =Self.Fill
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Size: =12
+            Text: ="Reset"
+            Underline: =true
+            Width: =55
+            X: =Parent.Width - Self.Width - 22
+            Y: =(Top_Edit_ACC.Height - Self.Height) * 0.50
+            ZIndex: =24
+
+    ctn_Search_ACC As groupContainer:
+        Height: =App.Height - Self.Y - 10
+        Width: |-
+            =If(
+                btn_BulkUpdate_ACC.Visible,
+                App.Width - Self.X * 3 - btn_BulkUpdate_ACC.Width,
+                If( 
+                    !ctn_Edit_ACC.Visible,  
+                    App.Width - Self.X * 2,
+                    (App.Width) * 0.70
+                )
+            )
+        X: =lbl_BoardType_ACC.X
+        Y: =lbl_BoardType_ACC.Y + lbl_BoardType_ACC.Height + 10
+        ZIndex: =4
+
+        glry_Search_ACC As gallery.variableTemplateHeightGallery:
+            BorderColor: =Back_Header_ACC.Fill
+            BorderThickness: =2
+            Height: =Parent.Height - Self.Y - 1
+            Items: |-
+                =Ungroup(//Ungroup function to add a Row Number column.
+                    ForAll(
+                        Sequence(
+                            CountRows(
+                                SortByColumns(
+                                    Search(
+                                        AddColumns(
+                                            ShowColumns(
+                                                Filter(
+                                                    ReviewHub_ScorecardAutomations,
+                                                    ThisRecord.BoardType.BoardTypeID = dpdn_ACC_BoardType.Selected.BoardTypeID
+                                                ),
+                                                "craf2_reviewhub_scorecardautomationid",
+                                                "craf2_BoardType",
+                                                "craf2_Product",
+                                                "craf2_Template",
+                                                "craf2_reviewownerdisplayname",
+                                                "craf2_reviewownerprincipalemail",
+                                                "craf2_dayofcreationpermonth",
+                                                "craf2_automationstartdate",
+                                                "craf2_lastcreationmonth",
+                                                "craf2_pausedsincemonth",
+                                                "modifiedon"
+                                            ),
+                                            "ProductName",
+                                            ThisRecord.craf2_Product.ProductName,
+                                            "RecordUID",
+                                            ThisRecord.craf2_reviewhub_scorecardautomationid
+                                        ),
+                                        Trim(ti_Search_Product_ACC.Text),
+                                        "ProductName"
+                                    ),
+                                    "ProductName",
+                                    SortOrder.Ascending
+                                )
+                            )
+                        ),
+                        {
+                            Record: Table(
+                                Last(
+                                    FirstN(
+                                        SortByColumns(
+                                            Search(
+                                                AddColumns(
+                                                    ShowColumns(
+                                                        Filter(
+                                                            ReviewHub_ScorecardAutomations,
+                                                            ThisRecord.BoardType.BoardTypeID = dpdn_ACC_BoardType.Selected.BoardTypeID
+                                                        ),
+                                                        "craf2_reviewhub_scorecardautomationid",
+                                                        "craf2_BoardType",
+                                                        "craf2_Product",
+                                                        "craf2_Template",
+                                                        "craf2_reviewownerdisplayname",
+                                                        "craf2_reviewownerprincipalemail",
+                                                        "craf2_dayofcreationpermonth",
+                                                        "craf2_automationstartdate",
+                                                        "craf2_lastcreationmonth",
+                                                        "craf2_pausedsincemonth",
+                                                        "modifiedon"
+                                                    ),
+                                                    "ProductName",
+                                                    ThisRecord.craf2_Product.ProductName,
+                                                    "RecordUID",
+                                                    ThisRecord.craf2_reviewhub_scorecardautomationid
+                                                ),
+                                                Trim(ti_Search_Product_ACC.Text),
+                                                "ProductName"
+                                            ),
+                                            "ProductName",
+                                            SortOrder.Ascending
+                                        ),
+                                        Value
+                                    )
+                                )
+                            ),
+                            RowNumber: Value
+                        }
+                    ),
+                    "Record"
+                )
+            Layout: =Layout.Vertical
+            TemplateFill: |-
+                =If(
+                    Mod(ThisItem.RowNumber, 2) > 0,
+                    If(
+                        check_Selected_ACC.Value || ThisItem.RecordUID = record_Edit_This_Automation.RecordUID, 
+                        ColorFade(BlueNaviHightLightBackground, 80%), 
+                        RGBA(0, 0, 0, 0)
+                    ),
+                    If(
+                        check_Selected_ACC.Value || ThisItem.RecordUID = record_Edit_This_Automation.RecordUID, 
+                        ColorFade(BlueNaviHightLightBackground, 80%), 
+                        GrayCanvasBackground
+                    )
+                )
+            TemplatePadding: =0
+            TemplateSize: =60
+            Width: =Parent.Width - 2
+            X: =1
+            Y: =ctn_Headers_ACC.Y + ctn_Headers_ACC.Height - 1
+            ZIndex: =1
+
+            btn_Delete_ACC As icon.Edit:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Color: =REDWARNINGCOLOR
+                Height: =btn_Edit_ACC.Height + 5
+                HoverColor: =Color.White
+                HoverFill: =REDWARNINGCOLOR
+                Icon: =Icon.Trash
+                OnSelect: |-
+                    =Set(record_Delete_This_ACC, ThisItem); UpdateContext({var_show_delete: true});
+                Tooltip: ="Delete"
+                Visible: =btn_Edit_ACC.Visible
+                Width: |
+                    =btn_Edit_ACC.Width + 5
+                X: |
+                    =btn_Edit_ACC.X + btn_Edit_ACC.Width + 15
+                Y: =btn_Edit_ACC.Y - 2
+                ZIndex: =1
+
+            btn_Edit_ACC As icon.Edit:
+                BorderColor: =Self.Color
+                BorderThickness: =2
+                Color: =BlueControlDarkBackground
+                Height: =25
+                HoverBorderColor: =Self.Color
+                HoverColor: =Color.White
+                HoverFill: =Self.Color
+                Icon: =Icon.Edit
+                OnSelect: |-
+                    =Concurrent(
+                        Set(record_Edit_This_Automation, ThisItem),
+                        Set(var_EditACC_PauseThisAutomation, false),
+                        Set(var_EditACC_AddNew, false),
+                        Set(var_ACC_SelectAll, false),
+                        Reset(dtpk_EditACC_PauseDate)
+                    )
+                PaddingBottom: =3
+                PaddingLeft: =3
+                PaddingRight: =3
+                PaddingTop: =3
+                Tooltip: ="Edit"
+                Visible: |-
+                    =If(
+                        Header_Conrol_ACC.Width = 1,
+                        false,
+                        true
+                    )
+                Width: =25
+                X: =Header_Conrol_ACC.X + (Header_Conrol_ACC.Width - Self.Width - btn_Delete_ACC.Width - 15) * 0.50
+                Y: =(check_Selected_ACC.Height - Self.Height) * 0.50
+                ZIndex: =2
+
+            lbl_Conrol_ACC As label:
+                Fill: =RGBA(222, 232, 249, 1)
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =11
+                Text: ="Edit/Delete"
+                Visible: =var_ACC_selected < 2
+                Width: =Header_Conrol_ACC.Width
+                X: =1176
+                ZIndex: =3
+
+            txt_PausedDate_ACC As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Color: =If(Self.Text = "(No Value)", Color.Black, BlueControlDarkBackground)
+                DisplayMode: =DisplayMode.View
+                Fill: =Parent.Fill
+                Font: =FontStyle
+                Height: =check_Selected_ACC.Height
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingTop: =0
+                Size: =10
+                Text: =If(IsBlankOrError(ThisItem.craf2_pausedsincemonth), "(No Value)", Text(ThisItem.craf2_pausedsincemonth, "mmmm yyyy"))
+                Width: =Header_PauseDate_ACC.Width
+                X: =Header_PauseDate_ACC.X
+                Y: =
+                ZIndex: =4
+
+            txt_LastCreatedIn_ACC As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Color: =If(Self.Text = "(No Value)", Color.Black, BlueControlDarkBackground)
+                DisplayMode: =DisplayMode.View
+                Fill: =Parent.Fill
+                Font: =FontStyle
+                Height: =check_Selected_ACC.Height
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: =If(IsBlankOrError(ThisItem.craf2_lastcreationmonth), "(No Value)", Text(ThisItem.craf2_lastcreationmonth, "mmmm yyyy"))
+                Width: =Header_LastCreationIn_ACC.Width
+                X: =Header_LastCreationIn_ACC.X
+                ZIndex: =5
+
+            txt_AutomationSD_ACC As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Fill: =Parent.Fill
+                Font: =FontStyle
+                Height: =check_Selected_ACC.Height
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: =Text(ThisItem.craf2_automationstartdate, "mmmm yyyy")
+                Width: =Header_AutomationSD_ACC.Width
+                X: =Header_AutomationSD_ACC.X
+                ZIndex: =6
+
+            txt_DayOfCreate_ACC As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Fill: =Parent.Fill
+                Font: =FontStyle
+                Height: =check_Selected_ACC.Height
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: =ThisItem.craf2_dayofcreationpermonth
+                Width: =Header_DayOfCreate_ACC.Width
+                X: =Header_DayOfCreate_ACC.X
+                ZIndex: =7
+
+            txt_ReviewOwner_ACC As label:
+                Align: =Align.Center
+                AutoHeight: =true
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Fill: =Parent.Fill
+                Font: =FontStyle
+                Height: =check_Selected_ACC.Height
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: =ThisItem.craf2_reviewownerdisplayname
+                Width: =Header_ReviewOwner_ACC.Width
+                X: =Header_ReviewOwner_ACC.X
+                Y: =(check_Selected_ACC.Height - Self.Height) * 0.50
+                ZIndex: =8
+
+            txt_TemplateUsed_ACC As label:
+                Align: =Align.Center
+                AutoHeight: =true
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Fill: =Parent.Fill
+                Font: =FontStyle
+                Height: =check_Selected_ACC.Height
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: =ThisItem.craf2_Template.TemplateName
+                Width: =Header_TemplateUsed_ACC.Width
+                X: =Header_TemplateUsed_ACC.X
+                Y: =(check_Selected_ACC.Height - Self.Height) * 0.50
+                ZIndex: =9
+
+            txt_Product_ACC As label:
+                AutoHeight: =true
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Fill: =Parent.Fill
+                Font: =FontStyle
+                Height: =10
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =10
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: =ThisItem.craf2_Product.ProductName
+                Width: =Header_Product_ACC.Width
+                X: =Header_Product_ACC.X
+                Y: =(check_Selected_ACC.Height - Self.Height) * 0.50
+                ZIndex: =10
+
+            check_Selected_ACC As checkbox:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                CheckboxBorderColor: =RGBA(0, 0, 0, 1)
+                CheckboxSize: =25
+                CheckmarkFill: =BlueControlDarkBackground
+                Default: =If(var_ACC_SelectAll, true, false)
+                Fill: =Parent.Fill
+                Font: =FontStyle
+                Height: =60
+                OnCheck: |-
+                    =Set(var_EditACC_AddNew, false);
+                    Set(var_bulk_update_visible_ACC, false);
+                    Set(record_Edit_This_Automation, Blank());
+                    Set(var_ACC_selected, CountRows(Filter(glry_Search_ACC.AllItems, ThisRecord.check_Selected_ACC.Value = true)));
+                OnSelect: =Select(Parent)
+                OnUncheck: |-
+                    =Set(var_bulk_update_visible_ACC, false);
+                    Set(record_Edit_This_Automation, Blank());
+                    Set(var_ACC_selected, CountRows(Filter(glry_Search_ACC.AllItems, ThisRecord.check_Selected_ACC.Value = true)))
+                PaddingLeft: =(Self.Width - Self.CheckboxSize) * 0.50
+                Size: =10
+                Text: =""
+                Width: =check_SelectAll_ACC.Width
+                X: =
+                ZIndex: =11
+
+        ctn_Headers_ACC As groupContainer.manualLayoutContainer:
+            Height: =40
+            Width: =Parent.Width
+            ZIndex: =6
+
+            Back_Header_ACC As button:
+                BorderColor: =Self.Fill
+                BorderStyle: =BorderStyle.None
+                BorderThickness: =0
+                DisabledBorderColor: =Self.BorderColor
+                DisabledColor: =Self.Color
+                DisabledFill: =Self.Fill
+                DisplayMode: =DisplayMode.Disabled
+                Fill: =ColorFade(BlueNaviHightLightBackground, 50%)
+                Font: =FontStyle
+                RadiusBottomLeft: |
+                    =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =20
+                RadiusTopRight: =20
+                Text: =""
+                Width: =Parent.Width
+                ZIndex: =1
+
+            Header_Conrol_ACC As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0,0,0,0)
+                BorderStyle: =BorderStyle.None
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =Parent.Height
+                OnSelect: =
+                PaddingBottom: =0
+                PaddingLeft: |
+                    =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: ="Edit / Delete"
+                Visible: =Self.Width <> 1
+                Width: |-
+                    =If(
+                        CountRows(Filter(glry_Search_ACC.AllItems, ThisRecord.check_Selected_ACC.Value = true)) > 1,
+                        1,
+                        130
+                    )
+                X: =Header_PauseDate_ACC.X + Header_PauseDate_ACC.Width
+                ZIndex: =2
+
+            Header_PauseDate_ACC As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0,0,0,0)
+                BorderStyle: =BorderStyle.None
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =Parent.Height
+                OnSelect: =
+                PaddingBottom: =0
+                PaddingLeft: |
+                    =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: ="Paused Date"
+                Width: =If(ctn_Search_ACC.Width < 800, 0, 125)
+                X: =Header_LastCreationIn_ACC.X + Header_LastCreationIn_ACC.Width
+                ZIndex: =5
+
+            Header_LastCreationIn_ACC As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0,0,0,0)
+                BorderStyle: =BorderStyle.None
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =Parent.Height
+                OnSelect: =
+                PaddingBottom: =0
+                PaddingLeft: |
+                    =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: ="Last Created"
+                Width: =If(App.Width < 1400, 0, 110)
+                X: =Header_AutomationSD_ACC.X+Header_AutomationSD_ACC.Width
+                ZIndex: =6
+
+            Header_AutomationSD_ACC As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0,0,0,0)
+                BorderStyle: =BorderStyle.None
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =Parent.Height
+                OnSelect: =
+                PaddingBottom: =0
+                PaddingLeft: |
+                    =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: ="Automation Started Since"
+                Width: =110
+                X: =Header_DayOfCreate_ACC.X + Header_DayOfCreate_ACC.Width
+                ZIndex: =7
+
+            Header_DayOfCreate_ACC As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0,0,0,0)
+                BorderStyle: =BorderStyle.None
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =Parent.Height
+                OnSelect: =
+                PaddingBottom: =0
+                PaddingLeft: |
+                    =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: =" Day Of Creation (Per Month)"
+                Width: =If(ctn_Search_ACC.Width < 1070, 0, 110)
+                X: =Header_ReviewOwner_ACC.X + Header_ReviewOwner_ACC.Width
+                ZIndex: =8
+
+            Header_ReviewOwner_ACC As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0,0,0,0)
+                BorderStyle: =BorderStyle.None
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =Parent.Height
+                OnSelect: =
+                PaddingBottom: =0
+                PaddingLeft: |
+                    =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: ="Review Owner"
+                Width: |-
+                    =If(
+                        App.Width >= 1300,
+                        200,
+                        180
+                    )
+                X: =Header_TemplateUsed_ACC.X + Header_TemplateUsed_ACC.Width
+                ZIndex: =9
+
+            Header_TemplateUsed_ACC As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0,0,0,0)
+                BorderStyle: =BorderStyle.None
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =Parent.Height
+                OnSelect: =
+                PaddingBottom: =0
+                PaddingLeft: |
+                    =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: ="Template"
+                Width: =If(App.Width >= 1300, 130, 100)
+                X: =Header_Product_ACC.X + Header_Product_ACC.Width
+                ZIndex: =10
+
+            Header_Product_ACC As label:
+                BorderColor: =RGBA(0,0,0,0)
+                BorderStyle: =BorderStyle.None
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =Parent.Height
+                OnSelect: =
+                PaddingBottom: =0
+                PaddingLeft: =10
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: ="Business Unit" & If(CountRows(glry_Search_ACC.AllItems) <> 0, " (" & CountRows(glry_Search_ACC.AllItems) & ")")
+                Width: =Parent.Width - check_SelectAll_ACC.Width - Header_TemplateUsed_ACC.Width - Header_DayOfCreate_ACC.Width - Header_ReviewOwner_ACC.Width - Header_AutomationSD_ACC.Width - Header_PauseDate_ACC.Width - Header_LastCreationIn_ACC.Width - Header_Conrol_ACC.Width
+                X: =check_SelectAll_ACC.X + check_SelectAll_ACC.Width
+                ZIndex: =11
+
+            check_SelectAll_ACC As checkbox:
+                BorderColor: =RGBA(0,0,0,0)
+                BorderStyle: =BorderStyle.None
+                CheckboxBorderColor: =RGBA(0, 0, 0, 1)
+                CheckboxSize: =25
+                CheckmarkFill: =BlueControlDarkBackground
+                Font: =FontStyle
+                Height: =Parent.Height
+                OnCheck: |-
+                    =If(
+                        var_ACC_SelectAll,
+                        Set(var_ACC_SelectAll, false); Set(var_ACC_SelectAll, true),
+                        Set(var_ACC_SelectAll, true)
+                    );
+                    Set(var_EditACC_AddNew, false);
+                    Set(record_Edit_This_Automation, Blank());
+                    Set(var_ACC_selected, CountRows(Filter(glry_Search_ACC.AllItems, ThisRecord.check_Selected_ACC.Value = true)))
+                OnSelect: =
+                OnUncheck: |-
+                    =If(
+                        var_ACC_SelectAll,
+                        Set(var_ACC_SelectAll, true); Set(var_ACC_SelectAll, false),
+                        Set(var_ACC_SelectAll, false)
+                    );
+                    Set(var_EditACC_AddNew, false);
+                    Set(var_ACC_selected, CountRows(Filter(glry_Search_ACC.AllItems, ThisRecord.check_Selected_ACC.Value = true)))
+                PaddingLeft: =(Self.Width - Self.CheckboxSize) * 0.50
+                Size: =10
+                Text: =""
+                Width: =50
+                X: =
+                ZIndex: =12
+
+    btn_AddNew_ACC As button:
+        BorderColor: =Self.Fill
+        Fill: =BlueControlDarkBackground
+        Font: =FontStyle
+        FontWeight: =FontWeight.Bold
+        Height: =25
+        HoverBorderColor: =Self.BorderColor
+        HoverColor: =Self.Fill
+        HoverFill: =Self.Color
+        OnSelect: |-
+            =Concurrent(
+                Set(var_EditACC_AddNew, true),
+                Set(var_ACC_SelectAll, false),
+                Set(var_bulk_update_visible_ACC, false),
+                Set(record_Edit_This_Automation, Blank()),
+                Reset(check_SelectAll_ACC)
+            )
+        PaddingBottom: =0
+        PaddingLeft: =0
+        PaddingRight: =0
+        PaddingTop: =0
+        RadiusBottomLeft: =15
+        RadiusBottomRight: =15
+        RadiusTopLeft: =15
+        RadiusTopRight: =15
+        Size: =10
+        Text: ="Add New Automation"
+        Visible: =!ctn_Edit_ACC.Visible
+        Width: =175
+        X: =ctn_Search_ACC.X + ctn_Search_ACC.Width - Self.Width - 1
+        Y: =lbl_BoardType_ACC.Y
+        ZIndex: =5
+
+    ti_Search_Product_ACC As text:
+        BorderColor: =GRAYCOLOR
+        BorderThickness: =1
+        Clear: =true
+        Default: =""
+        DelayOutput: =true
+        FocusedBorderThickness: =2
+        Font: =Font.'Segoe UI'
+        Height: =lbl_BoardType_ACC.Height
+        HintText: ="Search by Product"
+        HoverBorderColor: =Self.BorderColor
+        HoverFill: =GrayControlBackground
+        PaddingBottom: =0
+        PaddingTop: =0
+        RadiusBottomLeft: =14
+        RadiusBottomRight: =14
+        RadiusTopLeft: =14
+        RadiusTopRight: =14
+        Size: =9
+        Width: |
+            =280
+        X: =icon_Search_ACC.Width + icon_Search_ACC.X + 5
+        Y: =lbl_BoardType_ACC.Y
+        ZIndex: =6
+
+    icon_Search_ACC As icon.Search:
+        BorderColor: =RGBA(0, 0, 0, 0)
+        BorderStyle: =BorderStyle.None
+        DisabledBorderColor: =RGBA(0, 0, 0, 0)
+        DisabledColor: =RGBA(0, 0, 0, 1)
+        DisplayMode: =DisplayMode.Disabled
+        Height: =lbl_BoardType_ACC.Height
+        Icon: =Icon.Search
+        PaddingBottom: =2
+        PaddingLeft: =2
+        PaddingRight: =2
+        PaddingTop: =2
+        Width: =lbl_BoardType_ACC.Height
+        X: =dpdn_ACC_BoardType.X + dpdn_ACC_BoardType.Width + 30
+        Y: =dpdn_ACC_BoardType.Y
+        ZIndex: =7
+
+    dpdn_ACC_BoardType As dropdown:
+        BorderColor: =
+        BorderThickness: =0
+        ChevronBackground: =Self.Fill
+        ChevronFill: =Color.Black
+        ChevronHoverBackground: =BlueControlLightBackground
+        ChevronHoverFill: =RGBA(0, 0, 0, 1)
+        Default: ="Product Review"
+        Fill: =GrayControlBackground
+        Font: =Font.'Segoe UI'
+        FontWeight: =FontWeight.Semibold
+        Height: =lbl_BoardType_ACC.Height
+        HoverFill: =Self.ChevronHoverBackground
+        Items: |-
+            =RenameColumns(
+                Filter(
+                AddColumns(
+                    ShowColumns(
+                        ReviewHub_BoardTypes,
+                        "craf2_boardtypeid", "craf2_boardtypename", "craf2_isdisplayinapp"
+                    ), "IsDisplayInApp", If(Text(craf2_isdisplayinapp)="Yes", true, false)
+                ),
+                ThisRecord.IsDisplayInApp = true && (IsAdmin || (IsCoordinator && ThisRecord.craf2_boardtypeid in IsCoordinator_BoardTypes))
+                ),
+                "craf2_boardtypeid", "BoardTypeID",
+                "craf2_boardtypename", "BoardTypeName"
+            )
+        OnChange: =Reset(check_SelectAll_ACC); Set(var_ACC_SelectAll, false); Select(btn_EditACC_Cancel);
+        PressedColor: =BlueControlDarkBackground
+        PressedFill: =BlueControlLightBackground
+        SelectionFill: =BlueNaviHightLightBackground
+        Size: =11
+        Width: =175
+        X: =lbl_BoardType_ACC.X + lbl_BoardType_ACC.Width
+        Y: =lbl_BoardType_ACC.Y
+        ZIndex: =8
+
+    lbl_BoardType_ACC As label:
+        BorderColor: =RGBA(0, 0, 0, 0)
+        BorderStyle: =BorderStyle.None
+        DisplayMode: =DisplayMode.View
+        Font: =Font.'Segoe UI'
+        FontWeight: =FontWeight.Semibold
+        Height: =25
+        PaddingBottom: =0
+        PaddingRight: =0
+        PaddingTop: =0
+        Size: =11
+        Text: ="Scorecard (Board)"
+        Width: =135
+        X: =icon_Back_ACC.X
+        Y: =lbl_Header_ACC.Y + lbl_Header_ACC.Height + 10
+        ZIndex: =9
+
+    lbl_Header_ACC As label:
+        DisabledColor: =BlueControlDarkBackground
+        DisabledFill: =Self.Fill
+        DisplayMode: =DisplayMode.Disabled
+        Fill: =GrayCanvasBackground
+        Font: =FontStyle
+        FontWeight: =FontWeight.Bold
+        Height: =55
+        PaddingLeft: =60
+        Size: =18
+        Text: ="Configure/View Scorecard Auto-Creation"
+        Width: =App.Width - Self.X
+        Y: =SS_AppHeader_ACC.Y + SS_AppHeader_ACC.Height
+        ZIndex: =10
+
+    icon_Back_ACC As icon.BackArrow:
+        BorderColor: =RGBA(0, 0, 0, 0)
+        BorderStyle: =BorderStyle.None
+        Color: =BlueControlDarkBackground
+        Height: =30
+        HoverBorderColor: =Self.BorderColor
+        HoverColor: =Color.Purple
+        Icon: =Icon.BackArrow
+        OnSelect: |-
+            =Navigate(scn_SelfService);
+            Concurrent(
+                Set(record_Edit_This_Automation, Blank()),
+                Set(var_EditACC_AddNew, false),
+                Set(var_bulk_update_visible_ACC, false)
+            );
+        Tooltip: ="Back"
+        Width: =Self.Height
+        X: =15
+        Y: =lbl_Header_ACC.Y + (lbl_Header_ACC.Height - Self.Height) * 0.50
+        ZIndex: =11
+
+    SS_AppHeader_ACC As AppHeader:
+        DropDownSelection: =TrackRequestComponent_ACC.HideTrackRequest
+        FeatureRequestUrl: =var_FeatureRequestURL
+        FeedbackButtonUrl: =var_SendFeedback_URL
+        inputAppDisplayName: =varAppHeaderText
+        ScorecardOnboardingFeatureUrl: =var_ScorecardOnboardingRequestURL
+        ShowSurveyButton: =false
+        Y: =0
+        ZIndex: =12
+
+    TrackRequestComponent_ACC As TrackRequestComponent:
+        BlueControlDarkBackground: =BlueControlDarkBackground
+        BlueControlLightBackground: =BlueControlLightBackground
+        BlueNaviHightLightBackground: =BlueNaviHightLightBackground
+        DevOpsBaseUrl: =var_DevOpsBaseURL
+        DevOpsQueryID: =var_DevOpsQueryID
+        FontStyle: =FontStyle
+        GrayCanvasBackground: =GrayCanvasBackground
+        GRAYCOLOR: =GRAYCOLOR
+        GrayControlBackground: =GrayControlBackground
+        IsAdmin: =IsAdmin
+        Reset: =Self.Visible
+        Visible: =SS_AppHeader_ACC.DisplayTrackRequest
+        X: =App.Width - Self.Width
+        Y: =SS_AppHeader_ACC.Height
+        ZIndex: =13
+
+    ctn_Confirm_Delete_ACC As groupContainer:
+        Fill: =RGBA(255, 255, 255, 0.95)
+        Height: =App.Height
+        Visible: =var_show_delete
+        Width: =App.Width
+        ZIndex: =14
+
+        Card_SS_ACC As button:
+            BorderColor: =hdr_ConfirmDel_ACC.Fill
+            Color: =RGBA(0, 0, 0, 0)
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =RGBA(0, 0, 0, 0)
+            DisabledFill: =RGBA(0, 0, 0, 0)
+            DisplayMode: =DisplayMode.Disabled
+            Fill: =RGBA(0, 0, 0, 0)
+            Font: =FontStyle
+            Height: =hdr_ConfirmDel_ACC.Height + html_ConfirmDeleteACC.Height + 20 + btn_ConfirmDeleteACC.Height + 20
+            HoverBorderColor: =
+            HoverColor: =RGBA(0, 0, 0, 0)
+            HoverFill: =
+            OnSelect: =
+            PressedBorderColor: =
+            PressedColor: =
+            PressedFill: =
+            Text: =""
+            Width: =App.Width * 0.35
+            X: =App.Width * 0.5 - Self.Width*0.5
+            Y: =App.Height*0.5 - Self.Height*0.5 - 60
+            ZIndex: =1
+
+        btn_CancelDeleteACC As button:
+            BorderColor: =Self.Fill
+            Fill: =GRAYCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =25
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Self.Fill
+            HoverFill: =Self.Color
+            OnSelect: |-
+                =UpdateContext({var_show_delete: false});
+                Set(record_Delete_This_ACC, Blank());
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Size: =10
+            Text: ="Cancel"
+            Width: =90
+            X: |-
+                =If(
+                    btn_ConfirmDeleteACC.Visible, 
+                    btn_ConfirmDeleteACC.X + btn_ConfirmDeleteACC.Width + 50, 
+                    Card_SS_ACC.X + (Card_SS_ACC.X - Self.Width) * 0.50  // horizontally centered to Card_SS_Product item.
+                )
+            Y: =btn_ConfirmDeleteACC.Y
+            ZIndex: =2
+
+        btn_ConfirmDeleteACC As button:
+            BorderColor: =Self.Fill
+            Fill: =REDWARNINGCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =25
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Self.Fill
+            HoverFill: =Self.Color
+            OnSelect: |-
+                =UpdateContext({var_show_delete: false});
+                
+                If(
+                    CountRows(Filter(glry_Search_ACC.AllItems, ThisRecord.check_Selected_ACC.Value = true)) > 1,
+                    ForAll(
+                        RenameColumns(
+                            Filter(glry_Search_ACC.AllItems, ThisRecord.check_Selected_ACC.Value = true),
+                            "craf2_reviewhub_scorecardautomationid", "UniqueID_ToDelete"
+                        ),
+                        RemoveIf(
+                            ReviewHub_ScorecardAutomations,
+                            ThisRecord.craf2_reviewhub_scorecardautomationid = UniqueID_ToDelete
+                        )
+                    ),
+                    RemoveIf(
+                        ReviewHub_ScorecardAutomations,
+                        ThisRecord.craf2_reviewhub_scorecardautomationid = record_Delete_This_ACC.craf2_reviewhub_scorecardautomationid
+                    )
+                );
+                
+                Set(record_Delete_This_ACC, Blank());
+                Reset(check_SelectAll_ACC)
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Size: =10
+            Text: ="Yes, Delete"
+            Width: =90
+            X: =html_ConfirmDeleteACC.X + html_ConfirmDeleteACC.Width * 0.5 - Self.Width - 20
+            Y: =html_ConfirmDeleteACC.Y + html_ConfirmDeleteACC.Height + 20
+            ZIndex: =3
+
+        html_ConfirmDeleteACC As htmlViewer:
+            AutoHeight: =true
+            Font: =FontStyle
+            HtmlText: |-
+                =If(
+                    CountRows(Filter(glry_Search_ACC.AllItems, ThisRecord.check_Selected_ACC.Value = true)) < 1,
+                
+                /*
+                "<span style=''><b>FactMetricBoard ID</b></span><span style='margin-left:76px'>: " & record_Delete_This_FMB.fmb_ID & "</span><br>"
+                & "<span style=''><b>Board Type</b></span><span style='margin-left:136px'>: " & record_Delete_This_FMB.fmb_MetricBoardTypeValue & "</span><br>"
+                & "<span style=''><b>Review Month (MM-YYYY)</b></span><span style='margin-left:20px'>: " & record_Delete_This_FMB.fmb_ReviewMonth & "-" & record_Delete_This_FMB.fmb_ReviewYear & "</span><br>"
+                & "<span style=''><b>Product</b></span><span style='margin-left:161px'>: "& record_Delete_This_FMB.fmb_ProductName& "</span><br>"
+                & "<span style=''><b>Review Owner</b></span><span style='margin-left:113px'>: " & record_Delete_This_FMB.fmb_ReviewOwnerName & "</span>"
+                */
+                "<span style=''><b>Board Type</b></span><span style='margin-left:101px'>: " & record_Delete_This_ACC.craf2_BoardType.craf2_boardtypename & "</span><br>"
+                & "<span style=''><b>Template Used</b></span><span style='margin-left:76px'>: " & record_Delete_This_ACC.craf2_Template.craf2_templatename & "</span><br>"
+                & "<span style=''><b>Product</b></span><span style='margin-left:128px'>: " & record_Delete_This_ACC.ProductName & "</span><br>"
+                & "<span style=''><b>Review Owner</b></span><span style='margin-left:80px'>: " & record_Delete_This_ACC.craf2_reviewownerdisplayname & "</span><br>"
+                & "<span style=''><b>Automate Started On</b></span><span style='margin-left:27px'>: " & Text(record_Delete_This_ACC.craf2_automationstartdate, "mmmm yyyy") & "</span>",
+                
+                    "<center><font color = red><b>Warning: </b>Delete <b>" & CountRows(Filter(glry_Search_ACC.AllItems, ThisRecord.check_Selected_ACC.Value = true)) & "</b> selected auto-creations schedules.</font></center>"
+                )
+            PaddingBottom: =10
+            PaddingLeft: =30
+            PaddingRight: =10
+            PaddingTop: =15
+            Size: =12
+            Width: =Card_SS_ACC.Width
+            X: =App.Width * 0.5 - Self.Width*0.5
+            Y: =hdr_ConfirmDel_ACC.Y + hdr_ConfirmDel_ACC.Height
+            ZIndex: =4
+
+        hdr_ConfirmDel_ACC As button:
+            BorderColor: =Self.Fill
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =0
+            Color: =RGBA(0, 0, 0, 1)
+            Fill: =SUBGROUPCOLOR
+            FocusedBorderThickness: =0
+            Font: =FontStyle
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Self.Color
+            HoverFill: =Self.Fill
+            PressedBorderColor: =Self.BorderColor
+            PressedColor: =Self.Color
+            PressedFill: =Self.Fill
+            RadiusBottomLeft: =
+            RadiusBottomRight: =
+            Size: =14
+            Text: ="Confirm Delete"
+            Width: =Card_SS_ACC.Width
+            X: =Card_SS_ACC.X
+            Y: =Card_SS_ACC.Y
+            ZIndex: =5
+

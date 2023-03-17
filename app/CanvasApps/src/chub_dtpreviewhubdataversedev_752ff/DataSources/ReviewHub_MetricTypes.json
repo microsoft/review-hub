@@ -1,0 +1,218 @@
+[
+  {
+    "CdsFCBContext": "{\"FileType\":true,\"ImageExternalStorage\":true}",
+    "EntitySetName": "craf2_reviewhub_metrictypes",
+    "IsHidden": false,
+    "IsSampleData": false,
+    "IsWritable": true,
+    "LogicalName": "craf2_reviewhub_metrictype",
+    "MaxGetRowsCount": 2000,
+    "Name": "ReviewHub_MetricTypes",
+    "NativeCDSDataSourceInfoNameMapping": {
+      "_ownerid_value": "Owner",
+      "craf2_metrictypedeprecateddate": "MetricTypeDeprecatedDate",
+      "craf2_metrictypedescription": "MetricTypeDescription",
+      "craf2_metrictypeeffectivedate": "MetricTypeEffectiveDate",
+      "craf2_metrictypeenumerateoptions": "MetricTypeEnumerateOptions",
+      "craf2_metrictypehealthweight": "MetricTypeHealthWeight",
+      "craf2_metrictypeid": "MetricTypeID",
+      "craf2_metrictypeistrenddown": "MetricTypeIsTrendDown",
+      "craf2_metrictypename": "MetricTypeName",
+      "craf2_metrictypeshortname": "MetricTypeShortName",
+      "craf2_metrictypesource": "MetricTypeSource",
+      "craf2_metrictypestage": "MetricTypeStage",
+      "craf2_metrictypesubgroup": "MetricTypeSubgroup",
+      "craf2_reviewhub_metrictype_AsyncOperations": "System Jobs",
+      "craf2_reviewhub_metrictype_BulkDeleteFailures": "Bulk Delete Failures",
+      "craf2_reviewhub_metrictype_DuplicateBaseRecord": "Duplicate Records (craf2_reviewhub_metrictype_DuplicateBaseRecord)",
+      "craf2_reviewhub_metrictype_DuplicateMatchingRecord": "Duplicate Records (craf2_reviewhub_metrictype_DuplicateMatchingRecord)",
+      "craf2_reviewhub_metrictype_MailboxTrackingFolders": "Mailbox Auto Tracking Folders",
+      "craf2_reviewhub_metrictype_PrincipalObjectAttributeAccesses": "Field Sharing",
+      "craf2_reviewhub_metrictype_ProcessSession": "Process Sessions",
+      "craf2_reviewhub_metrictype_SyncErrors": "Sync Errors",
+      "craf2_ReviewHub_MetricTypeDetail_MetricType": "ReviewHub_MetricTypeDetails",
+      "craf2_reviewhub_metrictypeid": "ReviewHub_MetricType",
+      "craf2_ReviewHub_ProductMetric_pm_MetricTy": "ReviewHub_ProductMetrics",
+      "craf2_valuetype": "ValueType",
+      "createdby": "Created By",
+      "createdon": "Created On",
+      "createdonbehalfby": "Created By (Delegate)",
+      "importsequencenumber": "Import Sequence Number",
+      "modifiedby": "Modified By",
+      "modifiedon": "Modified On",
+      "modifiedonbehalfby": "Modified By (Delegate)",
+      "overriddencreatedon": "Record Created On",
+      "owningbusinessunit": "Owning Business Unit",
+      "owningteam": "Owning Team",
+      "owninguser": "Owning User",
+      "statecode": "Status",
+      "statuscode": "Status Reason",
+      "timezoneruleversionnumber": "Time Zone Rule Version Number",
+      "utcconversiontimezonecode": "UTC Conversion Time Zone Code",
+      "versionnumber": "Version Number"
+    },
+    "PreferredName": "ReviewHub_MetricTypes",
+    "Type": "NativeCDSDataSourceInfo"
+  },
+  {
+    "DisplayName": "ReviewHub_MetricTypes (Views)",
+    "Name": "_craf2_reviewhub_metrictype_views",
+    "RelatedEntityName": "ReviewHub_MetricTypes",
+    "TrimmedViewName": true,
+    "Type": "ViewInfo",
+    "ViewInfoNameMapping": {
+      "0e073d2e-dad8-4b67-b7c4-2ccc7235685e": "Inactive ReviewHub_MetricTypes",
+      "1bac5c62-9e8d-4cc2-9305-f2e6bd53e14d": "ReviewHub_MetricType Associated View",
+      "37b7ff61-900e-4b1a-85fc-0cac5f1e1976": "Active ReviewHub_MetricTypes",
+      "5dcb2447-7ef3-4fd6-ae2f-84671109d9cb": "ReviewHub_MetricType Lookup View",
+      "a7148022-115a-4922-b508-4bed5c0b5bac": "ReviewHub_MetricType Advanced Find View"
+    }
+  },
+  {
+    "DisplayName": "MetricTypeIsTrendDown (ReviewHub_MetricTypes)",
+    "Name": "craf2_craf2_reviewhub_metrictype_metrictypeistrenddown",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "craf2_metrictypeistrenddown",
+        "OptionSetReferenceEntityName": "ReviewHub_MetricTypes"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "craf2_metrictypeistrenddown",
+    "RelatedEntityName": "ReviewHub_MetricTypes",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Status (ReviewHub_MetricTypes)",
+    "Name": "craf2_reviewhub_metrictype_statecode",
+    "OptionSetInfoNameMapping": {
+      "0": "Active",
+      "1": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statecode",
+        "OptionSetReferenceEntityName": "ReviewHub_MetricTypes"
+      }
+    },
+    "OptionSetTypeKey": "StateType",
+    "RelatedColumnInvariantName": "statecode",
+    "RelatedEntityName": "ReviewHub_MetricTypes",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Status Reason (ReviewHub_MetricTypes)",
+    "Name": "craf2_reviewhub_metrictype_statuscode",
+    "OptionSetInfoNameMapping": {
+      "1": "Active",
+      "2": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statuscode",
+        "OptionSetReferenceEntityName": "ReviewHub_MetricTypes"
+      }
+    },
+    "OptionSetTypeKey": "StatusType",
+    "RelatedColumnInvariantName": "statuscode",
+    "RelatedEntityName": "ReviewHub_MetricTypes",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "ReviewHub_MetricTypeStage",
+    "Name": "craf2_reviewhub_metrictypestage",
+    "OptionSetInfoNameMapping": {
+      "803840000": "Acquire",
+      "803840001": "Advocate",
+      "803840002": "Discover",
+      "803840003": "Implement & Use",
+      "840660000": "Experience",
+      "840660001": "Support Case Volume",
+      "840660002": "Efficiency",
+      "840660003": "Escalation",
+      "840660004": "Self Help",
+      "840660005": "SE Tooling",
+      "840660008": "Customer Empathy",
+      "840660009": "All up OKR",
+      "840660010": "Support Readiness"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": true,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "craf2_metrictypestage",
+        "OptionSetReferenceEntityName": "ReviewHub_MetricTypes"
+      }
+    },
+    "OptionSetTypeKey": "PicklistType",
+    "RelatedColumnInvariantName": "craf2_metrictypestage",
+    "RelatedEntityName": "ReviewHub_MetricTypes",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "ReviewHub_MetricTypeSubgroup",
+    "Name": "craf2_reviewhub_metrictypesubgroup",
+    "OptionSetInfoNameMapping": {
+      "803840000": "Can I get my issues resolved?",
+      "803840001": "How can I learn about the product?",
+      "803840002": "How can I try this product?",
+      "803840003": "Is it easy to buy?",
+      "803840004": "Is MSFT listening to me?",
+      "803840005": "Is the product high quality?",
+      "803840006": "Is the product useful?",
+      "803840007": "Is this product going in the right direction?",
+      "803840008": "What product can help me with the problem?",
+      "803840009": "Why would I use anything else?(raving)",
+      "803840010": "Will this product meet my needs?",
+      "840660000": "Deliver world class support experiences for DTP customers",
+      "840660001": "Reduce Incidents & Support Costs by implementing self-help solutions",
+      "840660002": "Improve CPT by delivering tools, solutions, & improved readiness",
+      "840660003": "Improve CSAT & CPT by improving speed & quality of the resolution",
+      "840660004": "Improve CSAT to elevate Cx exp. by collab. & engaging in Spt. Practice"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": true,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "craf2_metrictypesubgroup",
+        "OptionSetReferenceEntityName": "ReviewHub_MetricTypes"
+      }
+    },
+    "OptionSetTypeKey": "PicklistType",
+    "RelatedColumnInvariantName": "craf2_metrictypesubgroup",
+    "RelatedEntityName": "ReviewHub_MetricTypes",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "ReviewHub_MetricValueType",
+    "Name": "craf2_reviewhub_metricvaluetype",
+    "OptionSetInfoNameMapping": {
+      "803840000": "Number",
+      "803840001": "Percentage",
+      "803840002": "Boolean",
+      "803840003": "Text"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": true,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "craf2_valuetype",
+        "OptionSetReferenceEntityName": "ReviewHub_MetricTypes"
+      }
+    },
+    "OptionSetTypeKey": "PicklistType",
+    "RelatedColumnInvariantName": "craf2_valuetype",
+    "RelatedEntityName": "ReviewHub_MetricTypes",
+    "Type": "OptionSetInfo"
+  }
+]

@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Workflow WorkflowId="{7e5fa17c-ad37-ed11-bba2-000d3a5bc525}" Name="ReviewHub - Access Request Submitted" Description="This flow triggers the approval process for the temporary stakeholder access request.&#xA;Flow failure results in a notification not being sent out to users that their request has bee submitted successfully and the admins not being notified of a new request being made." xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <JsonFileName>/Workflows/ReviewHub-AccessRequestSubmitted-7E5FA17C-AD37-ED11-BBA2-000D3A5BC525.json</JsonFileName>
+  <Type>1</Type>
+  <Subprocess>0</Subprocess>
+  <Category>5</Category>
+  <Mode>0</Mode>
+  <Scope>4</Scope>
+  <OnDemand>0</OnDemand>
+  <TriggerOnCreate>0</TriggerOnCreate>
+  <TriggerOnDelete>0</TriggerOnDelete>
+  <AsyncAutodelete>0</AsyncAutodelete>
+  <SyncWorkflowLogOnFailure>0</SyncWorkflowLogOnFailure>
+  <StateCode>1</StateCode>
+  <StatusCode>2</StatusCode>
+  <RunAs>1</RunAs>
+  <IsTransacted>1</IsTransacted>
+  <IntroducedVersion>1.0.0.0</IntroducedVersion>
+  <IsCustomizable>1</IsCustomizable>
+  <IsCustomProcessingStepAllowedForOtherPublishers>1</IsCustomProcessingStepAllowedForOtherPublishers>
+  <PrimaryEntity>none</PrimaryEntity>
+  <LocalizedNames>
+    <LocalizedName languagecode="1033" description="ReviewHub - Access Request Submitted" />
+  </LocalizedNames>
+  <Descriptions>
+    <Description languagecode="1033" description="This flow triggers the approval process for the temporary stakeholder access request.&#xA;Flow failure results in a notification not being sent out to users that their request has bee submitted successfully and the admins not being notified of a new request being made." />
+  </Descriptions>
+</Workflow>

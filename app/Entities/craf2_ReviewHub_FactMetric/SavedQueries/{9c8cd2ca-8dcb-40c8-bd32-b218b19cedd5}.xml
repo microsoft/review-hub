@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<savedqueries xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <savedquery>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>0</CanBeDeleted>
+    <isquickfindquery>1</isquickfindquery>
+    <isprivate>0</isprivate>
+    <isdefault>1</isdefault>
+    <savedqueryid>{9c8cd2ca-8dcb-40c8-bd32-b218b19cedd5}</savedqueryid>
+    <layoutxml>
+      <grid name="resultset" jump="craf2_factmetrictitle" select="1" icon="1" preview="1">
+        <row name="result" id="craf2_reviewhub_factmetricid">
+          <cell name="craf2_factmetrictitle" width="300" />
+          <cell name="createdon" width="125" />
+          <cell name="craf2_factmetricid" width="100" />
+          <cell name="chub_fm_boardtypeid" width="100" />
+          <cell name="craf2_fm_productid" width="100" />
+          <cell name="craf2_fm_productmetric" width="100" />
+          <cell name="craf2_fm_reviewlockdate" width="100" />
+          <cell name="chub_fm_productmetricid" width="100" />
+          <cell name="chub_fm_metrictypeid" width="100" />
+        </row>
+      </grid>
+    </layoutxml>
+    <querytype>4</querytype>
+    <fetchxml>
+      <fetch version="1.0" mapping="logical">
+        <entity name="craf2_reviewhub_factmetric">
+          <attribute name="craf2_reviewhub_factmetricid" />
+          <attribute name="craf2_factmetrictitle" />
+          <attribute name="createdon" />
+          <order attribute="craf2_factmetrictitle" descending="false" />
+          <filter type="and">
+            <condition attribute="statecode" operator="eq" value="0" />
+          </filter>
+          <filter type="or" isquickfindfields="1">
+            <condition attribute="craf2_factmetrictitle" operator="like" value="{0}" />
+          </filter>
+          <attribute name="craf2_factmetricid" />
+          <attribute name="chub_fm_boardtypeid" />
+          <attribute name="craf2_fm_productid" />
+          <attribute name="craf2_fm_productmetric" />
+          <attribute name="craf2_fm_reviewlockdate" />
+          <attribute name="chub_fm_productmetricid" />
+          <attribute name="chub_fm_metrictypeid" />
+        </entity>
+      </fetch>
+    </fetchxml>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <LocalizedNames>
+      <LocalizedName description="Quick Find Active ReviewHub_FactMetrics" languagecode="1033" />
+    </LocalizedNames>
+  </savedquery>
+</savedqueries>

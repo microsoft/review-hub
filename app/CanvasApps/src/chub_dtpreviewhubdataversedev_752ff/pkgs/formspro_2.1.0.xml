@@ -1,0 +1,98 @@
+<widget xmlns="http://openajax.org/metadata" spec="1.0" id="http://microsoft.com/appmagic/formspro" name="formspro" jsClass="AppMagic.Controls.FormsPro" version="2.1.0" styleable="true" runtimeCost="1" xmlns:appMagic="http://schemas.microsoft.com/appMagic">
+  <author name="Microsoft AppMagic" />
+  <license type="text/html"><![CDATA[<p>TODO:  Need license text here.</p>]]></license>
+  <description><![CDATA[ Forms Pro Report Control
+      ]]></description>
+  <requires>
+    <require type="css" src="css/formspro.css" />
+    <require type="javascript" src="js/formspro.js" />
+    <require type="other" src="/ctrllib/formspro/images/formspro-notset-logo.svg" />
+  </requires>
+  <appMagic:capabilities autoBorders="true" replicationLimit="0" isVersionFlexible="true" />
+  <!-- The parents that are supported. All other controls are prohibited as parents for this control. -->
+  <appMagic:supportedParents>
+    <appMagic:supportedControl name="screen" />
+    <appMagic:supportedControl name="component" />
+  </appMagic:supportedParents>
+  <content><![CDATA[
+      <div class="appmagic-formspro-control"
+        data-bind="
+          style: {
+            width: AppMagic.Controls.converters.pxHorizontalConverter.view(properties.Width()),
+            height: AppMagic.Controls.converters.pxVerticalConverter.view(properties.Height())
+          }"
+        >
+        <div class="appmagic-formspro-not-set-inner-container" data-bind="visible: !properties.SurveyID()">
+                <div class="appmagic-formspro-not-set-message" data-bind="visible: isPublishOrPreview(),
+                  text: AppMagic.Strings.FormsProPlayerNotConnectedMessage"></div>
+        </div>
+        <div class="overlay" data-bind="visible: shouldShowOverlay()"></div>
+        <iframe data-bind="visible: properties.SurveyID()"
+            class="replace-with-placeholder-in-preview" data-placeholder-icon="icon-formspro"
+          ></iframe>
+      </div>
+    ]]></content>
+  <properties>
+    <property name="SurveyID" localizedName="SurveyID" datatype="String">
+      <appMagic:displayName>##formsproProperties_SurveyID_DisplayName##</appMagic:displayName>
+      <appMagic:tooltip>##formproProperties_SurveyID_Tooltip##</appMagic:tooltip>
+      <appMagic:category>data</appMagic:category>
+    </property>
+    <property name="Contextparameters" localizedName="Contextparameters" datatype="object">
+      <appMagic:displayName>##formsproProperties_Contextparameters_DisplayName##</appMagic:displayName>
+      <appMagic:tooltip>##formproProperties_Contextparameters_Tooltip##</appMagic:tooltip>
+      <appMagic:category>data</appMagic:category>
+    </property>
+  </properties>
+  <appMagic:includeProperties>
+    <appMagic:includeProperty name="ContentLanguage" />
+    <appMagic:includeProperty name="OnSelect" direction="in" />
+    <appMagic:includeProperty name="DisplayMode" />
+    <appMagic:includeProperty name="Visible" />
+    <appMagic:includeProperty name="BorderColor" isPrimaryInputProperty="true" />
+    <appMagic:includeProperty name="BorderStyle" />
+    <appMagic:includeProperty name="BorderThickness" defaultValue="2" />
+    <appMagic:includeProperty name="X" />
+    <appMagic:includeProperty name="Y" />
+    <appMagic:includeProperty name="Width" defaultValue="640" phoneDefaultValue="300" />
+    <appMagic:includeProperty name="Height" defaultValue="480" phoneDefaultValue="300" />
+    <!-- Hidden properties -->
+    <appMagic:includeProperty name="minimumWidth" defaultValue="100" />
+    <appMagic:includeProperty name="minimumHeight" defaultValue="100" />
+    <appMagic:includeProperty name="maximumWidth" defaultValue="1366" phoneDefaultValue="640" />
+    <appMagic:includeProperty name="maximumHeight" defaultValue="768" phoneDefaultValue="1136" />
+  </appMagic:includeProperties>
+  <appMagic:insertMetadata isInPreview="true">
+    <appMagic:category name="Display" priority="30" />
+  </appMagic:insertMetadata>
+  <!-- Display metadata providing property visibility, order, sections, and grouping in UI (e.g. properties panel) -->
+  <appMagic:displayMetadata>
+    <appMagic:section>
+      <appMagic:wizardPropertyGroup>
+        <appMagic:wizardStep label="##formsproProperties_SurveySelector_DisplayName##" panelTitle="##ControlSidebar_PropertiesPanel_Data_DisplayName##" linkedLocation="FormsProPanel" propertyInvariantName="SurveyID" />
+      </appMagic:wizardPropertyGroup>
+      <appMagic:property name="DisplayMode" />
+    </appMagic:section>
+    <appMagic:section>
+      <appMagic:property name="Visible" />
+      <appMagic:propertyGroup name="Position">
+        <appMagic:property name="X" />
+        <appMagic:property name="Y" />
+      </appMagic:propertyGroup>
+      <appMagic:propertyGroup name="Size">
+        <appMagic:property name="Width" />
+        <appMagic:property name="Height" />
+      </appMagic:propertyGroup>
+    </appMagic:section>
+    <appMagic:section>
+      <appMagic:propertyGroup name="Border">
+        <appMagic:property name="BorderStyle" />
+        <appMagic:property name="BorderThickness" />
+        <appMagic:property name="BorderColor" />
+      </appMagic:propertyGroup>
+    </appMagic:section>
+  </appMagic:displayMetadata>
+  <appMagic:conversion from="2.0.0" to="2.1.0">
+    <appMagic:conversionAction type="add" name="ContentLanguage" />
+  </appMagic:conversion>
+</widget>

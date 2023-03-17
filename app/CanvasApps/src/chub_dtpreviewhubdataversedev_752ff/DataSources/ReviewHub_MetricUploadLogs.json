@@ -1,0 +1,101 @@
+[
+  {
+    "CdsFCBContext": "{\"FileType\":true,\"ImageExternalStorage\":true}",
+    "EntitySetName": "chub_reviewhub_metricuploadlogs",
+    "IsHidden": false,
+    "IsSampleData": false,
+    "IsWritable": true,
+    "LogicalName": "chub_reviewhub_metricuploadlog",
+    "MaxGetRowsCount": 2000,
+    "Name": "ReviewHub_MetricUploadLogs",
+    "NativeCDSDataSourceInfoNameMapping": {
+      "_ownerid_value": "Owner",
+      "chub_action": "Action",
+      "chub_affectedrows": "AffectedRows",
+      "chub_batchname": "BatchName",
+      "chub_filename": "FileName",
+      "chub_mul_BoardType": "mul_BoardType",
+      "chub_reviewhub_metricuploadlog_AsyncOperations": "System Jobs",
+      "chub_reviewhub_metricuploadlog_BulkDeleteFailures": "Bulk Delete Failures",
+      "chub_reviewhub_metricuploadlog_DuplicateBaseRecord": "Duplicate Records (chub_reviewhub_metricuploadlog_DuplicateBaseRecord)",
+      "chub_reviewhub_metricuploadlog_DuplicateMatchingRecord": "Duplicate Records (chub_reviewhub_metricuploadlog_DuplicateMatchingRecord)",
+      "chub_reviewhub_metricuploadlog_MailboxTrackingFolders": "Mailbox Auto Tracking Folders",
+      "chub_reviewhub_metricuploadlog_PrincipalObjectAttributeAccesses": "Field Sharing",
+      "chub_reviewhub_metricuploadlog_ProcessSession": "Process Sessions",
+      "chub_reviewhub_metricuploadlog_SyncErrors": "Sync Errors",
+      "chub_reviewhub_metricuploadlogid": "ReviewHub_MetricUploadLog",
+      "createdby": "Created By",
+      "createdon": "Created On",
+      "createdonbehalfby": "Created By (Delegate)",
+      "importsequencenumber": "Import Sequence Number",
+      "modifiedby": "Modified By",
+      "modifiedon": "Modified On",
+      "modifiedonbehalfby": "Modified By (Delegate)",
+      "overriddencreatedon": "Record Created On",
+      "owningbusinessunit": "Owning Business Unit",
+      "owningteam": "Owning Team",
+      "owninguser": "Owning User",
+      "statecode": "Status",
+      "statuscode": "Status Reason",
+      "timezoneruleversionnumber": "Time Zone Rule Version Number",
+      "utcconversiontimezonecode": "UTC Conversion Time Zone Code",
+      "versionnumber": "Version Number"
+    },
+    "PreferredName": "ReviewHub_MetricUploadLogs",
+    "Type": "NativeCDSDataSourceInfo"
+  },
+  {
+    "DisplayName": "ReviewHub_MetricUploadLogs (Views)",
+    "Name": "_chub_reviewhub_metricuploadlog_views",
+    "RelatedEntityName": "ReviewHub_MetricUploadLogs",
+    "TrimmedViewName": true,
+    "Type": "ViewInfo",
+    "ViewInfoNameMapping": {
+      "2034d438-ce77-4152-b6c4-aab6b47b6c34": "ReviewHub_MetricUploadLog Associated View",
+      "48c65d12-577b-4b5a-bb03-5c4ba800d800": "Active ReviewHub_MetricUploadLogs",
+      "6fd14144-b595-4a2a-9014-4afc19a1d237": "Inactive ReviewHub_MetricUploadLogs",
+      "84abc872-7682-427c-a078-bfbcbbae67df": "ReviewHub_MetricUploadLog Lookup View",
+      "a44419d5-8983-44af-a0a6-5ae411f13f73": "ReviewHub_MetricUploadLog Advanced Find View"
+    }
+  },
+  {
+    "DisplayName": "Status (ReviewHub_MetricUploadLogs)",
+    "Name": "chub_reviewhub_metricuploadlog_statecode",
+    "OptionSetInfoNameMapping": {
+      "0": "Active",
+      "1": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statecode",
+        "OptionSetReferenceEntityName": "ReviewHub_MetricUploadLogs"
+      }
+    },
+    "OptionSetTypeKey": "StateType",
+    "RelatedColumnInvariantName": "statecode",
+    "RelatedEntityName": "ReviewHub_MetricUploadLogs",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Status Reason (ReviewHub_MetricUploadLogs)",
+    "Name": "chub_reviewhub_metricuploadlog_statuscode",
+    "OptionSetInfoNameMapping": {
+      "1": "Active",
+      "2": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statuscode",
+        "OptionSetReferenceEntityName": "ReviewHub_MetricUploadLogs"
+      }
+    },
+    "OptionSetTypeKey": "StatusType",
+    "RelatedColumnInvariantName": "statuscode",
+    "RelatedEntityName": "ReviewHub_MetricUploadLogs",
+    "Type": "OptionSetInfo"
+  }
+]

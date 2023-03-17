@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<savedqueries xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <savedquery>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>0</CanBeDeleted>
+    <isquickfindquery>0</isquickfindquery>
+    <isprivate>0</isprivate>
+    <isdefault>1</isdefault>
+    <savedqueryid>{7c74d69a-0ae5-4047-b126-9e0833cb80ae}</savedqueryid>
+    <layoutxml>
+      <grid name="resultset" jump="craf2_executivesummarytitle" select="1" icon="1" preview="1">
+        <row name="result" id="craf2_reviewhub_factexecutivesummaryid">
+          <cell name="craf2_executivesummarytitle" width="246" />
+          <cell name="craf2_executivesummarydescription" width="212" />
+          <cell name="craf2_highlightmetrictypeid" width="100" />
+          <cell name="craf2_lowlightmetrictypeid" width="100" />
+          <cell name="craf2_factmetricboardid" width="100" />
+          <cell name="chub_boardtypeid" width="100" />
+          <cell name="craf2_product" width="100" />
+          <cell name="craf2_reviewlockdate" width="100" />
+          <cell name="createdby" width="100" />
+          <cell name="createdon" width="125" />
+          <cell name="modifiedby" width="100" />
+          <cell name="modifiedon" width="100" />
+        </row>
+      </grid>
+    </layoutxml>
+    <querytype>0</querytype>
+    <fetchxml>
+      <fetch version="1.0" mapping="logical">
+        <entity name="craf2_reviewhub_factexecutivesummary">
+          <attribute name="craf2_reviewhub_factexecutivesummaryid" />
+          <attribute name="craf2_executivesummarytitle" />
+          <attribute name="createdon" />
+          <filter type="and">
+            <condition attribute="statecode" operator="eq" value="0" />
+          </filter>
+          <attribute name="craf2_executivesummarydescription" />
+          <attribute name="craf2_highlightmetrictypeid" />
+          <attribute name="craf2_lowlightmetrictypeid" />
+          <attribute name="craf2_factmetricboardid" />
+          <attribute name="craf2_product" />
+          <attribute name="craf2_reviewlockdate" />
+          <attribute name="createdby" />
+          <attribute name="modifiedby" />
+          <attribute name="modifiedon" />
+          <attribute name="chub_boardtypeid" />
+          <order attribute="craf2_reviewlockdate" descending="false" />
+        </entity>
+      </fetch>
+    </fetchxml>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <LocalizedNames>
+      <LocalizedName description="Active ReviewHub_FactExecutiveSummaries" languagecode="1033" />
+    </LocalizedNames>
+  </savedquery>
+</savedqueries>

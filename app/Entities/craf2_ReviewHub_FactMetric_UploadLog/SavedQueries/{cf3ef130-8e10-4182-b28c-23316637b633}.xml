@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<savedqueries xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <savedquery>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>0</CanBeDeleted>
+    <isquickfindquery>0</isquickfindquery>
+    <isprivate>0</isprivate>
+    <isdefault>1</isdefault>
+    <savedqueryid>{cf3ef130-8e10-4182-b28c-23316637b633}</savedqueryid>
+    <layoutxml>
+      <grid name="craf2_reviewhub_factmetric_uploadlogs" jump="craf2_logtitle" select="1" icon="1" preview="0">
+        <row name="craf2_reviewhub_factmetric_uploadlog" id="craf2_reviewhub_factmetric_uploadlogid">
+          <cell name="craf2_logtitle" width="300" />
+          <cell name="createdon" width="125" />
+        </row>
+      </grid>
+    </layoutxml>
+    <querytype>64</querytype>
+    <fetchxml>
+      <fetch version="1.0" mapping="logical">
+        <entity name="craf2_reviewhub_factmetric_uploadlog">
+          <attribute name="craf2_reviewhub_factmetric_uploadlogid" />
+          <attribute name="craf2_logtitle" />
+          <attribute name="createdon" />
+          <filter type="and">
+            <condition attribute="statecode" operator="eq" value="0" />
+          </filter>
+        </entity>
+      </fetch>
+    </fetchxml>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <LocalizedNames>
+      <LocalizedName description="ReviewHub_FactMetric_UploadLog Lookup View" languagecode="1033" />
+    </LocalizedNames>
+  </savedquery>
+</savedqueries>

@@ -1,0 +1,776 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_commondataserviceforapps": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "chub_sharedcommondataserviceforapps_72f86"
+        },
+        "api": {
+          "name": "shared_commondataserviceforapps"
+        }
+      },
+      "shared_commondataservice": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "chub_sharedcommondataservice_8c683"
+        },
+        "api": {
+          "name": "shared_commondataservice"
+        }
+      },
+      "shared_commondataserviceforapps_1": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "chub_sharedcommondataserviceforapps_72f86"
+        },
+        "api": {
+          "name": "shared_commondataserviceforapps"
+        }
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        },
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        },
+        "EnvVar - ReviewHub - Environment ID (chub_EnvVarReviewHubEnvironmentID)": {
+          "defaultValue": "9318e63e-6db0-4c39-8941-52a01301dfd1",
+          "type": "String",
+          "metadata": {
+            "schemaName": "chub_EnvVarReviewHubEnvironmentID"
+          }
+        }
+      },
+      "triggers": {
+        "Recurrence": {
+          "recurrence": {
+            "frequency": "Day",
+            "interval": 1,
+            "timeZone": "Pacific Standard Time",
+            "startTime": "2022-06-23T23:00:00Z",
+            "schedule": {
+              "hours": [
+                "2"
+              ]
+            }
+          },
+          "metadata": {
+            "operationMetadataId": "ad23cb8a-4b1a-4495-976e-3fb91acb62b2"
+          },
+          "type": "Recurrence"
+        }
+      },
+      "actions": {
+        "Initialize_PM_UID": {
+          "runAfter": {
+            "Initialize_CurrentMonthStartDate": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "57dc21f5-5050-44af-8ba2-e1b1ae145cb0"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "PM_UID",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "Initialize_FM_UID": {
+          "runAfter": {
+            "Initialize_PM_UID": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "dfba0508-e0a4-4863-ae6c-51fdfb2833f7"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "FM_UID",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "Initialize_Environment_ID": {
+          "runAfter": {},
+          "metadata": {
+            "operationMetadataId": "4559f573-d75f-46c1-8f3e-2f3938462286"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "EnvironmentID",
+                "type": "string",
+                "value": "@{workflow().tags.environmentName}"
+              }
+            ]
+          }
+        },
+        "Initialize_UploadRowCount": {
+          "runAfter": {
+            "Initialize_Environment_ID": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "91290504-f593-45ce-93dd-719167e5b295"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "UploadRowCount",
+                "type": "integer",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "List_rows_in_BoardType_table": {
+          "runAfter": {
+            "Initialize_FM_UID": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "a76833e5-3fc4-4085-8201-ba4ecf40114e"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "connectionName": "shared_commondataserviceforapps",
+              "operationId": "ListRecords",
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+            },
+            "parameters": {
+              "entityName": "craf2_reviewhub_boardtypes",
+              "$filter": "craf2_expectedautoloaddaypermonth ge 1 and craf2_isdisplayinapp eq true and chub_reviewlockday ne null",
+              "$orderby": "craf2_boardtypeid asc"
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "description": "ExpectedAutoLoadDayPerMonth >= 1"
+        },
+        "Each_BoardType_Record": {
+          "foreach": "@outputs('List_rows_in_BoardType_table')?['body/value']",
+          "actions": {
+            "If_ExpectedAutoLoadDayPerMonth_is_reached": {
+              "actions": {
+                "Each_non-loaded_record": {
+                  "foreach": "@outputs('List_rows_in_FactMetric_Staging_table')?['body/value']",
+                  "actions": {
+                    "Check_if_this_record_has_been_loaded_for_current_month": {
+                      "runAfter": {},
+                      "metadata": {
+                        "operationMetadataId": "e73e1784-9002-4406-ab58-d5bcbf50c4d7"
+                      },
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "host": {
+                          "connectionName": "shared_commondataserviceforapps",
+                          "operationId": "ListRecords",
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                        },
+                        "parameters": {
+                          "entityName": "craf2_reviewhub_factmetric_stagings",
+                          "$filter": "craf2_fm_boardtypeid eq @{items('Each_BoardType_Record')?['craf2_boardtypeid']} and \ncraf2_fm_productmetricid eq @{items('Each_non-loaded_record')?['craf2_fm_productmetricid']} and \ncraf2_fm_reviewlockdate eq @{variables('CurrentMonthEndDate')} and \ncraf2_isthisrecordloaded eq 1 "
+                        },
+                        "authentication": "@parameters('$authentication')"
+                      }
+                    },
+                    "If_this_ProductMetricID_has_been_loaded_for_the_current_month": {
+                      "actions": {
+                        "Delete_All_Older_Records": {
+                          "foreach": "@outputs('Check_if_this_record_has_been_loaded_for_current_month')?['body/value']",
+                          "actions": {
+                            "Delete_this_non-loaded_record_from_the_Staging_table": {
+                              "runAfter": {},
+                              "metadata": {
+                                "operationMetadataId": "efbc4382-ce1b-46df-a1dc-caf48dc27d10"
+                              },
+                              "type": "OpenApiConnection",
+                              "inputs": {
+                                "host": {
+                                  "connectionName": "shared_commondataserviceforapps",
+                                  "operationId": "DeleteRecord",
+                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                                },
+                                "parameters": {
+                                  "entityName": "craf2_reviewhub_factmetric_stagings",
+                                  "recordId": "@items('Delete_All_Older_Records')?['craf2_reviewhub_factmetric_stagingid']"
+                                },
+                                "authentication": "@parameters('$authentication')"
+                              }
+                            }
+                          },
+                          "runAfter": {},
+                          "metadata": {
+                            "operationMetadataId": "b397a761-c78f-4ff4-bbcf-7505f8f722c3"
+                          },
+                          "type": "Foreach"
+                        }
+                      },
+                      "runAfter": {
+                        "Check_If_Review_Lock_Date_Has_been_Reached": [
+                          "Succeeded"
+                        ]
+                      },
+                      "expression": {
+                        "greaterOrEquals": [
+                          "@length(outputs('Check_if_this_record_has_been_loaded_for_current_month')?['body/value'])",
+                          1
+                        ]
+                      },
+                      "metadata": {
+                        "operationMetadataId": "1d7f074a-4e4e-4477-9790-d8a80d0f7ef9"
+                      },
+                      "type": "If"
+                    },
+                    "Check_If_Review_Lock_Date_Has_been_Reached": {
+                      "actions": {
+                        "Push_This_Record_to_FactMetric_table": {
+                          "actions": {
+                            "If_this_flow_runs_in_PROD_environment": {
+                              "actions": {
+                                "Update_a_FM_row_from_Staging_table": {
+                                  "runAfter": {},
+                                  "metadata": {
+                                    "operationMetadataId": "d569e7ff-793c-4152-bc46-14667b4dcdaa"
+                                  },
+                                  "type": "OpenApiConnection",
+                                  "inputs": {
+                                    "host": {
+                                      "connectionName": "shared_commondataserviceforapps",
+                                      "operationId": "UpdateRecord",
+                                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                                    },
+                                    "parameters": {
+                                      "entityName": "craf2_reviewhub_factmetrics",
+                                      "recordId": "@items('Each_non-loaded_record')?['craf2_fm_uniqueid']",
+                                      "item/craf2_fm_valuedate": "@items('Each_non-loaded_record')?['craf2_fm_valuedate']",
+                                      "item/craf2_factmetrictitle": "@items('Each_non-loaded_record')?['craf2_factmetrictitle']",
+                                      "item/craf2_fm_valuenumber": "@items('Each_non-loaded_record')?['craf2_fm_valuenumber']"
+                                    },
+                                    "authentication": "@parameters('$authentication')"
+                                  }
+                                },
+                                "Update_this_Staging_row_to_set_IsThisRecordLoaded_to_1": {
+                                  "runAfter": {
+                                    "Update_a_FM_row_from_Staging_table": [
+                                      "Succeeded"
+                                    ]
+                                  },
+                                  "metadata": {
+                                    "operationMetadataId": "1b8d0d55-d3fa-4668-a295-9ea7a09eb8f8"
+                                  },
+                                  "type": "OpenApiConnection",
+                                  "inputs": {
+                                    "host": {
+                                      "connectionName": "shared_commondataserviceforapps",
+                                      "operationId": "UpdateRecord",
+                                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                                    },
+                                    "parameters": {
+                                      "entityName": "craf2_reviewhub_factmetric_stagings",
+                                      "recordId": "@items('Each_non-loaded_record')?['craf2_reviewhub_factmetric_stagingid']",
+                                      "item/craf2_isthisrecordloaded": 1
+                                    },
+                                    "authentication": "@parameters('$authentication')"
+                                  }
+                                },
+                                "Increment_UploadRowCount": {
+                                  "runAfter": {
+                                    "Update_this_Staging_row_to_set_IsThisRecordLoaded_to_1": [
+                                      "Succeeded"
+                                    ]
+                                  },
+                                  "metadata": {
+                                    "operationMetadataId": "ba17172a-576d-443b-a416-bdccc47eb012"
+                                  },
+                                  "type": "IncrementVariable",
+                                  "inputs": {
+                                    "name": "UploadRowCount",
+                                    "value": 1
+                                  }
+                                }
+                              },
+                              "runAfter": {},
+                              "else": {
+                                "actions": {
+                                  "GetProductMetricFromProd": {
+                                    "runAfter": {},
+                                    "metadata": {
+                                      "operationMetadataId": "cee51ffd-9a2e-44a3-bc73-d5b1829ed1eb"
+                                    },
+                                    "type": "OpenApiConnection",
+                                    "inputs": {
+                                      "host": {
+                                        "connectionName": "shared_commondataservice",
+                                        "operationId": "GetItems_V2",
+                                        "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataservice"
+                                      },
+                                      "parameters": {
+                                        "dataset": "https://org00d69b54.crm.dynamics.com",
+                                        "table": "craf2_reviewhub_productmetrics",
+                                        "$filter": "craf2_productmetricid eq @{items('Each_non-loaded_record')?['craf2_fm_productmetricid']}",
+                                        "$top": 1
+                                      },
+                                      "authentication": "@parameters('$authentication')"
+                                    }
+                                  },
+                                  "ProductMetricTitle": {
+                                    "runAfter": {
+                                      "GetProductMetricFromProd": [
+                                        "Succeeded"
+                                      ]
+                                    },
+                                    "metadata": {
+                                      "operationMetadataId": "83ed86f4-f058-4f25-a1c4-b86fda83b756"
+                                    },
+                                    "type": "Compose",
+                                    "inputs": "@first(outputs('GetProductMetricFromProd')?['body/value'])?['craf2_productmetrictitle']"
+                                  },
+                                  "GetProductMetricUID": {
+                                    "runAfter": {
+                                      "ProductMetricTitle": [
+                                        "Succeeded"
+                                      ]
+                                    },
+                                    "metadata": {
+                                      "operationMetadataId": "34db4e7b-fd18-49c2-bf5a-4f1a58f91ec0"
+                                    },
+                                    "type": "OpenApiConnection",
+                                    "inputs": {
+                                      "host": {
+                                        "connectionName": "shared_commondataserviceforapps",
+                                        "operationId": "ListRecords",
+                                        "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                                      },
+                                      "parameters": {
+                                        "entityName": "craf2_reviewhub_productmetrics",
+                                        "$select": "craf2_productmetricid,\ncraf2_reviewhub_productmetricid",
+                                        "$filter": "craf2_productmetrictitle eq '@{replace(outputs('ProductMetricTitle'), '''', '''''')}'",
+                                        "$top": 1
+                                      },
+                                      "authentication": "@parameters('$authentication')"
+                                    }
+                                  },
+                                  "No_Product_Metric_ID_in_the_environment": {
+                                    "actions": {
+                                      "Set_FM_UID": {
+                                        "runAfter": {
+                                          "GetFactMetricUID": [
+                                            "Succeeded"
+                                          ]
+                                        },
+                                        "metadata": {
+                                          "operationMetadataId": "5e06399c-27a8-4ede-87c8-f5de407e1c9a"
+                                        },
+                                        "type": "SetVariable",
+                                        "inputs": {
+                                          "name": "FM_UID",
+                                          "value": "@{first(outputs('GetFactMetricUID')?['body/value'])?['craf2_reviewhub_factmetricid']}"
+                                        }
+                                      },
+                                      "Update_a_FM_row_from_Staging_table_2": {
+                                        "runAfter": {
+                                          "Set_FM_UID": [
+                                            "Succeeded"
+                                          ]
+                                        },
+                                        "metadata": {
+                                          "operationMetadataId": "86ab934f-2e33-4a72-8f69-4e79367e9a51"
+                                        },
+                                        "type": "OpenApiConnection",
+                                        "inputs": {
+                                          "host": {
+                                            "connectionName": "shared_commondataserviceforapps",
+                                            "operationId": "UpdateRecord",
+                                            "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                                          },
+                                          "parameters": {
+                                            "entityName": "craf2_reviewhub_factmetrics",
+                                            "recordId": "@variables('FM_UID')",
+                                            "item/craf2_fm_valuedate": "@items('Each_non-loaded_record')?['craf2_fm_valuedate']",
+                                            "item/craf2_factmetrictitle": "@items('Each_non-loaded_record')?['craf2_factmetrictitle']",
+                                            "item/craf2_fm_valuenumber": "@items('Each_non-loaded_record')?['craf2_fm_valuenumber']"
+                                          },
+                                          "authentication": "@parameters('$authentication')"
+                                        }
+                                      },
+                                      "Update_a_Staging_row_to_set_IsThisRecordLoaded": {
+                                        "runAfter": {
+                                          "Update_a_FM_row_from_Staging_table_2": [
+                                            "Succeeded"
+                                          ]
+                                        },
+                                        "metadata": {
+                                          "operationMetadataId": "1b8d0d55-d3fa-4668-a295-9ea7a09eb8f8"
+                                        },
+                                        "type": "OpenApiConnection",
+                                        "inputs": {
+                                          "host": {
+                                            "connectionName": "shared_commondataserviceforapps",
+                                            "operationId": "UpdateRecord",
+                                            "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                                          },
+                                          "parameters": {
+                                            "entityName": "craf2_reviewhub_factmetric_stagings",
+                                            "recordId": "@items('Each_non-loaded_record')?['craf2_reviewhub_factmetric_stagingid']",
+                                            "item/craf2_isthisrecordloaded": 1
+                                          },
+                                          "authentication": "@parameters('$authentication')"
+                                        }
+                                      },
+                                      "Increment_UploadRowCount_2": {
+                                        "runAfter": {
+                                          "Update_a_Staging_row_to_set_IsThisRecordLoaded": [
+                                            "Succeeded"
+                                          ]
+                                        },
+                                        "metadata": {
+                                          "operationMetadataId": "de9b52e6-91ea-432c-85b1-372b68540fc0"
+                                        },
+                                        "type": "IncrementVariable",
+                                        "inputs": {
+                                          "name": "UploadRowCount",
+                                          "value": 1
+                                        }
+                                      },
+                                      "Set_PM_UID": {
+                                        "runAfter": {},
+                                        "metadata": {
+                                          "operationMetadataId": "b7c37999-5fe6-4466-9a36-51ba80acb99f"
+                                        },
+                                        "type": "SetVariable",
+                                        "inputs": {
+                                          "name": "PM_UID",
+                                          "value": "@{first(outputs('GetProductMetricUID')?['body/value'])?['craf2_reviewhub_productmetricid']}"
+                                        }
+                                      },
+                                      "GetFactMetricUID": {
+                                        "runAfter": {
+                                          "Set_PM_UID": [
+                                            "Succeeded"
+                                          ]
+                                        },
+                                        "metadata": {
+                                          "operationMetadataId": "b623279d-6781-4a8f-a303-23563fe4f95f"
+                                        },
+                                        "type": "OpenApiConnection",
+                                        "inputs": {
+                                          "host": {
+                                            "connectionName": "shared_commondataserviceforapps",
+                                            "operationId": "ListRecords",
+                                            "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                                          },
+                                          "parameters": {
+                                            "entityName": "craf2_reviewhub_factmetrics",
+                                            "$select": "craf2_reviewhub_factmetricid",
+                                            "$filter": "craf2_fm_reviewlockdate eq @{items('Each_non-loaded_record')?['craf2_fm_reviewlockdate']} and\n_craf2_fm_productmetric_value eq @{variables('PM_UID')}",
+                                            "$top": 1
+                                          },
+                                          "authentication": "@parameters('$authentication')"
+                                        }
+                                      }
+                                    },
+                                    "runAfter": {
+                                      "GetProductMetricUID": [
+                                        "Succeeded"
+                                      ]
+                                    },
+                                    "expression": {
+                                      "greater": [
+                                        "@length(outputs('GetProductMetricUID')?['body/value'])",
+                                        0
+                                      ]
+                                    },
+                                    "metadata": {
+                                      "operationMetadataId": "6d691200-e210-48bb-8924-6693affedfd1"
+                                    },
+                                    "type": "If"
+                                  }
+                                }
+                              },
+                              "expression": {
+                                "equals": [
+                                  "@variables('EnvironmentID')",
+                                  "@parameters('EnvVar - ReviewHub - Environment ID (chub_EnvVarReviewHubEnvironmentID)')"
+                                ]
+                              },
+                              "metadata": {
+                                "operationMetadataId": "46d756ca-259d-41bd-a052-70e41bb18fa1"
+                              },
+                              "type": "If",
+                              "description": "If run in production, use FactMetric UniqueID stored in the Staging table to do the mapping. "
+                            }
+                          },
+                          "runAfter": {},
+                          "metadata": {
+                            "operationMetadataId": "c416f9ab-00a8-44e2-b2c9-4d7e0932e6f3"
+                          },
+                          "type": "Scope"
+                        }
+                      },
+                      "runAfter": {
+                        "Check_if_this_record_has_been_loaded_for_current_month": [
+                          "Succeeded"
+                        ]
+                      },
+                      "expression": {
+                        "greaterOrEquals": [
+                          "@items('Each_BoardType_Record')?['chub_reviewlockday']",
+                          "@dayOfMonth(utcNow())"
+                        ]
+                      },
+                      "metadata": {
+                        "operationMetadataId": "71d18091-9e5e-4a17-9b41-2c52cea54334"
+                      },
+                      "type": "If"
+                    }
+                  },
+                  "runAfter": {
+                    "List_rows_in_FactMetric_Staging_table": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "0f5625d7-c01d-49ef-b765-93d539dcf6c0"
+                  },
+                  "type": "Foreach"
+                },
+                "Reset_UploadRowCount_to_0": {
+                  "runAfter": {},
+                  "metadata": {
+                    "operationMetadataId": "e96dd87c-7378-4261-906e-2ffd76ccbdef"
+                  },
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "UploadRowCount",
+                    "value": 0
+                  }
+                },
+                "List_rows_in_FactMetric_Staging_table": {
+                  "runAfter": {
+                    "Reset_UploadRowCount_to_0": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "019f3f1d-baeb-4626-b0a5-446b14e58985"
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "connectionName": "shared_commondataserviceforapps",
+                      "operationId": "ListRecords",
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                    },
+                    "parameters": {
+                      "entityName": "craf2_reviewhub_factmetric_stagings",
+                      "$select": "craf2_reviewhub_factmetric_stagingid,\ncraf2_factmetrictitle,\ncraf2_fm_uniqueid,\ncraf2_fm_boardtypeid,\ncraf2_fm_productid,\ncraf2_fm_productmetricid,\ncraf2_fm_reviewlockdate,\ncraf2_fm_valuedate,\ncraf2_fm_valuenumber,\ncraf2_isthisrecordloaded",
+                      "$filter": "craf2_isthisrecordloaded ne 1 and \ncraf2_fm_boardtypeid eq @{items('Each_BoardType_Record')?['craf2_boardtypeid']} and \ncraf2_fm_reviewlockdate eq @{variables('CurrentMonthEndDate')} ",
+                      "$orderby": "createdon asc"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  },
+                  "description": "IsThisRecordLoaded <> 1"
+                },
+                "If_UploadRowCount_is_NOT_0": {
+                  "actions": {
+                    "Add_a_new_row_to_the_UploadLog_table": {
+                      "runAfter": {},
+                      "metadata": {
+                        "operationMetadataId": "da03b8f2-7ddb-4d85-86ce-0fd0408968c9"
+                      },
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "host": {
+                          "connectionName": "shared_commondataserviceforapps",
+                          "operationId": "CreateRecord",
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                        },
+                        "parameters": {
+                          "entityName": "craf2_reviewhub_factmetric_uploadlogs",
+                          "item/craf2_boardtypeid": "@items('Each_BoardType_Record')?['craf2_boardtypeid']",
+                          "item/craf2_logtitle": "AutoLoad-@{items('Each_BoardType_Record')?['craf2_boardtypeid']}-@{formatDateTime(utcNow(), 'MM')}@{formatDateTime(utcNow(), 'yyyy')}",
+                          "item/craf2_reviewmonthnumber": "@int(formatDateTime(utcNow(), 'MM'))",
+                          "item/craf2_reviewyear": "@int(formatDateTime(utcNow(), 'yyyy'))",
+                          "item/craf2_rowcount": "@variables('UploadRowCount')"
+                        },
+                        "authentication": "@parameters('$authentication')"
+                      }
+                    },
+                    "Run_a_Child_Flow": {
+                      "runAfter": {
+                        "Add_a_new_row_to_the_UploadLog_table": [
+                          "Succeeded"
+                        ]
+                      },
+                      "metadata": {
+                        "operationMetadataId": "4e46934b-dc79-452c-bbd1-2396d385ecf3"
+                      },
+                      "type": "Workflow",
+                      "inputs": {
+                        "host": {
+                          "workflowReferenceName": "bc66fa94-1c0f-ed11-b83f-000d3a36b0e9"
+                        }
+                      }
+                    }
+                  },
+                  "runAfter": {
+                    "Each_non-loaded_record": [
+                      "Succeeded"
+                    ]
+                  },
+                  "expression": {
+                    "not": {
+                      "equals": [
+                        "@variables('UploadRowCount')",
+                        0
+                      ]
+                    }
+                  },
+                  "metadata": {
+                    "operationMetadataId": "9693799e-6da0-4aab-a6c1-b53f4c4a728a"
+                  },
+                  "type": "If"
+                }
+              },
+              "runAfter": {},
+              "expression": {
+                "lessOrEquals": [
+                  "@items('Each_BoardType_Record')?['craf2_expectedautoloaddaypermonth']",
+                  "@int(formatDateTime(utcNow(), 'dd'))"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "91717706-57be-444f-b715-75d3841c1b74"
+              },
+              "type": "If"
+            }
+          },
+          "runAfter": {
+            "List_rows_in_BoardType_table": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "c33f93e1-6d12-4fa0-a9bc-b559bf2014ea"
+          },
+          "type": "Foreach"
+        },
+        "Initialize_CurrentMonthEndDate": {
+          "runAfter": {
+            "Initialize_UploadRowCount": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "2c2d7e5a-6cdc-41d2-9e5e-d6c084b21f39"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "CurrentMonthEndDate",
+                "type": "string",
+                "value": "@{formatDateTime(addDays(startOfMonth(addToTime(convertFromUtc(utcNow(), 'Pacific Standard Time'), 1, 'month')), -1), 'yyyy-MM-dd')}"
+              }
+            ]
+          }
+        },
+        "Delete_Staging_records_older_than_2_months": {
+          "runAfter": {
+            "Each_BoardType_Record": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "b7461a13-a242-49d1-ae02-245b3f5ee6bb"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "connectionName": "shared_commondataserviceforapps_1",
+              "operationId": "PerformUnboundAction",
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+            },
+            "parameters": {
+              "actionName": "BulkDelete",
+              "item/QuerySet": [
+                {
+                  "EntityName": "craf2_reviewhub_factmetric_staging",
+                  "Criteria": {
+                    "Conditions": [
+                      {
+                        "AttributeName": "craf2_fm_reviewlockdate",
+                        "Operator": "LessEqual",
+                        "Values": [
+                          {
+                            "Value": "@{addDays(startOfMonth(addToTime(convertFromUtc(utcNow(), 'Pacific Standard Time'), -2, 'month')), -1)}",
+                            "Type": "System.DateTime"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ],
+              "item/JobName": "BulkDelete FactMetric Staging table",
+              "item/SendEmailNotification": false,
+              "item/ToRecipients": [],
+              "item/CCRecipients": [],
+              "item/RecurrencePattern": "@base64ToString('')",
+              "item/StartDateTime": "@utcNow()",
+              "item/RunNow": false
+            },
+            "authentication": "@parameters('$authentication')",
+            "retryPolicy": {
+              "type": "none"
+            }
+          }
+        },
+        "Initialize_CurrentMonthStartDate": {
+          "runAfter": {
+            "Initialize_CurrentMonthEndDate": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "67c029f8-7b67-4bd8-95ad-63e708997b0c"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "CurrentMonthStartDate",
+                "type": "string",
+                "value": "@{formatDateTime(startOfMonth(convertFromUtc(utcNow(), 'Pacific Standard Time')), 'yyyy-MM-dd')}"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "templateName": ""
+  },
+  "schemaVersion": "1.0.0.0"
+}

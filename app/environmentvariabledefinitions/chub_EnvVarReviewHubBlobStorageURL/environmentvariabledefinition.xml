@@ -1,0 +1,13 @@
+<environmentvariabledefinition schemaname="chub_EnvVarReviewHubBlobStorageURL">
+  <description default="The link to the blob storage which  stores the product images to be displayed within the app.">
+    <label description="The link to the blob storage which  stores the product images to be displayed within the app." languagecode="1033" />
+  </description>
+  <displayname default="EnvVar - ReviewHub - BlobStorageURL">
+    <label description="EnvVar - ReviewHub - BlobStorageURL" languagecode="1033" />
+  </displayname>
+  <introducedversion>1.0.0.12082022</introducedversion>
+  <iscustomizable>1</iscustomizable>
+  <isrequired>0</isrequired>
+  <secretstore>0</secretstore>
+  <type>100000000</type>
+</environmentvariabledefinition>

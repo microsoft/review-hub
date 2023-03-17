@@ -1,0 +1,9 @@
+[
+  {
+    "IsComponentScoped": false,
+    "IsSampleData": false,
+    "IsWritable": true,
+    "Name": "MaxPm_ID",
+    "Type": "CollectionDataSourceInfo"
+  }
+]

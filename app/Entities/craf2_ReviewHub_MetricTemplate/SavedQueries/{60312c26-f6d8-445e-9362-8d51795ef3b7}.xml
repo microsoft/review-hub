@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<savedqueries xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <savedquery>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>0</CanBeDeleted>
+    <isquickfindquery>0</isquickfindquery>
+    <isprivate>0</isprivate>
+    <isdefault>1</isdefault>
+    <savedqueryid>{60312c26-f6d8-445e-9362-8d51795ef3b7}</savedqueryid>
+    <layoutxml>
+      <grid name="resultset" jump="craf2_templatename" select="1" icon="1" preview="1">
+        <row name="result" id="craf2_reviewhub_metrictemplateid">
+          <cell name="craf2_templatename" width="238" />
+          <cell name="craf2_templateid" width="212" />
+          <cell name="craf2_templatedescription" width="240" />
+          <cell name="craf2_templateboardtype" width="187" />
+          <cell name="createdby" width="100" />
+        </row>
+      </grid>
+    </layoutxml>
+    <querytype>0</querytype>
+    <fetchxml>
+      <fetch version="1.0" mapping="logical">
+        <entity name="craf2_reviewhub_metrictemplate">
+          <attribute name="craf2_reviewhub_metrictemplateid" />
+          <attribute name="craf2_templatename" />
+          <filter type="and">
+            <condition attribute="statecode" operator="eq" value="0" />
+          </filter>
+          <attribute name="craf2_templateid" />
+          <attribute name="craf2_templatedescription" />
+          <attribute name="craf2_templateboardtype" />
+          <order attribute="craf2_templateid" descending="false" />
+          <attribute name="createdby" />
+        </entity>
+      </fetch>
+    </fetchxml>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <LocalizedNames>
+      <LocalizedName description="Active ReviewHub_MetricTemplates" languagecode="1033" />
+    </LocalizedNames>
+  </savedquery>
+</savedqueries>

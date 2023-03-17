@@ -1,0 +1,176 @@
+{
+  "QualifiedValues": [
+    {
+      "Kind": "default.cds_craf2_reviewhub_metrictypedetail_forms",
+      "Namespace": "ReviewHub_MetricTypeDetails (Forms)",
+      "Values": {
+        "Information": "c8617d06-98ea-4f46-b7f6-a8c3c0206dc5"
+      }
+    },
+    {
+      "Kind": "default.cds_craf2_reviewhub_metrictype_forms",
+      "Namespace": "ReviewHub_MetricTypes (Forms)",
+      "Values": {
+        "Information": "609bbe7c-68a0-4f75-bf8a-e3e08556579e"
+      }
+    },
+    {
+      "Kind": "default.cds_craf2_reviewhub_productmetric_forms",
+      "Namespace": "ReviewHub_ProductMetrics (Forms)",
+      "Values": {
+        "Information": "63aae03f-1213-460c-a6fd-be8c8dc2effd"
+      }
+    },
+    {
+      "Kind": "default.cds_craf2_reviewhub_factmetric_forms",
+      "Namespace": "ReviewHub_FactMetrics (Forms)",
+      "Values": {
+        "Information": "9fcbaa2d-2560-40d9-ab19-a81d871f9cb6"
+      }
+    },
+    {
+      "Kind": "default.cds_craf2_reviewhub_factmetricboard_forms",
+      "Namespace": "ReviewHub_FactMetricBoards (Forms)",
+      "Values": {
+        "Information": "2f56ebb5-0d4c-4794-b034-beb03a3e77b9"
+      }
+    },
+    {
+      "Kind": "default.cds_craf2_reviewhub_users_forms",
+      "Namespace": "ReviewHub_Users (Forms)",
+      "Values": {
+        "Information": "2e9f5bd6-1b3b-4620-9af5-3d4dedeb070c"
+      }
+    },
+    {
+      "Kind": "default.cds_craf2_reviewhub_boardhealth_forms",
+      "Namespace": "ReviewHub_BoardHealths (Forms)",
+      "Values": {
+        "Information": "7ab6fabe-5728-4ef4-b8cf-c92a8d8c9346"
+      }
+    },
+    {
+      "Kind": "default.cds_craf2_reviewhub_product_forms",
+      "Namespace": "ReviewHub_Products (Forms)",
+      "Values": {
+        "Information": "a28771a0-93f0-4139-ad2b-6a933624fc9e"
+      }
+    },
+    {
+      "Kind": "default.cds_craf2_reviewhub_metrictemplate_forms",
+      "Namespace": "ReviewHub_MetricTemplates (Forms)",
+      "Values": {
+        "Information": "3be29041-e30b-41dd-beff-c374f993aaf6"
+      }
+    },
+    {
+      "Kind": "default.cds_craf2_reviewhub_boardtype_forms",
+      "Namespace": "ReviewHub_BoardTypes (Forms)",
+      "Values": {
+        "Information": "545be8ee-5341-445f-a826-fefef09eddcf"
+      }
+    },
+    {
+      "Kind": "default.cds_craf2_reviewhub_privacyagreement_forms",
+      "Namespace": "ReviewHub_PrivacyAgreements (Forms)",
+      "Values": {
+        "Information": "9a64b836-2022-49d5-aa75-e37400731b24"
+      }
+    },
+    {
+      "Kind": "default.cds_craf2_reviewhub_factexecutivesummary_forms",
+      "Namespace": "ReviewHub_FactExecutiveSummaries (Forms)",
+      "Values": {
+        "Information": "3f36d2dd-2f61-482c-8f32-8e0f53992e26"
+      }
+    },
+    {
+      "Kind": "default.cds_craf2_reviewhub_stakeholder_forms",
+      "Namespace": "ReviewHub_Stakeholders (Forms)",
+      "Values": {
+        "Information": "5bb50643-f42e-43aa-9105-db16a7344dfc"
+      }
+    },
+    {
+      "Kind": "default.cds_craf2_reviewhub_scorecardautomation_forms",
+      "Namespace": "ReviewHub_ScorecardAutomations (Forms)",
+      "Values": {
+        "Information": "baeea38a-d2ae-4f6d-bd74-ff93cbcf7d9e"
+      }
+    },
+    {
+      "Kind": "default.cds_systemuser_forms",
+      "Namespace": "Users (Forms)",
+      "Values": {
+        "Application User": "d26924ef-4d80-46f7-ab1d-e6ae80a54ce8",
+        "Information": "094fb08a-77bb-49e0-b7ea-8dbddfd01294",
+        "User": "c2cd9e55-d4b4-4b55-9951-16ead79643e5",
+        "User form – Business": "c2413504-7eb2-4c59-a087-95d819866114",
+        "User Hierarchy Tile Form": "c68d6c09-d7a7-4959-8d0f-44b8cff9b452"
+      }
+    },
+    {
+      "Kind": "default.cds_craf2_reviewhub_metrictypeobjective_forms",
+      "Namespace": "ReviewHub_MetricTypeObjectives (Forms)",
+      "Values": {
+        "Information": "f639aad2-9a32-4946-acee-f38748dd3d9c"
+      }
+    },
+    {
+      "Kind": "default.cds_chub_reviewhub_metricuploadlog_forms",
+      "Namespace": "ReviewHub_MetricUploadLogs (Forms)",
+      "Values": {
+        "Information": "8b88d486-3905-4cb5-a634-d8c39961c5a5"
+      }
+    },
+    {
+      "Kind": "default.cds_craf2_reviewhub_accessrequest_forms",
+      "Namespace": "ReviewHub_AccessRequests (Forms)",
+      "Values": {
+        "Information": "c1688c85-bc41-4437-87d1-c6bdb7c42722"
+      }
+    },
+    {
+      "Kind": "default.cds_craf2_reviewhub_requestedproduct_forms",
+      "Namespace": "ReviewHub_RequestedProducts (Forms)",
+      "Values": {
+        "Information": "96a7b17b-1b20-4662-9d9c-c3b0e9055c30"
+      }
+    },
+    {
+      "Kind": "default.cds_craf2_reviewhub_userrequest_forms",
+      "Namespace": "ReviewHub_UserRequests (Forms)",
+      "Values": {
+        "Information": "80b1a1a3-7df9-405e-9751-f983c46eba81"
+      }
+    },
+    {
+      "Kind": "default.cds_craf2_reviewhubproductmetricupdatemethod_forms",
+      "Namespace": "ReviewHub ProductMetricUpdateMethods (Forms)",
+      "Values": {
+        "Information": "50c27a3f-1b6b-4738-b56d-71fc8570299c"
+      }
+    },
+    {
+      "Kind": "default.cds_environmentvariabledefinition_forms",
+      "Namespace": "Environment Variable Definitions (Forms)",
+      "Values": {
+        "Information": "3853733b-a351-455d-b686-d2d05027ba4d"
+      }
+    },
+    {
+      "Kind": "default.cds_environmentvariablevalue_forms",
+      "Namespace": "Environment Variable Values (Forms)",
+      "Values": {
+        "Information": "f574a3ab-1060-43ee-a95f-9aa922b497db"
+      }
+    },
+    {
+      "Kind": "default.cds_craf2_reviewhub_objective_forms",
+      "Namespace": "ReviewHub_Objectives (Forms)",
+      "Values": {
+        "Information": "494aa624-3766-4318-9460-72522b017522"
+      }
+    }
+  ]
+}

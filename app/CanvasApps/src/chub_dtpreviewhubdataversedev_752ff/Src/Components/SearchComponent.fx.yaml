@@ -1,0 +1,68 @@
+SearchComponent As CanvasComponent:
+    Color: =RGBA(0, 0, 0, 1)
+    DelayOutput: =true
+    Fill: =RGBA(0, 0, 0, 0)
+    FontSize: =8
+    Height: =40
+    OnReset: =//Set(varSearchQuery, "");
+    OnSearch: ="text"
+    OutText: =TextInput_Search.Text //varSearchQuery
+    ResetTextInput: =false
+    SearchDefaultMessage: ="Search by Company Name"
+    Width: =330
+    X: =0
+    Y: =0
+    ZIndex: =1
+
+    TextInput_Search As text:
+        BorderColor: =SearchComponent.Color
+        BorderThickness: =1
+        Clear: =true
+        Color: =SearchComponent.Color
+        Default: =""
+        DelayOutput: =SearchComponent.DelayOutput
+        FocusedBorderThickness: =1
+        Font: =Font.'Segoe UI'
+        Height: =Parent.Height-10
+        HintText: =SearchComponent.SearchDefaultMessage
+        HoverFill: =Self.Fill
+        OnChange: |
+            =//Set(varSearchQuery, TextInput_Search.Text);
+            SearchComponent.OnSearch();
+        PaddingLeft: =35
+        PaddingRight: =10
+        RadiusBottomLeft: =50
+        RadiusBottomRight: |
+            =50
+        RadiusTopLeft: =50
+        RadiusTopRight: |
+            =50
+        Reset: =SearchComponent.ResetTextInput
+        Size: =SearchComponent.FontSize
+        Width: =Parent.Width - 15
+        X: =5
+        Y: =5
+        ZIndex: =1
+
+    Icon_magnifier As icon.Add:
+        BorderColor: =RGBA(0, 0, 0, 1)
+        Color: =RGBA(0, 0, 0, 1)
+        DisplayMode: =DisplayMode.View
+        FocusedBorderThickness: =6
+        Height: =TextInput_Search.Height
+        HoverBorderColor: =Self.BorderColor
+        HoverColor: =Self.Color
+        Icon: =Icon.Search
+        OnSelect: |
+            =//Set(varSearchQuery, TextInput_Search.Text);
+            SearchComponent.OnSearch();
+        PaddingBottom: =4
+        PaddingLeft: =5
+        PaddingTop: =4
+        PressedColor: =ColorFade(Self.Color, -50%)
+        Tooltip: ="Type to search"
+        Width: =Icon_magnifier.Height
+        X: =TextInput_Search.X
+        Y: =TextInput_Search.Y
+        ZIndex: =3
+

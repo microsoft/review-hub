@@ -1,0 +1,13 @@
+<environmentvariabledefinition schemaname="chub_EnvVarReviewHubReadOnlyAccess">
+  <description default="The group id for the Azure Group utilized to provide access to user who only require read only access.">
+    <label description="The group id for the Azure Group utilized to provide access to user who only require read only access." languagecode="1033" />
+  </description>
+  <displayname default="EnvVar - ReviewHub - Read Only Access Group">
+    <label description="EnvVar - ReviewHub - Read Only Access Group" languagecode="1033" />
+  </displayname>
+  <introducedversion>1.0.0.12082022</introducedversion>
+  <iscustomizable>1</iscustomizable>
+  <isrequired>0</isrequired>
+  <secretstore>0</secretstore>
+  <type>100000000</type>
+</environmentvariabledefinition>

@@ -1,0 +1,911 @@
+scn_SS_CoordinatorUsers As screen:
+    OnVisible: |-
+        =Select(btn_GetData_CU);
+        Reset(combo_NewCoord);
+
+    btn_GetData_CU As button:
+        Fill: =RGBA(99, 139, 44, 1)
+        Height: =55
+        OnSelect: |-
+            =ClearCollect(
+                clln_glry_Search_Coord,
+                DropColumns(
+                    AddColumns(
+                        AddColumns(
+                            RenameColumns(
+                                ForAll(Split(
+                                    LookUp(
+                                        ShowColumns(
+                                            ReviewHub_BoardTypes,
+                                            "craf2_boardtypeid",
+                                            "craf2_coordinator"
+                                        ),
+                                        ThisRecord.craf2_boardtypeid = dpdn_BoardType_CU.Selected.BoardTypeID
+                                    ).craf2_coordinator,
+                                    "|"
+                                ), {Result: ThisRecord.Value}),
+                                "Result",
+                                "UserPrincipalEmail"
+                            ),
+                            "Office365User_Record",
+                            Office365Users.UserProfileV2(ThisRecord.UserPrincipalEmail)
+                        ),
+                        "DisplayName",
+                        Office365User_Record.displayName,
+                        "Department",
+                        Office365User_Record.department,
+                        "JobTitle",
+                        Office365User_Record.jobTitle,
+                        "Location",
+                        Office365User_Record.officeLocation
+                    ),
+                    "Office365User_Record"
+                )
+            )
+        Text: ="Hidden button - Get Date"
+        Visible: =false
+        Width: =184
+        X: =1182
+        Y: =20
+        ZIndex: =1
+
+    lbl_CU_GlryRowCount As label:
+        Align: =Align.Right
+        Font: =FontStyle
+        FontWeight: =FontWeight.Semibold
+        Height: =35
+        PaddingRight: =15
+        Size: =10
+        Text: |-
+            ="Records Count: " & CountRows(glry_Search_Coord.AllItems)
+        Width: =140
+        X: =ctn_Search_Coords.X + ctn_Search_Coords.Width - Self.Width
+        Y: =ctn_Search_Coords.Y - Self.Height
+        ZIndex: =2
+
+    ctn_NewCoord As groupContainer:
+        Height: |-
+            =If(
+                IsBlankOrError(combo_NewCoord.Selected.DisplayName),
+                combo_NewCoord.Y + combo_NewCoord.Height + 150,
+                btn_Add_Coord.Y +btn_Add_Coord.Height + 25 //App.Height - Self.Y - 25
+            )
+        Visible: =IsBlankOrError(record_Edit_This_User)
+        Width: =If (IsBlankOrError(record_Edit_This_User), (App.Width - Self.X - 15), 0)
+        X: |
+            =ctn_Search_Coords.X + ctn_Search_Coords.Width + 20
+        Y: =ctn_Search_Coords.Y
+        ZIndex: =3
+
+        Back_NewCoord_Btm As button:
+            BorderColor: =Back_NewCoord_Top.Fill
+            DisabledBorderColor: =Self.BorderColor
+            DisabledFill: =RGBA(0, 0, 0, 0)
+            DisplayMode: =DisplayMode.Disabled
+            Font: =FontStyle
+            Height: =Parent.Height - Self.Y - 1
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Text: =""
+            Width: =Parent.Width - 2
+            X: =1
+            Y: =Back_NewCoord_Top.Height - 1
+            ZIndex: =1
+
+        btn_Cancel_Coord As button:
+            BorderColor: =Self.Fill
+            Fill: =GRAYCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =25
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Self.Fill
+            HoverFill: =Self.Color
+            OnSelect: =Reset(combo_NewCoord);
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Size: =10
+            Text: ="Cancel"
+            Width: =90
+            X: =btn_Add_Coord.X + btn_Add_Coord.Width + 30
+            Y: =btn_Add_Coord.Y 
+            ZIndex: =2
+
+        btn_Add_Coord As button:
+            BorderColor: =Self.Fill
+            DisplayMode: |-
+                =If(
+                    "user already exists!" in html_NewCoord.HtmlText || IsBlankOrError(combo_NewCoord.Selected.UserPrincipalName),
+                    DisplayMode.Disabled,
+                    DisplayMode.Edit
+                )
+            Fill: =BlueControlDarkBackground
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =25
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Self.Fill
+            HoverFill: =Self.Color
+            OnSelect: |
+                =Reset(ti_Search_Coord);
+                Patch(
+                    ReviewHub_BoardTypes,
+                    LookUp(
+                        ReviewHub_BoardTypes,
+                        ThisRecord.craf2_boardtypeid = dpdn_BoardType_CU.Selected.BoardTypeID
+                    ),
+                    {
+                        craf2_coordinator: Concat(
+                            ForAll(Distinct(
+                                clln_glry_Search_Coord,
+                                ThisRecord.UserPrincipalEmail
+                            ), {Result: ThisRecord.Value}).Result,
+                            ThisRecord.Result & "|"
+                        ) & combo_NewCoord.Selected.UserPrincipalName
+                    }
+                );
+                Patch(
+                    clln_glry_Search_Coord,
+                    Defaults(clln_glry_Search_Coord),
+                    {
+                        Department: combo_NewCoord.Selected.Department,
+                        DisplayName: combo_NewCoord.Selected.DisplayName,
+                        JobTitle: combo_NewCoord.Selected.JobTitle,
+                        Location: combo_NewCoord.Selected.OfficeLocation,
+                        UserPrincipalEmail: combo_NewCoord.Selected.UserPrincipalName
+                    }
+                );
+                Reset(combo_NewCoord);
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Size: =10
+            Text: ="Add"
+            Visible: =!IsBlankOrError(combo_NewCoord.Selected.UserPrincipalName)
+            Width: =90
+            X: =combo_NewCoord.X
+            Y: =html_NewCoord.Y + html_NewCoord.Height + 25
+            ZIndex: =3
+
+        html_NewCoord As htmlViewer:
+            AutoHeight: =true
+            Font: =FontStyle
+            Height: =50
+            HtmlText: |-
+                =If(
+                    !IsBlankOrError(LookUp(glry_Search_Coord.AllItems, ThisRecord.UserPrincipalEmail = combo_NewCoord.Selected.UserPrincipalName)),
+                    "<b><font color=red>This user already exists!</font></b><br>"
+                )
+                &
+                "<b>User Name: </b><br>" & combo_NewCoord.Selected.DisplayName 
+                & "<br><br><b>Principal Email: </b><br>" & combo_NewCoord.Selected.UserPrincipalName 
+                & "<br><br><b>Job Title: </b><br>" & If(IsBlankOrError(combo_NewCoord.Selected.JobTitle), "(No Value)", combo_NewCoord.Selected.JobTitle)
+                & "<br><br><b>Department: </b><br>" & combo_NewCoord.Selected.Department
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingTop: =0
+            Visible: =!IsBlankOrError(combo_NewCoord.Selected.UserPrincipalName)
+            Width: =combo_NewCoord.Width
+            X: =combo_NewCoord.X
+            Y: |
+                =img_Cord_New.Y + img_Cord_New.Height + 10
+            ZIndex: =4
+
+        img_Cord_New As image:
+            Height: =80
+            Image: |-
+                =If(
+                    !IsBlank(combo_NewCoord.Selected.DisplayName),
+                    If(
+                        !IsError(Office365Users.UserPhotoMetadata(combo_NewCoord.Selected.UserPrincipalName)) 
+                            && Office365Users.UserPhotoMetadata(combo_NewCoord.Selected.UserPrincipalName).HasPhoto,
+                        Office365Users.UserPhotoV2(combo_NewCoord.Selected.Id)
+                    )
+                )
+            RadiusBottomLeft: =10
+            RadiusBottomRight: =10
+            RadiusTopLeft: =10
+            RadiusTopRight: =10
+            Visible: |-
+                =If(
+                    !IsBlank(combo_NewCoord.Selected.DisplayName),
+                    If(
+                        IsError(Office365Users.UserPhotoMetadata(combo_NewCoord.Selected.UserPrincipalName)),
+                        false,
+                        If(
+                            Office365Users.UserPhotoMetadata(combo_NewCoord.Selected.UserPrincipalName).HasPhoto,
+                            true,
+                            false
+                        )
+                    ),
+                    false
+                )
+            Width: =80
+            X: =15
+            Y: |
+                =combo_NewCoord.Y + combo_NewCoord.Height + 15
+            ZIndex: =5
+
+        lbl_Cord_NoPhoto_New As label:
+            Align: =Align.Center
+            BorderColor: =GrayBorderDark
+            BorderThickness: =2
+            Color: =RGBA(0, 121, 187, 1)
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =img_Cord_New.Height
+            Size: =30
+            Text: |-
+                =If(
+                    IsBlankOrError(combo_NewCoord.Selected.UserPrincipalName),
+                    "",
+                    Left(Office365Users.UserProfileV2(combo_NewCoord.Selected.UserPrincipalName).givenName, 1) & Left(Office365Users.UserProfileV2(combo_NewCoord.Selected.UserPrincipalName).surname, 1)
+                )
+            Visible: |-
+                =If(
+                    IsBlankOrError(combo_NewCoord.Selected.UserPrincipalName),
+                    false,
+                    If(
+                        !IsError(!Office365Users.UserPhotoMetadata(combo_NewCoord.Selected.UserPrincipalName).HasPhoto),
+                        !Office365Users.UserPhotoMetadata(combo_NewCoord.Selected.UserPrincipalName).HasPhoto,
+                        true
+                    )
+                )
+            Width: =img_Cord_New.Width
+            X: =img_Cord_New.X
+            Y: =img_Cord_New.Y
+            ZIndex: =6
+
+        combo_NewCoord As combobox:
+            BorderColor: =RGBA(0, 0, 0, 1)
+            BorderThickness: =1
+            ChevronBackground: =Self.Fill
+            ChevronDisabledFill: =RGBA(0, 0, 0, 0)
+            ChevronFill: =RGBA(0, 0, 0, 1)
+            ChevronHoverBackground: =
+            DefaultSelectedItems: =
+            DisplayFields: =["DisplayName","UserPrincipalName","Picture"]
+            Font: =FontStyle
+            Height: =30
+            HoverBorderColor: =
+            HoverFill: =ColorFade(BlueNaviHightLightBackground, 85%)
+            InputTextPlaceholder: ="Search by name or principal email alias"
+            Items: |-
+                =Office365Users.SearchUserV2({searchTerm: Trim(Self.SearchText)}).value
+            PaddingBottom: =0
+            PaddingLeft: =8
+            PaddingTop: =0
+            PressedColor: =BlueControlDarkBackground
+            PressedFill: =BlueControlLightBackground
+            SearchFields: =["UserPrincipalName", "DisplayName"]
+            SearchItems: |-
+                =Search(Office365Users.SearchUserV2({searchTerm: Trim(Self.SearchText)}).value,combo_NewCoord.SearchText,"UserPrincipalName","DisplayName")
+            SelectionFill: =BlueNaviHightLightBackground
+            SelectMultiple: =false
+            Size: =11
+            Template: =ListItemTemplate.Double
+            Tooltip: =
+            Width: =Parent.Width - 30
+            X: =15
+            Y: =Back_NewCoord_Top.Y + Back_NewCoord_Top.Height + 15
+            ZIndex: =7
+
+        Back_NewCoord_Top As button:
+            Align: =Align.Left
+            BorderColor: =Self.Fill
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =0
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =Color.Black
+            DisabledFill: =Self.Fill
+            DisplayMode: =DisplayMode.Disabled
+            Fill: =SUBGROUPCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =60
+            PaddingLeft: =20
+            RadiusBottomLeft: |
+                =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: |
+                =25
+            RadiusTopRight: |
+                =25
+            Size: =14
+            Text: ="Add a new coordinator for " & dpdn_BoardType_CU.Selected.BoardTypeName 
+            Width: =Parent.Width
+            ZIndex: =8
+
+    ctn_Search_Coords As groupContainer:
+        Height: =App.Height - Self.Y - 15
+        Width: =(App.Width) * 0.70
+        X: =icon_Back_CoordUsers.X
+        Y: =icon_SearchCoord_CU.Y + icon_SearchCoord_CU.Height + 5
+        ZIndex: =4
+
+        glry_Search_Coord As gallery.variableTemplateHeightGallery:
+            BorderColor: =Back_Header_Coord.Fill
+            BorderThickness: =2
+            Height: =Parent.Height - Self.Y - 1
+            Items: |-
+                =Ungroup(//Ungroup function to add a Row Number column.
+                    ForAll(
+                        Sequence(
+                            CountRows(
+                                Search(
+                                    clln_glry_Search_Coord,
+                                    Trim(ti_Search_Coord),
+                                    "DisplayName",
+                                    "UserPrincipalEmail"
+                                )
+                            )
+                        ),
+                        {
+                            Record: Table(
+                                Last(
+                                    FirstN(
+                                        Search(
+                                            clln_glry_Search_Coord,
+                                            Trim(ti_Search_Coord),
+                                            "DisplayName",
+                                            "UserPrincipalEmail"
+                                        ),
+                                        Value
+                                    )
+                                )
+                            ),
+                            RowNumber: Value
+                        }
+                    ),
+                    "Record"
+                )
+            Layout: =Layout.Vertical
+            TemplateFill: |-
+                =If(
+                    Mod(ThisItem.RowNumber, 2) > 0,
+                    If(ThisItem.IsSelected, ColorFade(BlueNaviHightLightBackground, 85%), RGBA(0, 0, 0, 0)),
+                    If(ThisItem.IsSelected, ColorFade(BlueNaviHightLightBackground, 85%), GrayCanvasBackground)
+                )
+            TemplatePadding: =0
+            TemplateSize: =100
+            Visible: =true 
+            Width: =Parent.Width - 2
+            X: =1
+            Y: =Back_Header_Coord.Height - 1
+            ZIndex: =1
+
+            btn_Delete_Coord As icon.Edit:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Color: =REDWARNINGCOLOR
+                Height: =30
+                HoverColor: =Color.White
+                HoverFill: =REDWARNINGCOLOR
+                Icon: =Icon.Trash
+                OnSelect: |-
+                    =Set(record_Delete_This_Coord, ThisItem);
+                    Set(var_Confirm_Delete_This_Coord, true);
+                Tooltip: ="Delete"
+                Width: =30
+                X: =Header_Delete_Coord.X + (Header_Delete_Coord.Width - btn_Delete_Coord.Width) * 0.50
+                Y: =(lbl_NoPhoto_Coord.Height - Self.Height) * 0.50
+                ZIndex: =2
+
+            txt_Dpt_Coord As label:
+                Fill: =Parent.Fill
+                Font: =FontStyle
+                FontWeight: =If(ThisItem.IsSelected, FontWeight.Bold, FontWeight.Normal)
+                Height: =lbl_NoPhoto_Coord.Height
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =10
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: =ThisItem.Department
+                Width: =Header_Dpt_Coord.Width
+                X: =Header_Dpt_Coord.X
+                ZIndex: =4
+
+            txt_JobTitle_Coord As label:
+                Fill: =Parent.Fill
+                Font: =FontStyle
+                FontWeight: =If(ThisItem.IsSelected, FontWeight.Bold, FontWeight.Normal)
+                Height: =lbl_NoPhoto_Coord.Height
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =10
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: =If(IsBlankOrError(ThisItem.JobTitle), "(No Value)", Text(ThisItem.JobTitle))
+                Width: =Header_JobTitle_Coord.Width
+                X: =Header_JobTitle_Coord.X
+                ZIndex: =5
+
+            html_Name_Email_Coord As htmlViewer:
+                AutoHeight: =true
+                DisplayMode: =DisplayMode.View
+                Font: =FontStyle
+                HtmlText: |-
+                    =If(
+                        !IsError(ThisItem.DisplayName) && !IsError(ThisItem.UserPrincipalEmail),
+                        If(ThisItem.IsSelected, "<strong>", "") &
+                            ThisItem.DisplayName 
+                            & "<br>E: " & ThisItem.UserPrincipalEmail
+                            & If(ThisItem.IsSelected, "</strong>", ""),
+                        "<font color=gray><b>" & ThisItem.UserPrincipalEmail & "</b> is not valid.</font>"
+                    )
+                OnSelect: =Select(Parent)
+                Size: =10
+                Width: =Header_Username_Coord.Width
+                X: =Header_Username_Coord.X
+                Y: =(lbl_NoPhoto_Coord.Height - Self.Height) * 0.50
+                ZIndex: =6
+
+            lbl_NoPhoto_Coord As label:
+                Align: =Align.Center
+                Color: =RGBA(0, 134, 208, 1)
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: |
+                    =100
+                OnSelect: =Select(Parent)
+                Size: =18
+                Text: |-
+                    =If(
+                        !IsBlankOrError(ThisItem.UserPrincipalEmail) && !IsError(Office365Users.UserProfileV2(ThisItem.UserPrincipalEmail)),
+                        Left(Office365Users.UserProfileV2(ThisItem.UserPrincipalEmail).givenName, 1) 
+                            & Left(Office365Users.UserProfileV2(ThisItem.UserPrincipalEmail).surname, 1)
+                    )
+                Visible: |-
+                    =true
+                    /*
+                    If(
+                        IsBlankOrError(ThisItem.craf2_userprincipalemail),
+                        false,
+                        !Office365Users.UserPhotoMetadata(ThisItem.craf2_userprincipalemail).HasPhoto
+                    ) */
+                Width: |
+                    =100
+                X: =(Header_Username_Coord.X - Self.Width) * 0.50
+                ZIndex: =7
+
+            img_glry_Coord As image:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Height: =lbl_NoPhoto_Coord.Height - 15
+                Image: |-
+                    =If(
+                        !IsError(Office365Users.UserPhotoMetadata(ThisItem.UserPrincipalEmail)),
+                        If(
+                            !IsBlankOrError(ThisItem.UserPrincipalEmail) && Office365Users.UserPhotoMetadata(ThisItem.UserPrincipalEmail).HasPhoto,
+                            Office365Users.UserPhotoV2(ThisItem.UserPrincipalEmail)
+                        )
+                    )
+                OnSelect: =Select(Parent)
+                RadiusBottomLeft: =10
+                RadiusBottomRight: =10
+                RadiusTopLeft: =10
+                RadiusTopRight: =10
+                Visible: |-
+                    =If(
+                        !IsBlankOrError(ThisItem.UserPrincipalEmail) && !IsError(Office365Users.UserPhotoMetadata(ThisItem.UserPrincipalEmail)),
+                        Office365Users.UserPhotoMetadata(ThisItem.UserPrincipalEmail).HasPhoto
+                    )
+                Width: =Self.Height
+                X: =22
+                Y: =(lbl_NoPhoto_Coord.Height - Self.Height) * 0.50
+                ZIndex: =8
+
+        Back_Header_Coord As button:
+            BorderColor: =Self.Fill
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =0
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =Self.Color
+            DisabledFill: =Self.Fill
+            DisplayMode: =DisplayMode.Disabled
+            Fill: =ColorFade(BlueNaviHightLightBackground, 50%)
+            Font: =FontStyle
+            RadiusBottomLeft: |
+                =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =20
+            RadiusTopRight: =20
+            Text: =""
+            Width: =Parent.Width
+            ZIndex: =2
+
+        Header_Delete_Coord As label:
+            Align: =Align.Center
+            DisplayMode: =DisplayMode.View
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =Back_Header_Coord.Height
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =10
+            Text: ="Delete"
+            Width: =85
+            X: =Header_Dpt_Coord.X + Header_Dpt_Coord.Width
+            Y: =Back_Header_Coord.Y
+            ZIndex: =3
+
+        Header_Dpt_Coord As label:
+            DisplayMode: =DisplayMode.View
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =Back_Header_Coord.Height
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =10
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =10
+            Text: ="Department"
+            Width: =Max(150, Parent.Width * 0.15)
+            X: =Header_JobTitle_Coord.X + Header_JobTitle_Coord.Width
+            Y: =Back_Header_Coord.Y
+            ZIndex: =4
+
+        Header_JobTitle_Coord As label:
+            DisplayMode: =DisplayMode.View
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =Back_Header_Coord.Height
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =12
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =10
+            Text: ="Job Title"
+            Width: =Max(180, Parent.Width * 0.15)
+            X: =Header_Username_Coord.X + Header_Username_Coord.Width + 2
+            Y: =Back_Header_Coord.Y
+            ZIndex: =5
+
+        Header_Username_Coord As label:
+            DisplayMode: =DisplayMode.View
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =Back_Header_Coord.Height
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =10
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =10
+            Text: ="User Name, Principal Email"
+            Width: =Parent.Width - Self.X - Header_JobTitle_Coord.Width - Header_Dpt_Coord.Width - Header_Delete_Coord.Width
+            X: |
+                =120
+            Y: =Back_Header_Coord.Y
+            ZIndex: =6
+
+    ti_Search_Coord As text:
+        BorderColor: =GRAYCOLOR
+        BorderThickness: =1
+        Clear: =true
+        Default: =""
+        FocusedBorderThickness: =2
+        Font: =FontStyle
+        Height: =25
+        HintText: ="Search by Name or Principal Email Alias"
+        HoverBorderColor: =Self.BorderColor
+        HoverFill: =GrayControlBackground
+        PaddingBottom: =0
+        PaddingTop: =0
+        RadiusBottomLeft: =20
+        RadiusBottomRight: =20
+        RadiusTopLeft: =20
+        RadiusTopRight: =20
+        Size: =9
+        Width: =280
+        X: =icon_SearchCoord_CU.X + icon_SearchCoord_CU.Width + 5
+        Y: =Label_UCoord_Header.Y + Label_UCoord_Header.Height + 5
+        ZIndex: =5
+
+    icon_SearchCoord_CU As icon.Search:
+        DisabledBorderColor: =RGBA(0, 0, 0, 0)
+        DisabledColor: =RGBA(0, 0, 0, 1)
+        DisplayMode: =DisplayMode.Disabled
+        Height: =ti_Search_Coord.Height
+        Icon: =Icon.Search
+        PaddingBottom: =2
+        PaddingLeft: =2
+        PaddingRight: =2
+        PaddingTop: =2
+        Width: =ti_Search_Coord.Height
+        X: |
+            =dpdn_BoardType_CU.X + dpdn_BoardType_CU.Width + 30
+        Y: =ti_Search_Coord.Y
+        ZIndex: =6
+
+    dpdn_BoardType_CU As dropdown:
+        BorderColor: =
+        BorderThickness: =0
+        ChevronBackground: =Self.Fill
+        ChevronFill: =Color.Black
+        ChevronHoverBackground: =BlueControlLightBackground
+        ChevronHoverFill: =RGBA(0, 0, 0, 1)
+        Default: ="Product Review"
+        Fill: =GrayControlBackground
+        Font: =FontStyle
+        FontWeight: =FontWeight.Semibold
+        Height: =25
+        HoverFill: =Self.ChevronHoverBackground
+        Items: |-
+            =RenameColumns(
+                Filter(
+                    AddColumns(
+                        ShowColumns(
+                            ReviewHub_BoardTypes,
+                            "craf2_boardtypeid",
+                            "craf2_boardtypename",
+                            "craf2_isdisplayinapp"
+                        ),
+                        "IsDisplayInApp",
+                        If(
+                            Text(craf2_isdisplayinapp) = "Yes",
+                            true,
+                            false
+                        )
+                    ),
+                    ThisRecord.IsDisplayInApp = true 
+                        && (IsAdmin || (IsCoordinator && ThisRecord.craf2_boardtypeid in IsCoordinator_BoardTypes))
+                ),
+                "craf2_boardtypeid",
+                "BoardTypeID",
+                "craf2_boardtypename",
+                "BoardTypeName"
+            )
+        OnChange: =Select(btn_GetData_CU);
+        PressedColor: =BlueControlDarkBackground
+        PressedFill: =BlueControlLightBackground
+        SelectionFill: =BlueNaviHightLightBackground
+        Size: =11
+        Width: =170
+        X: =lbl_BoardType_CU.X + lbl_BoardType_CU.Width
+        Y: =lbl_BoardType_CU.Y
+        ZIndex: =7
+
+    lbl_BoardType_CU As label:
+        Font: =FontStyle
+        FontWeight: =FontWeight.Semibold
+        Height: =25
+        PaddingBottom: =0
+        PaddingRight: =0
+        PaddingTop: =0
+        Size: =11
+        Text: ="Scorecard (Board)"
+        Width: =135
+        X: =icon_Back_CoordUsers.X
+        Y: =Label_UCoord_Header.Y + Label_UCoord_Header.Height + 5
+        ZIndex: =8
+
+    Label_UCoord_Header As label:
+        DisabledColor: =BlueControlDarkBackground
+        DisabledFill: =Self.Fill
+        DisplayMode: =DisplayMode.Disabled
+        Fill: =GrayCanvasBackground
+        Font: =FontStyle
+        FontWeight: =FontWeight.Bold
+        Height: =55
+        PaddingLeft: =60
+        Size: =18
+        Text: ="Manage Coordinators for a Specific Board Type"
+        Width: =App.Width - Self.X
+        Y: =SS_AppHeader_CU.Height
+        ZIndex: =9
+
+    icon_Back_CoordUsers As icon.BackArrow:
+        BorderColor: =RGBA(0, 0, 0, 0)
+        BorderStyle: =BorderStyle.None
+        Color: =BlueControlDarkBackground
+        Height: =30
+        HoverBorderColor: =Self.BorderColor
+        HoverColor: =Color.Purple
+        Icon: =Icon.BackArrow
+        OnSelect: =Navigate(scn_SelfService);
+        Tooltip: ="Back"
+        Width: =Self.Height
+        X: =15
+        Y: =Label_UCoord_Header.Y + (Label_UCoord_Header.Height - Self.Height) * 0.50
+        ZIndex: =10
+
+    SS_AppHeader_CU As AppHeader:
+        DropDownSelection: =TrackRequestComponent_CU.HideTrackRequest
+        FeatureRequestUrl: =var_FeatureRequestURL
+        FeedbackButtonUrl: =var_SendFeedback_URL
+        inputAppDisplayName: =varAppHeaderText
+        ScorecardOnboardingFeatureUrl: =var_ScorecardOnboardingRequestURL
+        ShowSurveyButton: =false
+        Y: =0
+        ZIndex: =11
+
+    TrackRequestComponent_CU As TrackRequestComponent:
+        BlueControlDarkBackground: =BlueControlDarkBackground
+        BlueControlLightBackground: =BlueControlLightBackground
+        BlueNaviHightLightBackground: =BlueNaviHightLightBackground
+        DevOpsBaseUrl: =var_DevOpsBaseURL
+        DevOpsQueryID: =var_DevOpsQueryID
+        FontStyle: =FontStyle
+        GrayCanvasBackground: =GrayCanvasBackground
+        GRAYCOLOR: =GRAYCOLOR
+        GrayControlBackground: =GrayControlBackground
+        IsAdmin: =IsAdmin
+        Reset: =Self.Visible
+        Visible: =SS_AppHeader_CU.DisplayTrackRequest
+        X: =App.Width - Self.Width
+        Y: =SS_AppHeader_CU.Height
+        ZIndex: =12
+
+    ctn_Confirm_Delete_Coord As groupContainer:
+        Fill: =RGBA(255, 255, 255, 0.95)
+        Height: =App.Height
+        Visible: =var_Confirm_Delete_This_Coord
+        Width: =App.Width
+        ZIndex: =13
+
+        Card_SS_Coord As button:
+            BorderColor: =Header_Hover_Coord.Fill
+            Color: =RGBA(0, 0, 0, 0)
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =RGBA(0, 0, 0, 0)
+            DisabledFill: =RGBA(0, 0, 0, 0)
+            DisplayMode: =DisplayMode.Disabled
+            Fill: =RGBA(0, 0, 0, 0)
+            Font: =FontStyle
+            Height: =Header_Hover_Coord.Height + html_ConfirmDeleteCoord.Height + 10 + btn_ConfirmDeleteCoord.Height + 20
+            HoverBorderColor: =
+            HoverColor: =RGBA(0, 0, 0, 0)
+            HoverFill: =
+            OnSelect: =
+            PressedBorderColor: =
+            PressedColor: =
+            PressedFill: =
+            RadiusBottomLeft: =Header_Hover_Coord.RadiusTopLeft
+            RadiusBottomRight: =Header_Hover_Coord.RadiusTopLeft
+            RadiusTopLeft: =Header_Hover_Coord.RadiusTopLeft
+            RadiusTopRight: =Header_Hover_Coord.RadiusTopLeft
+            Text: =""
+            Width: =App.Width * 0.35
+            X: =App.Width * 0.5 - Self.Width*0.5
+            Y: =App.Height*0.5 - Self.Height*0.5 - 60
+            ZIndex: =1
+
+        btn_CancelDeleteCoord As button:
+            BorderColor: =Self.Fill
+            Fill: =RGBA(166, 166, 166, 1)
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =25
+            HoverColor: =Self.Fill
+            HoverFill: =Self.Color
+            OnSelect: =Set(var_Confirm_Delete_This_Coord, false)
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Size: =10
+            Text: ="Cancel"
+            Width: =90
+            X: =btn_ConfirmDeleteCoord.X + btn_ConfirmDeleteCoord.Width + 50
+            Y: =btn_ConfirmDeleteCoord.Y
+            ZIndex: =2
+
+        btn_ConfirmDeleteCoord As button:
+            BorderColor: =Self.Fill
+            Fill: =REDWARNINGCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =25
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Self.Fill
+            HoverFill: =Self.Color
+            OnSelect: |-
+                =Set(
+                    var_Coordinator_Value_ToUpdate,
+                    Concat(
+                        Filter(
+                            clln_glry_Search_Coord,
+                            ThisRecord.UserPrincipalEmail <> record_Delete_This_Coord.UserPrincipalEmail
+                        ),
+                        ThisRecord.UserPrincipalEmail & "|"
+                    )
+                );
+                Concurrent(
+                    Patch(
+                        ReviewHub_BoardTypes,
+                        LookUp(
+                            ReviewHub_BoardTypes,
+                            ThisRecord.craf2_boardtypeid = dpdn_BoardType_CU.Selected.BoardTypeID
+                        ),
+                        {
+                            craf2_coordinator: If(
+                                IsBlankOrError(var_Coordinator_Value_ToUpdate),
+                                Blank(),
+                                Left(
+                                    var_Coordinator_Value_ToUpdate,
+                                    Len(var_Coordinator_Value_ToUpdate) - 1
+                                )
+                            )
+                        }
+                    ),
+                    RemoveIf(
+                        clln_glry_Search_Coord,
+                        ThisRecord.UserPrincipalEmail = record_Delete_This_Coord.UserPrincipalEmail
+                    )
+                );
+                Set(
+                    var_Confirm_Delete_This_Coord,
+                    false
+                )
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Size: =10
+            Text: ="Yes, Delete"
+            Width: =90
+            X: =html_ConfirmDeleteCoord.X + html_ConfirmDeleteCoord.Width * 0.5 - Self.Width - 25
+            Y: =html_ConfirmDeleteCoord.Y + html_ConfirmDeleteCoord.Height + 15
+            ZIndex: =3
+
+        html_ConfirmDeleteCoord As htmlViewer:
+            AutoHeight: =true
+            Font: =FontStyle
+            HtmlText: |
+                =If(
+                    !IsError(record_Delete_This_Coord.DisplayName) && !IsError(record_Delete_This_Coord.UserPrincipalEmail),
+                    "<span style=''><b>Display Name</b></span><span style='margin-left:21px'>: " & record_Delete_This_Coord.DisplayName & "</span><br>"&
+                    "<b>Principal Email</b> <span style='margin-left: 10px'>: " & record_Delete_This_Coord.UserPrincipalEmail 
+                    & "</span>",
+                    "<span style=''><b>Display Name</b></span><span style='margin-left:21px'>: (User profile not valid)</span><br>"&
+                    "<b>Principal Email</b> <span style='margin-left: 10px'>: " & record_Delete_This_Coord.UserPrincipalEmail 
+                    & "</span>"
+                )
+            PaddingLeft: =25
+            PaddingTop: =15
+            Size: =12
+            Width: =Card_SS_Coord.Width
+            X: =Card_SS_Coord.X
+            Y: =Header_Hover_Coord.Y + Header_Hover_Coord.Height
+            ZIndex: =4
+
+        Header_Hover_Coord As button:
+            BorderColor: =Self.Fill
+            BorderThickness: =0
+            Color: =RGBA(0, 0, 0, 1)
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =Self.Color
+            DisabledFill: =Self.Fill
+            DisplayMode: =DisplayMode.Disabled
+            Fill: =SUBGROUPCOLOR
+            FocusedBorderThickness: =0
+            Font: =FontStyle
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Self.Color
+            HoverFill: =Self.Fill
+            PressedBorderColor: =Self.BorderColor
+            PressedColor: =Self.Color
+            PressedFill: =Self.Fill
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            Size: =14
+            Text: ="Confirm delete this coordinator for " & dpdn_BoardType_CU.Selected.BoardTypeName 
+            Width: =Card_SS_Coord.Width
+            X: =Card_SS_Coord.X
+            Y: =Card_SS_Coord.Y
+            ZIndex: =5
+

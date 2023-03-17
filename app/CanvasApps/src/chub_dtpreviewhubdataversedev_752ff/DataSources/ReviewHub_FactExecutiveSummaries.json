@@ -1,0 +1,105 @@
+[
+  {
+    "CdsFCBContext": "{\"FileType\":true,\"ImageExternalStorage\":true}",
+    "EntitySetName": "craf2_reviewhub_factexecutivesummaries",
+    "IsHidden": false,
+    "IsSampleData": false,
+    "IsWritable": true,
+    "LogicalName": "craf2_reviewhub_factexecutivesummary",
+    "MaxGetRowsCount": 2000,
+    "Name": "ReviewHub_FactExecutiveSummaries",
+    "NativeCDSDataSourceInfoNameMapping": {
+      "_ownerid_value": "Owner",
+      "chub_boardtypeid": "BoardTypeID",
+      "craf2_executivesummarydescription": "ExecutiveSummaryDescription",
+      "craf2_executivesummarytitle": "ExecutiveSummaryTitle",
+      "craf2_factmetricboardid": "FactMetricBoardID",
+      "craf2_highlightmetrictypeid": "HighLightMetricTypeID",
+      "craf2_lowlightmetrictypeid": "LowLightMetricTypeID",
+      "craf2_Product": "Product",
+      "craf2_reviewhub_factexecutivesummary_AsyncOperations": "System Jobs",
+      "craf2_reviewhub_factexecutivesummary_BulkDeleteFailures": "Bulk Delete Failures",
+      "craf2_reviewhub_factexecutivesummary_DuplicateBaseRecord": "Duplicate Records (craf2_reviewhub_factexecutivesummary_DuplicateBaseRecord)",
+      "craf2_reviewhub_factexecutivesummary_DuplicateMatchingRecord": "Duplicate Records (craf2_reviewhub_factexecutivesummary_DuplicateMatchingRecord)",
+      "craf2_reviewhub_factexecutivesummary_MailboxTrackingFolders": "Mailbox Auto Tracking Folders",
+      "craf2_reviewhub_factexecutivesummary_PrincipalObjectAttributeAccesses": "Field Sharing",
+      "craf2_reviewhub_factexecutivesummary_ProcessSession": "Process Sessions",
+      "craf2_reviewhub_factexecutivesummary_SyncErrors": "Sync Errors",
+      "craf2_reviewhub_factexecutivesummaryid": "ReviewHub_FactExecutiveSummary",
+      "craf2_ReviewHub_FactMetricBoard_fmb_Execu": "ReviewHub_FactMetricBoards",
+      "craf2_reviewlockdate": "ReviewLockDate",
+      "createdby": "Created By",
+      "createdon": "Created On",
+      "createdonbehalfby": "Created By (Delegate)",
+      "importsequencenumber": "Import Sequence Number",
+      "modifiedby": "Modified By",
+      "modifiedon": "Modified On",
+      "modifiedonbehalfby": "Modified By (Delegate)",
+      "overriddencreatedon": "Record Created On",
+      "owningbusinessunit": "Owning Business Unit",
+      "owningteam": "Owning Team",
+      "owninguser": "Owning User",
+      "statecode": "Status",
+      "statuscode": "Status Reason",
+      "timezoneruleversionnumber": "Time Zone Rule Version Number",
+      "utcconversiontimezonecode": "UTC Conversion Time Zone Code",
+      "versionnumber": "Version Number"
+    },
+    "PreferredName": "ReviewHub_FactExecutiveSummaries",
+    "Type": "NativeCDSDataSourceInfo"
+  },
+  {
+    "DisplayName": "ReviewHub_FactExecutiveSummaries (Views)",
+    "Name": "_craf2_reviewhub_factexecutivesummary_views",
+    "RelatedEntityName": "ReviewHub_FactExecutiveSummaries",
+    "TrimmedViewName": true,
+    "Type": "ViewInfo",
+    "ViewInfoNameMapping": {
+      "7c74d69a-0ae5-4047-b126-9e0833cb80ae": "Active ReviewHub_FactExecutiveSummaries",
+      "80c53dc4-2dc6-4cc3-b751-c9fba07707bb": "Inactive ReviewHub_FactExecutiveSummaries",
+      "a17b81f7-8d76-43f3-9bf7-1a85bef99385": "ReviewHub_FactExecutiveSummary Advanced Find View",
+      "a9284f8d-a2f0-4782-b7bb-25d45e94bbec": "ReviewHub_FactExecutiveSummary Lookup View",
+      "cb6aac16-9183-42b1-ba0e-47693dbfd810": "ReviewHub_FactExecutiveSummary Associated View"
+    }
+  },
+  {
+    "DisplayName": "Status (ReviewHub_FactExecutiveSummaries)",
+    "Name": "craf2_reviewhub_factexecutivesummary_statecode",
+    "OptionSetInfoNameMapping": {
+      "0": "Active",
+      "1": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statecode",
+        "OptionSetReferenceEntityName": "ReviewHub_FactExecutiveSummaries"
+      }
+    },
+    "OptionSetTypeKey": "StateType",
+    "RelatedColumnInvariantName": "statecode",
+    "RelatedEntityName": "ReviewHub_FactExecutiveSummaries",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Status Reason (ReviewHub_FactExecutiveSummaries)",
+    "Name": "craf2_reviewhub_factexecutivesummary_statuscode",
+    "OptionSetInfoNameMapping": {
+      "1": "Active",
+      "2": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statuscode",
+        "OptionSetReferenceEntityName": "ReviewHub_FactExecutiveSummaries"
+      }
+    },
+    "OptionSetTypeKey": "StatusType",
+    "RelatedColumnInvariantName": "statuscode",
+    "RelatedEntityName": "ReviewHub_FactExecutiveSummaries",
+    "Type": "OptionSetInfo"
+  }
+]

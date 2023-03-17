@@ -1,0 +1,442 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_commondataserviceforapps_1": {
+        "impersonation": {},
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "chub_sharedcommondataserviceforapps_72f86"
+        },
+        "api": {
+          "name": "shared_commondataserviceforapps"
+        }
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        },
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        }
+      },
+      "triggers": {
+        "manual": {
+          "metadata": {
+            "operationMetadataId": "bc3c2613-2436-4963-80c5-87f280175205"
+          },
+          "type": "Request",
+          "kind": "Button",
+          "inputs": {
+            "schema": {
+              "type": "object",
+              "properties": {},
+              "required": []
+            }
+          }
+        }
+      },
+      "actions": {
+        "Get_all_fact_metrics": {
+          "runAfter": {},
+          "metadata": {
+            "operationMetadataId": "12af74ee-16ee-4b67-a9de-5e5dc84588f4"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+              "connectionName": "shared_commondataserviceforapps_1",
+              "operationId": "ListRecords"
+            },
+            "parameters": {
+              "entityName": "craf2_reviewhub_factmetrics",
+              "$filter": "craf2_fm_targetnumber ne null and craf2_fm_valuenumber ne null and contains(craf2_fm_ProductMetric/craf2_productmetrictitle, 'IPD Per Usage Metric')",
+              "$expand": "craf2_fm_ProductMetric($select=craf2_productmetricid, craf2_productmetrictitle)",
+              "$top": 5000000
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "runtimeConfiguration": {
+            "paginationPolicy": {
+              "minimumItemCount": 50000
+            }
+          }
+        },
+        "Apply_to_each_fact_metrics": {
+          "foreach": "@outputs('Get_all_fact_metrics')?['body/value']",
+          "actions": {
+            "Check_if_portfolio_metrics_is_not_blank": {
+              "actions": {},
+              "runAfter": {},
+              "expression": {
+                "or": [
+                  {
+                    "equals": [
+                      "@items('Apply_to_each_fact_metrics')?['craf2_variancetotarget']",
+                      "@null"
+                    ]
+                  },
+                  {
+                    "equals": [
+                      "@items('Apply_to_each_fact_metrics')?['craf2_mom']",
+                      "@null"
+                    ]
+                  },
+                  {
+                    "equals": [
+                      "@items('Apply_to_each_fact_metrics')?['craf2_yoy']",
+                      "@null"
+                    ]
+                  }
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "4ad07efe-f642-4fce-af54-bf98cdbaa84d"
+              },
+              "type": "If"
+            },
+            "Update_portolio_metrics": {
+              "actions": {
+                "MetricValue": {
+                  "runAfter": {},
+                  "metadata": {
+                    "operationMetadataId": "f994cb56-4af8-49cf-a96d-073ab6373bd1"
+                  },
+                  "type": "Compose",
+                  "inputs": "@items('Apply_to_each_fact_metrics')?['craf2_fm_valuenumber']"
+                },
+                "Target": {
+                  "runAfter": {
+                    "MetricValue": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "9832f816-b6e8-4cee-b0d9-a27412f18534"
+                  },
+                  "type": "Compose",
+                  "inputs": "@items('Apply_to_each_fact_metrics')?['craf2_fm_targetnumber']"
+                },
+                "Subtract_from_1_month_from_ReviewLockDate": {
+                  "runAfter": {
+                    "Check_If_Variance_Can_Be_Calculated": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "cd9088f5-9c5a-4812-9134-0d5b707e2477"
+                  },
+                  "type": "Expression",
+                  "kind": "SubtractFromTime",
+                  "inputs": {
+                    "baseTime": "@items('Apply_to_each_fact_metrics')?['craf2_fm_reviewlockdate']",
+                    "interval": 1,
+                    "timeUnit": "Month"
+                  }
+                },
+                "Subtract_from_12_months_from_ReviewLockDate": {
+                  "runAfter": {
+                    "Subtract_from_1_month_from_ReviewLockDate": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "ea5fe00a-7d8c-499c-86e3-62cf094ad31a"
+                  },
+                  "type": "Expression",
+                  "kind": "SubtractFromTime",
+                  "inputs": {
+                    "baseTime": "@items('Apply_to_each_fact_metrics')?['craf2_fm_reviewlockdate']",
+                    "interval": 12,
+                    "timeUnit": "Month"
+                  }
+                },
+                "Get_fact_metrics_to_last_1_month": {
+                  "runAfter": {
+                    "Subtract_from_12_months_from_ReviewLockDate": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "e1d02bf5-373a-47d7-87bb-a39fedda34c5"
+                  },
+                  "type": "Query",
+                  "inputs": {
+                    "from": "@outputs('Get_all_fact_metrics_2')?['body/value']",
+                    "where": "@and(equals(formatDateTime(item()?['craf2_fm_reviewlockdate'], 'yyyy'), formatDateTime(body('Subtract_from_1_month_from_ReviewLockDate'), 'yyyy')), equals(formatDateTime(item()?['craf2_fm_reviewlockdate'], 'MM'), formatDateTime(body('Subtract_from_1_month_from_ReviewLockDate'), 'MM')), equals(items('Apply_to_each_fact_metrics')?['craf2_fm_productmetric/craf2_productmetricid'], item()?['craf2_fm_productmetric/craf2_productmetricid']))"
+                  }
+                },
+                "Get_fact_metrics_to_last_12_months": {
+                  "runAfter": {
+                    "Get_fact_metrics_to_last_1_month": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "c88788c5-30a9-4ae7-8726-ea2d49685399"
+                  },
+                  "type": "Query",
+                  "inputs": {
+                    "from": "@outputs('Get_all_fact_metrics_2')?['body/value']",
+                    "where": "@and(equals(formatDateTime(item()?['craf2_fm_reviewlockdate'], 'yyyy'), formatDateTime(body('Subtract_from_12_months_from_ReviewLockDate'), 'yyyy')), equals(formatDateTime(item()?['craf2_fm_reviewlockdate'], 'MM'), formatDateTime(body('Subtract_from_12_months_from_ReviewLockDate'), 'MM')), equals(items('Apply_to_each_fact_metrics')?['craf2_fm_productmetric/craf2_productmetricid'], item()?['craf2_fm_productmetric/craf2_productmetricid']))"
+                  }
+                },
+                "PreviousMonthMetricValue": {
+                  "runAfter": {
+                    "Get_fact_metrics_to_last_12_months": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "9ca2b6e5-2705-4c79-a26f-d7fccceccba9"
+                  },
+                  "type": "Compose",
+                  "inputs": "@body('Get_fact_metrics_to_last_1_month')?[0]?['craf2_fm_valuenumber']"
+                },
+                "Last12MonthMetricValue": {
+                  "runAfter": {
+                    "PreviousMonthMetricValue": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "a6d90897-d315-431a-8fda-5054cd166bf8"
+                  },
+                  "type": "Compose",
+                  "inputs": "@body('Get_fact_metrics_to_last_12_months')?[0]?['craf2_fm_valuenumber']"
+                },
+                "Update_factmetric_record": {
+                  "runAfter": {
+                    "Check_If_YoY_Can_Be_Calculated": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "ada57e9a-3f05-451a-bb2a-c631752179ba"
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                      "connectionName": "shared_commondataserviceforapps_1",
+                      "operationId": "UpdateRecord"
+                    },
+                    "parameters": {
+                      "entityName": "craf2_reviewhub_factmetrics",
+                      "recordId": "@items('Apply_to_each_fact_metrics')?['craf2_reviewhub_factmetricid']",
+                      "item/craf2_mom": "@if(or(equals(outputs('MoM'), 0), equals(outputs('MoM'), null)), null, outputs('MoM'))",
+                      "item/craf2_variancetotarget": "@if(or(equals(outputs('VarianceToTarget'), 0), equals(outputs('VarianceToTarget'), null)), null, outputs('VarianceToTarget'))",
+                      "item/craf2_yoy": "@if(or(equals(outputs('YoY'), 0), equals(outputs('YoY'), null)), null, outputs('YoY'))"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                },
+                "Check_If_YoY_Can_Be_Calculated": {
+                  "actions": {
+                    "YoY": {
+                      "runAfter": {},
+                      "metadata": {
+                        "operationMetadataId": "9e395528-6e54-480a-bff9-5cc19f5e841d"
+                      },
+                      "type": "Compose",
+                      "inputs": "@mul(div(sub(outputs('MetricValue'), outputs('Last12MonthMetricValue')), outputs('Last12MonthMetricValue')), 100)",
+                      "description": "[(Current year â€“ Previous year) / Previous year] x 100 "
+                    }
+                  },
+                  "runAfter": {
+                    "Check_If_MoM_Can_Be_Calculated": [
+                      "Succeeded"
+                    ]
+                  },
+                  "expression": {
+                    "and": [
+                      {
+                        "not": {
+                          "equals": [
+                            "@outputs('Last12MonthMetricValue')",
+                            0
+                          ]
+                        }
+                      },
+                      {
+                        "not": {
+                          "equals": [
+                            "@outputs('Last12MonthMetricValue')",
+                            "@null"
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "97796960-26c9-40d9-92f9-067500f05f90"
+                  },
+                  "type": "If"
+                },
+                "Check_If_MoM_Can_Be_Calculated": {
+                  "actions": {
+                    "MoM": {
+                      "runAfter": {},
+                      "metadata": {
+                        "operationMetadataId": "1a09d602-e68a-4b8c-9676-e5a2c0025ceb"
+                      },
+                      "type": "Compose",
+                      "inputs": "@mul(div(sub(outputs('MetricValue'), outputs('PreviousMonthMetricValue')), outputs('PreviousMonthMetricValue')), 100)",
+                      "description": "(Month 2 â€“ Month 1) / Month 1 * 100 "
+                    }
+                  },
+                  "runAfter": {
+                    "Last12MonthMetricValue": [
+                      "Succeeded"
+                    ]
+                  },
+                  "expression": {
+                    "and": [
+                      {
+                        "not": {
+                          "equals": [
+                            "@outputs('PreviousMonthMetricValue')",
+                            0
+                          ]
+                        }
+                      },
+                      {
+                        "not": {
+                          "equals": [
+                            "@outputs('PreviousMonthMetricValue')",
+                            "@null"
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "c2fddf0d-abd7-4d7d-b7b0-352d81e0d4af"
+                  },
+                  "type": "If"
+                },
+                "Check_If_Variance_Can_Be_Calculated": {
+                  "actions": {
+                    "VarianceToTarget": {
+                      "runAfter": {},
+                      "metadata": {
+                        "operationMetadataId": "34f78278-0a41-4f8c-bece-80883d18136a"
+                      },
+                      "type": "Compose",
+                      "inputs": "@mul(div(sub(outputs('MetricValue'), outputs('Target')), outputs('Target')), 100)",
+                      "description": "(Latest value â€“ target)/ target * 100 "
+                    }
+                  },
+                  "runAfter": {
+                    "Target": [
+                      "Succeeded"
+                    ]
+                  },
+                  "expression": {
+                    "and": [
+                      {
+                        "not": {
+                          "equals": [
+                            "@outputs('Target')",
+                            0
+                          ]
+                        }
+                      },
+                      {
+                        "not": {
+                          "equals": [
+                            "@outputs('Target')",
+                            "@null"
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "c2fddf0d-abd7-4d7d-b7b0-352d81e0d4af"
+                  },
+                  "type": "If"
+                }
+              },
+              "runAfter": {
+                "Check_if_portfolio_metrics_is_not_blank": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "d7b2d3f0-c593-4c32-bdbf-dd720313c01f"
+              },
+              "type": "Scope"
+            }
+          },
+          "runAfter": {
+            "Terminate": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "bdc80a0e-f074-4ef1-9e55-0be9afdf5268"
+          },
+          "type": "Foreach",
+          "runtimeConfiguration": {
+            "concurrency": {
+              "repetitions": 50
+            }
+          }
+        },
+        "Get_all_fact_metrics_2": {
+          "runAfter": {
+            "Get_all_fact_metrics": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "12af74ee-16ee-4b67-a9de-5e5dc84588f4"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+              "connectionName": "shared_commondataserviceforapps_1",
+              "operationId": "ListRecords"
+            },
+            "parameters": {
+              "entityName": "craf2_reviewhub_factmetrics",
+              "$filter": "contains(craf2_fm_ProductMetric/craf2_productmetrictitle, 'IPD Per Usage Metric')",
+              "$expand": "craf2_fm_ProductMetric($select=craf2_productmetricid, craf2_productmetrictitle)",
+              "$top": 5000000
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "runtimeConfiguration": {
+            "paginationPolicy": {
+              "minimumItemCount": 50000
+            }
+          }
+        },
+        "Terminate": {
+          "runAfter": {
+            "Get_all_fact_metrics_2": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "807b93e3-9a4d-4a3d-bfb5-a2b04daf1f23"
+          },
+          "type": "Terminate",
+          "inputs": {
+            "runStatus": "Succeeded"
+          }
+        }
+      }
+    },
+    "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+}

@@ -1,0 +1,61 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<savedqueries xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <savedquery>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>0</CanBeDeleted>
+    <isquickfindquery>0</isquickfindquery>
+    <isprivate>0</isprivate>
+    <isdefault>1</isdefault>
+    <savedqueryid>{f8c68c77-2f82-4d86-be1b-423388cdd9d7}</savedqueryid>
+    <layoutxml>
+      <grid name="resultset" jump="craf2_productmetrictitle" select="1" icon="1" preview="1">
+        <row name="result" id="craf2_reviewhub_productmetricid">
+          <cell name="craf2_productmetrictitle" width="300" />
+          <cell name="craf2_productmetricid" width="100" />
+          <cell name="craf2_pm_metrictype" width="197" />
+          <cell name="craf2_pm_boardtypeid" width="142" />
+          <cell name="craf2_pm_ismetricactive" width="100" />
+          <cell name="craf2_pm_latesttargetnumber" width="100" />
+          <cell name="craf2_pm_latesttargetyesno" width="100" />
+          <cell name="craf2_pm_latesttargettext" width="100" />
+          <cell name="craf2_pm_latestgreentargetstart" width="100" />
+          <cell name="craf2_pm_latestyellowtargetstart" width="100" />
+          <cell name="createdon" width="147" />
+          <cell name="createdby" width="100" />
+          <cell name="a_a5ce5822a6744fa0853298d9a37a3cfd.craf2_productid" width="100" />
+        </row>
+      </grid>
+    </layoutxml>
+    <querytype>0</querytype>
+    <fetchxml>
+      <fetch version="1.0" mapping="logical">
+        <entity name="craf2_reviewhub_productmetric">
+          <attribute name="craf2_reviewhub_productmetricid" />
+          <attribute name="craf2_productmetrictitle" />
+          <filter type="and">
+            <condition attribute="statecode" operator="eq" value="0" />
+          </filter>
+          <attribute name="craf2_productmetricid" />
+          <attribute name="craf2_pm_metrictype" />
+          <attribute name="craf2_pm_ismetricactive" />
+          <attribute name="craf2_pm_latesttargetnumber" />
+          <attribute name="craf2_pm_latesttargetyesno" />
+          <attribute name="craf2_pm_latesttargettext" />
+          <attribute name="craf2_pm_latestgreentargetstart" />
+          <attribute name="craf2_pm_latestyellowtargetstart" />
+          <attribute name="createdon" />
+          <order attribute="craf2_productmetricid" descending="true" />
+          <attribute name="createdby" />
+          <attribute name="craf2_pm_boardtypeid" />
+          <link-entity alias="a_a5ce5822a6744fa0853298d9a37a3cfd" name="craf2_reviewhub_product" to="craf2_pm_product" from="craf2_reviewhub_productid" link-type="outer" visible="false">
+            <attribute name="craf2_productid" />
+          </link-entity>
+        </entity>
+      </fetch>
+    </fetchxml>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <LocalizedNames>
+      <LocalizedName description="Active ReviewHub_ProductMetrics" languagecode="1033" />
+    </LocalizedNames>
+  </savedquery>
+</savedqueries>

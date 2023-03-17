@@ -1,0 +1,13 @@
+<environmentvariabledefinition schemaname="chub_EnvVarReviewHubAccessControlWiki">
+  <description default="A link to a wiki on how the access to the application is managed">
+    <label description="A link to a wiki on how the access to the application is managed" languagecode="1033" />
+  </description>
+  <displayname default="EnvVar - ReviewHub - Access Control Wiki">
+    <label description="EnvVar - ReviewHub - Access Control Wiki" languagecode="1033" />
+  </displayname>
+  <introducedversion>1.0.0.12082022</introducedversion>
+  <iscustomizable>1</iscustomizable>
+  <isrequired>0</isrequired>
+  <secretstore>0</secretstore>
+  <type>100000000</type>
+</environmentvariabledefinition>

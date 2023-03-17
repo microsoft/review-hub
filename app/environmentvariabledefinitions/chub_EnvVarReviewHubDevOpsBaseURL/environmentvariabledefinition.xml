@@ -1,0 +1,13 @@
+<environmentvariabledefinition schemaname="chub_EnvVarReviewHubDevOpsBaseURL">
+  <description default="The link to the Azure DevOps Project where all DevOps resources are created.">
+    <label description="The link to the Azure DevOps Project where all DevOps resources are created." languagecode="1033" />
+  </description>
+  <displayname default="EnvVar - ReviewHub - DevOps Base URL">
+    <label description="EnvVar - ReviewHub - DevOps Base URL" languagecode="1033" />
+  </displayname>
+  <introducedversion>1.0.0.12082022</introducedversion>
+  <iscustomizable>1</iscustomizable>
+  <isrequired>0</isrequired>
+  <secretstore>0</secretstore>
+  <type>100000000</type>
+</environmentvariabledefinition>

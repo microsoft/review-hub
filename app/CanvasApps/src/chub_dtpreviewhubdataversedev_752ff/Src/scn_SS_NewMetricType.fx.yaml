@@ -1,0 +1,2207 @@
+scn_SS_NewMetricType As screen:
+    OnHidden: |-
+        =Concurrent(
+            Set(var_check_AddNewMT_IfSuccess, false),
+            Set(var_Display_html_AddNewMT_Warning, true)
+        )
+    OnVisible: |-
+        =Concurrent(
+            Set(var_check_AddNewMT_IfSuccess, false),
+            Set(var_Display_html_AddNewMT_Warning, true),
+            ClearCollect(
+                clln_MetricTypeObjectives,
+                RenameColumns(
+                    ShowColumns(
+                        ReviewHub_MetricTypeObjectives,
+                        "craf2_mto_boardtypeid",
+                        "craf2_objectiveid",
+                        "craf2_objectivename"
+                    ),
+                    "craf2_mto_boardtypeid",
+                    "mto_BoardTypeID_selected",
+                    "craf2_objectiveid",
+                    "mto_ObjectiveID_selected",
+                    "craf2_objectivename",
+                    "mto_ObjectiveName_selected"
+                )
+            )
+        )
+
+    ctn_Main_NMT As groupContainer.horizontalAutoLayoutContainer:
+        BorderColor: =RGBA(0, 0, 0, 0)
+        BorderStyle: =BorderStyle.None
+        Height: =Parent.Height - Self.Y - 10
+        LayoutGap: =15
+        LayoutJustifyContent: =LayoutJustifyContent.Center
+        LayoutMode: =LayoutMode.Auto
+        Visible: |-
+            =If(
+                CountRows(combo_BoardType_NMT.SelectedItems) = 0 || IsBlankOrError(combo_BoardType_NMT.SelectedItems),
+                false,
+                true
+            )
+        Width: =App.Width - Self.X * 2
+        X: =15
+        Y: |-
+            =If(
+                Len(html_AddNewMT_Warning.HtmlText)>0,
+                html_AddNewMT_Warning.Y + html_AddNewMT_Warning.Height,
+                lbl_ScreenTitle_NMT.Y + lbl_ScreenTitle_NMT.Height + 5
+            )
+        ZIndex: =1
+
+        ctn_Add_NewMT As groupContainer:
+            AlignInContainer: =AlignInContainer.SetByContainer
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            Height: =Parent.Height
+            LayoutMinHeight: =100
+            LayoutMinWidth: =250
+            Width: =814
+            X: =66
+            Y: =100
+            ZIndex: =1
+
+            Control_NewMT_Basic As fluidGrid.fluidGridWithBlankCard:
+                AcceptsFocus: =false
+                BorderColor: =lbl_NewMT_Basic.Fill
+                Height: =Parent.Height - Self.Y -2//Min(Label_MTEffective_Tip.Y + 40, Parent.Height - Self.Y)//HtmlText1_2.Height - (Label_AddNewMT_Basic.Height + 15)//Min(HtmlText1_2.Height - (Label_AddNewMT_Basic.Height + 15), Parent.Height - Self.Y)
+                Width: =Parent.Width - 2
+                X: =1
+                Y: =lbl_NewMT_Basic.Y + lbl_NewMT_Basic.Height
+                ZIndex: =1
+
+                DataCard2_NewMT_Basic As dataCard:
+                    BorderColor: =RGBA(0, 0, 0, 1)
+                    BorderStyle: =BorderStyle.Solid
+                    BorderThickness: =0
+                    DisplayMode: =DisplayMode.Edit
+                    Fill: =RGBA(0, 0, 0, 0)
+                    Height: =Label_MTEffective_Tip.Y + 20//Min(Label_MTEffective_Tip.Y + 20, Parent.Height)
+                    Width: =Parent.Width
+                    X: =0
+                    Y: =0
+                    ZIndex: =1
+
+                    Label_MTEffective_Tip As label:
+                        Color: =Color.Black
+                        Font: =FontStyle
+                        Height: =36
+                        Size: =10
+                        Text: |-
+                            ="Example: To show the metric from " & Text(Date(Year(Now()), Month(Now()) - 1, 1), "[$-en-US]mmmm yyyy") & "'s review, select " &  Text(Date(Year(Now()), Month(Now()), 01 -1), "[$-en-US]dd/mm/yyyy") & "."
+                        VerticalAlign: =VerticalAlign.Top
+                        Width: =html_MTID.Width
+                        X: =html_MTEffective.X
+                        Y: =DatePicker_MTEffective.Y + DatePicker_MTEffective.Height
+                        ZIndex: =1
+
+                    DatePicker_MTEffective As datepicker:
+                        BorderColor: =GRAYCOLOR
+                        BorderThickness: =1
+                        DisabledColor: =RGBA(0, 0, 0, 1)
+                        Font: =FontStyle
+                        Height: =html_MTEffective.Height
+                        IconBackground: =GrayControlBackground
+                        IconFill: =Color.Black
+                        PaddingBottom: =3
+                        PaddingLeft: =8
+                        PaddingRight: =3
+                        PaddingTop: =3
+                        Size: =12
+                        Width: |
+                            =130
+                        X: =html_MTEffective.X + html_MTEffective.Width
+                        Y: =html_MTEffective.Y
+                        ZIndex: =2
+
+                    html_MTEffective As htmlViewer:
+                        AutoHeight: =true
+                        Font: =FontStyle
+                        Height: =30
+                        HtmlText: |-
+                            ="<b>When will this metric be effective?
+                             </b><font color=red>*</font>"
+                        Size: =html_MTID.Size
+                        Width: =270
+                        X: =html_MTID.X
+                        Y: =ti_MTHealthWeight.Y + ti_MTHealthWeight.Height + 10
+                        ZIndex: =3
+
+                    lbl_HealthWeight_Error As label:
+                        Color: =Color.Red
+                        Font: =FontStyle
+                        Height: =20
+                        Size: =10
+                        Text: ="Please provide numeric value only."
+                        Visible: =IsError(Value(ti_MTHealthWeight.Text))
+                        Width: =Parent.Width - Self.X - 30
+                        X: =ti_MTHealthWeight.X + ti_MTHealthWeight.Width + 10
+                        Y: =ti_MTHealthWeight.Y + (ti_MTHealthWeight.Height - Self.Height) * 0.50
+                        ZIndex: =4
+
+                    ti_MTHealthWeight As text:
+                        BorderColor: =GRAYCOLOR
+                        BorderThickness: =1
+                        Default: ="5"
+                        Font: =FontStyle
+                        Height: =ti_MTName.Height
+                        HintText: |-
+                            ="Defalut: 5"
+                        HoverBorderColor: =Self.BorderColor
+                        HoverFill: =ColorFade(BlueControlLightBackground, 75%)
+                        PaddingLeft: =10
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Size: =11
+                        Width: =70
+                        X: =html_MTHealthWeight.X + html_MTHealthWeight.Width
+                        Y: =html_MTHealthWeight.Y
+                        ZIndex: =5
+
+                    html_MTHealthWeight As htmlViewer:
+                        AutoHeight: =true
+                        Font: =FontStyle
+                        Height: =30
+                        HtmlText: |-
+                            ="<b>Health Weight
+                             </b><font color=red>*</font>"
+                        Size: =html_MTID.Size
+                        Width: =135
+                        X: =html_MTID.X
+                        Y: =html_MTTrendDown.Y + html_MTTrendDown.Height + 10 
+                        ZIndex: =6
+
+                    Toggle_MTIsTrendDown As toggleSwitch:
+                        BorderStyle: =BorderStyle.None
+                        FalseText: ="NO"
+                        Font: =FontStyle
+                        Height: |
+                            =25
+                        OnChange: =
+                        Size: =11
+                        TrueFill: =BlueControlDarkBackground
+                        TrueText: ="YES"
+                        X: =html_MTTrendDown.X  + html_MTTrendDown.Width + 5
+                        Y: =html_MTTrendDown.Y + (html_MTTrendDown.Height - Self.Height) * 0.50
+                        ZIndex: =7
+
+                    html_MTTrendDown As htmlViewer:
+                        AutoHeight: =true
+                        Font: =FontStyle
+                        Height: =30
+                        HtmlText: |-
+                            ="<b>Is Metric Value Smaller The Better?  (Default: No)
+                             </b><font color=red>*</font>"
+                        Size: =html_MTID.Size
+                        Width: =375
+                        X: =html_MTID.X
+                        Y: =dpdn_MTValueType.Y + dpdn_MTValueType.Height + 10 
+                        ZIndex: =8
+
+                    ti_MTEnum As text:
+                        BorderColor: |-
+                            =If(
+                                Text(dpdn_MTValueType.Selected.Value) = "Text" && Trim(ti_MTEnum.Text)="",
+                                Color.Red,
+                                GRAYCOLOR
+                            )
+                        BorderThickness: =1
+                        Default: =""
+                        Font: =FontStyle
+                        Height: =ti_MTName.Height
+                        HintText: ="Separate each value by ''|''. For example, G|R|Y|W"
+                        HoverBorderColor: =Self.BorderColor
+                        HoverFill: =ColorFade(BlueControlLightBackground, 75%)
+                        PaddingLeft: =10
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Size: =11
+                        Width: =ti_MTName.Width - label_MTEnum.Width - dpdn_MTValueType.Width - 15
+                        X: =label_MTEnum.X + label_MTEnum.Width
+                        Y: =label_MTEnum.Y
+                        ZIndex: =9
+
+                    label_MTEnum As label:
+                        Align: =Align.Right
+                        Color: =Color.Black
+                        Font: =FontStyle
+                        Height: =30
+                        Size: =12
+                        Text: |-
+                            ="If ""Text"", enumerate options:"
+                        Width: =210
+                        X: =dpdn_MTValueType.X + dpdn_MTValueType.Width + 15
+                        Y: =dpdn_MTValueType.Y
+                        ZIndex: =10
+
+                    dpdn_MTValueType As dropdown:
+                        BorderColor: =GRAYCOLOR
+                        BorderThickness: =1
+                        ChevronBackground: =GrayControlBackground
+                        ChevronFill: =Color.Black
+                        ChevronHoverBackground: =ColorFade(Self.ChevronBackground, -20%)
+                        ChevronHoverFill: =Color.Black
+                        Default: =""
+                        Font: =FontStyle
+                        Height: =ti_MTName.Height
+                        HoverBorderColor: =Self.BorderColor
+                        HoverFill: =ColorFade(BlueControlLightBackground, 75%)
+                        Items: =Choices(ReviewHub_MetricTypes.ValueType)
+                        PressedColor: =BlueControlDarkBackground
+                        PressedFill: =BlueControlLightBackground
+                        SelectionFill: =BlueNaviHightLightBackground
+                        Size: =11
+                        Width: =130
+                        X: =html_MTID.X
+                        Y: =html_MTValueType.Y + html_MTValueType.Height
+                        ZIndex: =11
+
+                    html_MTValueType As htmlViewer:
+                        AutoHeight: =true
+                        Font: =FontStyle
+                        Height: =30
+                        HtmlText: |-
+                            ="<b>Value Type
+                             </b><font color=red>*</font>"
+                        Size: =html_MTID.Size
+                        Width: =html_MTID.Width
+                        X: =html_MTID.X
+                        Y: =Label_MTSubgroup_Tip.Y + Label_MTSubgroup_Tip.Height + 10
+                        ZIndex: =12
+
+                    Label_MTSubgroup_Tip As label:
+                        AutoHeight: =true
+                        Color: =Color.Black
+                        Height: =20
+                        Size: =10
+                        Text: ="Don't find desired value? Please contact Review Hub Team ("& var_TeamEmail &")"
+                        Width: =dpdn_MTObjective.Width
+                        X: =dpdn_MTObjective.X
+                        Y: =dpdn_MTObjective.Y + dpdn_MTObjective.Height
+                        ZIndex: =13
+
+                    icon_AddMTObjective As icon.Add:
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        BorderStyle: =BorderStyle.None
+                        Color: =RGBA(255, 255, 255, 1)
+                        DisabledColor: =Self.Color
+                        Fill: =BlueControlDarkBackground
+                        Height: =dpdn_MTObjective.Height
+                        HoverColor: =Self.Color
+                        Icon: =Icon.Settings
+                        OnSelect: |-
+                            =UpdateContext(
+                                {
+                                    var_Show_ManageMTObjective: true,
+                                    var_AddNew_ManageMTObjective: false,
+                                    var_Edit_ManageMTObjective: false,
+                                    var_Delete_ManageMTObjective: false
+                                }
+                            )
+                        PaddingBottom: =4
+                        PaddingLeft: =4
+                        PaddingRight: =4
+                        PaddingTop: =4
+                        PressedBorderColor: =Self.BorderColor
+                        PressedColor: =Self.Fill
+                        PressedFill: =Self.Color
+                        Tooltip: ="Manage Subgroup / Metric Objective"
+                        Width: =Self.Height
+                        X: =dpdn_MTObjective.X + dpdn_MTObjective.Width + 5
+                        Y: =dpdn_MTObjective.Y
+                        ZIndex: =14
+
+                    dpdn_MTObjective As combobox:
+                        BorderColor: =If(IsBlankOrError(Self.Selected.mto_ObjectiveName_selected) || CountRows(Self.SelectedItems) = 0, REDWARNINGCOLOR, GRAYCOLOR)
+                        BorderThickness: =1
+                        ChevronBackground: =GrayControlBackground
+                        ChevronFill: =Color.Black
+                        ChevronHoverBackground: =
+                        ChevronHoverFill: =Color.Black
+                        Default: |-
+                            =First(
+                                SortByColumns(
+                                RenameColumns(
+                                    ShowColumns(
+                                        ReviewHub_MetricTypeObjectives,
+                                        "craf2_mto_boardtypeid",
+                                        "craf2_objectiveid",
+                                        "craf2_objectivename",
+                                        "craf2_reviewhub_metrictypeobjectiveid",
+                                        "modifiedby",
+                                        "modifiedon"
+                                    ),
+                                    "craf2_mto_boardtypeid",
+                                    "mto_BoardTypeID_selected",
+                                    "craf2_objectiveid",
+                                    "mto_ObjectiveID_selected",
+                                    "craf2_objectivename",
+                                    "mto_ObjectiveName_selected",
+                                    "craf2_reviewhub_metrictypeobjectiveid",
+                                    "mto_UniqueID_selected"
+                                ),
+                                "mto_ObjectiveName_selected",
+                                SortOrder.Ascending
+                            )
+                            )
+                        DefaultSelectedItems: |-
+                            =First(
+                                SortByColumns(
+                                RenameColumns(
+                                    ShowColumns(
+                                        ReviewHub_MetricTypeObjectives,
+                                        "craf2_mto_boardtypeid",
+                                        "craf2_objectiveid",
+                                        "craf2_objectivename",
+                                        "craf2_reviewhub_metrictypeobjectiveid",
+                                        "modifiedby",
+                                        "modifiedon"
+                                    ),
+                                    "craf2_mto_boardtypeid",
+                                    "mto_BoardTypeID_selected",
+                                    "craf2_objectiveid",
+                                    "mto_ObjectiveID_selected",
+                                    "craf2_objectivename",
+                                    "mto_ObjectiveName_selected",
+                                    "craf2_reviewhub_metrictypeobjectiveid",
+                                    "mto_UniqueID_selected"
+                                ),
+                                "mto_ObjectiveName_selected",
+                                SortOrder.Ascending
+                            )
+                            )
+                        DisplayFields: =["mto_ObjectiveName_selected"]
+                        Font: =FontStyle
+                        Height: =ti_MTName.Height
+                        HoverBorderColor: =
+                        HoverFill: =BlueControlLightBackground
+                        InputTextPlaceholder: ="Search for a metric type objective / subgroup"
+                        Items: |-
+                            =SortByColumns(
+                                DropColumns(
+                                    GroupBy(
+                                        Filter(
+                                            clln_MetricTypeObjectives,
+                                            ThisRecord.mto_BoardTypeID_selected in combo_BoardType_NMT.SelectedItems.BoardTypeID
+                                        ),
+                                        "mto_ObjectiveName_selected",
+                                        "DummyGroup"
+                                    ),
+                                    "DummyGroup"
+                                ),
+                                "mto_ObjectiveName_selected",
+                                SortOrder.Ascending
+                            )
+                        OnChange: =
+                        PaddingBottom: =0
+                        PaddingRight: =8
+                        PaddingTop: =0
+                        PressedColor: =BlueControlDarkBackground
+                        PressedFill: =BlueControlLightBackground
+                        Reset: =
+                        SearchFields: =["mto_ObjectiveName_selected"]
+                        SearchItems: |-
+                            =Search(SortByColumns(
+                                DropColumns(
+                                    GroupBy(
+                                        Filter(
+                                            clln_MetricTypeObjectives,
+                                            ThisRecord.mto_BoardTypeID_selected in combo_BoardType_NMT.SelectedItems.BoardTypeID
+                                        ),
+                                        "mto_ObjectiveName_selected",
+                                        "DummyGroup"
+                                    ),
+                                    "DummyGroup"
+                                ),
+                                "mto_ObjectiveName_selected",
+                                SortOrder.Ascending
+                            ),dpdn_MTObjective.SearchText,"mto_ObjectiveName_selected")
+                        SelectionFill: =BlueNaviHightLightBackground
+                        SelectMultiple: =false
+                        Size: =11
+                        Tooltip: ="Select Metric Type Objective"
+                        Width: =html_MTObjective.Width - icon_AddMTObjective.Width - 5
+                        X: =html_MTID.X
+                        Y: =html_MTObjective.Y + html_MTObjective.Height
+                        ZIndex: =16
+
+                    html_MTObjective As htmlViewer:
+                        AutoHeight: =true
+                        Font: =FontStyle
+                        Height: =30
+                        HtmlText: ="<b>Metric Type Objective / Subgroup</b><font color=red>*</font>"
+                        Size: =html_MTID.Size
+                        Width: =html_MTID.Width
+                        X: =html_MTID.X
+                        Y: =Label_MTStage_Tip.Y + Label_MTStage_Tip.Height + 10
+                        ZIndex: =17
+
+                    Label_MTStage_Tip As label:
+                        AutoHeight: =true
+                        Color: =Color.Black
+                        Height: =20
+                        Size: =10
+                        Text: ="Don't find desired value? Please contact Review Hub Team ("& var_TeamEmail &")"
+                        Width: =dpdn_MTStage.Width
+                        X: =dpdn_MTStage.X
+                        Y: =dpdn_MTStage.Y + dpdn_MTStage.Height
+                        ZIndex: =18
+
+                    dpdn_MTStage As dropdown:
+                        BorderColor: =GRAYCOLOR
+                        BorderThickness: =1
+                        ChevronBackground: =GrayControlBackground
+                        ChevronFill: =Color.Black
+                        ChevronHoverBackground: =ColorFade(Self.ChevronBackground, -20%)
+                        ChevronHoverFill: =RGBA(0, 0, 0, 1)
+                        Default: =""
+                        Font: =FontStyle
+                        Height: =ti_MTName.Height
+                        HoverBorderColor: =Self.BorderColor
+                        HoverFill: =ColorFade(BlueControlLightBackground, 75%)
+                        Items: =Choices(ReviewHub_MetricTypes.MetricTypeStage)
+                        PressedColor: =BlueControlDarkBackground
+                        PressedFill: =BlueControlLightBackground
+                        SelectionFill: =BlueNaviHightLightBackground
+                        Size: =11
+                        Width: =html_MTStage.Width
+                        X: =html_MTID.X
+                        Y: =html_MTStage.Y + html_MTStage.Height
+                        ZIndex: =19
+
+                    html_MTStage As htmlViewer:
+                        AutoHeight: =true
+                        Font: =FontStyle
+                        Height: =30
+                        HtmlText: |-
+                            ="<b>Stage / Category
+                             </b><font color=red>*</font>"
+                        Size: =html_MTID.Size
+                        Width: =html_MTID.Width
+                        X: =ti_MTSource.X
+                        Y: =ti_MTSource.Y + ti_MTSource.Height + 10
+                        ZIndex: =20
+
+                    ti_MTSource As text:
+                        BorderColor: =GRAYCOLOR
+                        BorderThickness: =1
+                        Default: =""
+                        Font: =FontStyle
+                        Height: =ti_MTName.Height
+                        HintText: ="Where does the data come from?"
+                        HoverBorderColor: =Self.BorderColor
+                        HoverFill: =ColorFade(BlueControlLightBackground, 75%)
+                        PaddingLeft: =10
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Size: =11
+                        Width: =label_MTSource.Width
+                        X: =label_MTSource.X
+                        Y: =label_MTSource.Y + label_MTSource.Height
+                        ZIndex: =21
+
+                    label_MTSource As label:
+                        Color: =Color.Black
+                        Font: =FontStyle
+                        FontWeight: =FontWeight.Bold
+                        Height: =30
+                        Size: =html_MTID.Size
+                        Text: |-
+                            ="Data Source:"
+                        Width: =html_MTID.Width
+                        X: =ti_MTDesc.X
+                        Y: =ti_MTDesc.Y + ti_MTDesc.Height + 10
+                        ZIndex: =22
+
+                    ti_MTDesc As text:
+                        BorderColor: =GRAYCOLOR
+                        BorderThickness: =1
+                        Default: =""
+                        Font: =FontStyle
+                        Height: =80
+                        HintText: ="Metric Type Description"
+                        HoverBorderColor: =Self.BorderColor
+                        HoverFill: =ColorFade(BlueControlLightBackground, 75%)
+                        Mode: =TextMode.MultiLine
+                        PaddingLeft: =10
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Size: =11
+                        Width: =label_MTDesc.Width
+                        X: =label_MTDesc.X
+                        Y: =label_MTDesc.Y + label_MTDesc.Height
+                        ZIndex: =23
+
+                    label_MTDesc As label:
+                        Color: =Color.Black
+                        Font: =FontStyle
+                        FontWeight: =FontWeight.Bold
+                        Height: =30
+                        Size: =html_MTID.Size
+                        Text: |-
+                            ="Description:"
+                        Width: =html_MTID.Width
+                        X: =ti_MTShort.X
+                        Y: =Label_MTShort_Tip.Y + Label_MTShort_Tip.Height + 10
+                        ZIndex: =24
+
+                    Label_MTShort_Tip As label:
+                        Color: =ti_MTShort.BorderColor
+                        Font: =FontStyle
+                        Height: =20
+                        Size: =10
+                        Text: |-
+                            ="Number of characters: " & Len(ti_MTShort.Text)
+                        Width: =ti_MTShort.Width
+                        X: =ti_MTShort.X
+                        Y: =ti_MTShort.Y + ti_MTShort.Height
+                        ZIndex: =25
+
+                    ti_MTShort As text:
+                        BorderColor: =If(Len(Trim(Self.Text)) <= 25, GRAYCOLOR, REDWARNINGCOLOR)
+                        BorderThickness: =1
+                        Default: =""
+                        DelayOutput: =true
+                        Font: =FontStyle
+                        Height: =ti_MTName.Height
+                        HintText: ="Metric Type Short Name"
+                        HoverBorderColor: =Self.BorderColor
+                        HoverFill: =ColorFade(BlueControlLightBackground, 75%)
+                        PaddingLeft: =10
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Size: =11
+                        Width: =label_MTShort.Width
+                        X: =label_MTShort.X
+                        Y: =label_MTShort.Y + label_MTShort.Height
+                        ZIndex: =26
+
+                    label_MTShort As label:
+                        Color: =Color.Black
+                        Font: =FontStyle
+                        FontWeight: =FontWeight.Semibold
+                        Height: =30
+                        Size: =12
+                        Text: |-
+                            ="*Short Name: (no more than 25 letters)"
+                        Visible: =false
+                        Width: =ti_MTName.Width
+                        X: =ti_MTName.X
+                        Y: =ti_MTName.Y + ti_MTName.Height + 10
+                        ZIndex: =27
+
+                    HtmlText_label_MTShort As htmlViewer:
+                        AutoHeight: =true
+                        Font: =FontStyle
+                        Height: =31
+                        HtmlText: |-
+                            ="<b>Short Name: (no more than 25 characters)
+                             </b><font color=red>*</font>"
+                        Size: =html_MTID.Size
+                        Width: =html_MTID.Width
+                        X: =html_MTName.X
+                        Y: =ti_MTName.Y + ti_MTName.Height + 10
+                        ZIndex: =28
+
+                    ti_MTName As text:
+                        BorderColor: =GRAYCOLOR
+                        BorderThickness: =1
+                        Default: =""
+                        Font: =FontStyle
+                        Height: =30
+                        HintText: ="Metric Type Name"
+                        HoverBorderColor: =Self.BorderColor
+                        HoverFill: =ColorFade(BlueControlLightBackground, 75%)
+                        PaddingLeft: =10
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Size: =11
+                        Width: =html_MTName.Width
+                        X: =html_MTName.X
+                        Y: =html_MTName.Y + html_MTName.Height
+                        ZIndex: =29
+
+                    html_MTName As htmlViewer:
+                        AutoHeight: =true
+                        Font: =FontStyle
+                        Height: =30
+                        HtmlText: |-
+                            ="<b>Metric Type Name: </b><font color=red>*</font>"
+                        Size: =html_MTID.Size
+                        Width: =html_MTID.Width
+                        X: =html_MTID.X
+                        Y: =html_MTID.Y + html_MTID.Height + 5
+                        ZIndex: =30
+
+                    html_MTID As htmlViewer:
+                        AutoHeight: =true
+                        Font: =FontStyle
+                        Height: =31
+                        HtmlText: |-
+                            ="<b>Metric Type ID: " & Max(ReviewHub_MetricTypes, MetricTypeID) + 1 & "
+                             </b><font color=red>*</font>"
+                        Width: =Parent.Width - Self.X * 3
+                        X: =15
+                        ZIndex: =31
+
+            lbl_NewMT_Basic As button:
+                Align: =Align.Left
+                BorderColor: =Self.Fill
+                BorderStyle: =BorderStyle.None
+                BorderThickness: =0
+                Color: =RGBA(0, 0, 0, 1)
+                DisabledBorderColor: =Self.BorderColor
+                DisabledColor: =Self.Color
+                DisabledFill: =Self.Fill
+                DisplayMode: =DisplayMode.Disabled
+                Fill: =ColorFade(BlueNaviHightLightBackground, 50%)
+                Font: =FontStyle
+                FontWeight: =FontWeight.Bold
+                PaddingLeft: =15
+                RadiusBottomLeft: |
+                    =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =20
+                RadiusTopRight: =20
+                Size: =11
+                Text: ="Metric Type - Basic Properties"
+                Width: =Parent.Width
+                ZIndex: =3
+
+            btn_NewMT_Reset As button:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                BorderThickness: =0
+                Color: =BlueControlDarkBackground
+                Fill: =RGBA(0, 0, 0, 0)
+                Font: =FontStyle
+                Height: =lbl_NewMT_Basic.Height
+                HoverBorderColor: =Self.BorderColor
+                HoverColor: =Color.Purple
+                HoverFill: =Self.Fill
+                OnSelect: |
+                    =
+                    Concurrent(
+                        Reset(ti_MTName),
+                    Reset(ti_MTShort),
+                         Reset(ti_MTSource), Reset(dpdn_MTStage), Reset(ti_MTDesc), Reset(dpdn_MTObjective), Reset(dpdn_MTValueType), Reset(ti_MTEnum), Reset(ti_MTHealthWeight), 
+                    Reset(DatePicker_MTEffective), 
+                        Reset(Toggle_MTIsTrendDown)
+                    );
+                PressedBorderColor: =Self.BorderColor
+                PressedColor: =Self.Color
+                PressedFill: =Self.Fill
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Size: =11
+                Text: ="Reset"
+                Underline: =true
+                Width: =75
+                X: =lbl_NewMT_Basic.Width - Self.Width
+                Y: =lbl_NewMT_Basic.Y
+                ZIndex: =4
+
+        ctn_Add_NewMTD As groupContainer:
+            AlignInContainer: =AlignInContainer.SetByContainer
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            FillPortions: =0
+            Height: =Parent.Height
+            LayoutMinHeight: =100
+            LayoutMinWidth: =250
+            Width: =0.40 * Parent.Width //App.Width - ctn_Add_NewMT.X - ctn_Add_NewMT.Width - 15
+            X: =890
+            Y: =100
+            ZIndex: =2
+
+            Back_NewMTD As label:
+                BorderColor: =lbl_NewMTD.Fill
+                BorderThickness: =2
+                Height: =Parent.Height - Self.Y - 1
+                Text: =""
+                Width: =Parent.Width - 2
+                X: =1
+                Y: =lbl_NewMTD.Y + lbl_NewMTD.Height
+                ZIndex: =1
+
+            btn_AddNewMT_Cancel As button:
+                BorderColor: =Self.Fill
+                Fill: =GRAYCOLOR
+                Font: =FontStyle
+                FontWeight: =FontWeight.Bold
+                Height: =btn_AddNewMT_Submit.Height
+                HoverColor: =Self.Fill
+                HoverFill: =Self.Color
+                OnSelect: |-
+                    =Concurrent(
+                        Reset(ti_MTName),
+                        Reset(ti_MTDesc),
+                        Reset(ti_MTSource),
+                        Reset(dpdn_MTStage),
+                        Reset(ti_MTShort),
+                        Reset(dpdn_MTObjective),
+                        Reset(dpdn_MTValueType),
+                        Reset(ti_MTEnum),
+                        Reset(ti_MTHealthWeight),
+                        Reset(Toggle_MTIsTrendDown),
+                        Reset(DatePicker_MTEffective),
+                        UpdateContext({ResetCheckbox: true});
+                        UpdateContext({ResetCheckbox: false}),
+                        Clear(clln_NewMTD_SelectedItems),
+                        Reset(glry_NewMTD)
+                    )
+                PaddingBottom: =0
+                PaddingTop: =0
+                RadiusBottomLeft: =15
+                RadiusBottomRight: =15
+                RadiusTopLeft: =15
+                RadiusTopRight: =15
+                Size: =10
+                Text: ="Cancel"
+                Width: =90
+                X: =btn_AddNewMT_Submit.X + btn_AddNewMT_Submit.Width + 30
+                Y: =btn_AddNewMT_Submit.Y
+                ZIndex: =2
+
+            btn_AddNewMT_Submit As button:
+                BorderColor: =Self.Fill
+                DisplayMode: |
+                    =If(
+                        CountRows(Filter(glry_TemplateSelection_MTD.AllItems, check_TemplateSelect_MTD.Value = true)) = 0
+                        || Len(html_AddNewMT_Warning.HtmlText)>0,
+                        DisplayMode.Disabled,
+                        DisplayMode.Edit
+                    )
+                Fill: =BlueControlDarkBackground
+                Font: =FontStyle
+                FontWeight: =FontWeight.Bold
+                Height: =25
+                HoverBorderColor: =Self.Fill
+                HoverColor: =Self.Fill
+                HoverFill: =Self.Color
+                OnSelect: |-
+                    =Concurrent(
+                    Set(var_AddNewMT_ID, Max(ReviewHub_MetricTypes, craf2_metrictypeid) + 1),
+                    Set(var_Display_html_AddNewMT_Warning, false)
+                    );
+                        
+                    
+                    
+                    
+                    
+                    Patch(
+                        ReviewHub_MetricTypes,
+                        Defaults(ReviewHub_MetricTypes),
+                        {
+                            craf2_metrictypename: Trim(ti_MTName.Text),
+                            craf2_metrictypeid: var_AddNewMT_ID,
+                            craf2_metrictypedescription: Trim(ti_MTDesc.Text),
+                            craf2_metrictypesource: Trim(ti_MTSource.Text),
+                            craf2_metrictypestage: dpdn_MTStage.Selected.Value,
+                            craf2_valuetype: dpdn_MTValueType.Selected.Value,
+                            craf2_metrictypeshortname: Trim(ti_MTShort.Text),
+                            //craf2_metrictypesubgroup: dpdn_MTSubgroup.Selected.Value,
+                            craf2_metrictypehealthweight: Value(ti_MTHealthWeight.Text),
+                            craf2_metrictypeenumerateoptions: Trim(ti_MTEnum.Text),
+                            craf2_metrictypeistrenddown: Toggle_MTIsTrendDown.Value,
+                            craf2_metrictypeeffectivedate: DatePicker_MTEffective.SelectedDate
+                        }
+                    );
+                    
+                    ForAll(
+                        Filter(glry_TemplateSelection_MTD.AllItems, check_TemplateSelect_MTD.Value=true),
+                        Patch(
+                            ReviewHub_MetricTypeDetails,
+                            Defaults(ReviewHub_MetricTypeDetails),
+                            {
+                                craf2_MetricType: LookUp(ReviewHub_MetricTypes, ThisRecord.craf2_metrictypeid=var_AddNewMT_ID),
+                                craf2_metrictypedetailupdatemethod: LookUp(glry_NewMTD.AllItems, ThisRecord.TemplateID=SelectedTemplateID).dpdn_UpdateMethod_MTD.Selected.Value,
+                                craf2_metrictypequaterlycalcmethod: LookUp(glry_NewMTD.AllItems, ThisRecord.TemplateID=SelectedTemplateID).dpdn_QuarterlYCalcMethod_MTD.Selected.Value,
+                                craf2_metrictypedetailpowerbiurl: Trim(LookUp(glry_NewMTD.AllItems, ThisRecord.TemplateID=SelectedTemplateID).ti_MTDPowerBI.Text), 
+                                craf2_MetricTypeDetailTemplate: LookUp(ReviewHub_MetricTemplates, ThisRecord.craf2_templateid = SelectedTemplateID),
+                                craf2_mtd_BoardType: LookUp(ReviewHub_MetricTemplates, ThisRecord.craf2_templateid = SelectedTemplateID).craf2_TemplateBoardType, 
+                                mtd_Objective: LookUp(ReviewHub_MetricTypeObjectives, ThisRecord.mto_BoardTypeID = TemplateBoardTypeID && ThisRecord.mto_ObjectiveName = dpdn_MTObjective.Selected.mto_ObjectiveName_selected),
+                                craf2_mtd_displayorder: 
+                                Max(
+                                    Filter(ReviewHub_MetricTypeDetails, ThisRecord.craf2_MetricTypeDetailTemplate.craf2_templateid=SelectedTemplateID), 
+                                    craf2_mtd_displayorder
+                                ) + 1
+                            }
+                        )
+                    );
+                    
+                    Select(btn_NewMT_Reset);
+                    Select(btn_NewMT_Reset2);
+                    Set(var_Timer_DelayRefreshWarning, true);
+                    Set(var_check_AddNewMT_IfSuccess, true);
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                RadiusBottomLeft: =15
+                RadiusBottomRight: =15
+                RadiusTopLeft: =15
+                RadiusTopRight: =15
+                Size: =10
+                Text: ="Submit"
+                Width: =90
+                X: =(Parent.Width - (Self.Width*2 + 30)) * 0.50
+                Y: =Parent.Height - Self.Height - 10
+                ZIndex: =3
+
+            glry_NewMTD As gallery.variableTemplateHeightGallery:
+                Height: |-
+                    =Min(
+                        Parent.Height - Self.Y - 65, 
+                        Self.TemplateHeight * CountRows(Filter(glry_TemplateSelection_MTD.AllItems, check_TemplateSelect_MTD.Value=true)) + 45
+                    )
+                Items: =clln_NewMTD_SelectedItems
+                Layout: =Layout.Vertical
+                TemplatePadding: =10
+                TemplateSize: =187 //Top_TemplateSelect_MTD.Height + Sp_glry_NewMTD.Height + 30
+                Visible: |-
+                    =If(
+                         CountRows(Filter(glry_TemplateSelection_MTD.AllItems, check_TemplateSelect_MTD.Value=true)) <= 0,
+                         false,
+                         true
+                    )
+                Width: =lbl_NewMTD.Width - 2
+                X: =lbl_NewMTD.X
+                Y: =html_MTDBoardType.Y + html_MTDBoardType.Height 
+                ZIndex: =4
+
+                Btm_glry_NewMTD As rectangle:
+                    BorderColor: =RGBA(0,0,0,0)
+                    BorderStyle: =BorderStyle.None
+                    DisplayMode: =DisplayMode.Disabled
+                    Fill: =RGBA(0, 0, 0, 0)
+                    Height: =3
+                    OnSelect: =
+                    Width: =Parent.Width * 0.50
+                    Y: =Sp_glry_NewMTD.Y + Sp_glry_NewMTD.Height
+                    ZIndex: =1
+
+                Sp_glry_NewMTD As rectangle:
+                    BorderColor: =Top_TemplateSelect_MTD.Fill
+                    BorderThickness: =2
+                    DisplayMode: =DisplayMode.Disabled
+                    Fill: =RGBA(255, 255, 255, 1)
+                    Height: =ti_MTDPowerBI.Y + ti_MTDPowerBI.Height - 15
+                    OnSelect: =
+                    Width: =Top_TemplateSelect_MTD.Width - 2
+                    X: =Top_TemplateSelect_MTD.X + 1
+                    Y: =Top_TemplateSelect_MTD.Y + Top_TemplateSelect_MTD.Height
+                    ZIndex: =2
+
+                ti_MTDPowerBI As text:
+                    BorderColor: =GRAYCOLOR
+                    BorderThickness: =1
+                    Default: =""
+                    Font: =FontStyle
+                    Height: =dpdn_MTStage.Height
+                    HintText: |-
+                        ="Enter Power BI URL here. Please starts with https://"
+                    HoverBorderColor: =Self.BorderColor
+                    HoverFill: =ColorFade(BlueControlLightBackground, 75%)
+                    PaddingLeft: =5
+                    RadiusBottomLeft: =0
+                    RadiusBottomRight: =0
+                    RadiusTopLeft: =0
+                    RadiusTopRight: =0
+                    Size: =11
+                    Width: =Top_TemplateSelect_MTD.Width - 30
+                    X: =20
+                    Y: =lbl_MTDPowerBI.Y + lbl_MTDPowerBI.Height
+                    ZIndex: =3
+
+                lbl_MTDPowerBI As label:
+                    Font: =FontStyle
+                    FontWeight: =FontWeight.Bold
+                    Height: =html_UpdateMethod_MTD.Height
+                    PaddingLeft: =html_UpdateMethod_MTD.PaddingLeft
+                    Size: =11
+                    Text: |-
+                        ="Power BI URL:"
+                    Width: =html_UpdateMethod_MTD.Width
+                    X: =html_UpdateMethod_MTD.X
+                    Y: =html_QuarterlyCalcMethod_MTD.Y + html_QuarterlyCalcMethod_MTD.Height + 5
+                    ZIndex: =4
+
+                dpdn_UpdateMethod_MTD As dropdown:
+                    BorderColor: =GRAYCOLOR
+                    BorderThickness: =1
+                    ChevronBackground: =GrayControlBackground
+                    ChevronFill: =Color.Black
+                    ChevronHoverBackground: =ColorFade(RGBA(255, 255, 255, 1), -20%)
+                    Default: =""
+                    Font: =FontStyle
+                    Height: =html_UpdateMethod_MTD.Height
+                    HoverBorderColor: =Self.BorderColor
+                    HoverFill: =ColorFade(BlueControlLightBackground, 75%)
+                    Items: =Choices(ReviewHub_MetricTypeDetails.MetricTypeDetailUpdateMethod)
+                    PressedColor: =Self.Color
+                    PressedFill: =Self.Fill
+                    SelectionFill: =BlueNaviHightLightBackground
+                    Size: =11
+                    Width: =200
+                    X: =html_UpdateMethod_MTD.X + html_UpdateMethod_MTD.Width
+                    Y: =html_UpdateMethod_MTD.Y
+                    ZIndex: =5
+
+                html_UpdateMethod_MTD As htmlViewer:
+                    AutoHeight: =true
+                    Font: =FontStyle
+                    Height: =31
+                    HtmlText: |-
+                        ="<b>Update Method: 
+                         </b><font color=red>*</font>"
+                    OnSelect: =Select(Parent)
+                    PaddingLeft: =15
+                    PaddingRight: =0
+                    Width: =160
+                    X: =10
+                    Y: =Top_TemplateSelect_MTD.Y + Top_TemplateSelect_MTD.Height + 5
+                    ZIndex: =6
+
+                Top_TemplateSelect_MTD As button:
+                    Align: =Align.Left
+                    BorderColor: =Self.Fill
+                    BorderStyle: =BorderStyle.None
+                    BorderThickness: =0
+                    Color: =RGBA(0, 0, 0, 1)
+                    DisabledBorderColor: =Self.BorderColor
+                    DisabledColor: =Self.Color
+                    DisabledFill: =Self.Fill
+                    DisplayMode: =DisplayMode.Disabled
+                    Fill: =SUBGROUPCOLOR
+                    Font: =FontStyle
+                    FontWeight: =FontWeight.Bold
+                    Height: =html_TemplateSelect_MTD.Height
+                    PaddingLeft: =15
+                    RadiusBottomLeft: |
+                        =0
+                    RadiusBottomRight: =0
+                    RadiusTopLeft: =20
+                    RadiusTopRight: =20
+                    Size: =11
+                    Text: =""
+                    Width: =Parent.Width - 40
+                    X: =5
+                    ZIndex: =7
+
+                html_TemplateSelect_MTD As htmlViewer:
+                    AutoHeight: =true
+                    Font: =FontStyle
+                    Height: =30
+                    HtmlText: |-
+                        ="<center><b>Board Type: </b>" & ThisItem.BoardTypeName & "&emsp; <b>Template: </b>" & ThisItem.TemplateName & "</center>"
+                    OnSelect: =Select(Parent)
+                    Width: =Top_TemplateSelect_MTD.Width
+                    X: =Top_TemplateSelect_MTD.X
+                    ZIndex: =8
+
+                dpdn_QuarterlYCalcMethod_MTD As dropdown:
+                    BorderColor: =GRAYCOLOR
+                    BorderThickness: =1
+                    ChevronBackground: =GrayControlBackground
+                    ChevronFill: =Color.Black
+                    ChevronHoverBackground: =ColorFade(RGBA(255, 255, 255, 1), -20%)
+                    Default: =""
+                    Font: =FontStyle
+                    Height: =html_UpdateMethod_MTD.Height
+                    HoverBorderColor: =Self.BorderColor
+                    HoverFill: =ColorFade(BlueControlLightBackground, 75%)
+                    Items: =Choices(ReviewHub_QuaterlyCalculationMethod)
+                    PressedColor: =Self.Color
+                    PressedFill: =Self.Fill
+                    SelectionFill: =BlueNaviHightLightBackground
+                    Size: =11
+                    Width: =200
+                    X: =html_UpdateMethod_MTD.X + html_UpdateMethod_MTD.Width
+                    Y: =html_QuarterlyCalcMethod_MTD.Y + (html_QuarterlyCalcMethod_MTD.Height / 3)
+                    ZIndex: =9
+
+                html_QuarterlyCalcMethod_MTD As htmlViewer:
+                    AutoHeight: =true
+                    Font: =FontStyle
+                    Height: =31
+                    HtmlText: |-
+                        ="<b>Quarterly Calculation Method:</b><font color=red>*</font>"
+                    OnSelect: =Select(Parent)
+                    PaddingLeft: =15
+                    PaddingRight: =0
+                    Width: =160
+                    X: =html_UpdateMethod_MTD.X
+                    Y: =html_UpdateMethod_MTD.Y + html_UpdateMethod_MTD.Height + 5
+                    ZIndex: =10
+
+            html_AddNewMT_Summary As htmlViewer:
+                AutoHeight: =true
+                Font: =FontStyle
+                HtmlText: |-
+                    =If(
+                         CountRows(Filter(glry_TemplateSelection_MTD.AllItems, check_TemplateSelect_MTD.Value=true)) <= 0,
+                        "",
+                        "<b>Summary:</b> Based on your input, you will add <strong><font color='blue'>1</font></strong> record to <i>[MetricType]</i> table, and <strong><font color='blue'>"  &  CountRows(Filter(glry_TemplateSelection_MTD.AllItems, check_TemplateSelect_MTD.Value=true)) & "</font></strong> record(s) to <i>[MetricTypeDetail]</i> table."
+                    )
+                Size: =10
+                Width: =ctn_Add_NewMTD.Width
+                X: =Back_NewMTD.X
+                Y: =Back_NewMTD.Y + Back_NewMTD.Height
+                ZIndex: =5
+
+            html_SubmitSuccess_NMT As htmlViewer:
+                AutoHeight: =true
+                BorderColor: =RGBA(0, 0, 0, 0)
+                DisplayMode: =DisplayMode.View
+                Font: =FontStyle
+                Height: =20
+                HtmlText: |-
+                    =If(
+                        IsBlankOrError(LookUp(ReviewHub_MetricTypes, ThisRecord.craf2_metrictypeid=var_AddNewMT_ID).craf2_metrictypename),
+                        "<b><font color='red'>Error! Metric Type ID - " & var_AddNewMT_ID & " is not added successfully!</font></b>",
+                        "<b><font color='ForestGreen'>Success! Metric Type ID - " & var_AddNewMT_ID & " is added!</font></b>"
+                    )
+                PaddingTop: =0
+                Size: =10
+                Visible: =var_check_AddNewMT_IfSuccess
+                Width: =Parent.Width - Self.X
+                X: =btn_AddNewMT_Submit.X - 20
+                Y: =btn_AddNewMT_Submit.Y - Self.Height
+                ZIndex: =6
+
+            html_MTDBoardType As htmlViewer:
+                AutoHeight: =true
+                DisplayMode: =DisplayMode.View
+                Fill: =lbl_NewMTD.Fill
+                Font: =FontStyle
+                Height: =35
+                HtmlText: |-
+                    =If(
+                         CountRows(Filter(glry_TemplateSelection_MTD.AllItems, check_TemplateSelect_MTD.Value=true)) <= 0,
+                        "",
+                        "<center><strong>Add this metric to <font color='#0072C6'>" & CountRows(Filter(glry_TemplateSelection_MTD.AllItems, check_TemplateSelect_MTD.Value=true)) & "</font> template(s)</strong></center>"
+                    )
+                PaddingBottom: =7
+                PaddingTop: =7
+                Width: =Parent.Width - 2
+                X: =1
+                Y: =glry_TemplateSelection_MTD.Y + glry_TemplateSelection_MTD.Height + 5
+                ZIndex: =7
+
+            glry_TemplateSelection_MTD As gallery.galleryHorizontal:
+                BorderStyle: =BorderStyle.None
+                Height: |-
+                    =RoundUp(CountRows(glry_TemplateSelection_MTD.AllItems) * 185 / Self.Width, 0)
+                     * 35
+                Items: |-
+                    =Filter(
+                        AddColumns(
+                            RenameColumns(
+                                ShowColumns(
+                                    ReviewHub_MetricTemplates,
+                                    "craf2_templateid",
+                                    "craf2_templatename",
+                                    "craf2_templatedescription",
+                                    "craf2_TemplateBoardType"
+                                ),
+                                "craf2_templateid",
+                                "SelectedTemplateID",
+                                "craf2_templatename",
+                                "TemplateName",
+                                "craf2_templatedescription",
+                                "TemplateDescription",
+                                "craf2_TemplateBoardType",
+                                "TemplateBoardType"
+                            ),
+                            "TemplateBoardTypeID",//ThisRecord.TemplateBoardType.BoardTypeID
+                            LookUp(
+                                clln_BoardTypes,
+                                ThisRecord.bt_BoardTypeName = TemplateBoardType.BoardTypeName
+                            ).bt_BoardTypeID
+                        ),
+                        ThisRecord.TemplateBoardTypeID in combo_BoardType_NMT.SelectedItems.BoardTypeID
+                        && ThisRecord.SelectedTemplateID in var_DisplayMetricTemplateID.TemplateID
+                    )
+                OnSelect: |-
+                    =ClearCollect(
+                        clln_NewMTD_SelectedItems,
+                        RenameColumns(
+                        AddColumns(
+                        ShowColumns(
+                            Filter(glry_TemplateSelection_MTD.AllItems, check_TemplateSelect_MTD.Value=true),
+                            "SelectedTemplateID", "TemplateName", "TemplateBoardType"
+                        ),
+                        "BoardTypeID", TemplateBoardType.craf2_boardtypeid,
+                        "BoardTypeName", TemplateBoardType.craf2_boardtypename
+                        ),
+                        "SelectedTemplateID", "TemplateID"
+                        )
+                    )
+                TemplatePadding: =3
+                TemplateSize: =192
+                Width: =html_MetricTemplate.Width
+                WrapCount: |-
+                    =//RoundUp( CountRows(glry_TemplateSelection_MTD.AllItems) / RoundUp(Self.Width / 180, 0), 0)
+                     //If(Parent.Width <= 649, 4, Parent.Width <= 1007, 3, Parent.Width >= 1078, 2)
+                    RoundUp(CountRows(glry_TemplateSelection_MTD.AllItems) * 185 / Self.Width, 0)
+                X: =html_MetricTemplate.X
+                Y: =html_MetricTemplate.Y + html_MetricTemplate.Height
+                ZIndex: =8
+
+                check_TemplateSelect_MTD As checkbox:
+                    BorderColor: =RGBA(0, 0, 0, 0)
+                    BorderStyle: =BorderStyle.None
+                    CheckboxBorderColor: =Color.Black
+                    CheckboxSize: =28
+                    CheckmarkFill: =BlueControlDarkBackground
+                    Color: =RGBA(0,0,0,1)//If(Self.Value,RGBA(0,0,0,1),BlueControlDarkBackground)
+                    Font: =FontStyle
+                    Height: =25
+                    HoverBorderColor: =Self.BorderColor
+                    HoverColor: =Self.Color
+                    OnSelect: =Select(Parent)
+                    PressedBorderColor: =Self.BorderColor
+                    PressedColor: =Self.HoverColor
+                    Reset: =ResetCheckbox
+                    Size: =11
+                    Text: =ThisItem.TemplateName
+                    Width: =175
+                    ZIndex: =1
+
+            html_MetricTemplate As htmlViewer:
+                AutoHeight: =true
+                Font: =FontStyle
+                Height: =30
+                HtmlText: |-
+                    ="<b>Template/Group:
+                     </b><font color=red>*</font>" //& CountRows(glry_TemplateSelection_MTD.AllItems)
+                Width: =Parent.Width - Self.X * 2
+                X: =15
+                Y: =lbl_NewMTD.Y + lbl_NewMTD.Height
+                ZIndex: =9
+
+            lbl_NewMTD As button:
+                Align: =Align.Left
+                BorderColor: =Self.Fill
+                BorderStyle: =BorderStyle.None
+                BorderThickness: =0
+                Color: =RGBA(0, 0, 0, 1)
+                DisabledBorderColor: =Self.BorderColor
+                DisabledColor: =Self.Color
+                DisabledFill: =Self.Fill
+                DisplayMode: =DisplayMode.Disabled
+                Fill: =ColorFade(BlueNaviHightLightBackground, 50%)
+                Font: =FontStyle
+                FontWeight: =FontWeight.Bold
+                PaddingLeft: =15
+                RadiusBottomLeft: |
+                    =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =20
+                RadiusTopRight: =20
+                Size: =11
+                Text: ="We need more details about this metric type"
+                Width: =Parent.Width
+                ZIndex: =10
+
+            btn_NewMT_Reset2 As button:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                BorderThickness: =0
+                Color: =BlueControlDarkBackground
+                Fill: =RGBA(0, 0, 0, 0)
+                Font: =FontStyle
+                Height: =lbl_NewMTD.Height
+                HoverBorderColor: =Self.BorderColor
+                HoverColor: =Color.Purple
+                HoverFill: =Self.Fill
+                OnSelect: |-
+                    =Concurrent(
+                        UpdateContext({ResetCheckbox:true});
+                        UpdateContext({ResetCheckbox:false}), 
+                        Clear(clln_NewMTD_SelectedItems)
+                    )
+                PressedBorderColor: =Self.BorderColor
+                PressedColor: =Self.Color
+                PressedFill: =Self.Fill
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Size: =11
+                Text: ="Reset"
+                Underline: =true
+                Width: =75
+                X: =lbl_NewMTD.Width - Self.Width
+                Y: =lbl_NewMT_Basic.Y
+                ZIndex: =11
+
+    html_AddNewMT_Warning As htmlViewer:
+        AutoHeight: =true
+        Font: =FontStyle
+        HtmlText: |-
+            =If(
+                IsBlankOrError(LookUp(ReviewHub_MetricTypes, ThisRecord.MetricTypeName=Trim(ti_MTName.Text)).MetricTypeName),
+                "",
+                "<font color='red'><strong>Warning:</strong> The Metric Type Name, <b>" & Trim(ti_MTName.Text) & "</b> already exists in [MetricType] table.</font><br>"
+            )
+            & 
+            If(
+                IsBlankOrError(LookUp(ReviewHub_MetricTypes, ThisRecord.MetricTypeShortName=Trim(ti_MTShort.Text)).MetricTypeShortName),
+                "",
+                "<font color='red'><strong>Warning:</strong> The Metric Type Short Name, <b>" & Trim(ti_MTShort.Text) & "</b> already exists in [MetricType] table.</font><br>"
+            )
+            &
+            If(
+                Text(dpdn_MTValueType.Selected.Value) = "Text" && Trim(ti_MTEnum.Text)="",
+                "<font color='red'><strong>Warning:</strong> The Value Type is ''Text'', you must provide enumerate options!</font>",
+                ""
+            )
+            &
+            If(
+                IsBlankOrError(dpdn_MTObjective.Selected.mto_ObjectiveName_selected),
+                "<font color='red'><strong>Warning:</strong> The Metric Type Objective/Subgroup cannot be blank!</font>",
+                ""
+            )
+        Size: =12
+        Visible: =var_Display_html_AddNewMT_Warning && ctn_Main_NMT.Visible
+        Width: =ctn_Main_NMT.Width
+        X: =ctn_Main_NMT.X
+        Y: =lbl_ScreenTitle_NMT.Y + lbl_ScreenTitle_NMT.Height 
+        ZIndex: =2
+
+    lbl_ScreenTitle_NMT As label:
+        DisabledColor: =BlueControlDarkBackground
+        DisabledFill: =Self.Fill
+        DisplayMode: =DisplayMode.Disabled
+        Fill: =GrayCanvasBackground
+        Font: =FontStyle
+        FontWeight: =FontWeight.Bold
+        Height: =55
+        PaddingLeft: =60
+        Size: =18
+        Text: ="Create New Metric Type for"
+        Width: =App.Width - Self.X
+        Y: =SS_AppHeader_NMT.Height
+        ZIndex: =4
+
+    lbl_BoardType_NMT As label:
+        Color: =BlueControlDarkBackground
+        DisplayMode: =DisplayMode.View
+        Font: =FontStyle
+        FontWeight: =FontWeight.Bold
+        Height: =combo_BoardType_NMT.Height
+        PaddingLeft: =15
+        PaddingRight: =0
+        Size: =11
+        Text: |-
+            =If(
+                CountRows(combo_BoardType_NMT.SelectedItems) = 0 || IsBlankOrError(combo_BoardType_NMT.SelectedItems),
+                "(allows multi-select)",
+            "(" & Left(
+                Concat(combo_BoardType_NMT.SelectedItems, ThisRecord.BoardTypeName & ", "),
+                Len(Concat(combo_BoardType_NMT.SelectedItems, ThisRecord.BoardTypeName & ", ")) - 2
+            ) & ")"
+            )
+        Width: |-
+            =If(
+                CountRows(combo_BoardType_NMT.SelectedItems) = 0 || IsBlankOrError(combo_BoardType_NMT.SelectedItems),
+                200,
+                140 * CountRows(combo_BoardType_NMT.SelectedItems)
+            )
+        X: =combo_BoardType_NMT.X + combo_BoardType_NMT.Width
+        Y: =combo_BoardType_NMT.Y
+        ZIndex: =5
+
+    combo_BoardType_NMT As combobox:
+        BorderColor: =If(IsBlankOrError(Self.Selected.BoardTypeName) || CountRows(Self.SelectedItems) = 0, REDWARNINGCOLOR, GRAYCOLOR)
+        BorderThickness: =1
+        ChevronBackground: =GrayControlBackground
+        ChevronFill: =Color.Black
+        ChevronHoverBackground: =
+        ChevronHoverFill: =Color.Black
+        DefaultSelectedItems: =
+        DisplayFields: =["BoardTypeName"]
+        Font: =FontStyle
+        Height: =30
+        HoverBorderColor: =
+        HoverFill: =BlueControlLightBackground
+        InputTextPlaceholder: ="Select scorecard types"
+        Items: |-
+            =RenameColumns(
+                Filter(
+                    AddColumns(
+                        ShowColumns(
+                            ReviewHub_BoardTypes,
+                            "craf2_boardtypeid",
+                            "craf2_boardtypename",
+                            "craf2_isdisplayinapp"
+                        ),
+                        "IsDisplayInApp",
+                        If(
+                            Text(craf2_isdisplayinapp) = "Yes",
+                            true,
+                            false
+                        )
+                    ),
+                    ThisRecord.IsDisplayInApp = true 
+                        && (IsAdmin || (IsCoordinator && ThisRecord.craf2_boardtypeid in IsCoordinator_BoardTypes))
+                ),
+                "craf2_boardtypeid",
+                "BoardTypeID",
+                "craf2_boardtypename",
+                "BoardTypeName"
+            )
+        OnChange: =
+        PaddingBottom: =0
+        PaddingTop: =0
+        PressedColor: =BlueControlDarkBackground
+        PressedFill: =BlueControlLightBackground
+        Reset: =
+        SearchFields: =["BoardTypeName"]
+        SearchItems: |-
+            =Search(RenameColumns(
+                Filter(
+                    AddColumns(
+                        ShowColumns(
+                            ReviewHub_BoardTypes,
+                            "craf2_boardtypeid",
+                            "craf2_boardtypename",
+                            "craf2_isdisplayinapp"
+                        ),
+                        "IsDisplayInApp",
+                        If(
+                            Text(craf2_isdisplayinapp) = "Yes",
+                            true,
+                            false
+                        )
+                    ),
+                    ThisRecord.IsDisplayInApp = true 
+                        && (IsAdmin || (IsCoordinator && ThisRecord.craf2_boardtypeid in IsCoordinator_BoardTypes))
+                ),
+                "craf2_boardtypeid",
+                "BoardTypeID",
+                "craf2_boardtypename",
+                "BoardTypeName"
+            ),combo_BoardType_NMT.SearchText,"BoardTypeName")
+        SelectionFill: =BlueNaviHightLightBackground
+        Size: =11
+        Tooltip: ="Select scorecard types"
+        Width: |-
+            =If(
+                CountRows(combo_BoardType_NMT.SelectedItems) = 0 || IsBlankOrError(combo_BoardType_NMT.SelectedItems),
+                200,
+                Min(160 * CountRows(combo_BoardType_NMT.SelectedItems), 300)
+            )
+        X: =388
+        Y: =icon_Back_NMT.Y
+        ZIndex: =6
+
+    icon_Back_NMT As icon.BackArrow:
+        BorderColor: =RGBA(0, 0, 0, 0)
+        BorderStyle: =BorderStyle.None
+        Color: =BlueControlDarkBackground
+        Height: =30
+        HoverBorderColor: =Self.BorderColor
+        HoverColor: =Color.Purple
+        Icon: =Icon.BackArrow
+        OnSelect: |-
+            =Navigate(scn_SelfService);
+            Concurrent(
+                Reset(combo_BoardType_NMT),
+                Select(btn_NewMT_Reset),
+                Select(btn_NewMT_Reset2)
+            );
+            
+            // Update Two Cache Tables
+            ClearCollect(
+                    clln_MetricTypeDetail, 
+                    ShowColumns(
+                        AddColumns(
+                            AddColumns(
+                                ReviewHub_MetricTypeDetails,
+                                "TemplateRec", ThisRecord.MetricTypeDetailTemplate
+                                // "MetricTemplateRec", LookUp(ReviewHub_MetricTemplates, ReviewHub_MetricTypeDetails[@MetricTypeDetailTemplate].TemplateID=ThisRecord.TemplateID)
+                            ),
+                            "mtd_TemplateID", TemplateRec.TemplateID, 
+                            "mtd_TemplateName", TemplateRec.TemplateName,
+                            "mtd_MetricTypeId", ThisRecord.MetricType.MetricTypeID,
+                            "mtd_MetricTypeName", ThisRecord.MetricType.MetricTypeName,
+                            "mtd_UpdateMethod", Text(ThisRecord.MetricTypeDetailUpdateMethod),
+                            "mtd_MetricDeprecatedDate", ThisRecord.MetricType.MetricTypeDeprecatedDate,
+                            "mtd_MetricCreatedDate", ThisRecord.MetricType.MetricTypeEffectiveDate,
+                            "mtd_MetricShortName", ThisRecord.MetricType.MetricTypeShortName,
+                            "mtd_BoardTypeID", ThisRecord.mtd_BoardType.BoardTypeID, //MetricTemplateRec.TemplateBoardType.BoardTypeID,
+                            "mtd_BoardTypeName", ThisRecord.mtd_BoardType.BoardTypeName, //MetricTemplateRec.TemplateBoardType.BoardTypeName,
+                            "mtd_MetricDisplayOrder", ThisRecord.mtd_DisplayOrder,
+                            "mtd_MetricStage", Text(ThisRecord.MetricType.MetricTypeStage),
+                            "mtd_MetricTypeSubgroup", ThisRecord.mtd_Objective.mto_ObjectiveName, //Text(ThisRecord.MetricType.MetricTypeSubgroup),
+                            "mtd_MetricValueType", Text(ThisRecord.MetricType.ValueType),
+                            "mtd_IsTrendDown", ThisRecord.MetricType.MetricTypeIsTrendDown,
+                            "mtd_MetricTypeEnumerateOptions", ThisRecord.MetricType.MetricTypeEnumerateOptions,
+                            "mtd_MetricTypeSource", ThisRecord.MetricType.MetricTypeSource,
+                            "mtd_MetricTypeHealthWeight", ThisRecord.MetricType.MetricTypeHealthWeight,
+                            "mtd_MetricPowerBIUrl", ThisRecord.MetricTypeDetailPowerBIUrl,
+                            "mtd_MetricTypeDescription", ThisRecord.MetricType.MetricTypeDescription
+                        ),
+                        "mtd_TemplateID", "mtd_TemplateName", "mtd_BoardTypeID", "mtd_BoardTypeName",
+                        "mtd_MetricTypeId", "mtd_MetricTypeName","mtd_MetricShortName","mtd_MetricDeprecatedDate", "mtd_MetricCreatedDate",
+                        "mtd_UpdateMethod", "mtd_MetricPowerBIUrl", "mtd_MetricDisplayOrder", "mtd_MetricStage", "mtd_MetricTypeSubgroup",
+                        "mtd_MetricValueType", "mtd_IsTrendDown", "mtd_MetricTypeEnumerateOptions", "mtd_MetricTypeSource", "mtd_MetricTypeHealthWeight", "mtd_MetricTypeDescription"
+                    )
+                );
+            
+            ClearCollect(
+                colStageOrder,
+                DropColumns(
+                    AddColumns(
+                        GroupBy(
+                            Sort(
+                                clln_MetricTypeDetail,
+                                mtd_MetricDisplayOrder
+                            ),
+                            "mtd_BoardTypeID",
+                            "mtd_TemplateID",
+                            "mtd_MetricStage",
+                            "MetricGroup"
+                        ),
+                        "FirstDisplayOrder_ByStage",
+                        First(ThisRecord.MetricGroup).mtd_MetricDisplayOrder
+                    ),
+                    "MetricGroup"
+                )
+            );
+        Tooltip: ="Back"
+        Width: =Self.Height
+        X: =15
+        Y: =lbl_ScreenTitle_NMT.Y + (lbl_ScreenTitle_NMT.Height - Self.Height) * 0.50
+        ZIndex: =7
+
+    SS_AppHeader_NMT As AppHeader:
+        DropDownSelection: =TrackRequestComponent_NMT.HideTrackRequest
+        FeatureRequestUrl: =var_FeatureRequestURL
+        FeedbackButtonUrl: =var_SendFeedback_URL
+        inputAppDisplayName: =varAppHeaderText
+        ScorecardOnboardingFeatureUrl: =var_ScorecardOnboardingRequestURL
+        ShowSurveyButton: =false
+        Y: =0
+        ZIndex: =8
+
+    ctn_ManageMTObjective_NMT As groupContainer.manualLayoutContainer:
+        BorderColor: =RGBA(0, 0, 0, 0)
+        BorderStyle: =BorderStyle.None
+        Fill: =RGBA(255, 255, 255, 0.95)
+        Height: =App.Height
+        Visible: =var_Show_ManageMTObjective = true
+        Width: =App.Width
+        ZIndex: =9
+
+        Back_MangeMTObjective_NMT As button:
+            BorderColor: =Self.Fill
+            DisabledBorderColor: =Top_ManageObjective_NMT.Fill
+            DisabledColor: =RGBA(255, 255, 255, 1)
+            DisabledFill: =RGBA(255, 255, 255, 1)
+            DisplayMode: =DisplayMode.Disabled
+            Height: |-
+                =//Parent.Height - Top_ManageObjective_NMT.Height - Top_ManageObjective_NMT.Y * 2
+                If(
+                    btn_SaveMTObjective_NMT.Visible && var_Delete_ManageMTObjective,
+                    261 + ctn_ManageObj_Inputs_NMT.Height + btn_SaveMTObjective_NMT.Height + 50, //btn_SaveMTObjective_NMT.Y + btn_SaveMTObjective_NMT.Height - Self.Y + 25,
+                    If(
+                        btn_SaveMTObjective_NMT.Visible && (var_AddNew_ManageMTObjective || var_Edit_ManageMTObjective),
+                        403,
+                        271
+                    )
+                )
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Text: =""
+            Width: =Parent.Width * 0.60
+            X: =Top_ManageObjective_NMT.X
+            Y: =(App.Height - Self.Height) * 0.50 - 40 //Top_ManageObjective_NMT.Y + Top_ManageObjective_NMT.Height - 1
+            ZIndex: =2
+
+        btn_CancelMTObjective_NMT As button:
+            BorderColor: =Self.Fill
+            Fill: =GRAYCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =25
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Self.Fill
+            HoverFill: =Self.Color
+            OnSelect: |
+                =Concurrent(
+                    UpdateContext(
+                        {
+                            var_Show_ManageMTObjective: false,
+                            var_AddNew_ManageMTObjective: false,
+                            var_Edit_ManageMTObjective: false,
+                            var_Delete_ManageMTObjective: false
+                        }
+                    ),
+                    Reset(combo_ManageObj_BoardType_NMT)
+                )
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Size: =10
+            Text: ="Cancel"
+            Visible: =btn_SaveMTObjective_NMT.Visible
+            Width: =90
+            X: =btn_SaveMTObjective_NMT.X + btn_SaveMTObjective_NMT.Width + 30
+            Y: =btn_SaveMTObjective_NMT.Y 
+            ZIndex: =3
+
+        btn_SaveMTObjective_NMT As button:
+            BorderColor: =Self.Fill
+            DisplayMode: |-
+                =If(
+                    ("Warning" in html_ManageObj_Inputs_NMT.HtmlText && var_Delete_ManageMTObjective)
+                        || (Trim(ti_ManageObj_Value_NMT.Text) = "" && (var_AddNew_ManageMTObjective || var_Edit_ManageMTObjective))
+                        || Len(html_ManageObj_Inputs_NMT.HtmlText) = 0,
+                    DisplayMode.Disabled,
+                    DisplayMode.Edit
+                )
+            Fill: =If(var_Delete_ManageMTObjective, REDWARNINGCOLOR, BlueControlDarkBackground)
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =25
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Self.Fill
+            HoverFill: =Self.Color
+            OnSelect: |-
+                =If(
+                    var_AddNew_ManageMTObjective,
+                    ForAll(
+                        combo_ManageObj_BoardType_NMT.SelectedItems,
+                        Patch(
+                            clln_MetricTypeObjectives,
+                            Defaults(clln_MetricTypeObjectives),
+                            {
+                                mto_BoardTypeID_selected: BoardTypeID_Selected,
+                                mto_ObjectiveID_selected: Max(clln_MetricTypeObjectives, ThisRecord.mto_ObjectiveID_selected) + 1,
+                                mto_ObjectiveName_selected: Trim(ti_ManageObj_Value_NMT.Text)
+                            }
+                        );
+                        Patch(
+                            ReviewHub_MetricTypeObjectives,
+                            Defaults(ReviewHub_MetricTypeObjectives),
+                            {
+                                mto_BoardTypeID: BoardTypeID_Selected,
+                                mto_ObjectiveID: Max(clln_MetricTypeObjectives, ThisRecord.mto_ObjectiveID_selected),
+                                mto_ObjectiveName: Trim(ti_ManageObj_Value_NMT.Text)
+                            }
+                        )
+                    )
+                );
+                
+                If(
+                    var_Delete_ManageMTObjective,
+                    ForAll(
+                        combo_ManageObj_BoardType_NMT.SelectedItems, 
+                        RemoveIf(
+                            clln_MetricTypeObjectives,
+                            Trim(ThisRecord.mto_ObjectiveName_selected) = Trim(combo_ManageObj_ExistingValues.Selected.mto_ObjectiveName_selected)
+                                && ThisRecord.mto_BoardTypeID_selected = BoardTypeID_Selected
+                        );
+                        RemoveIf(
+                            ReviewHub_MetricTypeObjectives,
+                            Trim(ThisRecord.mto_ObjectiveName) = Trim(combo_ManageObj_ExistingValues.Selected.mto_ObjectiveName_selected)
+                                && ThisRecord.mto_BoardTypeID = BoardTypeID_Selected
+                        )
+                    )
+                );
+                
+                If(
+                    var_Edit_ManageMTObjective,
+                    ForAll(
+                        combo_ManageObj_BoardType_NMT.SelectedItems,
+                        Patch(
+                            clln_MetricTypeObjectives,
+                            LookUp(
+                                clln_MetricTypeObjectives, 
+                                ThisRecord.mto_BoardTypeID_selected = BoardTypeID_Selected 
+                                    && Trim(ThisRecord.mto_ObjectiveName_selected) = Trim(combo_ManageObj_ExistingValues.Selected.mto_ObjectiveName_selected)
+                        ),
+                        {
+                            mto_ObjectiveName_selected: Trim(ti_ManageObj_Value_NMT.Text)
+                        }
+                        );
+                        Patch(
+                            ReviewHub_MetricTypeObjectives,
+                            LookUp(
+                                ReviewHub_MetricTypeObjectives,
+                                ThisRecord.mto_BoardTypeID = BoardTypeID_Selected
+                                    && ThisRecord.mto_ObjectiveName = Trim(combo_ManageObj_ExistingValues.Selected.mto_ObjectiveName_selected)
+                            ),
+                            {
+                                mto_ObjectiveName: Trim(ti_ManageObj_Value_NMT.Text)
+                            }
+                        )
+                    )
+                );
+                
+                Concurrent(
+                    UpdateContext(
+                        {
+                            var_AddNew_ManageMTObjective: false,
+                            var_Edit_ManageMTObjective: false,
+                            var_Delete_ManageMTObjective: false
+                        }
+                    ),
+                    Reset(ti_ManageObj_Value_NMT),
+                    Reset(combo_ManageObj_ExistingValues)
+                )
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Size: =10
+            Text: =If(var_Delete_ManageMTObjective, "Delete", "Save")
+            Visible: |-
+                =(var_AddNew_ManageMTObjective 
+                    || var_Edit_ManageMTObjective 
+                    || var_Delete_ManageMTObjective) 
+                    && html_ManageObj_Inputs_NMT.Visible
+            Width: =90
+            X: =Top_ManageObjective_NMT.X + Top_ManageObjective_NMT.Width - Self.Width*2 - 60
+            Y: |-
+                =If(
+                    ti_ManageObj_Value_NMT.Visible,
+                    ti_ManageObj_Value_NMT.Y + ti_ManageObj_Value_NMT.Height + 25,
+                    If(
+                        var_Delete_ManageMTObjective,
+                        ctn_ManageObj_Inputs_NMT.Y + ctn_ManageObj_Inputs_NMT.Height + 25
+                    )
+                )
+            ZIndex: =4
+
+        ti_ManageObj_Value_NMT As text:
+            BorderColor: =GRAYCOLOR
+            BorderThickness: =1
+            Default: |-
+                =If(
+                    var_AddNew_ManageMTObjective,
+                    "",
+                    If(
+                        var_Edit_ManageMTObjective,
+                        combo_ManageObj_ExistingValues.Selected.mto_ObjectiveName_selected
+                    )
+                )
+            DelayOutput: =true
+            DisplayMode: =Parent.DisplayMode
+            Font: =FontStyle
+            Height: =html_ManageObj_Value_NMT.Height
+            HoverBorderColor: =Self.BorderColor
+            HoverFill: =ColorFade(BlueControlLightBackground, 75%)
+            LineHeight: =1
+            PaddingBottom: =0
+            PaddingLeft: =5
+            PaddingTop: =0
+            PressedBorderColor: =Self.BorderColor
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Size: =10
+            Tooltip: ="Only Manual metrics are editable through this app"
+            Visible: =html_ManageObj_Value_NMT.Visible
+            Width: =Top_ManageObjective_NMT.Width - html_ManageObj_Value_NMT.Width - 15
+            X: =html_ManageObj_Value_NMT.X + html_ManageObj_Value_NMT.Width
+            Y: =html_ManageObj_Value_NMT.Y
+            ZIndex: =5
+
+        html_ManageObj_Value_NMT As htmlViewer:
+            AutoHeight: =true
+            BorderColor: =RGBA(0, 0, 0, 0)
+            Font: =FontStyle
+            Height: =30
+            HtmlText: |-
+                =If(
+                    var_AddNew_ManageMTObjective,
+                    "<font style='font-weight:600'>Enter New Value: </font><font color=red>*</font>",
+                    If(
+                        var_Edit_ManageMTObjective, 
+                        "<font style='font-weight:600'>Update The Value: </font><font color=red>*</font>"
+                    )
+                )
+            PaddingLeft: =15
+            Visible: =(var_AddNew_ManageMTObjective || var_Edit_ManageMTObjective) && html_ManageObj_Inputs_NMT.Visible
+            Width: =160
+            X: =Top_ManageObjective_NMT.X
+            Y: =ctn_ManageObj_Inputs_NMT.Y + ctn_ManageObj_Inputs_NMT.Height + 5
+            ZIndex: =6
+
+        ctn_ManageObj_Inputs_NMT As groupContainer.verticalAutoLayoutContainer:
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            Height: =Min(300, html_ManageObj_Inputs_NMT.Height)
+            LayoutDirection: =LayoutDirection.Vertical
+            LayoutMode: =LayoutMode.Auto
+            LayoutOverflowY: =LayoutOverflow.Scroll
+            Width: =Top_ManageObjective_NMT.Width - 2
+            X: =Top_ManageObjective_NMT.X
+            Y: =btn_ManageObj_AddNew_NMT.Y + btn_ManageObj_AddNew_NMT.Height + 15
+            ZIndex: =7
+
+            html_ManageObj_Inputs_NMT As htmlViewer:
+                AutoHeight: =true
+                BorderColor: =RGBA(0, 0, 0, 0)
+                DisplayMode: =DisplayMode.View
+                Font: =FontStyle
+                Height: =30
+                HtmlText: |-
+                    =If(
+                        var_AddNew_ManageMTObjective,
+                        "<b>Step 3. Provide new objective value for <u>" & Left(
+                            Concat(
+                                combo_ManageObj_BoardType_NMT.SelectedItems,
+                                ThisRecord.BoardTypeName_Selected & ", "
+                            ),
+                            Len(
+                                Concat(
+                                    combo_ManageObj_BoardType_NMT.SelectedItems,
+                                    ThisRecord.BoardTypeName_Selected & ", "
+                                )
+                            ) - 2
+                        ) & "</u></b>",
+                        If(
+                            var_Edit_ManageMTObjective,
+                            "<b>Step 3. Update the value and then save</b>",
+                            If(
+                                var_Delete_ManageMTObjective
+                                    && 
+                                    CountRows(Filter(ReviewHub_MetricTypeDetails, ThisRecord.mtd_Objective.mto_ObjectiveName = combo_ManageObj_ExistingValues.Selected.mto_ObjectiveName_selected)) = 0,
+                                "<b>Step 3. Confirm delete ''" & combo_ManageObj_ExistingValues.Selected.mto_ObjectiveName_selected & "'' for <u>" & Left(
+                            Concat(
+                                combo_ManageObj_BoardType_NMT.SelectedItems,
+                                ThisRecord.BoardTypeName_Selected & ", "
+                            ),
+                            Len(
+                                Concat(
+                                    combo_ManageObj_BoardType_NMT.SelectedItems,
+                                    ThisRecord.BoardTypeName_Selected & ", "
+                                )
+                            ) - 2
+                        ) & "</u>?</b>",
+                                "<font color=red><b>Warning: </b>You cannot delete this value. This value is used by <b>" 
+                                    & CountRows(
+                                        ForAll(Distinct(
+                                            Filter(clln_MetricTypeDetail, ThisRecord.mtd_MetricTypeSubgroup = combo_ManageObj_ExistingValues.Selected.mto_ObjectiveName_selected).mtd_MetricTypeId,
+                                            ThisRecord.mtd_MetricTypeId
+                                        ), {Result: ThisRecord.Value})
+                                    ) 
+                                    & "</b> metric type(s):<br>"
+                                    & Concat(
+                                        GroupBy(
+                                            Filter(
+                                                clln_MetricTypeDetail,
+                                                ThisRecord.mtd_MetricTypeSubgroup = combo_ManageObj_ExistingValues.Selected.mto_ObjectiveName_selected
+                                            ),
+                                            "mtd_MetricTypeId",
+                                            "mtd_MetricTypeGroup"
+                                        ),
+                                        //Filter(ReviewHub_MetricTypeDetails, ThisRecord.mtd_Objective.mto_ObjectiveName = combo_ManageObj_ExistingValues.Selected.mto_ObjectiveName_selected), 
+                                        "&emsp; <b>&#8226; Metric Type: </b>" & First(ThisRecord.mtd_MetricTypeGroup).mtd_MetricTypeName & "<br>"
+                                        )
+                            )
+                        )
+                    )
+                PaddingLeft: =15
+                PaddingRight: =15
+                Visible: =(var_AddNew_ManageMTObjective || var_Edit_ManageMTObjective || var_Delete_ManageMTObjective) && html_ManageObj_ExistingValues.Visible
+                Width: =Top_ManageObjective_NMT.Width
+                X: =Top_ManageObjective_NMT.X
+                Y: =btn_ManageObj_AddNew_NMT.Y + btn_ManageObj_AddNew_NMT.Height + 15
+                ZIndex: =1
+
+        btn_ManageObj_Delete_NMT As button:
+            BorderColor: =Self.Fill
+            DisplayMode: =btn_ManageObj_Modify_NMT.DisplayMode
+            Fill: =BlueControlDarkBackground
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =25
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Self.Fill
+            HoverFill: =Self.Color
+            OnSelect: |-
+                =UpdateContext(
+                    {
+                        var_AddNew_ManageMTObjective: false,
+                        var_Edit_ManageMTObjective: false,
+                        var_Delete_ManageMTObjective: true
+                    }
+                )
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Size: =10
+            Text: ="Delete This Value"
+            Visible: =html_ManageObj_ExistingValues.Visible
+            Width: =btn_ManageObj_AddNew_NMT.Width
+            X: =btn_ManageObj_Modify_NMT.X + btn_ManageObj_Modify_NMT.Width + 30
+            Y: =btn_ManageObj_AddNew_NMT.Y
+            ZIndex: =8
+
+        btn_ManageObj_Modify_NMT As button:
+            BorderColor: =Self.Fill
+            DisplayMode: |-
+                =If(
+                    IsBlankOrError(combo_ManageObj_ExistingValues.Selected.mto_ObjectiveName_selected) || CountRows(combo_ManageObj_ExistingValues.SelectedItems) = 0,
+                    DisplayMode.Disabled,
+                    DisplayMode.Edit
+                )
+            Fill: =BlueControlDarkBackground
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =25
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Self.Fill
+            HoverFill: =Self.Color
+            OnSelect: |-
+                =UpdateContext(
+                    {
+                        var_AddNew_ManageMTObjective: false,
+                        var_Edit_ManageMTObjective: true,
+                        var_Delete_ManageMTObjective: false
+                    }
+                )
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Size: =10
+            Text: ="Modify This Value"
+            Visible: =html_ManageObj_ExistingValues.Visible
+            Width: =btn_ManageObj_AddNew_NMT.Width
+            X: =btn_ManageObj_AddNew_NMT.X +btn_ManageObj_AddNew_NMT.Width + 30
+            Y: =btn_ManageObj_AddNew_NMT.Y
+            ZIndex: =9
+
+        btn_ManageObj_AddNew_NMT As button:
+            BorderColor: =Self.Fill
+            Fill: =BlueControlDarkBackground
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =25
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Self.Fill
+            HoverFill: =Self.Color
+            OnSelect: |-
+                =UpdateContext(
+                    {
+                        var_AddNew_ManageMTObjective: true,
+                        var_Edit_ManageMTObjective: false,
+                        var_Delete_ManageMTObjective: false
+                    }
+                )
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Size: =10
+            Text: ="Add A New Value"
+            Visible: =html_ManageObj_ExistingValues.Visible
+            Width: =175
+            X: =Top_ManageObjective_NMT.X + (Top_ManageObjective_NMT.Width - Self.Width*3 - 60) * 0.50
+            Y: =combo_ManageObj_ExistingValues.Y + combo_ManageObj_ExistingValues.Height + 10
+            ZIndex: =10
+
+        combo_ManageObj_ExistingValues As combobox:
+            BorderColor: =If(IsBlankOrError(Self.Selected.mto_ObjectiveName_selected) || CountRows(Self.SelectedItems) = 0, REDWARNINGCOLOR, GRAYCOLOR)
+            BorderThickness: =1
+            ChevronBackground: =GrayControlBackground
+            ChevronFill: =Color.Black
+            ChevronHoverBackground: =
+            ChevronHoverFill: =Color.Black
+            DefaultSelectedItems: |-
+                =First(
+                    SortByColumns(
+                        ShowColumns(
+                            GroupBy(
+                                Filter(
+                                    clln_MetricTypeObjectives,
+                                    ThisRecord.mto_BoardTypeID_selected in combo_ManageObj_BoardType_NMT.SelectedItems.BoardTypeID_Selected
+                                ),
+                                "mto_ObjectiveName_selected",
+                                "DummyGroup"
+                            ),
+                            "mto_ObjectiveName_selected"
+                        ),
+                        "mto_ObjectiveName_selected",
+                        SortOrder.Ascending
+                    )
+                )
+            DisplayFields: =["mto_ObjectiveName_selected"]
+            Font: =FontStyle
+            Height: =30
+            HoverBorderColor: =
+            HoverFill: =BlueControlLightBackground
+            InputTextPlaceholder: ="Search for a metric type objective / subgroup"
+            Items: |-
+                =SortByColumns(
+                    ShowColumns(
+                        GroupBy(
+                            Filter(
+                                clln_MetricTypeObjectives,
+                                ThisRecord.mto_BoardTypeID_selected in combo_ManageObj_BoardType_NMT.SelectedItems.BoardTypeID_Selected
+                            ),
+                            "mto_ObjectiveName_selected",
+                            "DummyGroup"
+                        ),
+                        "mto_ObjectiveName_selected"
+                    ),
+                    "mto_ObjectiveName_selected",
+                    SortOrder.Ascending
+                )
+            OnChange: |-
+                =UpdateContext(
+                    {
+                        var_AddNew_ManageMTObjective: false,
+                        var_Edit_ManageMTObjective: false,
+                        var_Delete_ManageMTObjective: false
+                    }
+                )
+            PaddingBottom: =0
+            PaddingRight: =8
+            PaddingTop: =0
+            PressedColor: =BlueControlDarkBackground
+            PressedFill: =BlueControlLightBackground
+            Reset: =
+            SearchFields: =["mto_ObjectiveName_selected"]
+            SearchItems: |-
+                =Search(SortByColumns(
+                    ShowColumns(
+                        GroupBy(
+                            Filter(
+                                clln_MetricTypeObjectives,
+                                ThisRecord.mto_BoardTypeID_selected in combo_ManageObj_BoardType_NMT.SelectedItems.BoardTypeID_Selected
+                            ),
+                            "mto_ObjectiveName_selected",
+                            "DummyGroup"
+                        ),
+                        "mto_ObjectiveName_selected"
+                    ),
+                    "mto_ObjectiveName_selected",
+                    SortOrder.Ascending
+                ),combo_ManageObj_ExistingValues.SearchText,"mto_ObjectiveName_selected")
+            SelectionFill: =BlueNaviHightLightBackground
+            SelectMultiple: =false
+            Size: =11
+            Tooltip: ="Select Metric Type Objective"
+            Visible: =html_ManageObj_ExistingValues.Visible
+            Width: =Top_ManageObjective_NMT.Width - 30
+            X: =combo_ManageObj_BoardType_NMT.X
+            Y: =html_ManageObj_ExistingValues.Y + html_ManageObj_ExistingValues.Height
+            ZIndex: =11
+
+        html_ManageObj_ExistingValues As htmlViewer:
+            AutoHeight: =true
+            BorderColor: =RGBA(0, 0, 0, 0)
+            Font: =FontStyle
+            Height: =30
+            HtmlText: ="<b>Step 2. Select an existing objective, and then select an action"
+            PaddingLeft: =15
+            Visible: =!(IsBlankOrError(combo_ManageObj_BoardType_NMT.SelectedItems) || CountRows(combo_ManageObj_BoardType_NMT.SelectedItems) = 0)
+            Width: =Top_ManageObjective_NMT.Width
+            X: =Top_ManageObjective_NMT.X
+            Y: =html_ManageObj_BTSubheader_NMT.Y + html_ManageObj_BTSubheader_NMT.Height + 10
+            ZIndex: =12
+
+        html_ManageObj_BTSubheader_NMT As htmlViewer:
+            AutoHeight: =true
+            BorderColor: =RGBA(0, 0, 0, 0)
+            Font: =FontStyle
+            Height: =30
+            HtmlText: |-
+                =If(
+                    CountRows(combo_ManageObj_BoardType_NMT.SelectedItems) = 0 || IsBlankOrError(combo_ManageObj_BoardType_NMT.SelectedItems),
+                    " ",
+                    "You've selected <font style='font-weight: 600'>" & Left(
+                        Concat(combo_ManageObj_BoardType_NMT.SelectedItems, ThisRecord.BoardTypeName_Selected & ", "),
+                        Len(Concat(combo_ManageObj_BoardType_NMT.SelectedItems, ThisRecord.BoardTypeName_Selected & ", ")) - 2
+                    ) & "</font>."
+                )
+            PaddingLeft: =22
+            Width: =html_ManageObj_BTHeader_NMT.Width
+            X: =html_ManageObj_BTHeader_NMT.X
+            Y: =combo_ManageObj_BoardType_NMT.Y + combo_ManageObj_BoardType_NMT.Height
+            ZIndex: =13
+
+        combo_ManageObj_BoardType_NMT As combobox:
+            BorderColor: =If(IsBlankOrError(Self.SelectedItems) || CountRows(Self.SelectedItems) = 0, REDWARNINGCOLOR, GRAYCOLOR)
+            BorderThickness: =1
+            ChevronBackground: =GrayControlBackground
+            ChevronFill: =Color.Black
+            ChevronHoverBackground: =
+            ChevronHoverFill: =Color.Black
+            DefaultSelectedItems: =Blank()
+            DisplayFields: =["BoardTypeName_Selected"]
+            Font: =FontStyle
+            Height: =30
+            HoverBorderColor: =
+            HoverFill: =BlueControlLightBackground
+            InputTextPlaceholder: ="Select scorecard types"
+            IsSearchable: =false
+            Items: |-
+                =RenameColumns(
+                    Filter(
+                        AddColumns(
+                            ShowColumns(
+                                ReviewHub_BoardTypes,
+                                "craf2_boardtypeid",
+                                "craf2_boardtypename",
+                                "craf2_isdisplayinapp"
+                            ),
+                            "IsDisplayInApp",
+                            If(
+                                Text(craf2_isdisplayinapp) = "Yes",
+                                true,
+                                false
+                            )
+                        ),
+                        ThisRecord.IsDisplayInApp = true 
+                            && (IsAdmin || (IsCoordinator && ThisRecord.craf2_boardtypeid in IsCoordinator_BoardTypes))
+                    ),
+                    "craf2_boardtypeid",
+                    "BoardTypeID_Selected",
+                    "craf2_boardtypename",
+                    "BoardTypeName_Selected"
+                )
+            OnChange: =Reset(combo_ManageObj_ExistingValues)
+            PaddingBottom: =0
+            PaddingTop: =0
+            PressedColor: =BlueControlDarkBackground
+            PressedFill: =BlueControlLightBackground
+            Reset: =
+            SearchFields: =["BoardTypeName_Selected"]
+            SearchItems: =[]
+            SelectionFill: =BlueNaviHightLightBackground
+            Size: =11
+            Tooltip: ="Select scorecard types"
+            Width: |-
+                =If(
+                    CountRows(Self.SelectedItems) = 0 || IsBlankOrError(Self.SelectedItems),
+                    200,
+                    Min(160 * CountRows(Self.SelectedItems), Top_ManageObjective_NMT.Width - 30)
+                )
+            X: =Top_ManageObjective_NMT.X + 15
+            Y: =html_ManageObj_BTHeader_NMT.Y + html_ManageObj_BTHeader_NMT.Height
+            ZIndex: =14
+
+        html_ManageObj_BTHeader_NMT As htmlViewer:
+            AutoHeight: =true
+            BorderColor: =RGBA(0, 0, 0, 0)
+            Font: =FontStyle
+            Height: =30
+            HtmlText: |-
+                ="<b>Step 1. Select scorecard types for this objective (allow multi-selection): </b><font color=red>*</font>"
+            PaddingLeft: =15
+            Width: =Top_ManageObjective_NMT.Width
+            X: =Top_ManageObjective_NMT.X
+            Y: =Top_ManageObjective_NMT.Y + Top_ManageObjective_NMT.Height + 10
+            ZIndex: =15
+
+        Top_ManageObjective_NMT As button:
+            BorderColor: =Self.Fill
+            Color: =RGBA(0, 0, 0, 1)
+            DisabledBorderColor: =Self.Fill
+            DisabledColor: =Self.Color
+            DisabledFill: =Self.Fill
+            DisplayMode: =DisplayMode.Disabled
+            Fill: =ColorFade(BlueNaviHightLightBackground, 50%)
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Size: =11
+            Text: ="Manage Metric Type Objectives (Subgroup)"
+            Width: =Back_MangeMTObjective_NMT.Width
+            X: =(Parent.Width - Self.Width) * 0.50
+            Y: =Back_MangeMTObjective_NMT.Y
+            ZIndex: =16
+
+        btn_Close_ManageObj_NMT As icon.Add:
+            BorderColor: =
+            BorderStyle: =BorderStyle.None
+            Color: =RGBA(0, 0, 0, 1)
+            Height: =Top_ManageObjective_NMT.Height
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =BlueControlDarkBackground
+            Icon: =Icon.Cancel
+            OnSelect: =Select(btn_CancelMTObjective_NMT);
+            PaddingBottom: =7
+            PaddingLeft: =7
+            PaddingRight: =7
+            PaddingTop: =7
+            PressedColor: =Color.Purple
+            Tooltip: ="Close"
+            Width: =Self.Height + 3
+            X: =Top_ManageObjective_NMT.X + Top_ManageObjective_NMT.Width - Self.Width
+            Y: =Top_ManageObjective_NMT.Y
+            ZIndex: =17
+
+    Timer_NMT As timer:
+        Duration: =5000
+        OnTimerEnd: |-
+            =Set(var_Display_html_AddNewMT_Warning, true);
+            Set(var_Timer_DelayRefreshWarning, false);
+        Start: =var_Timer_DelayRefreshWarning
+        Visible: =false
+        X: =737
+        Y: =42
+        ZIndex: =10
+
+    TrackRequestComponent_NMT As TrackRequestComponent:
+        BlueControlDarkBackground: =BlueControlDarkBackground
+        BlueControlLightBackground: =BlueControlLightBackground
+        BlueNaviHightLightBackground: =BlueNaviHightLightBackground
+        DevOpsBaseUrl: =var_DevOpsBaseURL
+        DevOpsQueryID: =var_DevOpsQueryID
+        FontStyle: =FontStyle
+        GrayCanvasBackground: =GrayCanvasBackground
+        GRAYCOLOR: =GRAYCOLOR
+        GrayControlBackground: =GrayControlBackground
+        IsAdmin: =IsAdmin
+        Reset: =Self.Visible
+        Visible: =SS_AppHeader_NMT.DisplayTrackRequest
+        X: =App.Width - Self.Width
+        Y: =SS_AppHeader_NMT.Height
+        ZIndex: =11
+

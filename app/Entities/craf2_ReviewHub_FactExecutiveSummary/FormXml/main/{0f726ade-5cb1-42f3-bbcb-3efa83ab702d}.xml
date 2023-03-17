@@ -1,0 +1,148 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <systemform>
+    <formid>{0f726ade-5cb1-42f3-bbcb-3efa83ab702d}</formid>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <FormPresentation>1</FormPresentation>
+    <FormActivationState>1</FormActivationState>
+    <form headerdensity="HighWithControls">
+      <tabs>
+        <tab verticallayout="true" id="{a330eede-6804-40be-b0d1-528bea42ea55}" IsUserDefined="1">
+          <labels>
+            <label description="General" languagecode="1033" />
+          </labels>
+          <columns>
+            <column width="100%">
+              <sections>
+                <section showlabel="false" showbar="false" IsUserDefined="0" id="{80ef8192-0847-4e5c-858f-9a256245995c}">
+                  <labels>
+                    <label description="General" languagecode="1033" />
+                  </labels>
+                  <rows>
+                    <row>
+                      <cell id="{7f909a80-c376-4d87-85f6-62767d5c7855}">
+                        <labels>
+                          <label description="Title" languagecode="1033" />
+                        </labels>
+                        <control id="craf2_executivesummarytitle" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="craf2_executivesummarytitle" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{2cd0990b-aa25-4b9e-8804-cabccf7951e4}" visible="false">
+                        <labels>
+                          <label description="Owner" languagecode="1033" />
+                        </labels>
+                        <control id="ownerid" classid="{270BD3DB-D9AF-4782-9025-509E298DEC0A}" datafieldname="ownerid" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{514f0439-eb3a-4c33-84c2-e053ac29bc55}" locklevel="0" colspan="1" rowspan="1">
+                        <labels>
+                          <label description="ExecutiveSummary Description" languagecode="1033" />
+                        </labels>
+                        <control id="craf2_executivesummarydescription" classid="{4273EDBD-AC1D-40D3-9FB2-095C621B552D}" datafieldname="craf2_executivesummarydescription" disabled="false" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{2127960e-6620-467a-be78-bfc7a78313f8}" locklevel="0" colspan="1" rowspan="1">
+                        <labels>
+                          <label description="HighLight MetricTypeID" languagecode="1033" />
+                        </labels>
+                        <control id="craf2_highlightmetrictypeid" classid="{4273EDBD-AC1D-40D3-9FB2-095C621B552D}" datafieldname="craf2_highlightmetrictypeid" disabled="false" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{4cace774-8313-4fcb-9e74-60a6f5726671}" locklevel="0" colspan="1" rowspan="1">
+                        <labels>
+                          <label description="LowLight MetricTypeID" languagecode="1033" />
+                        </labels>
+                        <control id="craf2_lowlightmetrictypeid" classid="{4273EDBD-AC1D-40D3-9FB2-095C621B552D}" datafieldname="craf2_lowlightmetrictypeid" disabled="false" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{9490b4d7-19fc-4d6e-987a-df625c50ea67}" locklevel="0" colspan="1" rowspan="1">
+                        <labels>
+                          <label description="FactMetricBoardID" languagecode="1033" />
+                        </labels>
+                        <control id="craf2_factmetricboardid" classid="{C6D124CA-7EDA-4A60-AEA9-7FB8D318B68F}" datafieldname="craf2_factmetricboardid" disabled="false" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{16c6bdb6-246a-4d84-925e-e0da7523f636}" locklevel="0" colspan="1" rowspan="1">
+                        <labels>
+                          <label description="Product" languagecode="1033" />
+                        </labels>
+                        <control id="craf2_product" classid="{270BD3DB-D9AF-4782-9025-509E298DEC0A}" datafieldname="craf2_product" disabled="false" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{61cc1b73-a7c6-4e78-9aee-e00a15007051}" locklevel="0" colspan="1" rowspan="1">
+                        <labels>
+                          <label description="ReviewLockDate" languagecode="1033" />
+                        </labels>
+                        <control id="craf2_reviewlockdate" classid="{5B773807-9FB2-42DB-97C3-7A91EFF8ADFF}" datafieldname="craf2_reviewlockdate" disabled="false" />
+                      </cell>
+                    </row>
+                  </rows>
+                </section>
+              </sections>
+            </column>
+          </columns>
+        </tab>
+      </tabs>
+      <header id="{cd15d2ce-2696-4e53-8e4d-be2ddb710195}" celllabelposition="Top" columns="111" labelwidth="115" celllabelalignment="Left">
+        <rows>
+          <row>
+            <cell id="{10aebeaa-e757-4568-af57-78087a1708e1}" showlabel="false">
+              <labels>
+                <label description="" languagecode="1033" />
+              </labels>
+            </cell>
+            <cell id="{c4e2dc76-a66b-4b25-a4c1-ffacd4177cf5}" showlabel="false">
+              <labels>
+                <label description="" languagecode="1033" />
+              </labels>
+            </cell>
+            <cell id="{5677d597-848a-4cf5-93ac-c6adf0f4eee3}" showlabel="false">
+              <labels>
+                <label description="" languagecode="1033" />
+              </labels>
+            </cell>
+          </row>
+        </rows>
+      </header>
+      <footer id="{95f1d706-9b14-4aae-85e9-50f7bc128efc}" celllabelposition="Top" columns="111" labelwidth="115" celllabelalignment="Left">
+        <rows>
+          <row>
+            <cell id="{f34c42ef-8203-42e3-aae1-e31ec68c8336}" showlabel="false">
+              <labels>
+                <label description="" languagecode="1033" />
+              </labels>
+            </cell>
+            <cell id="{2ff51844-c3a3-423b-b0ed-d3b1cc840020}" showlabel="false">
+              <labels>
+                <label description="" languagecode="1033" />
+              </labels>
+            </cell>
+            <cell id="{7f9e9992-59c9-476e-88b8-125db4682b2b}" showlabel="false">
+              <labels>
+                <label description="" languagecode="1033" />
+              </labels>
+            </cell>
+          </row>
+        </rows>
+      </footer>
+      <DisplayConditions Order="0" FallbackForm="true">
+        <Everyone />
+      </DisplayConditions>
+    </form>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>1</CanBeDeleted>
+    <LocalizedNames>
+      <LocalizedName description="Information" languagecode="1033" />
+    </LocalizedNames>
+    <Descriptions>
+      <Description description="A form for this entity." languagecode="1033" />
+    </Descriptions>
+  </systemform>
+</forms>

@@ -1,0 +1,1771 @@
+scn_ExecSummary As screen:
+    Fill: =GrayCanvasBackground
+    OnHidden: |-
+        =Set(var_EditExecSummaryDesc_ES, false);
+        //Reset(dpdn_Product_ES);
+    OnVisible: |
+        =Set(var_TRCVisible, !var_TRCVisible);
+        Set(varSelectedBoardId, -6);
+        Concurrent(
+            ClearCollect(
+                cllnl_BoardType_ES,
+                RenameColumns(
+                    DropColumns(
+                        GroupBy(
+                            AddColumns(
+                                ReviewHub_FactExecutiveSummaries,
+                                "ReviewMonth", Month(ThisRecord.ReviewLockDate),
+                                "ReviewYear", Year(ThisRecord.ReviewLockDate)
+                            ),
+                            "ReviewYear", "ReviewMonth", "chub_boardtypeid", "DummyGroup"
+                        ), 
+                        "DummyGroup"
+                    ),
+                    "chub_boardtypeid", "filter_BoardTypeID"
+                )
+            ),
+            ClearCollect(
+                clln_Product_ES,
+                DropColumns(
+                GroupBy(
+                    ShowColumns(
+                        AddColumns(
+                            ReviewHub_FactExecutiveSummaries,
+                            "ProductID", ThisRecord.Product.ProductID,
+                            "ProductName", ThisRecord.Product.ProductName,
+                            "ReviewMonth", Month(ThisRecord.ReviewLockDate),
+                            "ReviewYear", Year(ThisRecord.ReviewLockDate)
+                        ),
+                        "ProductID", "ProductName", "ReviewMonth", "ReviewYear", "chub_boardtypeid"
+                    ),
+                    "chub_boardtypeid", "ReviewMonth", "ReviewYear", "ProductID", "ProductName", "DummyGroup"
+                ), "DummyGroup"
+                )
+            ),
+            ClearCollect(
+                clln_ExecSummary_MonthYear, //Get distinct values of Review Month and Year
+                SortByColumns(
+                    DropColumns(
+                        GroupBy(
+                            AddColumns(
+                                ShowColumns(ReviewHub_FactExecutiveSummaries, "craf2_reviewlockdate"),
+                                "ReviewMonthYear", Text(craf2_reviewlockdate, "mmmm yyyy"),
+                                "ReviewMonth", Month(craf2_reviewlockdate),
+                                "ReviewYear", Year(craf2_reviewlockdate)
+                            ),
+                            "ReviewMonthYear", "ReviewMonth", "ReviewYear", "DummyGroup"
+                        ), 
+                        "DummyGroup"
+                    ),
+                    "ReviewYear", SortOrder.Descending, "ReviewMonth", SortOrder.Descending
+                )
+            )
+        );
+
+    Timer_Handle_HTML_Height_Issue_ES As timer:
+        AutoStart: =true
+        Duration: =300
+        OnTimerEnd: |-
+            =If(
+                html_ExecSumDesc_ES.Height > 2000,
+                Select(btn_get_data_ES)
+            )
+        Repeat: =html_ExecSumDesc_ES.Height > 2000
+        Start: |-
+            =If(
+                html_ExecSumDesc_ES.Height > 1500,
+                true,
+                false
+            )
+        Text: |-
+            =Text(Time(0, 0, Self.Value/1000), "hh:mm:ss") //This Time can prevent the html_ExecSumDesc_ES auto-height growing too large!
+        Visible: =false
+        X: =452
+        ZIndex: =1
+
+    btn_get_data_ES As button:
+        OnSelect: |+
+            =Set(var_fmbID_ES, -1);
+            Clear(clln_glry_HL_ES);
+            Clear(clln_glry_LL_ES);  //The above batch can prevent the html_ExecSumDesc_ES auto-height growing too large!
+            
+            Concurrent(
+                Set(var_EditExecSummaryDesc_ES, false),
+                Set(
+                    var_fmbID_ES, 
+                    LookUp(
+                        clln_factMetricBoard, 
+                        ThisRecord.fmb_MetricBoardTypeID = dpdn_Scorecard_ES.Selected.filter_BoardTypeID
+                            && ThisRecord.fmb_ProductID = dpdn_Product_ES.Selected.ProductID 
+                            && ThisRecord.fmb_ReviewMonth = dpdn_ReviewMonth_ES.Selected.ReviewMonth
+                            && ThisRecord.fmb_ReviewYear = dpdn_ReviewMonth_ES.Selected.ReviewYear
+                    ).fmb_ID
+                ),
+                //Handle User Persona - Review Owner
+                If(
+                    IsMatch(
+                        First(
+                            Sort(
+                                Filter(clln_factMetricBoard, fmb_ProductID=dpdn_Product_ES.Selected.ProductID && fmb_MetricBoardTypeID=dpdn_Scorecard_ES.Selected.filter_BoardTypeID), 
+                                fmb_ReviewLockDate, 
+                                SortOrder.Descending
+                            )
+                        ).fmb_ReviewOwnerClaims,
+                        User().Email,
+                        MatchOptions.Contains & MatchOptions.IgnoreCase
+                    ),
+                    Set(IsReviewOwner, true),
+                    Set(IsReviewOwner, false)
+                ),
+                //Handle User Persona - Stakeholder
+                If(
+                    IsMatch(
+                        LookUp(ReviewHub_Stakeholders, ThisRecord.craf2_Product.craf2_productid=dpdn_Product_ES.Selected.ProductID && ThisRecord.craf2_BoardType.craf2_boardtypeid = dpdn_Scorecard_ES.Selected.filter_BoardTypeID).ProductStakeholderEmails,
+                        User().Email, 
+                        MatchOptions.Contains & MatchOptions.IgnoreCase
+                    ),
+                    Set(IsStakeholder, true), 
+                    Set(IsStakeholder, false)
+                )
+            );
+            
+            Concurrent(
+                ClearCollect(
+                    clln_glry_HL_ES,
+                    AddColumns(
+                AddColumns(
+                    AddColumns(
+                        ForAll(Split(
+                            LookUp(
+                                ReviewHub_FactExecutiveSummaries,
+                                ThisRecord.craf2_Product.craf2_productid = dpdn_Product_ES.Selected.ProductID && ThisRecord.craf2_factmetricboardid = var_fmbID_ES
+                            ).craf2_highlightmetrictypeid,
+                            "|"
+                        ), {Result: ThisRecord.Value}).Result,
+                        "Highlight_MetricTypeID", Value(First(ForAll(Split(ThisRecord.Result,"-"), {Result: ThisRecord.Value})).Result),
+                        "Highlight_FactMetricID", Value(Last(ForAll(Split(ThisRecord.Result,"-"), {Result: ThisRecord.Value})).Result)
+                    ),
+                    "record_MTD",
+                    LookUp(
+                        clln_MetricTypeDetail,
+                        ThisRecord.mtd_MetricTypeId = Highlight_MetricTypeID
+                    ),
+                    "record_FM",
+                    LookUp(
+                        ReviewHub_FactMetrics,
+                        ThisRecord.FactMetricID = Highlight_FactMetricID
+                    )
+                ),
+                "MetricTypeShortName", record_MTD.mtd_MetricShortName,
+                "MetricTypeName", record_MTD.mtd_MetricTypeName,
+                "fm_Comment", record_FM.fm_Comment
+            )
+                ),
+                ClearCollect(
+                    clln_glry_LL_ES,
+                    AddColumns(
+                AddColumns(
+                    AddColumns(
+                        ForAll(Split(
+                            LookUp(
+                                ReviewHub_FactExecutiveSummaries,
+                                ThisRecord.craf2_Product.craf2_productid = dpdn_Product_ES.Selected.ProductID && ThisRecord.craf2_factmetricboardid = var_fmbID_ES
+                            ).craf2_lowlightmetrictypeid,
+                            "|"
+                        ), {Result: ThisRecord.Value}).Result,
+                        "Lowlight_MetricTypeID", Value(First(ForAll(Split(ThisRecord.Result,"-"), {Result: ThisRecord.Value})).Result),
+                        "Lowlight_FactMetricID", Value(Last(ForAll(Split(ThisRecord.Result,"-"), {Result: ThisRecord.Value})).Result)
+                    ),
+                    "record_MTD",
+                    LookUp(
+                        clln_MetricTypeDetail,
+                        ThisRecord.mtd_MetricTypeId = Lowlight_MetricTypeID
+                    ),
+                    "record_FM",
+                    LookUp(
+                        ReviewHub_FactMetrics,
+                        ThisRecord.FactMetricID = Lowlight_FactMetricID
+                    )
+                ),
+                "MetricTypeShortName", record_MTD.mtd_MetricShortName,
+                "MetricTypeName", record_MTD.mtd_MetricTypeName,
+                "fm_Comment", record_FM.fm_Comment
+            )
+                )
+            );
+            
+        Text: ="Hidden For ExecutiveSummary Screen"
+        Visible: =false
+        Width: =531
+        X: =578
+        ZIndex: =2
+
+    vctn_ExecSum_ViewOnly As groupContainer.verticalAutoLayoutContainer:
+        Height: =App.Height - Self.Y - 20
+        LayoutAlignItems: =LayoutAlignItems.Stretch
+        LayoutDirection: =LayoutDirection.Vertical
+        LayoutGap: =10
+        LayoutMode: =LayoutMode.Auto
+        LayoutOverflowY: =LayoutOverflow.Scroll
+        Visible: =!IsBlankOrError(LookUp(ReviewHub_FactExecutiveSummaries, ThisRecord.craf2_factmetricboardid=var_fmbID_ES))
+        Width: =App.Width - Self.X - 15 //App.Width - LeftNavi_ES.Width - 50
+        X: =LeftNavi_ES.Width + 15
+        Y: =ctn_TopBanner_ES.Y + ctn_TopBanner_ES.Height + 15
+        ZIndex: =3
+
+        ctn_ExecSummaryDesc_ES As groupContainer:
+            AlignInContainer: =AlignInContainer.SetByContainer
+            FillPortions: =0
+            Height: =background_ExecSumDesc.Height
+            LayoutMinHeight: =200
+            LayoutMinWidth: =250
+            PaddingBottom: =5
+            PaddingTop: =5
+            ZIndex: =1
+
+            background_ExecSumDesc As button:
+                Align: =Align.Left
+                BorderColor: =Self.Fill
+                BorderThickness: =1
+                Color: =RGBA(0, 0, 0, 1)
+                DisabledBorderColor: =Self.Fill
+                DisabledColor: =RGBA(0, 0, 0, 1)
+                DisabledFill: =Self.Fill
+                DisplayMode: =DisplayMode.Disabled
+                Fill: =SUBGROUPCOLOR //ColorFade(BlueNaviHightLightBackground, 50%)
+                Font: =FontStyle
+                FontWeight: =FontWeight.Bold
+                Height: |-
+                    =If(
+                        var_EditExecSummaryDesc_ES,
+                        html_ExecSumDesc_ES.Height + 150,
+                        html_ExecSumDesc_ES.Height + 42 //Max(html_ExecSumDesc_ES.Height+5, 200)
+                    )
+                PaddingLeft: =15
+                PaddingTop: =10
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =15
+                RadiusTopRight: =15
+                Size: =11
+                Text: ="Executive Summary"
+                VerticalAlign: =VerticalAlign.Top
+                Width: =Parent.Width
+                ZIndex: =1
+
+            html_ExecSumDesc_ES As htmlViewer:
+                AutoHeight: =true
+                BorderColor: =RGBA(0, 0, 0, 0)
+                Color: =If(var_EditExecSummaryDesc_ES,  RGBA(0, 0, 0, 0), RGBA(0, 0, 0, 1))
+                Fill: =If(var_EditExecSummaryDesc_ES, RGBA(0, 0, 0, 0), RGBA(255, 255, 255, 1))
+                Font: =FontStyle
+                Height: =
+                HtmlText: |-
+                    =If(
+                        var_EditExecSummaryDesc_ES,
+                        ti_ExecSumDesc_ES.HtmlText, //if in edit mode, get RichTextInput Text to use its Auto-Height value for background's height.
+                        LookUp(ReviewHub_FactExecutiveSummaries, ThisRecord.craf2_factmetricboardid=var_fmbID_ES).craf2_executivesummarydescription
+                    )
+                PaddingBottom: =0
+                PaddingTop: =0
+                Visible: =true //!var_EditExecSummaryDesc_ES
+                Width: =background_ExecSumDesc.Width - 4
+                X: =background_ExecSumDesc.X + 2
+                Y: =background_ExecSumDesc.Y + 40
+                ZIndex: =2
+
+            ti_ExecSumDesc_ES As richTextEditor:
+                BorderColor: =If(lbl_Warn_CharacterLimit.Visible, Color.Red, RGBA(0, 0, 0, 0))
+                Default: =LookUp(ReviewHub_FactExecutiveSummaries, ThisRecord.craf2_factmetricboardid=var_fmbID_ES).craf2_executivesummarydescription 
+                Height: =background_ExecSumDesc.Height - 34
+                Visible: =var_EditExecSummaryDesc_ES
+                Width: =background_ExecSumDesc.Width + 5
+                X: =background_ExecSumDesc.X - 2
+                Y: =background_ExecSumDesc.Y + 36
+                ZIndex: =3
+
+            bttn_EditExecSummary_ES As button:
+                BorderColor: =Self.Fill
+                Fill: =BlueControlDarkBackground
+                Font: =FontStyle
+                FontWeight: =FontWeight.Bold
+                Height: |
+                    =25
+                HoverColor: =Self.Fill
+                HoverFill: =Self.Color
+                OnSelect: =Set(var_EditExecSummaryDesc_ES, true)
+                RadiusBottomLeft: =15
+                RadiusBottomRight: =15
+                RadiusTopLeft: =15
+                RadiusTopRight: =15
+                Size: =10
+                Text: ="Edit"
+                Visible: |-
+                    =var_EditExecSummaryDesc_ES = false
+                        && (
+                            IsAdmin || IsReviewOwner || IsStakeholder
+                            || (IsCoordinator && dpdn_Scorecard_ES.Selected.filter_BoardTypeID in IsCoordinator_BoardTypes)
+                        )
+                Width: =90
+                X: =Parent.Width - Self.Width - 15
+                Y: =(41 - Self.Height) * 0.50
+                ZIndex: =4
+
+            bttn_SaveExecSummary_ES As button:
+                BorderColor: =Self.Fill
+                DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                DisabledFill: =RGBA(0, 0, 0, 0)
+                DisplayMode: =If(lbl_Warn_CharacterLimit.Visible, DisplayMode.Disabled, DisplayMode.Edit)
+                Fill: =BlueControlDarkBackground
+                Font: =FontStyle
+                FontWeight: =FontWeight.Bold
+                Height: |
+                    =25
+                HoverColor: =Self.Fill
+                HoverFill: =Self.Color
+                OnSelect: |
+                    =Concurrent(
+                        Set(var_EditExecSummaryDesc_ES, false),
+                        Patch(
+                            ReviewHub_FactExecutiveSummaries,
+                            LookUp(ReviewHub_FactExecutiveSummaries, ThisRecord.craf2_factmetricboardid = var_fmbID_ES),
+                            {
+                                craf2_executivesummarydescription: Trim(ti_ExecSumDesc_ES.HtmlText)
+                            }
+                        )
+                    );
+                PaddingBottom: =0
+                PaddingTop: =0
+                RadiusBottomLeft: =15
+                RadiusBottomRight: =15
+                RadiusTopLeft: =15
+                RadiusTopRight: =15
+                Size: =10
+                Text: ="Save"
+                Visible: =var_EditExecSummaryDesc_ES
+                Width: =90
+                X: =bttn_CancelExecSummary_ES.X - Self.Width - 10
+                Y: =bttn_EditExecSummary_ES.Y
+                ZIndex: =5
+
+            bttn_CancelExecSummary_ES As button:
+                BorderColor: =Self.Fill
+                Fill: =GRAYCOLOR
+                Font: =FontStyle
+                FontWeight: =FontWeight.Bold
+                Height: |
+                    =25
+                HoverColor: =Self.Fill
+                HoverFill: =Self.Color
+                OnSelect: |-
+                    =Concurrent(
+                        Set(var_EditExecSummaryDesc_ES, false),
+                        Reset(ti_ExecSumDesc_ES)
+                    )
+                PaddingBottom: =0
+                PaddingTop: =0
+                RadiusBottomLeft: =15
+                RadiusBottomRight: =15
+                RadiusTopLeft: =15
+                RadiusTopRight: =15
+                Size: =10
+                Text: ="Cancel"
+                Visible: =var_EditExecSummaryDesc_ES
+                Width: =90
+                X: =bttn_EditExecSummary_ES.X
+                Y: =bttn_EditExecSummary_ES.Y 
+                ZIndex: =6
+
+            lbl_Warn_CharacterLimit As label:
+                Align: =Align.Right
+                Color: =RGBA(255, 0, 0, 1)
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =bttn_EditExecSummary_ES.Height
+                PaddingRight: =10
+                Size: =10
+                Text: |-
+                    ="Current characters: " & Len(ti_ExecSumDesc_ES.HtmlText) & ", exceeded maximum 4000 characters!"
+                Visible: =Len(ti_ExecSumDesc_ES.HtmlText) > 4000
+                Width: =420
+                X: =bttn_SaveExecSummary_ES.X - Self.Width
+                Y: =bttn_SaveExecSummary_ES.Y + bttn_SaveExecSummary_ES.Height - Self.Height
+                ZIndex: =7
+
+        hctn_ExecSummary_ES As groupContainer.horizontalAutoLayoutContainer:
+            AlignInContainer: =AlignInContainer.SetByContainer
+            FillPortions: =0
+            Height: =Max(ctn_ExecSummary_HL_ES.Height, ctn_ExecSummary_LL_ES.Height)
+            LayoutJustifyContent: =LayoutJustifyContent.Center
+            LayoutMinHeight: =100
+            LayoutMinWidth: =250
+            LayoutMode: =LayoutMode.Auto
+            LayoutOverflowY: =LayoutOverflow.Scroll
+            PaddingLeft: =20
+            PaddingRight: =20
+            ZIndex: =2
+
+            ctn_ExecSummary_HL_ES As groupContainer:
+                AlignInContainer: =AlignInContainer.Start
+                FillPortions: =0
+                Height: |-
+                    =If(
+                        IsEmpty(glry_HL_ES.AllItems),
+                        html_HL_NoDataTip_ES.Y + html_HL_NoDataTip_ES.Height,
+                        Label_glry_HL_ES.Height + glry_HL_ES.Height + lbl_HL_HeaderMetric_ES.Height + 20
+                    )
+                LayoutMinHeight: =100
+                LayoutMinWidth: =250
+                Visible: =!IsBlankOrError(LookUp(ReviewHub_FactExecutiveSummaries, ThisRecord.craf2_factmetricboardid=var_fmbID_ES))
+                Width: =(Parent.Width - divider_BetweenContainers.Width) * 0.5
+                X: =Label_Scorecard_ES.X
+                Y: =Label_Product_ES.Y + Label_Product_ES.Height + 15
+                ZIndex: =1
+
+                Back_ExecSummary_HL_ES As label:
+                    BorderColor: =RGBA(255, 255, 255, 1)
+                    Color: =RGBA(255, 255, 255, 1)
+                    Fill: =RGBA(255, 255, 255, 1)
+                    Height: =Parent.Height - Self.Y
+                    Size: =10
+                    Text: =//for the white background
+                    Width: =Parent.Width
+                    Y: =Label_glry_HL_ES.Y + Label_glry_HL_ES.Height
+                    ZIndex: =1
+
+                glry_HL_ES As gallery.variableTemplateHeightGallery:
+                    BorderColor: =lbl_HL_HeaderMetric_ES.Fill
+                    BorderThickness: =2
+                    Height: =Sum(Self.AllItems, If(IsError(lbl_Height_HL.Text), 0, Value(lbl_Height_HL.Text)))
+                    Items: |-
+                        =Ungroup( //Ungroup function to add a Row Number column.
+                                ForAll(
+                                    Sequence(CountRows(clln_glry_HL_ES)),
+                                    {
+                                        Record: Table(Last(FirstN(clln_glry_HL_ES, Value))),
+                                        RowNumber: Value
+                                    }
+                                ),
+                                "Record"
+                            )
+                    Layout: =Layout.Vertical
+                    ShowScrollbar: =false
+                    TemplateFill: =If(Mod(ThisItem.RowNumber, 2)= 1, RGBA(255, 255, 255, 1), RowHoverOverColor) //
+                    TemplatePadding: =0
+                    TemplateSize: =40
+                    Width: =Label_glry_HL_ES.Width - Self.X - 11
+                    X: =lbl_HL_HeaderMetric_ES.X + 1
+                    Y: =lbl_HL_HeaderMetric_ES.Height + lbl_HL_HeaderMetric_ES.Y
+                    ZIndex: =2
+
+                    lbl_Height_HL As label:
+                        Height: =25
+                        OnSelect: =Select(Parent)
+                        Size: =10
+                        Text: =lbl_HL_MetricName_ES.Height + If(html_HL_Comment_ES.Visible, html_HL_Comment_ES.Height, 0)
+                        Visible: =false
+                        Width: =50
+                        X: =Parent.Width - Self.Width
+                        ZIndex: =1
+
+                    html_HL_Comment_ES As htmlViewer:
+                        AutoHeight: =true
+                        Font: =FontStyle
+                        Height: =52
+                        HtmlText: |-
+                            =If(
+                                IsBlankOrError(ThisItem.fm_Comment) || Trim(ThisItem.fm_Comment) = "",
+                                "",
+                                "<font style='font-weight: 600; font-size:18px;'>&#128221; </font>" & ThisItem.fm_Comment //&#128172;  &#128204;
+                            )
+                        OnSelect: =Select(Parent)
+                        PaddingBottom: =10
+                        PaddingTop: =0
+                        Size: =10
+                        Tooltip: ="Comment"
+                        Visible: |-
+                            =If(
+                                IsBlankOrError(ThisItem.fm_Comment) || Trim(ThisItem.fm_Comment) = "",
+                                false,
+                                true
+                            )
+                        Width: =Parent.Width
+                        X: =lbl_HL_MetricName_ES.X
+                        Y: =lbl_HL_MetricName_ES.Y + lbl_HL_MetricName_ES.Height
+                        ZIndex: =3
+
+                    lbl_HL_Target_ES As label:
+                        Align: =Align.Center
+                        Color: =If(Self.Text = "Not Available", GRAYCOLOR, RGBA(0, 0, 0, 1))
+                        Font: =FontStyle
+                        FontWeight: =bttn_HL_Value_ES.FontWeight
+                        Height: =25
+                        OnSelect: =Select(Parent)
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =bttn_HL_Value_ES.Size
+                        Text: |-
+                            =Switch(
+                                ThisItem.record_MTD.mtd_MetricValueType,
+                                "Number", 
+                                    If(
+                                        ThisItem.record_FM.fm_TargetNumber = -1 || IsBlankOrError(ThisItem.record_FM.fm_TargetNumber),
+                                        "Not Available",
+                                        If(
+                                            ThisItem.record_FM.fm_TargetNumber < 1.0,
+                                            Text(Round(ThisItem.record_FM.fm_TargetNumber, 4)),
+                                            If(
+                                                EndsWith(Text(ThisItem.record_FM.fm_TargetNumber, "[$-en-US]###,###,###.##"), "."),
+                                                Text(ThisItem.record_FM.fm_TargetNumber, "[$-en-US]###,###,###"),
+                                                Text(ThisItem.record_FM.fm_TargetNumber, "[$-en-US]###,###,###.00")
+                                            )
+                                        )
+                                    ),
+                                "Percentage", 
+                                    If(
+                                        ThisItem.record_FM.fm_TargetNumber = -1 || IsBlankOrError(ThisItem.record_FM.fm_TargetNumber),
+                                        "Not Available",
+                                        ThisItem.record_FM.fm_TargetNumber & "%"
+                                    ),
+                                
+                                "Text", 
+                                    If(
+                                        IsBlankOrError(ThisItem.record_FM.fm_TargetText),
+                                        "Not Available",
+                                        ThisItem.record_FM.fm_TargetText
+                                    ),
+                                "Boolean", 
+                                    If(
+                                        IsBlankOrError(ThisItem.record_FM.fm_TargetYesNo),
+                                        "Not Available",
+                                        Switch(ThisItem.record_FM.fm_TargetYesNo, 1, "Yes", 0, "No")
+                                    )
+                            )
+                        Tooltip: =bttn_HL_Value_ES.Tooltip
+                        Width: =lbl_HL_HeaderTarget_ES.Width
+                        X: =bttn_HL_Value_ES.X + bttn_HL_Value_ES.Width
+                        Y: =bttn_HL_Value_ES.Y
+                        ZIndex: =4
+
+                    bttn_HL_Value_ES As button:
+                        BorderColor: =Self.Fill
+                        BorderStyle: =BorderStyle.None
+                        BorderThickness: =0
+                        Color: |-
+                            =If(
+                                Self.Text="..." || Trim(Self.Text)="" || lbl_HL_Target_ES.Text="Not Available", 
+                                Color.Black,
+                                If(
+                                    Self.Text="Not Applicable",
+                                    GRAYCOLOR,
+                                    Switch(
+                                        Self.Fill,
+                                        GREENCOLOR, GreenFontColor,
+                                        YellowTargetColor, YellowFontColor,
+                                        REDCOLOR, RedFontColor,
+                                        RGBA(0, 0, 0, 0), RGBA(1, 1, 1, 1)
+                                    )
+                                )
+                            )
+                        ContentLanguage: =
+                        DisplayMode: =DisplayMode.View
+                        Fill: |-
+                            =If(
+                                (IsBlankOrError(ThisItem.record_FM.fm_TargetNumber) || ThisItem.record_FM.fm_TargetNumber=-1) && IsBlankOrError(ThisItem.record_FM.fm_TargetYesNo) && IsBlankOrError(ThisItem.record_FM.fm_TargetText),
+                                RGBA(0,0,0,0),
+                                If(
+                                    ThisItem.record_MTD.mtd_MetricValueType = "Boolean" || ThisItem.record_MTD.mtd_MetricValueType = "Text",
+                                    Switch(
+                                        ThisItem.record_MTD.mtd_MetricValueType,
+                                        "Boolean",
+                                        If(
+                                            IsBlank(ThisItem.record_FM.fm_TargetYesNo), 
+                                            RGBA(0,0,0,0),
+                                            If(
+                                                ThisItem.record_FM.fm_TargetYesNo = ThisItem.record_FM.fm_ValueYesNo,
+                                                GREENCOLOR, 
+                                                REDCOLOR
+                                            )
+                                        ),
+                                        "Text",
+                                        If(
+                                            IsBlank(ThisItem.record_FM.fm_TargetText), 
+                                            RGBA(0,0,0,0),
+                                            If(
+                                                ThisItem.record_FM.fm_TargetText = ThisItem.record_FM.fm_ValueText,
+                                                GREENCOLOR, 
+                                                REDCOLOR
+                                            )
+                                        )
+                                    ),
+                                    //Else "Percentage" or "Number"
+                                    If(
+                                        ThisItem.record_FM.fm_TargetNumber = -1,
+                                        RGBA(0,0,0,0),
+                                        If(
+                                            ThisItem.record_MTD.mtd_IsTrendDown,
+                                            If(
+                                                ThisItem.record_FM.fm_ValueNumber <= ThisItem.record_FM.fm_TargetNumber 
+                                                    || (!IsBlankOrError(ThisItem.record_FM.fm_GreenTargetStart) && ThisItem.record_FM.fm_ValueNumber <= ThisItem.record_FM.fm_GreenTargetStart),
+                                                GREENCOLOR,
+                                                If(
+                                                    !IsBlankOrError(ThisItem.record_FM.fm_YellowTargetStart) 
+                                                        && ThisItem.record_FM.fm_ValueNumber <= ThisItem.record_FM.fm_YellowTargetStart, 
+                                                    YellowTargetColor,
+                                                    REDCOLOR
+                                                )
+                                            ),
+                            
+                                            If(
+                                                ThisItem.record_FM.fm_ValueNumber >= ThisItem.record_FM.fm_TargetNumber  
+                                                    || (!IsBlankOrError(ThisItem.record_FM.fm_GreenTargetStart) && ThisItem.record_FM.fm_ValueNumber >= ThisItem.record_FM.fm_GreenTargetStart),
+                                                GREENCOLOR,
+                                                If(
+                                                    !IsBlankOrError(ThisItem.record_FM.fm_YellowTargetStart) 
+                                                        && ThisItem.record_FM.fm_ValueNumber >= ThisItem.record_FM.fm_YellowTargetStart, 
+                                                    YellowTargetColor,
+                                                    REDCOLOR
+                                                )
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        Font: =FontStyle
+                        FontWeight: =FontWeight.Normal
+                        Height: =25
+                        HoverColor: =Self.Color
+                        HoverFill: =ColorFade(Self.Fill, -10%)
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        PressedColor: =Color.White
+                        PressedFill: =ColorFade(Self.Fill, 25%)
+                        RadiusBottomLeft: =15
+                        RadiusBottomRight: =15
+                        RadiusTopLeft: =15
+                        RadiusTopRight: =15
+                        Size: =10
+                        Text: |-
+                            =Switch(
+                                ThisItem.record_MTD.mtd_MetricValueType,
+                                "Boolean", Switch(ThisItem.record_FM.fm_ValueYesNo, 1, "Yes", 0, "No"), 
+                                "Text", ThisItem.record_FM.fm_ValueText,
+                                "Percentage", ThisItem.record_FM.fm_ValueNumber & "%",
+                                "Number", If(
+                                                ThisItem.record_FM.fm_ValueNumber < 1.0, 
+                                                Text(Round(ThisItem.record_FM.fm_ValueNumber, 4)),
+                                                If(
+                                                    EndsWith(Text(ThisItem.record_FM.fm_ValueNumber, "[$-en-US]###,###,###.##"), "."),
+                                                    Text(ThisItem.record_FM.fm_ValueNumber, "[$-en-US]###,###,###"),
+                                                    Text(ThisItem.record_FM.fm_ValueNumber, "[$-en-US]###,###,###.00")
+                                                )
+                                            ) 
+                            )
+                        Tooltip: |-
+                            =If(
+                                (ThisItem.record_MTD.mtd_MetricValueType="Number" || ThisItem.record_MTD.mtd_MetricValueType="Percentage") 
+                                    && Self.Text <> "Not Applicable",
+                            
+                                If(
+                                    !IsBlankOrError(ThisItem.record_FM.fm_YellowTargetStart), 
+                                    "YellowRangeStart: " & ThisItem.record_FM.fm_YellowTargetStart & If(ThisItem.record_MTD.mtd_MetricValueType="Percentage", "%"), 
+                                    ""
+                                ) 
+                                &
+                                    If(
+                                        !IsBlankOrError(ThisItem.record_FM.fm_GreenTargetStart), 
+                                        " GreenRangeStart: " & ThisItem.record_FM.fm_GreenTargetStart & If(ThisItem.record_MTD.mtd_MetricValueType="Percentage", "%"), 
+                                        ""
+                                    ) 
+                                & 
+                                    If(
+                                        !IsBlankOrError(ThisItem.record_FM.fm_TargetNumber), 
+                                        " Target:" & ThisItem.record_FM.fm_TargetNumber & If(ThisItem.record_MTD.mtd_MetricValueType="Percentage", "%"),
+                                        ""
+                                    )
+                            )
+                        Width: =lbl_HL_HeaderValue_ES.Width
+                        X: =lbl_HL_MetricName_ES.X + lbl_HL_MetricName_ES.Width
+                        Y: =(lbl_HL_MetricName_ES.Height - Self.Height) * 0.50
+                        ZIndex: =5
+
+                    lbl_HL_MetricName_ES As label:
+                        AutoHeight: =true
+                        Font: =FontStyle
+                        FontWeight: =FontWeight.Semibold
+                        OnSelect: =Select(Parent)
+                        PaddingBottom: =Self.PaddingTop
+                        PaddingLeft: =If(Text(ThisItem.record_MTD.mtd_IsTrendDown) = "Yes", 25, 5)
+                        PaddingTop: |-
+                            =If(
+                                IsBlankOrError(ThisItem.fm_Comment) || Trim(ThisItem.fm_Comment) = "",
+                                10,
+                                8
+                            )
+                        Size: =10
+                        Text: =ThisItem.MetricTypeName
+                        Tooltip: |-
+                            ="Metric Short Name: " & ThisItem.MetricTypeShortName
+                        Width: =lbl_HL_HeaderMetric_ES.Width
+                        ZIndex: =6
+
+                    Img_TrendDown_HL_ES As image:
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        Height: =36
+                        Image: =TrendingDown
+                        OnSelect: =Select(Parent)
+                        PaddingLeft: =3
+                        PaddingRight: =3
+                        Visible: =Text(ThisItem.record_MTD.mtd_IsTrendDown) = "Yes"
+                        Width: =25
+                        Y: =0 //Label_MetricType_Title.Height*0.5 - Self.Height*0.5
+                        ZIndex: =7
+
+                html_HL_NoDataTip_ES As htmlViewer:
+                    Height: =50
+                    HtmlText: ="<center><font color=gray>No metrics added to Highlights</font></center>"
+                    Visible: =IsEmpty(glry_HL_ES.AllItems)
+                    Width: =glry_HL_ES.Width
+                    X: =glry_HL_ES.X
+                    Y: =glry_HL_ES.Y + 20
+                    ZIndex: =3
+
+                lbl_HL_HeaderTarget_ES As label:
+                    Align: =Align.Center
+                    BorderStyle: =BorderStyle.None
+                    DisplayMode: =DisplayMode.View
+                    Fill: =lbl_HL_HeaderMetric_ES.Fill
+                    Font: =FontStyle
+                    FontWeight: =FontWeight.Bold
+                    Height: =25
+                    Size: =10
+                    Text: ="Target"
+                    Width: =125
+                    X: =lbl_HL_HeaderValue_ES.X + lbl_HL_HeaderValue_ES.Width
+                    Y: =lbl_HL_HeaderMetric_ES.Y
+                    ZIndex: =4
+
+                lbl_HL_HeaderValue_ES As label:
+                    Align: =Align.Center
+                    BorderStyle: =BorderStyle.None
+                    DisplayMode: =DisplayMode.View
+                    Fill: =lbl_HL_HeaderMetric_ES.Fill
+                    Font: =FontStyle
+                    FontWeight: =FontWeight.Bold
+                    Height: =25
+                    Size: =10
+                    Text: ="Value"
+                    Width: =125
+                    X: =lbl_HL_HeaderMetric_ES.X + lbl_HL_HeaderMetric_ES.Width
+                    Y: =lbl_HL_HeaderMetric_ES.Y
+                    ZIndex: =5
+
+                lbl_HL_HeaderMetric_ES As label:
+                    BorderStyle: =BorderStyle.None
+                    DisplayMode: =DisplayMode.View
+                    Fill: =RGBA(220, 220, 220, 1) //SUBGROUPCOLOR
+                    Font: =FontStyle
+                    FontWeight: =FontWeight.Bold
+                    Height: =25
+                    PaddingLeft: =10
+                    Size: =10
+                    Text: ="Metric"
+                    Width: =Parent.Width - lbl_HL_HeaderValue_ES.Width - lbl_HL_HeaderTarget_ES.Width - Self.X * 2
+                    X: =10
+                    Y: =Label_glry_HL_ES.Y + Label_glry_HL_ES.Height + 10
+                    ZIndex: =6
+
+                Back_glry_HL_ES As button:
+                    BorderColor: =Self.Fill
+                    BorderStyle: =BorderStyle.None
+                    BorderThickness: =0
+                    DisplayMode: =DisplayMode.View
+                    Fill: =background_ExecSumDesc.Fill
+                    Height: =Label_glry_HL_ES.Height
+                    RadiusBottomLeft: =0
+                    RadiusBottomRight: =0
+                    RadiusTopLeft: =15
+                    RadiusTopRight: =15
+                    Text: =""
+                    Width: =Parent.Width
+                    ZIndex: =7
+
+                Label_glry_HL_ES As label:
+                    Color: =RGBA(55, 118, 29, 1)
+                    Font: =FontStyle
+                    FontWeight: =FontWeight.Bold
+                    PaddingLeft: =background_ExecSumDesc.PaddingLeft
+                    Size: =11
+                    Text: ="Highlights (" & CountRows(glry_HL_ES.AllItems) & ")"
+                    Width: =Parent.Width
+                    X: |
+                        =0
+                    ZIndex: =8
+
+            divider_BetweenContainers As rectangle:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Fill: =RGBA(0, 0, 0, 0)
+                Height: =Parent.Height
+                Width: =10
+                ZIndex: =2
+
+            ctn_ExecSummary_LL_ES As groupContainer:
+                AlignInContainer: =AlignInContainer.Start
+                FillPortions: =0
+                Height: |-
+                    =If(
+                        IsEmpty(glry_LL_ES.AllItems),
+                        html_LL_NoDataTip_ES.Y + html_LL_NoDataTip_ES.Height,
+                        Label_glry_LL_ES.Height + glry_LL_ES.Height + lbl_LL_HeaderMetric_ES.Height + 20
+                    )
+                LayoutMinHeight: =100
+                LayoutMinWidth: =250
+                Visible: =!IsBlankOrError(LookUp(ReviewHub_FactExecutiveSummaries, ThisRecord.craf2_factmetricboardid=var_fmbID_ES))
+                Width: =(Parent.Width - divider_BetweenContainers.Width) * 0.5
+                X: =Label_Scorecard_ES.X
+                Y: =Label_Product_ES.Y + Label_Product_ES.Height + 15
+                ZIndex: =3
+
+                Back_ExecSummary_LL_ES As label:
+                    BorderColor: =RGBA(255, 255, 255, 1)
+                    Color: =RGBA(255, 255, 255, 1)
+                    Fill: =RGBA(255, 255, 255, 1)
+                    Height: =Parent.Height - Self.Y
+                    Size: =10
+                    Text: =//for the white background
+                    Width: =Parent.Width
+                    Y: =Label_glry_LL_ES.Y + Label_glry_LL_ES.Height
+                    ZIndex: =1
+
+                glry_LL_ES As gallery.variableTemplateHeightGallery:
+                    BorderColor: =lbl_LL_HeaderMetric_ES.Fill
+                    BorderThickness: =2
+                    Height: =Sum(Self.AllItems, If(IsError(lbl_Height_LL.Text), 0, Value(lbl_Height_LL.Text)))
+                    Items: |-
+                        =Ungroup( //Ungroup function to add a Row Number column.
+                                ForAll(
+                                    Sequence(CountRows(clln_glry_LL_ES)),
+                                    {
+                                        Record: Table(Last(FirstN(clln_glry_LL_ES, Value))),
+                                        RowNumber: Value
+                                    }
+                                ),
+                                "Record"
+                            )
+                    Layout: =Layout.Vertical
+                    ShowScrollbar: =false
+                    TemplateFill: =If(Mod(ThisItem.RowNumber, 2)= 1, RGBA(255, 255, 255, 1), RowHoverOverColor) //
+                    TemplatePadding: =0
+                    TemplateSize: =40
+                    Width: =Label_glry_LL_ES.Width - Self.X - 11
+                    X: =lbl_LL_HeaderMetric_ES.X + 1
+                    Y: =lbl_LL_HeaderMetric_ES.Height + lbl_LL_HeaderMetric_ES.Y
+                    ZIndex: =2
+
+                    lbl_Height_LL As label:
+                        Color: =RGBA(0, 0, 0, 0)
+                        Height: =25
+                        OnSelect: =Select(Parent)
+                        Size: =10
+                        Text: =lbl_LL_MetricName_ES.Height + If(html_LL_Comment_ES.Visible, html_LL_Comment_ES.Height, 0)
+                        Width: =50
+                        X: =Parent.Width - Self.Width
+                        ZIndex: =3
+
+                    html_LL_Comment_ES As htmlViewer:
+                        AutoHeight: =true
+                        Font: =FontStyle
+                        Height: =52
+                        HtmlText: |-
+                            =If(
+                                IsBlankOrError(ThisItem.fm_Comment) || Trim(ThisItem.fm_Comment) = "",
+                                "",
+                                "<font style='font-weight: 600; font-size:18px;'>&#128221; </font>" & ThisItem.fm_Comment //&#128172;  &#128204;
+                            )
+                        OnSelect: =Select(Parent)
+                        PaddingBottom: =10
+                        PaddingTop: =0
+                        Size: =10
+                        Tooltip: ="Comment"
+                        Visible: |-
+                            =If(
+                                IsBlankOrError(ThisItem.fm_Comment) || Trim(ThisItem.fm_Comment) = "",
+                                false,
+                                true
+                            )
+                        Width: =Parent.Width
+                        X: =lbl_LL_MetricName_ES.X
+                        Y: =lbl_LL_MetricName_ES.Y + lbl_LL_MetricName_ES.Height
+                        ZIndex: =4
+
+                    lbl_LL_Target_ES As label:
+                        Align: =Align.Center
+                        Color: =If(Self.Text = "Not Available", GRAYCOLOR, RGBA(0, 0, 0, 1))
+                        Font: =FontStyle
+                        FontWeight: =bttn_LL_Value_ES.FontWeight
+                        Height: =25
+                        OnSelect: =Select(Parent)
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =bttn_LL_Value_ES.Size
+                        Text: |-
+                            =Switch(
+                                ThisItem.record_MTD.mtd_MetricValueType,
+                                "Number", 
+                                    If(
+                                        ThisItem.record_FM.fm_TargetNumber = -1 || IsBlankOrError(ThisItem.record_FM.fm_TargetNumber),
+                                        "Not Available",
+                                        If(
+                                            ThisItem.record_FM.fm_TargetNumber < 1.0,
+                                            Text(Round(ThisItem.record_FM.fm_TargetNumber, 4)),
+                                            If(
+                                                EndsWith(Text(ThisItem.record_FM.fm_TargetNumber, "[$-en-US]###,###,###.##"), "."),
+                                                Text(ThisItem.record_FM.fm_TargetNumber, "[$-en-US]###,###,###"),
+                                                Text(ThisItem.record_FM.fm_TargetNumber, "[$-en-US]###,###,###.00")
+                                            )
+                                        )
+                                    ),
+                                "Percentage", 
+                                    If(
+                                        ThisItem.record_FM.fm_TargetNumber = -1 || IsBlankOrError(ThisItem.record_FM.fm_TargetNumber),
+                                        "Not Available",
+                                        ThisItem.record_FM.fm_TargetNumber & "%"
+                                    ),
+                                
+                                "Text", 
+                                    If(
+                                        IsBlankOrError(ThisItem.record_FM.fm_TargetText),
+                                        "Not Available",
+                                        ThisItem.record_FM.fm_TargetText
+                                    ),
+                                "Boolean", 
+                                    If(
+                                        IsBlankOrError(ThisItem.record_FM.fm_TargetYesNo),
+                                        "Not Available",
+                                        Switch(ThisItem.record_FM.fm_TargetYesNo, 1, "Yes", 0, "No")
+                                    )
+                            )
+                        Tooltip: =bttn_LL_Value_ES.Tooltip
+                        Width: =lbl_LL_HeaderTarget_ES.Width
+                        X: =bttn_LL_Value_ES.X + bttn_LL_Value_ES.Width
+                        Y: =bttn_LL_Value_ES.Y
+                        ZIndex: =5
+
+                    bttn_LL_Value_ES As button:
+                        BorderColor: =Self.Fill
+                        BorderStyle: =BorderStyle.None
+                        BorderThickness: =0
+                        Color: |-
+                            =If(
+                                Self.Text="..." || Trim(Self.Text)="" || lbl_LL_Target_ES.Text="Not Available", 
+                                Color.Black,
+                                If(
+                                    Self.Text="Not Applicable",
+                                    GRAYCOLOR,
+                                    Switch(
+                                        Self.Fill,
+                                        GREENCOLOR, GreenFontColor,
+                                        YellowTargetColor, YellowFontColor,
+                                        REDCOLOR, RedFontColor,
+                                        RGBA(0, 0, 0, 0), RGBA(1, 1, 1, 1)
+                                    )
+                                )
+                            )
+                        ContentLanguage: =
+                        DisplayMode: =DisplayMode.View
+                        Fill: |-
+                            =If(
+                                (IsBlankOrError(ThisItem.record_FM.fm_TargetNumber) || ThisItem.record_FM.fm_TargetNumber=-1) && IsBlankOrError(ThisItem.record_FM.fm_TargetYesNo) && IsBlankOrError(ThisItem.record_FM.fm_TargetText),
+                                RGBA(0,0,0,0),
+                                If(
+                                    ThisItem.record_MTD.mtd_MetricValueType = "Boolean" || ThisItem.record_MTD.mtd_MetricValueType = "Text",
+                                    Switch(
+                                        ThisItem.record_MTD.mtd_MetricValueType,
+                                        "Boolean",
+                                        If(
+                                            IsBlank(ThisItem.record_FM.fm_TargetYesNo), 
+                                            RGBA(0,0,0,0),
+                                            If(
+                                                ThisItem.record_FM.fm_TargetYesNo = ThisItem.record_FM.fm_ValueYesNo,
+                                                GREENCOLOR, 
+                                                REDCOLOR
+                                            )
+                                        ),
+                                        "Text",
+                                        If(
+                                            IsBlank(ThisItem.record_FM.fm_TargetText), 
+                                            RGBA(0,0,0,0),
+                                            If(
+                                                ThisItem.record_FM.fm_TargetText = ThisItem.record_FM.fm_ValueText,
+                                                GREENCOLOR, 
+                                                REDCOLOR
+                                            )
+                                        )
+                                    ),
+                                    //Else "Percentage" or "Number"
+                                    If(
+                                        ThisItem.record_FM.fm_TargetNumber = -1,
+                                        RGBA(0,0,0,0),
+                                        If(
+                                            ThisItem.record_MTD.mtd_IsTrendDown,
+                                            If(
+                                                ThisItem.record_FM.fm_ValueNumber <= ThisItem.record_FM.fm_TargetNumber 
+                                                    || (!IsBlankOrError(ThisItem.record_FM.fm_GreenTargetStart) && ThisItem.record_FM.fm_ValueNumber <= ThisItem.record_FM.fm_GreenTargetStart),
+                                                GREENCOLOR,
+                                                If(
+                                                    !IsBlankOrError(ThisItem.record_FM.fm_YellowTargetStart) 
+                                                        && ThisItem.record_FM.fm_ValueNumber <= ThisItem.record_FM.fm_YellowTargetStart, 
+                                                    YellowTargetColor,
+                                                    REDCOLOR
+                                                )
+                                            ),
+                            
+                                            If(
+                                                ThisItem.record_FM.fm_ValueNumber >= ThisItem.record_FM.fm_TargetNumber  
+                                                    || (!IsBlankOrError(ThisItem.record_FM.fm_GreenTargetStart) && ThisItem.record_FM.fm_ValueNumber >= ThisItem.record_FM.fm_GreenTargetStart),
+                                                GREENCOLOR,
+                                                If(
+                                                    !IsBlankOrError(ThisItem.record_FM.fm_YellowTargetStart) 
+                                                        && ThisItem.record_FM.fm_ValueNumber >= ThisItem.record_FM.fm_YellowTargetStart, 
+                                                    YellowTargetColor,
+                                                    REDCOLOR
+                                                )
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        Font: =FontStyle
+                        FontWeight: =FontWeight.Normal
+                        Height: =25
+                        HoverColor: =Self.Color
+                        HoverFill: =ColorFade(Self.Fill, -10%)
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        PressedColor: =Color.White
+                        PressedFill: =ColorFade(Self.Fill, 25%)
+                        RadiusBottomLeft: =15
+                        RadiusBottomRight: =15
+                        RadiusTopLeft: =15
+                        RadiusTopRight: =15
+                        Size: =10
+                        Text: |-
+                            =Switch(
+                                ThisItem.record_MTD.mtd_MetricValueType,
+                                "Boolean", Switch(ThisItem.record_FM.fm_ValueYesNo, 1, "Yes", 0, "No"), 
+                                "Text", ThisItem.record_FM.fm_ValueText,
+                                "Percentage", ThisItem.record_FM.fm_ValueNumber & "%",
+                                "Number", If(
+                                                ThisItem.record_FM.fm_ValueNumber < 1.0, 
+                                                Text(Round(ThisItem.record_FM.fm_ValueNumber, 4)),
+                                                If(
+                                                    EndsWith(Text(ThisItem.record_FM.fm_ValueNumber, "[$-en-US]###,###,###.##"), "."),
+                                                    Text(ThisItem.record_FM.fm_ValueNumber, "[$-en-US]###,###,###"),
+                                                    Text(ThisItem.record_FM.fm_ValueNumber, "[$-en-US]###,###,###.00")
+                                                )
+                                            ) 
+                            )
+                        Tooltip: |-
+                            =If(
+                                (ThisItem.record_MTD.mtd_MetricValueType="Number" || ThisItem.record_MTD.mtd_MetricValueType="Percentage") 
+                                    && Self.Text <> "Not Applicable",
+                            
+                                If(
+                                    !IsBlankOrError(ThisItem.record_FM.fm_YellowTargetStart), 
+                                    "YellowRangeStart: " & ThisItem.record_FM.fm_YellowTargetStart & If(ThisItem.record_MTD.mtd_MetricValueType="Percentage", "%"), 
+                                    ""
+                                ) 
+                                &
+                                    If(
+                                        !IsBlankOrError(ThisItem.record_FM.fm_GreenTargetStart), 
+                                        " GreenRangeStart: " & ThisItem.record_FM.fm_GreenTargetStart & If(ThisItem.record_MTD.mtd_MetricValueType="Percentage", "%"), 
+                                        ""
+                                    ) 
+                                & 
+                                    If(
+                                        !IsBlankOrError(ThisItem.record_FM.fm_TargetNumber), 
+                                        " Target:" & ThisItem.record_FM.fm_TargetNumber & If(ThisItem.record_MTD.mtd_MetricValueType="Percentage", "%"),
+                                        ""
+                                    )
+                            )
+                        Width: =lbl_LL_HeaderValue_ES.Width
+                        X: =lbl_LL_MetricName_ES.X + lbl_LL_MetricName_ES.Width
+                        Y: =(lbl_LL_MetricName_ES.Height - Self.Height) * 0.50
+                        ZIndex: =6
+
+                    lbl_LL_MetricName_ES As label:
+                        AutoHeight: =true
+                        Font: =FontStyle
+                        FontWeight: =FontWeight.Semibold
+                        OnSelect: =Select(Parent)
+                        PaddingBottom: =Self.PaddingTop
+                        PaddingLeft: =If(Text(ThisItem.record_MTD.mtd_IsTrendDown) = "Yes", 25, 5)
+                        PaddingTop: |-
+                            =If(
+                                IsBlankOrError(ThisItem.fm_Comment) || Trim(ThisItem.fm_Comment) = "",
+                                10,
+                                8
+                            )
+                        Size: =10
+                        Text: =ThisItem.MetricTypeName
+                        Tooltip: |-
+                            ="Metric Short Name: " & ThisItem.MetricTypeShortName
+                        Width: =lbl_LL_HeaderMetric_ES.Width
+                        ZIndex: =7
+
+                    Img_TrendDown_LL_ES As image:
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        Height: =36
+                        Image: =TrendingDown
+                        OnSelect: =Select(Parent)
+                        PaddingLeft: =3
+                        PaddingRight: =3
+                        Visible: =Text(ThisItem.record_MTD.mtd_IsTrendDown) = "Yes"
+                        Width: =25
+                        Y: =0 //Label_MetricType_Title.Height*0.5 - Self.Height*0.5
+                        ZIndex: =8
+
+                html_LL_NoDataTip_ES As htmlViewer:
+                    Height: =50
+                    HtmlText: ="<center><font color=gray>No metrics added to Lowlights</font></center>"
+                    Visible: =IsEmpty(glry_LL_ES.AllItems)
+                    Width: =glry_LL_ES.Width
+                    X: =glry_LL_ES.X
+                    Y: =glry_LL_ES.Y + 20
+                    ZIndex: =3
+
+                lbl_LL_HeaderTarget_ES As label:
+                    Align: =Align.Center
+                    BorderStyle: =BorderStyle.None
+                    DisplayMode: =DisplayMode.View
+                    Fill: =lbl_HL_HeaderMetric_ES.Fill
+                    Font: =FontStyle
+                    FontWeight: =FontWeight.Bold
+                    Height: =25
+                    Size: =10
+                    Text: ="Target"
+                    Width: =125
+                    X: =lbl_LL_HeaderValue_ES.X + lbl_LL_HeaderValue_ES.Width
+                    Y: =lbl_LL_HeaderMetric_ES.Y
+                    ZIndex: =4
+
+                lbl_LL_HeaderValue_ES As label:
+                    Align: =Align.Center
+                    BorderStyle: =BorderStyle.None
+                    DisplayMode: =DisplayMode.View
+                    Fill: =lbl_HL_HeaderMetric_ES.Fill
+                    Font: =FontStyle
+                    FontWeight: =FontWeight.Bold
+                    Height: =25
+                    Size: =10
+                    Text: ="Value"
+                    Width: =125
+                    X: =lbl_LL_HeaderMetric_ES.X + lbl_LL_HeaderMetric_ES.Width
+                    Y: =lbl_LL_HeaderMetric_ES.Y
+                    ZIndex: =5
+
+                lbl_LL_HeaderMetric_ES As label:
+                    BorderStyle: =BorderStyle.None
+                    DisplayMode: =DisplayMode.View
+                    Fill: =lbl_HL_HeaderMetric_ES.Fill
+                    Font: =FontStyle
+                    FontWeight: =FontWeight.Bold
+                    Height: =25
+                    PaddingLeft: =10
+                    Size: =10
+                    Text: ="Metric"
+                    Width: =Parent.Width - lbl_LL_HeaderValue_ES.Width - lbl_LL_HeaderTarget_ES.Width - Self.X * 2
+                    X: =10
+                    Y: =Label_glry_LL_ES.Y + Label_glry_LL_ES.Height + 10
+                    ZIndex: =6
+
+                Back_glry_LL_ES As button:
+                    BorderColor: =Self.Fill
+                    BorderStyle: =BorderStyle.None
+                    BorderThickness: =0
+                    DisplayMode: =DisplayMode.View
+                    Fill: =background_ExecSumDesc.Fill
+                    Height: =Label_glry_HL_ES.Height
+                    RadiusBottomLeft: =0
+                    RadiusBottomRight: =0
+                    RadiusTopLeft: =15
+                    RadiusTopRight: =15
+                    Text: =""
+                    Width: =Parent.Width
+                    ZIndex: =7
+
+                Label_glry_LL_ES As label:
+                    Color: =RGBA(210, 64, 39, 1)
+                    Font: =FontStyle
+                    FontWeight: =FontWeight.Bold
+                    PaddingLeft: =background_ExecSumDesc.PaddingLeft
+                    Size: =11
+                    Text: ="Lowlights (" & CountRows(glry_LL_ES.AllItems) & ")"
+                    Width: =Parent.Width
+                    X: |
+                        =0
+                    ZIndex: =8
+
+    lbl_LastUpdate_ES As label:
+        Color: =RGBA(116, 116, 116, 1)
+        Font: =FontStyle
+        Height: =App.Height - Self.Y
+        PaddingBottom: =0
+        PaddingLeft: =10
+        PaddingTop: =0
+        Size: =10
+        Text: |-
+            ="Last updated at " & LookUp(ReviewHub_FactExecutiveSummaries, ThisRecord.craf2_factmetricboardid = var_fmbID_ES).modifiedon
+            & " by " & LookUp(ReviewHub_FactExecutiveSummaries, ThisRecord.craf2_factmetricboardid = var_fmbID_ES).modifiedby.fullname 
+            & " (" & LookUp(ReviewHub_FactExecutiveSummaries, ThisRecord.craf2_factmetricboardid = var_fmbID_ES).modifiedby.internalemailaddress & ")"
+        VerticalAlign: =VerticalAlign.Top
+        Width: =vctn_ExecSum_ViewOnly.Width
+        X: =vctn_ExecSum_ViewOnly.X
+        Y: =vctn_ExecSum_ViewOnly.Y + vctn_ExecSum_ViewOnly.Height
+        ZIndex: =4
+
+    Label4 As label:
+        Align: =Align.Right
+        Color: =BlueControlDarkBackground
+        Font: =FontStyle
+        Height: =20
+        PaddingBottom: =0
+        PaddingTop: =0
+        Size: =10
+        Text: ="To edit highlights and lowlights, go to the corresponding review board from Home Screen."
+        Visible: |
+            =IsAdmin || IsReviewOwner || IsStakeholder
+                    || (IsCoordinator && dpdn_Scorecard_ES.Selected.filter_BoardTypeID in IsCoordinator_BoardTypes)
+        Width: =lbl_LastUpdate_ES.Width
+        X: =Parent.Width - Self.Width - 15
+        Y: =Parent.Height - Self.Height
+        ZIndex: =5
+
+    Label_NoData_ES As label:
+        Align: =Align.Center
+        Font: =FONTNAME
+        FontWeight: =FontWeight.Bold
+        Height: =35
+        Size: =11
+        Text: ="No Executive Summary found based on your selection."
+        Visible: =!vctn_ExecSum_ViewOnly.Visible
+        Width: =460
+        X: =ctn_TopBanner_ES.X + 150
+        Y: =(App.Height - ctn_TopBanner_ES.Y - ctn_TopBanner_ES.Height) * 0.45
+        ZIndex: =6
+
+    ctn_TopBanner_ES As groupContainer.manualLayoutContainer:
+        Fill: =RGBA(255, 255, 255, 1)
+        Height: =80
+        Width: =App.Width - Self.X
+        X: =LeftNavi_ES.Width
+        Y: =BAGIAAppHeader_ES.Height
+        ZIndex: =8
+
+        divider_TopBanner_ES As rectangle:
+            BorderStyle: =BorderStyle.None
+            DisplayMode: =DisplayMode.View
+            Fill: =GrayBorderLight
+            Height: =2
+            Width: =Parent.Width
+            Y: =Parent.Height - Self.Height
+            ZIndex: =1
+
+        dpdn_Product_ES As combobox:
+            BorderColor: =
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =0
+            ChevronBackground: =Self.Fill
+            ChevronDisabledBackground: =RGBA(149, 149, 149, 1)
+            ChevronDisabledFill: =RGBA(0, 0, 0, 0)
+            ChevronFill: =RGBA(0, 0, 0, 1)
+            ChevronHoverBackground: =RGBA(0,0,0,0)
+            ChevronHoverFill: =RGBA(0, 0, 0, 1)
+            DefaultSelectedItems: |-
+                =First(
+                    Filter(
+                        clln_Product_ES,
+                        ThisRecord.ReviewMonth = dpdn_ReviewMonth_ES.Selected.ReviewMonth 
+                            && ThisRecord.ReviewYear = dpdn_ReviewMonth_ES.Selected.ReviewYear 
+                            && ThisRecord.chub_boardtypeid = dpdn_Scorecard_ES.Selected.filter_BoardTypeID
+                    )
+                )
+            DisabledBorderColor: =RGBA(149, 149, 149, 1)
+            DisabledColor: =RGBA(149, 149, 149, 1)
+            DisplayFields: =["ProductName"]
+            Fill: =GrayControlBackground
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: |
+                =30
+            HoverFill: =Self.ChevronHoverBackground
+            InputTextPlaceholder: ="Find A Product"
+            Items: |-
+                =Filter(
+                    clln_Product_ES,
+                    ThisRecord.ReviewMonth = dpdn_ReviewMonth_ES.Selected.ReviewMonth 
+                        && ThisRecord.ReviewYear = dpdn_ReviewMonth_ES.Selected.ReviewYear
+                        && ThisRecord.chub_boardtypeid = dpdn_Scorecard_ES.Selected.filter_BoardTypeID
+                )
+            OnChange: =Select(btn_get_data_ES)
+            PaddingBottom: =0
+            PaddingRight: =10
+            PaddingTop: =0
+            PressedColor: =BlueControlDarkBackground
+            PressedFill: =BlueControlLightBackground
+            SearchFields: =["ProductName"]
+            SearchItems: |-
+                =Search(Filter(
+                    clln_Product_ES,
+                    ThisRecord.ReviewMonth = dpdn_ReviewMonth_ES.Selected.ReviewMonth 
+                        && ThisRecord.ReviewYear = dpdn_ReviewMonth_ES.Selected.ReviewYear
+                        && ThisRecord.chub_boardtypeid = dpdn_Scorecard_ES.Selected.filter_BoardTypeID
+                ),dpdn_Product_ES.SearchText,"ProductName")
+            SelectionFill: =BlueNaviHightLightBackground
+            SelectMultiple: =false
+            Size: =11
+            Width: =370
+            X: =Label_Product_ES.X + Label_Product_ES.Width
+            Y: =(Parent.Height - Self.Height) * 0.50
+            ZIndex: =2
+
+        Label_Product_ES As label:
+            Align: =Align.Right
+            BorderStyle: =BorderStyle.None
+            DisplayMode: =DisplayMode.View
+            Font: =FontStyle
+            Height: =Parent.Height
+            PaddingRight: =10
+            Size: =11
+            Text: |-
+                ="Product:"
+            Width: =85
+            X: |
+                =dpdn_Scorecard_ES.Width + dpdn_Scorecard_ES.X + 10
+            Y: =Label_Title_ES.Y
+            ZIndex: =3
+
+        dpdn_Scorecard_ES As dropdown:
+            BorderColor: =
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =0
+            ChevronBackground: =Self.Fill
+            ChevronDisabledBackground: =RGBA(149, 149, 149, 1)
+            ChevronDisabledFill: =RGBA(0, 0, 0, 0)
+            ChevronFill: =RGBA(0, 0, 0, 1)
+            ChevronHoverBackground: =BlueControlLightBackground
+            ChevronHoverFill: =RGBA(0, 0, 0, 1)
+            Default: ="Product Review"
+            DisabledBorderColor: =RGBA(149, 149, 149, 1)
+            DisabledColor: =RGBA(149, 149, 149, 1)
+            Fill: =GrayControlBackground
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: |
+                =30
+            HoverFill: =Self.ChevronHoverBackground
+            Items: |-
+                =AddColumns(
+                    Filter(
+                        cllnl_BoardType_ES, 
+                        ThisRecord.ReviewMonth = dpdn_ReviewMonth_ES.Selected.ReviewMonth 
+                            && ThisRecord.ReviewYear = dpdn_ReviewMonth_ES.Selected.ReviewYear
+                    ),
+                    "filter_BoardTypeName", LookUp(ReviewHub_BoardTypes, ThisRecord.BoardTypeID = filter_BoardTypeID).BoardTypeShortName
+                )
+            OnChange: =Select(btn_get_data_ES)
+            PressedColor: =BlueControlDarkBackground
+            PressedFill: =BlueControlLightBackground
+            SelectionFill: =BlueNaviHightLightBackground
+            Size: =11
+            Width: =190
+            X: =Label_Scorecard_ES.X + Label_Scorecard_ES.Width
+            Y: =(Parent.Height - Self.Height) * 0.50
+            ZIndex: =4
+
+        Label_Scorecard_ES As label:
+            Align: =Align.Right
+            BorderStyle: =BorderStyle.None
+            DisplayMode: =DisplayMode.View
+            Font: =FontStyle
+            Height: =Parent.Height
+            PaddingRight: =10
+            Size: =11
+            Text: |-
+                ="Scorecard:"
+            Width: =95
+            X: =dpdn_ReviewMonth_ES.X + dpdn_ReviewMonth_ES.Width + 10
+            Y: =Label_Title_ES.Y
+            ZIndex: =5
+
+        dpdn_ReviewMonth_ES As dropdown:
+            BorderColor: =
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =0
+            ChevronBackground: =Self.Fill
+            ChevronDisabledBackground: =RGBA(149, 149, 149, 1)
+            ChevronDisabledFill: =RGBA(0, 0, 0, 0)
+            ChevronFill: =RGBA(0, 0, 0, 1)
+            ChevronHoverBackground: =BlueControlLightBackground
+            ChevronHoverFill: =RGBA(0, 0, 0, 1)
+            Default: =First(clln_ExecSummary_MonthYear).ReviewMonthYear
+            DisabledBorderColor: =RGBA(149, 149, 149, 1)
+            DisabledColor: =RGBA(149, 149, 149, 1)
+            Fill: =GrayControlBackground
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: |
+                =30
+            HoverFill: =Self.ChevronHoverBackground
+            Items: |
+                =AddColumns(
+                clln_ExecSummary_MonthYear,
+                "displayMonthYear", Text(DateAdd(Date(ReviewYear, ReviewMonth, 1), -1, TimeUnit.Months), "mmmm yyyy"))
+            OnChange: =Select(btn_get_data_ES)
+            PressedColor: =BlueControlDarkBackground
+            PressedFill: =BlueControlLightBackground
+            SelectionFill: =BlueNaviHightLightBackground
+            Size: =11
+            Width: =155
+            X: =Label_ReviewMonth_ES.X + Label_ReviewMonth_ES.Width
+            Y: =(Parent.Height - Self.Height) * 0.50
+            ZIndex: =6
+
+        Label_ReviewMonth_ES As label:
+            Align: =Align.Right
+            BorderStyle: =BorderStyle.None
+            DisplayMode: =DisplayMode.View
+            Font: =FontStyle
+            Height: =Parent.Height
+            PaddingRight: =10
+            Size: =11
+            Text: |-
+                ="Review Month:"
+            Width: =135
+            X: =Label_Title_ES.X + Label_Title_ES.Width 
+            Y: =Label_Title_ES.Y
+            ZIndex: =7
+
+        Label_Title_ES As label:
+            BorderStyle: =BorderStyle.None
+            DisplayMode: =DisplayMode.View
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =Parent.Height
+            PaddingLeft: =15
+            Size: =14
+            Text: ="Executive Summary"
+            Width: =205
+            X: |
+                =0
+            ZIndex: =8
+
+    LeftNavi_ES As groupContainer.manualLayoutContainer:
+        BorderStyle: =BorderStyle.None
+        Fill: =BlueControlDarkBackground
+        Height: =App.Height - Self.Y
+        Width: =var_LeftNavi_Width
+        Y: =BAGIAAppHeader_ES.Height
+        ZIndex: =9
+
+        glry_LeftNavi_4 As gallery.variableTemplateHeightGallery:
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            Height: =Parent.Height - Self.Y
+            Items: |-
+                =Sort(
+                    varLeftNavOptions,
+                    If(ThisRecord.ID < 0, ID),
+                    SortOrder.Descending
+                )
+            Layout: =Layout.Vertical
+            OnSelect: |
+                =Set(varSelectedBoardId, ThisItem.ID);
+                Navigate(ThisItem.Screen);
+            ShowScrollbar: =false
+            TemplateFill: |-
+                =If(
+                    ThisItem.ID = varSelectedBoardId,
+                    ColorFade(BlueControlDarkBackground, 20%), 
+                    RGBA(0,0,0,0)
+                )
+            TemplatePadding: =0
+            TemplateSize: =45
+            Width: =Parent.Width
+            Y: =icon_CollapseExpand_4.Y + icon_CollapseExpand_4.Height
+            ZIndex: =1
+
+            imgCircle_LN_4 As circle:
+                DisplayMode: =DisplayMode.View
+                Fill: =RGBA(255, 255, 255, 0.90)
+                Height: =img_LN_4.Height - 5
+                OnSelect: =Select(Parent)
+                Visible: =If(IsBlank(ThisItem.BoardTypeID), false, true)
+                Width: =Self.Height
+                X: =img_LN_4.X + (img_LN_4.Width - Self.Width) * 0.5 
+                Y: =(Parent.TemplateHeight - Self.Height) * 0.5
+                ZIndex: =1
+
+            NoImage_LN_4 As label:
+                Align: =Align.Center
+                Color: =BlueControlDarkBackground
+                FocusedBorderThickness: =1
+                Font: =Font.'Segoe UI'
+                FontWeight: =FontWeight.Semibold
+                Height: =img_LN_4.Height
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Text: =Upper(Left(ThisItem.Title, 2))
+                Tooltip: =ThisItem.Title
+                Visible: |-
+                    =If(
+                        IsBlankOrError(ThisItem.PID), //It means this is not a scorecard tab and should always have a logo.
+                        false, 
+                        If(
+                            IsBlankOrError(LookUp(ReviewHub_Products, ThisRecord.ProductID = ThisItem.PID).LogoImage), //When on scorecard tab, the product logo is missing, 
+                            true,
+                            false
+                        )
+                    )
+                Width: =img_LN_4.Width
+                X: =rect_LN_4.X + rect_LN_4.Width
+                ZIndex: =2
+
+            img_LN_4 As image:
+                AutoDisableOnSelect: =false
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Height: =Self.Width
+                Image: |-
+                    =If(
+                        NoImage_LN_4.Visible,
+                        Blank(),
+                        If(IsBlankOrError(ThisItem.PID), 
+                        ThisItem.ImagePath , LookUp(ReviewHub_Products, ThisRecord.ProductID = ThisItem.PID).LogoImage.Value)
+                    )
+                OnSelect: =Select(Parent)
+                PaddingBottom: =If(IsBlank(ThisItem.BoardTypeID), 3, 9)
+                PaddingLeft: =If(IsBlank(ThisItem.BoardTypeID), 3, 8)
+                PaddingRight: =If(IsBlank(ThisItem.BoardTypeID), 3, 8)
+                PaddingTop: =If(IsBlank(ThisItem.BoardTypeID), 3, 9)
+                Tooltip: =ThisItem.Title
+                Width: =Parent.TemplateHeight
+                X: =rect_LN_4.X + rect_LN_4.Width
+                ZIndex: =3
+
+            html_LN_4 As htmlViewer:
+                Color: =RGBA(255, 255, 255, 1)
+                DisplayMode: =DisplayMode.View
+                Fill: =RGBA(0, 0, 0, 0)
+                Font: =FontStyle
+                Height: =45
+                HtmlText: |-
+                    ="<span style='background-color: " 
+                    & If(
+                        Parent.Width = var_LeftNavi_ExpandWidth, 
+                        "#79b5de; color: #FFFFFF;  display: inline-block; padding: 1px 6px; font-weight: ", 
+                        "rgba(121, 181, 222, 0.75); color: #FFFFFF;  display: inline-block; padding: 1px 3px; font-weight: "
+                    ) 
+                    & If(ThisItem.ID = varSelectedBoardId, "600", "400") & "; border-radius: 5px;'>"
+                    & If(
+                        Parent.Width = var_LeftNavi_ExpandWidth, 
+                        LookUp(clln_BoardTypes, ThisRecord.bt_BoardTypeID = ThisItem.BoardTypeID).bt_BoardTypeShortName,
+                        Upper(Left(LookUp(clln_BoardTypes, ThisRecord.bt_BoardTypeID = ThisItem.BoardTypeID).bt_BoardTypeShortName,2))
+                    )
+                    & "</span></font>"
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =Title_LN_4.PaddingLeft
+                PaddingRight: =Title_LN_4.PaddingRight
+                PaddingTop: =If(Parent.Width = var_LeftNavi_ExpandWidth, 6, 0)
+                Size: =Title_LN_4.Size
+                Visible: =If(IsBlank(ThisItem.BoardTypeID), false, true)
+                Width: =If(Parent.Width = var_LeftNavi_ExpandWidth, Title_LN_4.Width, img_LN_4.Width)
+                X: =If(Parent.Width = var_LeftNavi_ExpandWidth, Title_LN_4.X, img_LN_4.X)
+                ZIndex: =4
+
+            Title_LN_4 As label:
+                BorderColor: =RGBA(32, 54, 71, 1)
+                BorderStyle: =BorderStyle.None
+                Color: =RGBA(255, 255, 255, 1)
+                DisplayMode: =DisplayMode.View
+                FocusedBorderColor: =Title_LN_4.BorderColor
+                Font: =FontStyle
+                FontWeight: =If(ThisItem.ID = varSelectedBoardId, FontWeight.Semibold, FontWeight.Normal)
+                Height: =Parent.TemplateHeight
+                HoverBorderColor: =Title_LN_4.BorderColor
+                HoverColor: =Title_LN_4.Color
+                HoverFill: =Title_LN_4.Fill
+                LineHeight: =1
+                OnSelect: =Select(Parent)
+                PaddingBottom: =If(IsBlank(ThisItem.BoardTypeID), 0, 5)
+                PaddingLeft: =2
+                PaddingTop: =0
+                PressedBorderColor: =Title_LN_4.BorderColor
+                PressedColor: =Title_LN_4.Color
+                PressedFill: =Title_LN_4.Fill
+                Size: =9
+                Text: =ThisItem.Title
+                Tooltip: =ThisItem.Title
+                VerticalAlign: =If(IsBlank(ThisItem.BoardTypeID), VerticalAlign.Middle, VerticalAlign.Bottom)
+                Width: =Parent.Width - Self.X
+                Wrap: =false
+                X: =img_LN_4.X + img_LN_4.Width
+                ZIndex: =5
+
+            TopDivider_LN_4 As rectangle:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Fill: =RGBA(0, 91, 159, 0.30)
+                Height: =1
+                OnSelect: =Select(Parent)
+                Width: =Parent.Width
+                ZIndex: =6
+
+            rect_LN_4 As rectangle:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Fill: =If(ThisItem.ID = varSelectedBoardId, BlueNaviHightLightBackground, TABLEHEADERCOLOR)
+                FocusedBorderColor: =rect_LN_4.BorderColor
+                Height: =Parent.TemplateHeight - Self.Y
+                HoverFill: =rect_LN_4.Fill
+                OnSelect: =Select(Parent)
+                Tooltip: =
+                Width: =6
+                Y: =1
+                ZIndex: =7
+
+            btn_LN_Top_4 As button:
+                AutoDisableOnSelect: =false
+                BorderColor: =
+                BorderStyle: =BorderStyle.None
+                BorderThickness: =0
+                Color: =RGBA(0, 0, 0, 0)
+                DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                DisabledColor: =RGBA(0, 0, 0, 0)
+                DisabledFill: =RGBA(0, 0, 0, 0)
+                Fill: =RGBA(0, 0, 0, 0)
+                Font: =FontStyle
+                Height: =Parent.TemplateHeight
+                HoverBorderColor: =
+                HoverColor: =RGBA(0, 0, 0, 0)
+                HoverFill: =
+                OnSelect: =Select(Parent)
+                PressedBorderColor: =
+                PressedColor: =
+                Text: =//Need this button for the hover-over hand cursor.
+                Tooltip: |
+                    =If(
+                        IsBlankOrError(ThisItem.BoardTypeID),
+                        ThisItem.Title,
+                        Text(ThisItem.ReviewDate, "mmmm yyyy") &
+                            " - (" & LookUp(clln_BoardTypes, ThisRecord.bt_BoardTypeID = ThisItem.BoardTypeID).bt_BoardTypeShortName & ") " 
+                            & ThisItem.Title
+                    )
+                Width: =Parent.TemplateWidth
+                ZIndex: =8
+
+            close_LN_4 As icon.CancelBadge:
+                AutoDisableOnSelect: =false
+                BorderStyle: =BorderStyle.None
+                Color: =RGBA(255, 255, 255, 1)
+                Height: =25
+                HoverColor: =RedFontColor
+                HoverFill: =BlueNaviHightLightBackground
+                Icon: =Icon.Cancel
+                OnSelect: |-
+                    =If(
+                        App.ActiveScreen.Name = "BoardScreen", //When user is currently staying on a Board Screen, navigate to Home Screen.
+                        Navigate(HomeScreen)
+                    );
+                    
+                    RemoveIf(varLeftNavOptions, ThisRecord.ID = ThisItem.ID)
+                    /*
+                    Concurrent(
+                        RemoveIf(varLeftNavOptions, ThisRecord.ID = ThisItem.ID),
+                        RemoveIf(clln_ProductMetrics_BS, ThisRecord.pm_ProductID = ThisItem.PID),
+                        RemoveIf(clln_factMetrics_BS, ThisRecord.fm_ProductID = ThisItem.PID)
+                    );
+                    */
+                PaddingBottom: =5
+                PaddingLeft: =5
+                PaddingRight: =5
+                PaddingTop: =5
+                Tooltip: ="Close this tab"
+                Visible: =!IsBlankOrError(ThisItem.BoardTypeID) && Parent.Width = var_LeftNavi_ExpandWidth //When collapsed, not showing close button.
+                Width: =25
+                X: =Title_LN_4.X + Title_LN_4.Width - Self.Width
+                ZIndex: =9
+
+        icon_CollapseExpand_4 As icon.Add:
+            BorderColor: =RGBA(32, 54, 71, 1)
+            Color: =RGBA(255, 255, 255, 1)
+            DisabledFill: =icon_CollapseExpand_4.Fill
+            FocusedBorderColor: =icon_CollapseExpand_4.BorderColor
+            Height: |
+                =45
+            HoverBorderColor: =ColorFade(icon_CollapseExpand_4.BorderColor, 20%)
+            HoverColor: =ColorFade(icon_CollapseExpand_4.Color, 20%)
+            HoverFill: =icon_CollapseExpand_4.Fill
+            Icon: =If(Parent.Width = var_LeftNavi_ExpandWidth, Icon.DockLeft, Icon.DockRight)
+            OnSelect: =Set(var_LeftNavi_Width, If(Parent.Width = var_LeftNavi_CollapseWidth, var_LeftNavi_ExpandWidth, var_LeftNavi_CollapseWidth))
+            PaddingBottom: =10
+            PaddingLeft: =10
+            PaddingRight: =10
+            PaddingTop: =10
+            PressedBorderColor: =ColorFade(icon_CollapseExpand_4.BorderColor, -20%)
+            PressedColor: =ColorFade(icon_CollapseExpand_4.Color, -20%)
+            PressedFill: =icon_CollapseExpand_4.Fill
+            Tooltip: ="Collapse/Expand"
+            Width: =var_LeftNavi_CollapseWidth
+            X: =Parent.Width - Self.Width
+            ZIndex: =2
+
+    BAGIAAppHeader_ES As AppHeader:
+        DropDownSelection: =TrackRequestComponent_ES.HideTrackRequest
+        FeatureRequestUrl: =var_FeatureRequestURL
+        FeedbackButtonUrl: =var_SendFeedback_URL
+        inputAppDisplayName: =varAppHeaderText
+        Reset: =SurveyComponent_ES.HideSurvey
+        ScorecardOnboardingFeatureUrl: =var_ScorecardOnboardingRequestURL
+        Y: =0
+        ZIndex: =10
+
+    TrackRequestComponent_ES As TrackRequestComponent:
+        BlueControlDarkBackground: =BlueControlDarkBackground
+        BlueControlLightBackground: =BlueControlLightBackground
+        BlueNaviHightLightBackground: =BlueNaviHightLightBackground
+        DevOpsBaseUrl: =var_DevOpsBaseURL
+        DevOpsQueryID: =var_DevOpsQueryID
+        FontStyle: =FontStyle
+        GrayCanvasBackground: =GrayCanvasBackground
+        GRAYCOLOR: =GRAYCOLOR
+        GrayControlBackground: =GrayControlBackground
+        IsAdmin: =IsAdmin
+        Reset: =Self.Visible
+        Visible: =BAGIAAppHeader_ES.DisplayTrackRequest
+        X: =App.Width - Self.Width
+        Y: =BAGIAAppHeader_ES.Height
+        ZIndex: =11
+
+    SurveyComponent_ES As SurveyComponent:
+        Reset: =BAGIAAppHeader_ES.ShowSurvey
+        Survey: =var_ReviewHubSurvey
+        Visible: =BAGIAAppHeader_ES.ShowSurvey
+        Y: =BAGIAAppHeader_ES.Height
+        ZIndex: =12
+

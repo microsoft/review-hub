@@ -1,0 +1,1291 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_commondataserviceforapps": {
+        "impersonation": {},
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "chub_sharedcommondataserviceforapps_72f86"
+        },
+        "api": {
+          "name": "shared_commondataserviceforapps"
+        }
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        },
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        }
+      },
+      "triggers": {
+        "Recurrence": {
+          "recurrence": {
+            "frequency": "Day",
+            "interval": 1,
+            "timeZone": "Pacific Standard Time",
+            "startTime": "2021-12-14T11:45:00Z",
+            "schedule": {
+              "hours": [
+                "3"
+              ],
+              "minutes": [
+                30
+              ]
+            }
+          },
+          "metadata": {
+            "operationMetadataId": "454c5eab-61fe-43bb-b445-4366741c2845"
+          },
+          "type": "Recurrence"
+        }
+      },
+      "actions": {
+        "SA": {
+          "runAfter": {
+            "CopyMaxFMBID": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "18ca32ca-e755-4a9f-be5e-14c7d68f5116"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+              "connectionName": "shared_commondataserviceforapps",
+              "operationId": "ListRecords"
+            },
+            "parameters": {
+              "entityName": "craf2_reviewhub_scorecardautomations",
+              "$select": "craf2_reviewhub_scorecardautomationid,\n_craf2_boardtype_value,\n_craf2_product_value,\ncraf2_dayofcreationpermonth,\ncraf2_automationstartdate,\ncraf2_reviewownerdisplayname,\ncraf2_reviewownerprincipalemail,\n_craf2_template_value,\ncraf2_lastcreationmonth,\ncraf2_pausedsincemonth"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "EachSA": {
+          "foreach": "@outputs('SA')?['body/value']",
+          "actions": {
+            "LookupFMBTable": {
+              "runAfter": {},
+              "metadata": {
+                "operationMetadataId": "a9537065-6d37-4328-97ea-3a7f4aa54af2"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "connectionName": "shared_commondataserviceforapps",
+                  "operationId": "ListRecords"
+                },
+                "parameters": {
+                  "entityName": "craf2_reviewhub_factmetricboards",
+                  "$filter": "_craf2_fmb_product_value eq @{items('EachSA')?['_craf2_product_value']} and \n_craf2_fmb_boardtype_value eq @{items('EachSA')?['_craf2_boardtype_value']} and\ncraf2_fmb_reviewlockdate gt @{formatDateTime(startOfMonth(convertFromUtc(utcNow(), 'Pacific Standard Time')), 'yyyy-MM-dd')} and \ncraf2_fmb_reviewlockdate lt @{formatDateTime(startOfMonth(addDays(startOfMonth(convertFromUtc(utcNow(), 'Pacific Standard Time')), 32)), 'yyyy-MM-dd')}",
+                  "$top": 1
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "IfTriggerCreation": {
+              "actions": {
+                "EachMTD": {
+                  "foreach": "@outputs('ThisTempMTD')?['body/value']",
+                  "actions": {
+                    "RecMT": {
+                      "runAfter": {},
+                      "metadata": {
+                        "operationMetadataId": "d56f2cbe-8c9e-4f48-bac3-b1643880632e"
+                      },
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                          "connectionName": "shared_commondataserviceforapps",
+                          "operationId": "GetItem"
+                        },
+                        "parameters": {
+                          "entityName": "craf2_reviewhub_metrictypes",
+                          "recordId": "@items('EachMTD')?['_craf2_metrictype_value']",
+                          "$select": "craf2_metrictypename,\ncraf2_metrictypeid,\ncraf2_valuetype,\ncraf2_metrictypeeffectivedate,\ncraf2_metrictypedeprecateddate,\ncraf2_reviewhub_metrictypeid"
+                        },
+                        "authentication": "@parameters('$authentication')"
+                      }
+                    },
+                    "CheckDateRange": {
+                      "actions": {
+                        "LookupPMTable": {
+                          "runAfter": {},
+                          "metadata": {
+                            "operationMetadataId": "af3ac08e-ba21-4808-a30e-c611091817cb"
+                          },
+                          "type": "OpenApiConnection",
+                          "inputs": {
+                            "host": {
+                              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                              "connectionName": "shared_commondataserviceforapps",
+                              "operationId": "ListRecords"
+                            },
+                            "parameters": {
+                              "entityName": "craf2_reviewhub_productmetrics",
+                              "$select": "craf2_productmetricid,\n_craf2_pm_metrictype_value,\n_craf2_pm_product_value,\ncraf2_reviewhub_productmetricid,\ncraf2_pm_ismetricactive,\ncraf2_pm_latestgreentargetstart,\ncraf2_pm_latestyellowtargetstart,\ncraf2_pm_latesttargetnumber,\ncraf2_pm_latesttargettext,\ncraf2_pm_latesttargetyesno",
+                              "$filter": "_craf2_pm_metrictype_value eq @{outputs('RecMT')?['body/craf2_reviewhub_metrictypeid']} and _craf2_pm_product_value eq @{items('EachSA')?['_craf2_product_value']}"
+                            },
+                            "authentication": "@parameters('$authentication')"
+                          }
+                        },
+                        "IfNotInPM": {
+                          "actions": {
+                            "AddNewPM": {
+                              "runAfter": {},
+                              "metadata": {
+                                "operationMetadataId": "70ff2935-b896-4e31-8b35-4c460c1afd83"
+                              },
+                              "type": "OpenApiConnection",
+                              "inputs": {
+                                "host": {
+                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                  "connectionName": "shared_commondataserviceforapps",
+                                  "operationId": "CreateRecord"
+                                },
+                                "parameters": {
+                                  "entityName": "craf2_reviewhub_productmetrics",
+                                  "item/craf2_pm_MetricType@odata.bind": "/systemusers(@{outputs('RecMT')?['body/craf2_reviewhub_metrictypeid']})",
+                                  "item/craf2_pm_Product@odata.bind": "/systemusers(@{items('EachSA')?['_craf2_product_value']})",
+                                  "item/craf2_productmetricid": "@add(variables('MaxPMID'), 1)",
+                                  "item/craf2_pm_boardtypeid": "@outputs('ThisBoardType')?['body/craf2_boardtypeid']",
+                                  "item/craf2_pm_ismetricactive": true,
+                                  "item/chub_pm_metrictypeid": "@outputs('RecMT')?['body/craf2_metrictypeid']",
+                                  "item/chub_pm_productid": "@outputs('ThisProduct')?['body/craf2_productid']",
+                                  "item/craf2_productmetrictitle": "@concat(items('EachSA')?['_craf2_product_value@OData.Community.Display.V1.FormattedValue'], ': ', outputs('RecMT')?['body/craf2_metrictypename'])"
+                                },
+                                "authentication": "@parameters('$authentication')"
+                              }
+                            },
+                            "MaxPMID_Add_One": {
+                              "runAfter": {
+                                "AddNewPM": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "metadata": {
+                                "operationMetadataId": "ee22c467-3648-47ac-8d0f-24ab2c714d00"
+                              },
+                              "type": "SetVariable",
+                              "inputs": {
+                                "name": "MaxPMID",
+                                "value": "@add(variables('CopyMaxPMID'), 1)"
+                              }
+                            },
+                            "CopyMaxPMID_Again": {
+                              "runAfter": {
+                                "MaxPMID_Add_One": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "metadata": {
+                                "operationMetadataId": "4aa4e774-6bdb-4c94-a703-6b5275d729ed"
+                              },
+                              "type": "SetVariable",
+                              "inputs": {
+                                "name": "CopyMaxPMID",
+                                "value": "@variables('MaxPMID')"
+                              }
+                            },
+                            "ThisNewPM": {
+                              "runAfter": {
+                                "CopyMaxPMID_Again": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "metadata": {
+                                "operationMetadataId": "95163e51-5a09-4c16-862f-620ddf453b49"
+                              },
+                              "type": "OpenApiConnection",
+                              "inputs": {
+                                "host": {
+                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                  "connectionName": "shared_commondataserviceforapps",
+                                  "operationId": "ListRecords"
+                                },
+                                "parameters": {
+                                  "entityName": "craf2_reviewhub_productmetrics",
+                                  "$select": "craf2_productmetricid,\n_craf2_pm_metrictype_value,\n_craf2_pm_product_value,\ncraf2_reviewhub_productmetricid,\ncraf2_pm_ismetricactive,\ncraf2_pm_latestgreentargetstart,\ncraf2_pm_latestyellowtargetstart,\ncraf2_pm_latesttargetnumber,\ncraf2_pm_latesttargettext,\ncraf2_pm_latesttargetyesno",
+                                  "$filter": "craf2_productmetricid eq @{variables('MaxPMID')}"
+                                },
+                                "authentication": "@parameters('$authentication')"
+                              }
+                            },
+                            "SetPMUID": {
+                              "runAfter": {
+                                "ThisNewPM": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "metadata": {
+                                "operationMetadataId": "a75f0bdf-e112-4de4-8770-b261ae4597ca"
+                              },
+                              "type": "SetVariable",
+                              "inputs": {
+                                "name": "PMUID",
+                                "value": "@{first(outputs('ThisNewPM')?['body/value'])?['craf2_reviewhub_productmetricid']}"
+                              }
+                            },
+                            "Set_IsMetricActive_=_true_": {
+                              "runAfter": {
+                                "SetPMUID": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "metadata": {
+                                "operationMetadataId": "7ab915b2-22ee-480a-a742-e7479387fbc0"
+                              },
+                              "type": "SetVariable",
+                              "inputs": {
+                                "name": "IsMetricActive",
+                                "value": "@true"
+                              }
+                            },
+                            "Set_GreenTarget_=_null": {
+                              "runAfter": {
+                                "Set_IsMetricActive_=_true_": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "metadata": {
+                                "operationMetadataId": "40d5465e-0b47-4f8f-b1be-aff308f92290"
+                              },
+                              "type": "SetVariable",
+                              "inputs": {
+                                "name": "GreenTarget",
+                                "value": "@null"
+                              }
+                            },
+                            "Set_YellowTarget_=_null": {
+                              "runAfter": {
+                                "Set_GreenTarget_=_null": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "metadata": {
+                                "operationMetadataId": "360cbec9-b87e-4a65-830f-4529eda37cce"
+                              },
+                              "type": "SetVariable",
+                              "inputs": {
+                                "name": "YellowTarget",
+                                "value": "@null"
+                              }
+                            },
+                            "Set_TargetYesNo_=_null": {
+                              "runAfter": {
+                                "Set_YellowTarget_=_null": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "metadata": {
+                                "operationMetadataId": "4bb21545-ee08-4f69-bfe9-92289ed3b310"
+                              },
+                              "type": "SetVariable",
+                              "inputs": {
+                                "name": "TargetYesNo",
+                                "value": "@null"
+                              }
+                            },
+                            "Set_TargetText_=_null": {
+                              "runAfter": {
+                                "Set_TargetYesNo_=_null": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "metadata": {
+                                "operationMetadataId": "7a34849e-80fc-40b5-992a-70f947bca6d8"
+                              },
+                              "type": "SetVariable",
+                              "inputs": {
+                                "name": "TargetText",
+                                "value": "@{null}"
+                              }
+                            },
+                            "Set_TargetNumber_=_null": {
+                              "runAfter": {
+                                "Set_TargetText_=_null": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "metadata": {
+                                "operationMetadataId": "19d89e81-7080-4efc-8e05-e1914c23e950"
+                              },
+                              "type": "SetVariable",
+                              "inputs": {
+                                "name": "TargetNumber",
+                                "value": "@null"
+                              }
+                            }
+                          },
+                          "runAfter": {
+                            "LookupPMTable": [
+                              "Succeeded"
+                            ]
+                          },
+                          "else": {
+                            "actions": {
+                              "SetPMUID_WhenFound": {
+                                "runAfter": {},
+                                "metadata": {
+                                  "operationMetadataId": "df0f2eef-3ac9-46fd-b1aa-9f3bbed8c2a4"
+                                },
+                                "type": "SetVariable",
+                                "inputs": {
+                                  "name": "PMUID",
+                                  "value": "@{first(outputs('LookupPMTable')?['body/value'])?['craf2_reviewhub_productmetricid']}"
+                                }
+                              },
+                              "IsThisMetricActive": {
+                                "actions": {
+                                  "Set_IsMetricActive_=_true": {
+                                    "runAfter": {},
+                                    "metadata": {
+                                      "operationMetadataId": "4d3ad131-d532-47d3-9fd8-71af947d4958"
+                                    },
+                                    "type": "SetVariable",
+                                    "inputs": {
+                                      "name": "IsMetricActive",
+                                      "value": "@true"
+                                    }
+                                  },
+                                  "Get_latest_targets_(5_targets)": {
+                                    "actions": {
+                                      "Set_YellowTarget": {
+                                        "runAfter": {
+                                          "Set_dummy_variable": [
+                                            "Succeeded"
+                                          ]
+                                        },
+                                        "metadata": {
+                                          "operationMetadataId": "68e36b53-c68e-4fa2-b3d2-73da6e07bd86"
+                                        },
+                                        "type": "SetVariable",
+                                        "inputs": {
+                                          "name": "YellowTarget",
+                                          "value": "@{if(or(equals(variables('MetricValueType'), 'Number'), equals(variables('MetricValueType'), 'Percentage')), string(first(outputs('LookupPMTable')?['body/value'])?['craf2_pm_latestyellowtargetstart']), null)}"
+                                        }
+                                      },
+                                      "Set_dummy_variable": {
+                                        "runAfter": {},
+                                        "metadata": {
+                                          "operationMetadataId": "fd6b66a1-02f4-4464-9b96-93109657edac"
+                                        },
+                                        "type": "SetVariable",
+                                        "inputs": {
+                                          "name": "DummyVar",
+                                          "value": 0
+                                        }
+                                      },
+                                      "Set_GreenTarget": {
+                                        "runAfter": {
+                                          "Set_dummy_variable": [
+                                            "Succeeded"
+                                          ]
+                                        },
+                                        "metadata": {
+                                          "operationMetadataId": "8db54fe2-9507-44c3-b979-f58f444b7677"
+                                        },
+                                        "type": "SetVariable",
+                                        "inputs": {
+                                          "name": "GreenTarget",
+                                          "value": "@{if(or(equals(variables('MetricValueType'), 'Number'), equals(variables('MetricValueType'), 'Percentage')), string(first(outputs('LookupPMTable')?['body/value'])?['craf2_pm_latestgreentargetstart']), null)}"
+                                        }
+                                      },
+                                      "Set_TargetYesNo": {
+                                        "runAfter": {
+                                          "Set_dummy_variable": [
+                                            "Succeeded"
+                                          ]
+                                        },
+                                        "metadata": {
+                                          "operationMetadataId": "aa7e37fa-3d6d-4e29-98a6-33170cd055db"
+                                        },
+                                        "type": "SetVariable",
+                                        "inputs": {
+                                          "name": "TargetYesNo",
+                                          "value": "@{if(equals(variables('MetricValueType'), 'Boolean'), string(first(outputs('LookupPMTable')?['body/value'])?['craf2_pm_latesttargetyesno']), null)}"
+                                        }
+                                      },
+                                      "Set_TargetText": {
+                                        "runAfter": {
+                                          "Set_dummy_variable": [
+                                            "Succeeded"
+                                          ]
+                                        },
+                                        "metadata": {
+                                          "operationMetadataId": "2ea66ca8-31a9-4a0d-9417-8ca77b7c6506"
+                                        },
+                                        "type": "SetVariable",
+                                        "inputs": {
+                                          "name": "TargetText",
+                                          "value": "@{if(equals(variables('MetricValueType'), 'Text'), first(outputs('LookupPMTable')?['body/value'])?['craf2_pm_latesttargettext'], null)}"
+                                        }
+                                      },
+                                      "Set_TargetNumber": {
+                                        "runAfter": {
+                                          "Set_dummy_variable": [
+                                            "Succeeded"
+                                          ]
+                                        },
+                                        "metadata": {
+                                          "operationMetadataId": "f84ec8d2-bc4c-4753-b6bc-25e1408e2d7b"
+                                        },
+                                        "type": "SetVariable",
+                                        "inputs": {
+                                          "name": "TargetNumber",
+                                          "value": "@{if(or(equals(variables('MetricValueType'), 'Number'), equals(variables('MetricValueType'), 'Percentage')), string(first(outputs('LookupPMTable')?['body/value'])?['craf2_pm_latesttargetnumber']), null)}"
+                                        }
+                                      }
+                                    },
+                                    "runAfter": {
+                                      "Set_IsMetricActive_=_true": [
+                                        "Succeeded"
+                                      ]
+                                    },
+                                    "metadata": {
+                                      "operationMetadataId": "4d1c6171-5060-47c4-9b59-315e80fad157"
+                                    },
+                                    "type": "Scope"
+                                  }
+                                },
+                                "runAfter": {
+                                  "SetPMUID_WhenFound": [
+                                    "Succeeded"
+                                  ]
+                                },
+                                "else": {
+                                  "actions": {
+                                    "Set_IsMetricActive_=_false": {
+                                      "runAfter": {},
+                                      "metadata": {
+                                        "operationMetadataId": "467723c9-91c4-42c8-9f96-eb21d2afe7f7"
+                                      },
+                                      "type": "SetVariable",
+                                      "inputs": {
+                                        "name": "IsMetricActive",
+                                        "value": "@false"
+                                      }
+                                    }
+                                  }
+                                },
+                                "expression": {
+                                  "equals": [
+                                    "@first(outputs('LookupPMTable')?['body/value'])?['craf2_pm_ismetricactive']",
+                                    "@true"
+                                  ]
+                                },
+                                "metadata": {
+                                  "operationMetadataId": "2bc38128-e2b5-4949-a012-6980ce529845"
+                                },
+                                "type": "If"
+                              }
+                            }
+                          },
+                          "expression": {
+                            "equals": [
+                              "@length(outputs('LookupPMTable')?['body/value'])",
+                              0
+                            ]
+                          },
+                          "metadata": {
+                            "operationMetadataId": "b1575093-0ae1-4124-ac5e-a017c499f02b"
+                          },
+                          "type": "If"
+                        },
+                        "Is_ThisMetric_Active_To_Add_To_FactMetric": {
+                          "actions": {
+                            "AddNewFM": {
+                              "runAfter": {},
+                              "metadata": {
+                                "operationMetadataId": "d670c5b0-1562-46df-9213-a7745b4accad"
+                              },
+                              "type": "OpenApiConnection",
+                              "inputs": {
+                                "host": {
+                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                  "connectionName": "shared_commondataserviceforapps",
+                                  "operationId": "CreateRecord"
+                                },
+                                "parameters": {
+                                  "entityName": "craf2_reviewhub_factmetrics",
+                                  "item/craf2_factmetricid": "@add(variables('MaxFMID'), 1)",
+                                  "item/craf2_fm_productid": "@outputs('ThisProduct')?['body/craf2_productid']",
+                                  "item/craf2_fm_ProductMetric@odata.bind": "\\systemusers(@{variables('PMUID')})",
+                                  "item/craf2_fm_reviewlockdate": "@variables('CurrentMonthEndDate')",
+                                  "item/craf2_fm_valuedate": "@addSeconds(concat(int(formatDateTime(utcNow(), 'MM')), '/02/', int(formatDateTime(utcNow(), 'yyyy'))), 0)",
+                                  "item/craf2_factmetrictitle": "Initial-@{outputs('ThisBoardType')?['body/craf2_boardtypeid']}-@{outputs('ThisProduct')?['body/craf2_productid']}-@{formatDateTime(variables('CurrentMonthEndDate'), 'MMddyyyy')}",
+                                  "item/chub_fm_boardtypeid": "@outputs('ThisBoardType')?['body/craf2_boardtypeid']",
+                                  "item/craf2_fm_greentargetstart": "@if(equals(trim(variables('GreenTarget')), ''), null, variables('GreenTarget'))",
+                                  "item/craf2_fm_isnotapplicable": false,
+                                  "item/chub_fm_metrictypeid": "@outputs('RecMT')?['body/craf2_metrictypeid']",
+                                  "item/chub_fm_productmetricid": "@add(variables('MaxPMID'), 1)",
+                                  "item/craf2_fm_targetnumber": "@if(equals(trim(variables('TargetNumber')), ''), null, variables('TargetNumber'))",
+                                  "item/craf2_fm_targettext": "@if(equals(trim(variables('TargetText')), ''), null, variables('TargetText'))",
+                                  "item/craf2_fm_targetyesno": "@if(equals(trim(variables('TargetYesNo')), ''), null, variables('TargetYesNo'))",
+                                  "item/craf2_fm_yellowtargetstart": "@if(equals(trim(variables('YellowTarget')), ''), null, variables('YellowTarget'))"
+                                },
+                                "authentication": "@parameters('$authentication')"
+                              }
+                            },
+                            "MaxFMID_Add_One": {
+                              "runAfter": {
+                                "AddNewFM": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "metadata": {
+                                "operationMetadataId": "ee22c467-3648-47ac-8d0f-24ab2c714d00"
+                              },
+                              "type": "SetVariable",
+                              "inputs": {
+                                "name": "MaxFMID",
+                                "value": "@add(variables('CopyMaxFMID'), 1)"
+                              }
+                            },
+                            "CopyMaxFMID_Again": {
+                              "runAfter": {
+                                "MaxFMID_Add_One": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "metadata": {
+                                "operationMetadataId": "4aa4e774-6bdb-4c94-a703-6b5275d729ed"
+                              },
+                              "type": "SetVariable",
+                              "inputs": {
+                                "name": "CopyMaxFMID",
+                                "value": "@variables('MaxFMID')"
+                              }
+                            }
+                          },
+                          "runAfter": {
+                            "IfNotInPM": [
+                              "Succeeded"
+                            ]
+                          },
+                          "expression": {
+                            "equals": [
+                              "@variables('IsMetricActive')",
+                              "@true"
+                            ]
+                          },
+                          "metadata": {
+                            "operationMetadataId": "f0d54b05-ff92-4706-abf9-a7f0ef9cf3d8"
+                          },
+                          "type": "If"
+                        }
+                      },
+                      "runAfter": {
+                        "Set_MetricValueType": [
+                          "Succeeded"
+                        ]
+                      },
+                      "expression": {
+                        "and": [
+                          {
+                            "lessOrEquals": [
+                              "@outputs('RecMT')?['body/craf2_metrictypeeffectivedate']",
+                              "@addSeconds(concat(int(formatDateTime(utcNow(), 'MM')), '/', items('EachSA')?['craf2_dayofcreationpermonth'], '/', int(formatDateTime(utcNow(), 'yyyy'))), 1)"
+                            ]
+                          },
+                          {
+                            "or": [
+                              {
+                                "equals": [
+                                  "@outputs('RecMT')?['body/craf2_metrictypedeprecateddate']",
+                                  "@null"
+                                ]
+                              },
+                              {
+                                "greater": [
+                                  "@outputs('RecMT')?['body/craf2_metrictypedeprecateddate']",
+                                  "@addSeconds(concat(int(formatDateTime(utcNow(), 'MM')), '/', items('EachSA')?['craf2_dayofcreationpermonth'], '/', int(formatDateTime(utcNow(), 'yyyy'))), 1)"
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      "metadata": {
+                        "operationMetadataId": "9302e600-8994-48f8-8e4b-fe89869e267e"
+                      },
+                      "type": "If"
+                    },
+                    "Set_MetricValueType": {
+                      "runAfter": {
+                        "RecMT": [
+                          "Succeeded"
+                        ]
+                      },
+                      "metadata": {
+                        "operationMetadataId": "b821de5f-7685-4706-be6d-18587665ae59"
+                      },
+                      "type": "SetVariable",
+                      "inputs": {
+                        "name": "MetricValueType",
+                        "value": "@{outputs('RecMT')?['body/craf2_valuetype@OData.Community.Display.V1.FormattedValue']}"
+                      }
+                    }
+                  },
+                  "runAfter": {
+                    "Get_Product,_BoardType,_MetricTypeDetails": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "2f458e4d-1621-4bba-92a4-ad8ec286d79f"
+                  },
+                  "type": "Foreach"
+                },
+                "AddNewFMB": {
+                  "runAfter": {
+                    "EachMTD": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "775761ce-31dc-4ec7-bd29-71eb7443fd71"
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                      "connectionName": "shared_commondataserviceforapps",
+                      "operationId": "CreateRecord"
+                    },
+                    "parameters": {
+                      "entityName": "craf2_reviewhub_factmetricboards",
+                      "item/craf2_factmetricboardid": "@add(variables('MaxFMBID'), 1)",
+                      "item/craf2_fmb_BoardType@odata.bind": "\\systemusers(@{items('EachSA')?['_craf2_boardtype_value']})",
+                      "item/craf2_fmb_Product@odata.bind": "\\systemusers(@{items('EachSA')?['_craf2_product_value']})",
+                      "item/craf2_fmb_reviewlockdate": "@variables('CurrentMonthEndDate')",
+                      "item/craf2_fmb_reviewownerprincipal": "@items('EachSA')?['craf2_reviewownerprincipalemail']",
+                      "item/craf2_fmb_Template@odata.bind": "\\systemusers(@{items('EachSA')?['_craf2_template_value']})",
+                      "item/craf2_fmb_reviewownername": "@items('EachSA')?['craf2_reviewownerdisplayname']"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                },
+                "MaxFMBID_Add_One": {
+                  "runAfter": {
+                    "AddNewFMB": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "ee22c467-3648-47ac-8d0f-24ab2c714d00"
+                  },
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "MaxFMBID",
+                    "value": "@add(variables('CopyMaxFMBID'), 1)"
+                  }
+                },
+                "CopyMaxFMBID_Again": {
+                  "runAfter": {
+                    "MaxFMBID_Add_One": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "4aa4e774-6bdb-4c94-a703-6b5275d729ed"
+                  },
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "CopyMaxFMBID",
+                    "value": "@variables('MaxFMBID')"
+                  }
+                },
+                "Assign_LastCreationMonth": {
+                  "runAfter": {
+                    "CopyMaxFMBID_Again": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "faf51ab1-5e7a-4293-80ce-744ed0928d1f"
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                      "connectionName": "shared_commondataserviceforapps",
+                      "operationId": "UpdateRecord"
+                    },
+                    "parameters": {
+                      "entityName": "craf2_reviewhub_scorecardautomations",
+                      "recordId": "@items('EachSA')?['craf2_reviewhub_scorecardautomationid']",
+                      "item/craf2_lastcreationmonth": "@addSeconds(concat(int(formatDateTime(utcNow(), 'MM')), '/01/', int(formatDateTime(utcNow(), 'yyyy'))), 0)"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                },
+                "Get_Product,_BoardType,_MetricTypeDetails": {
+                  "actions": {
+                    "Set_Dummy_Variable_1": {
+                      "runAfter": {},
+                      "metadata": {
+                        "operationMetadataId": "e4c0e29c-23ec-4b2e-ba19-b6993d884a17"
+                      },
+                      "type": "SetVariable",
+                      "inputs": {
+                        "name": "DummyVar",
+                        "value": 0
+                      }
+                    },
+                    "ThisProduct": {
+                      "runAfter": {
+                        "Set_Dummy_Variable_1": [
+                          "Succeeded"
+                        ]
+                      },
+                      "metadata": {
+                        "operationMetadataId": "5e9b59a5-9abd-4a18-a5fa-6b2584321a40"
+                      },
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                          "connectionName": "shared_commondataserviceforapps",
+                          "operationId": "GetItem"
+                        },
+                        "parameters": {
+                          "entityName": "craf2_reviewhub_products",
+                          "recordId": "@items('EachSA')?['_craf2_product_value']",
+                          "$select": "craf2_productid"
+                        },
+                        "authentication": "@parameters('$authentication')"
+                      }
+                    },
+                    "ThisBoardType": {
+                      "runAfter": {
+                        "Set_Dummy_Variable_1": [
+                          "Succeeded"
+                        ]
+                      },
+                      "metadata": {
+                        "operationMetadataId": "92375fa5-98e9-43cf-892e-5eb403618dbd"
+                      },
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                          "connectionName": "shared_commondataserviceforapps",
+                          "operationId": "GetItem"
+                        },
+                        "parameters": {
+                          "entityName": "craf2_reviewhub_boardtypes",
+                          "recordId": "@items('EachSA')?['_craf2_boardtype_value']",
+                          "$select": "craf2_boardtypeid"
+                        },
+                        "authentication": "@parameters('$authentication')"
+                      }
+                    },
+                    "ThisTempMTD": {
+                      "runAfter": {
+                        "Set_Dummy_Variable_1": [
+                          "Succeeded"
+                        ]
+                      },
+                      "metadata": {
+                        "operationMetadataId": "8715661c-bc4a-44e0-a65e-0a300a2c8396"
+                      },
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                          "connectionName": "shared_commondataserviceforapps",
+                          "operationId": "ListRecords"
+                        },
+                        "parameters": {
+                          "entityName": "craf2_reviewhub_metrictypedetails",
+                          "$select": "_craf2_metrictype_value",
+                          "$filter": "_craf2_metrictypedetailtemplate_value eq @{items('EachSA')?['_craf2_template_value']} "
+                        },
+                        "authentication": "@parameters('$authentication')"
+                      }
+                    }
+                  },
+                  "runAfter": {},
+                  "metadata": {
+                    "operationMetadataId": "dab4653f-bf9a-4b2d-8c12-3f2eb962f8c4"
+                  },
+                  "type": "Scope"
+                }
+              },
+              "runAfter": {
+                "LookupFMBTable": [
+                  "Succeeded"
+                ]
+              },
+              "expression": {
+                "and": [
+                  {
+                    "greaterOrEquals": [
+                      "@dayOfMonth(convertFromUtc(utcNow(), 'Pacific Standard Time'))",
+                      "@items('EachSA')?['craf2_dayofcreationpermonth']"
+                    ]
+                  },
+                  {
+                    "or": [
+                      {
+                        "equals": [
+                          "@items('EachSA')?['craf2_lastcreationmonth']",
+                          "@null"
+                        ]
+                      },
+                      {
+                        "less": [
+                          "@addSeconds(items('EachSA')?['craf2_lastcreationmonth'], 0)",
+                          "@startOfMonth(convertFromUtc(utcNow(), 'Pacific Standard Time'))"
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "or": [
+                      {
+                        "equals": [
+                          "@items('EachSA')?['craf2_pausedsincemonth']",
+                          "@null"
+                        ]
+                      },
+                      {
+                        "less": [
+                          "@convertFromUtc(utcNow(), 'Pacific Standard Time')",
+                          "@items('EachSA')?['craf2_pausedsincemonth']"
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "greaterOrEquals": [
+                      "@convertFromUtc(utcNow(), 'Pacific Standard Time')",
+                      "@addSeconds(items('EachSA')?['craf2_automationstartdate'], 0)"
+                    ]
+                  },
+                  {
+                    "equals": [
+                      "@length(outputs('LookupFMBTable')?['body/value'])",
+                      0
+                    ]
+                  }
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "c4b1b231-6a11-461c-a857-b5d1cebf7a4c"
+              },
+              "type": "If"
+            }
+          },
+          "runAfter": {
+            "SA": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "9f80ad20-0a72-426f-a024-0fb6e8758ebf"
+          },
+          "type": "Foreach"
+        },
+        "MaxPMID": {
+          "runAfter": {
+            "GetMaxPMID": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "914377c8-6950-4f88-b5ef-6f73ed0243c3"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "MaxPMID",
+                "type": "integer",
+                "value": "@first(outputs('GetMaxPMID')?['body/value'])?['craf2_productmetricid']"
+              }
+            ]
+          }
+        },
+        "GetMaxPMID": {
+          "runAfter": {
+            "Initial_MetricValueType": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "bdfa9787-27ca-4cad-80c7-04c8853564d1"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+              "connectionName": "shared_commondataserviceforapps",
+              "operationId": "ListRecords"
+            },
+            "parameters": {
+              "entityName": "craf2_reviewhub_productmetrics",
+              "$select": "craf2_productmetricid",
+              "$orderby": "craf2_productmetricid desc",
+              "$top": 1
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "CopyMaxPMID": {
+          "runAfter": {
+            "MaxPMID": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "34830478-4fa4-4350-9386-6bad13fceb61"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "CopyMaxPMID",
+                "type": "integer",
+                "value": "@variables('MaxPMID')"
+              }
+            ]
+          }
+        },
+        "GetMaxFMID": {
+          "runAfter": {
+            "CopyMaxPMID": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "bdfa9787-27ca-4cad-80c7-04c8853564d1"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+              "connectionName": "shared_commondataserviceforapps",
+              "operationId": "ListRecords"
+            },
+            "parameters": {
+              "entityName": "craf2_reviewhub_factmetrics",
+              "$select": "craf2_factmetricid",
+              "$orderby": "craf2_factmetricid desc",
+              "$top": 1
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "MaxFMID": {
+          "runAfter": {
+            "GetMaxFMID": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "914377c8-6950-4f88-b5ef-6f73ed0243c3"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "MaxFMID",
+                "type": "integer",
+                "value": "@first(outputs('GetMaxFMID')?['body/value'])?['craf2_factmetricid']"
+              }
+            ]
+          }
+        },
+        "CopyMaxFMID": {
+          "runAfter": {
+            "MaxFMID": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "34830478-4fa4-4350-9386-6bad13fceb61"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "CopyMaxFMID",
+                "type": "integer",
+                "value": "@variables('MaxFMID')"
+              }
+            ]
+          }
+        },
+        "Initial_PMUID": {
+          "runAfter": {
+            "Initialize_CurrentMonthEndDate": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "3e69422a-3b0e-4fda-a104-e5cb3f48bf73"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "PMUID",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "Initial_IsMetricActive": {
+          "runAfter": {
+            "Initial_PMUID": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "e2b43821-76d9-424e-affe-a65dc78ddff0"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "IsMetricActive",
+                "type": "boolean"
+              }
+            ]
+          }
+        },
+        "Initial_GreenTarget": {
+          "runAfter": {
+            "Initial_IsMetricActive": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "27342d62-79b7-4f4c-b3a2-40634b63564e"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "GreenTarget",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "Initial_YellowTarget": {
+          "runAfter": {
+            "Initial_GreenTarget": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "a957a200-c24f-43cd-a7ad-d0b148b0a884"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "YellowTarget",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "Initial_TargetNumber": {
+          "runAfter": {
+            "Initial_YellowTarget": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "ff9fe561-08ec-49f9-b13c-5b62ebfe336e"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "TargetNumber",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "Initial_TargetText": {
+          "runAfter": {
+            "Initial_TargetNumber": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "eccbc5c2-fab8-48c2-b14b-89708028d617"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "TargetText",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "Initial_TargetYesNo": {
+          "runAfter": {
+            "Initial_TargetText": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "de72db71-19a8-4b28-bb06-c3d7882dfcb9"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "TargetYesNo",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "GetMaxFMBID": {
+          "runAfter": {
+            "CopyMaxFMID": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "67a51804-7f5e-4056-aead-ee6821728522"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+              "connectionName": "shared_commondataserviceforapps",
+              "operationId": "ListRecords"
+            },
+            "parameters": {
+              "entityName": "craf2_reviewhub_factmetricboards",
+              "$select": "craf2_factmetricboardid",
+              "$orderby": "craf2_factmetricboardid desc",
+              "$top": 1
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "MaxFMBID": {
+          "runAfter": {
+            "GetMaxFMBID": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "914377c8-6950-4f88-b5ef-6f73ed0243c3"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "MaxFMBID",
+                "type": "integer",
+                "value": "@first(outputs('GetMaxFMBID')?['body/value'])?['craf2_factmetricboardid']"
+              }
+            ]
+          }
+        },
+        "CopyMaxFMBID": {
+          "runAfter": {
+            "MaxFMBID": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "34830478-4fa4-4350-9386-6bad13fceb61"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "CopyMaxFMBID",
+                "type": "integer",
+                "value": "@variables('MaxFMBID')"
+              }
+            ]
+          }
+        },
+        "Initial_MetricValueType": {
+          "runAfter": {
+            "Initial_TargetYesNo": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "d5d6cd35-f048-4f0d-bc48-a225b62689b0"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "MetricValueType",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "Initialize_CurrentMonthEndDate": {
+          "runAfter": {
+            "Initialize_Dummy_Variable": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "2497b841-7845-4013-86ca-7eb9ad10a41a"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "CurrentMonthEndDate",
+                "type": "string",
+                "value": "@{addDays(startOfMonth(addToTime(convertFromUtc(utcNow(), 'Pacific Standard Time'), 1, 'month')), -1)}"
+              }
+            ]
+          }
+        },
+        "Initialize_Dummy_Variable": {
+          "runAfter": {},
+          "metadata": {
+            "operationMetadataId": "128323be-d36c-454c-b122-95ce99a1e591"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "DummyVar",
+                "type": "integer",
+                "value": 0
+              }
+            ]
+          }
+        }
+      }
+    },
+    "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+}

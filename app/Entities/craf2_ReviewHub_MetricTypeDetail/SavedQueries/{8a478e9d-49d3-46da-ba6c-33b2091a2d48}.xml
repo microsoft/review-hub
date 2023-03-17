@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<savedqueries xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <savedquery>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>0</CanBeDeleted>
+    <isquickfindquery>0</isquickfindquery>
+    <isprivate>0</isprivate>
+    <isdefault>1</isdefault>
+    <savedqueryid>{8a478e9d-49d3-46da-ba6c-33b2091a2d48}</savedqueryid>
+    <layoutxml>
+      <grid name="resultset" jump="craf2_title" select="1" icon="1" preview="1">
+        <row name="result" id="craf2_reviewhub_metrictypedetailid">
+          <cell name="craf2_title" width="300" />
+          <cell name="createdon" width="125" />
+        </row>
+      </grid>
+    </layoutxml>
+    <querytype>1</querytype>
+    <fetchxml>
+      <fetch version="1.0" mapping="logical">
+        <entity name="craf2_reviewhub_metrictypedetail">
+          <attribute name="craf2_reviewhub_metrictypedetailid" />
+          <attribute name="craf2_title" />
+          <attribute name="createdon" />
+          <order attribute="craf2_title" descending="false" />
+        </entity>
+      </fetch>
+    </fetchxml>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <LocalizedNames>
+      <LocalizedName description="ReviewHub_MetricTypeDetail Advanced Find View" languagecode="1033" />
+    </LocalizedNames>
+  </savedquery>
+</savedqueries>

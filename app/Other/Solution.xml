@@ -1,0 +1,164 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ImportExportXml version="9.2.23021.198" SolutionPackageVersion="9.2" languagecode="1033" generatedBy="CrmLive" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <SolutionManifest>
+    <UniqueName>ReviewHubDev</UniqueName>
+    <LocalizedNames>
+      <LocalizedName description="Review Hub - Dataverse" languagecode="1033" />
+    </LocalizedNames>
+    <Descriptions>
+      <Description description="ReviewHub with Dataverse data source." languagecode="1033" />
+    </Descriptions>
+    <Version>1.1.0.3092023</Version>
+    <Managed>0</Managed>
+    <Publisher>
+      <UniqueName>customerhub</UniqueName>
+      <LocalizedNames>
+        <LocalizedName description="DTP - Insights and Analytics" languagecode="1033" />
+      </LocalizedNames>
+      <Descriptions>
+        <Description description="DTP Insights and Analytics App Publisher" languagecode="1033" />
+      </Descriptions>
+      <EMailAddress>vcuadros@microsoft.com</EMailAddress>
+      <SupportingWebsiteUrl xsi:nil="true"></SupportingWebsiteUrl>
+      <CustomizationPrefix>chub</CustomizationPrefix>
+      <CustomizationOptionValuePrefix>84066</CustomizationOptionValuePrefix>
+      <Addresses>
+        <Address>
+          <AddressNumber>1</AddressNumber>
+          <AddressTypeCode>1</AddressTypeCode>
+          <City xsi:nil="true"></City>
+          <County xsi:nil="true"></County>
+          <Country xsi:nil="true"></Country>
+          <Fax xsi:nil="true"></Fax>
+          <FreightTermsCode xsi:nil="true"></FreightTermsCode>
+          <ImportSequenceNumber xsi:nil="true"></ImportSequenceNumber>
+          <Latitude xsi:nil="true"></Latitude>
+          <Line1 xsi:nil="true"></Line1>
+          <Line2 xsi:nil="true"></Line2>
+          <Line3 xsi:nil="true"></Line3>
+          <Longitude xsi:nil="true"></Longitude>
+          <Name xsi:nil="true"></Name>
+          <PostalCode xsi:nil="true"></PostalCode>
+          <PostOfficeBox xsi:nil="true"></PostOfficeBox>
+          <PrimaryContactName xsi:nil="true"></PrimaryContactName>
+          <ShippingMethodCode>1</ShippingMethodCode>
+          <StateOrProvince xsi:nil="true"></StateOrProvince>
+          <Telephone1 xsi:nil="true"></Telephone1>
+          <Telephone2 xsi:nil="true"></Telephone2>
+          <Telephone3 xsi:nil="true"></Telephone3>
+          <TimeZoneRuleVersionNumber xsi:nil="true"></TimeZoneRuleVersionNumber>
+          <UPSZone xsi:nil="true"></UPSZone>
+          <UTCOffset xsi:nil="true"></UTCOffset>
+          <UTCConversionTimeZoneCode xsi:nil="true"></UTCConversionTimeZoneCode>
+        </Address>
+        <Address>
+          <AddressNumber>2</AddressNumber>
+          <AddressTypeCode>1</AddressTypeCode>
+          <City xsi:nil="true"></City>
+          <County xsi:nil="true"></County>
+          <Country xsi:nil="true"></Country>
+          <Fax xsi:nil="true"></Fax>
+          <FreightTermsCode xsi:nil="true"></FreightTermsCode>
+          <ImportSequenceNumber xsi:nil="true"></ImportSequenceNumber>
+          <Latitude xsi:nil="true"></Latitude>
+          <Line1 xsi:nil="true"></Line1>
+          <Line2 xsi:nil="true"></Line2>
+          <Line3 xsi:nil="true"></Line3>
+          <Longitude xsi:nil="true"></Longitude>
+          <Name xsi:nil="true"></Name>
+          <PostalCode xsi:nil="true"></PostalCode>
+          <PostOfficeBox xsi:nil="true"></PostOfficeBox>
+          <PrimaryContactName xsi:nil="true"></PrimaryContactName>
+          <ShippingMethodCode>1</ShippingMethodCode>
+          <StateOrProvince xsi:nil="true"></StateOrProvince>
+          <Telephone1 xsi:nil="true"></Telephone1>
+          <Telephone2 xsi:nil="true"></Telephone2>
+          <Telephone3 xsi:nil="true"></Telephone3>
+          <TimeZoneRuleVersionNumber xsi:nil="true"></TimeZoneRuleVersionNumber>
+          <UPSZone xsi:nil="true"></UPSZone>
+          <UTCOffset xsi:nil="true"></UTCOffset>
+          <UTCConversionTimeZoneCode xsi:nil="true"></UTCConversionTimeZoneCode>
+        </Address>
+      </Addresses>
+    </Publisher>
+    <RootComponents>
+      <RootComponent type="1" schemaName="chub_reviewhub_metricuploadlog" behavior="0" />
+      <RootComponent type="1" schemaName="craf2_reviewhub_accessrequest" behavior="0" />
+      <RootComponent type="1" schemaName="craf2_reviewhub_automaticnotifcationlog" behavior="0" />
+      <RootComponent type="1" schemaName="craf2_reviewhub_boardhealth" behavior="0" />
+      <RootComponent type="1" schemaName="craf2_reviewhub_boardtype" behavior="0" />
+      <RootComponent type="1" schemaName="craf2_reviewhub_factexecutivesummary" behavior="0" />
+      <RootComponent type="1" schemaName="craf2_reviewhub_factmetric" behavior="0" />
+      <RootComponent type="1" schemaName="craf2_reviewhub_factmetric_staging" behavior="0" />
+      <RootComponent type="1" schemaName="craf2_reviewhub_factmetric_uploadlog" behavior="0" />
+      <RootComponent type="1" schemaName="craf2_reviewhub_factmetricboard" behavior="0" />
+      <RootComponent type="1" schemaName="craf2_reviewhub_metrictemplate" behavior="0" />
+      <RootComponent type="1" schemaName="craf2_reviewhub_metrictype" behavior="0" />
+      <RootComponent type="1" schemaName="craf2_reviewhub_metrictypedetail" behavior="0" />
+      <RootComponent type="1" schemaName="craf2_reviewhub_metrictypeobjective" behavior="0" />
+      <RootComponent type="1" schemaName="craf2_reviewhub_privacyagreement" behavior="0" />
+      <RootComponent type="1" schemaName="craf2_reviewhub_product" behavior="0" />
+      <RootComponent type="1" schemaName="craf2_reviewhub_productmetric" behavior="0" />
+      <RootComponent type="1" schemaName="craf2_reviewhub_requestedproduct" behavior="0" />
+      <RootComponent type="1" schemaName="craf2_reviewhub_scorecardautomation" behavior="0" />
+      <RootComponent type="1" schemaName="craf2_reviewhub_stakeholder" behavior="0" />
+      <RootComponent type="1" schemaName="craf2_reviewhub_userrequest" behavior="0" />
+      <RootComponent type="1" schemaName="craf2_reviewhub_users" behavior="0" />
+      <RootComponent type="1" schemaName="craf2_reviewhubproductmetricupdatemethod" behavior="0" />
+      <RootComponent type="20" id="{287fb4df-223b-ed11-bba2-000d3a5bc525}" behavior="0" />
+      <RootComponent type="20" id="{3517e515-a620-ec11-b6e6-0022480695a9}" behavior="0" />
+      <RootComponent type="20" id="{f1de5c32-bc27-ec11-b6e6-0022480491cd}" behavior="0" />
+      <RootComponent type="29" id="{03413583-c837-ed11-bba2-000d3a5bc542}" behavior="0" />
+      <RootComponent type="29" id="{05832a5c-4302-ed11-82e6-000d3a36b7e4}" behavior="0" />
+      <RootComponent type="29" id="{0cd5ee17-143b-ed11-bba2-000d3a5bc542}" behavior="0" />
+      <RootComponent type="29" id="{2c56a1d1-6b3d-ed11-bba3-000d3a5bc542}" behavior="0" />
+      <RootComponent type="29" id="{3b64e66d-ee21-ed11-9db2-000d3a36b7e4}" behavior="0" />
+      <RootComponent type="29" id="{42be6669-2135-ed11-9db1-000d3a5bc525}" behavior="0" />
+      <RootComponent type="29" id="{4b3e9eaa-86c0-ec11-983e-000d3a32b28a}" behavior="0" />
+      <RootComponent type="29" id="{63ea6d9b-663d-ed11-bba3-000d3a5bc525}" behavior="0" />
+      <RootComponent type="29" id="{642d8259-6a3d-ed11-bba3-000d3a5bc525}" behavior="0" />
+      <RootComponent type="29" id="{74986884-8507-ed11-b83e-000d3a3b1f96}" behavior="0" />
+      <RootComponent type="29" id="{7e5fa17c-ad37-ed11-bba2-000d3a5bc525}" behavior="0" />
+      <RootComponent type="29" id="{80c0c86f-d3b0-ec11-983f-002248096ce2}" behavior="0" />
+      <RootComponent type="29" id="{870e5e26-c334-ed11-9db1-000d3a5bc542}" behavior="0" />
+      <RootComponent type="29" id="{8c072846-f627-ed11-9db1-000d3a36b03f}" behavior="0" />
+      <RootComponent type="29" id="{a03dc98c-f838-ed11-bba2-000d3a5bc525}" behavior="0" />
+      <RootComponent type="29" id="{b6e1e000-4b19-ed11-b83e-000d3a36b03f}" behavior="0" />
+      <RootComponent type="29" id="{bc66fa94-1c0f-ed11-b83f-000d3a36b0e9}" behavior="0" />
+      <RootComponent type="29" id="{bded368a-f121-ed11-9db2-000d3a36b7e4}" behavior="0" />
+      <RootComponent type="29" id="{c0e1bdc0-8b08-ed11-b83d-000d3a36b03f}" behavior="0" />
+      <RootComponent type="29" id="{c57ac825-c935-ed11-9db1-000d3a5bc542}" behavior="0" />
+      <RootComponent type="29" id="{c64eebca-b54a-ed11-bba3-000d3a5bc525}" behavior="0" />
+      <RootComponent type="29" id="{d232557e-20b7-ec11-983f-000d3a346432}" behavior="0" />
+      <RootComponent type="29" id="{d960b6c3-ae38-ed11-bba2-000d3a5bc542}" behavior="0" />
+      <RootComponent type="29" id="{dac706fa-623d-ed11-bba3-000d3a5bc542}" behavior="0" />
+      <RootComponent type="29" id="{ea71d94b-f52f-ed11-9db1-000d3a5bc542}" behavior="0" />
+      <RootComponent type="29" id="{f508ea77-2029-ed11-9db2-000d3a36b7e4}" behavior="0" />
+      <RootComponent type="300" schemaName="chub_dtpreviewhubdataversedev_752ff" behavior="0" />
+      <RootComponent type="62" schemaName="chub_ReviewHubConfigurator" behavior="0" />
+      <RootComponent type="80" schemaName="chub_ReviewHubConfigurator" behavior="0" />
+      <RootComponent type="9" schemaName="chub_reviewhub_accesstype" behavior="0" />
+      <RootComponent type="9" schemaName="craf2_productcategory" behavior="0" />
+      <RootComponent type="9" schemaName="craf2_reviewhub_metrictypestage" behavior="0" />
+      <RootComponent type="9" schemaName="craf2_reviewhub_metrictypesubgroup" behavior="0" />
+      <RootComponent type="9" schemaName="craf2_reviewhub_metrictypeupdatemethod" behavior="0" />
+      <RootComponent type="9" schemaName="craf2_reviewhub_metricvaluetype" behavior="0" />
+      <RootComponent type="9" schemaName="craf2_reviewhub_quaterlycalculationmethod" behavior="0" />
+      <RootComponent type="9" schemaName="craf2_reviewhub_userrole" behavior="0" />
+    </RootComponents>
+    <MissingDependencies>
+      <MissingDependency>
+        <Required type="1" schemaName="environmentvariabledefinition" displayName="Environment Variable Definition" solution="EnvironmentVariables (1.0.2.168)" />
+        <Dependent type="300" schemaName="chub_dtpreviewhubdataversedev_752ff" displayName="Review Hub" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="environmentvariablevalue" displayName="Environment Variable Value" solution="EnvironmentVariables (1.0.2.168)" />
+        <Dependent type="300" schemaName="chub_dtpreviewhubdataversedev_752ff" displayName="Review Hub" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="61" schemaName="msdyn_/Images/AppModule_Default_Icon.png" displayName="msdyn_/Images/AppModule_Default_Icon.png" solution="AppModuleWebResources (2.5)" />
+        <Dependent type="80" schemaName="chub_ReviewHubConfigurator" displayName="ReviewHubConfigurator" />
+      </MissingDependency>
+    </MissingDependencies>
+  </SolutionManifest>
+</ImportExportXml>

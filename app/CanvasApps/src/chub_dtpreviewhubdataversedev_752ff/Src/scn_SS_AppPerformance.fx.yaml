@@ -1,0 +1,220 @@
+scn_SS_AppPerformance As screen:
+    OnVisible: |-
+        =ClearCollect(
+            clln_AppPerf_View,
+            clln_AppPerf,
+            clln_AppPerf_110,
+            clln_AppPerf_120,
+            clln_AppPerf_130,
+            clln_AppPerf_140,
+            clln_AppPerf_150
+        );
+        
+        ClearCollect(
+            clln_AppPerf_View,
+            Sort(
+                clln_AppPerf_View,
+                ThisRecord.RunID,
+                SortOrder.Ascending
+            )
+        )
+
+    ctn_SS_AppPerf As groupContainer.manualLayoutContainer:
+        Height: =App.Height - Self.Y - 15
+        Width: =App.Width - Self.X * 2
+        X: =icon_Back_AP.X
+        Y: =lbl_ScreenTitle_AP.Y + lbl_ScreenTitle_AP.Height + 15
+        ZIndex: =1
+
+        glry_SS_AppPerf As gallery.variableTemplateHeightGallery:
+            Height: =Parent.Height - Self.Y
+            Items: |-
+                =Ungroup( 
+                        ForAll(
+                            Sequence(CountRows(clln_AppPerf_View)),
+                            {
+                                Record: Table(Last(FirstN(clln_AppPerf_View, Value))),
+                                RowNumber: Value
+                            }
+                        ),
+                        "Record"
+                    )
+            Layout: =Layout.Vertical
+            TemplateFill: =If(Mod(ThisItem.RowNumber, 2) = 0, ColorFade(SUBGROUPCOLOR, 50%), RGBA(0, 0, 0, 0))
+            TemplatePadding: =0
+            TemplateSize: =35
+            Width: =Parent.Width
+            Y: =35
+            ZIndex: =1
+
+            lbl_AppPerf_Description As label:
+                AutoHeight: =true
+                DisplayMode: =DisplayMode.View
+                Font: =FontStyle
+                Height: =lbl_AppPerf_RunID.Height
+                Size: =12
+                Text: =ThisItem.Description
+                Width: =Parent.Width - Self.X 
+                X: =lbl_AppPerf_Duration.X + lbl_AppPerf_Duration.Width
+                Y: =lbl_AppPerf_RunID.Y
+                ZIndex: =1
+
+            lbl_AppPerf_Duration As label:
+                DisplayMode: =DisplayMode.View
+                Font: =FontStyle
+                Height: =lbl_AppPerf_RunID.Height
+                Size: =12
+                Text: =DateDiff(ThisItem.StartTime, ThisItem.EndTime, TimeUnit.Milliseconds) / 1000
+                Width: =lbl_AppPerfHeader_Duration.Width
+                X: =lbl_AppPerf_EndTime.X + lbl_AppPerf_EndTime.Width
+                Y: =lbl_AppPerf_RunID.Y
+                ZIndex: =2
+
+            lbl_AppPerf_EndTime As label:
+                DisplayMode: =DisplayMode.View
+                Font: =FontStyle
+                Height: =lbl_AppPerf_RunID.Height
+                Size: =12
+                Text: |-
+                    =Text(ThisItem.EndTime, "hh:mm:ss.f")
+                Width: =lbl_AppPerfHeader_EndTime.Width
+                X: =lbl_AppPerf_StartTime.X + lbl_AppPerf_StartTime.Width
+                Y: =lbl_AppPerf_RunID.Y
+                ZIndex: =3
+
+            lbl_AppPerf_StartTime As label:
+                DisplayMode: =DisplayMode.View
+                Font: =FontStyle
+                Height: =lbl_AppPerf_RunID.Height
+                Size: =12
+                Text: |-
+                    =Text(ThisItem.StartTime, "hh:mm:ss.f")
+                Width: =lbl_AppPerfHeader_StartTime.Width
+                X: =lbl_AppPerf_RunID.X + lbl_AppPerf_RunID.Width
+                Y: =lbl_AppPerf_RunID.Y
+                ZIndex: =4
+
+            lbl_AppPerf_RunID As label:
+                DisplayMode: =DisplayMode.View
+                Font: =FontStyle
+                Height: =35
+                Size: =12
+                Text: =ThisItem.RunID
+                Width: =lbl_AppPerfHeader_RunID.Width
+                ZIndex: =5
+
+        lbl_AppPerfHeader_Description As label:
+            Fill: =SUBGROUPCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =lbl_AppPerfHeader_RunID.Height
+            Size: =12
+            Text: ="Description"
+            Width: =Parent.Width - Self.X 
+            X: =lbl_AppPerfHeader_Duration.X + lbl_AppPerfHeader_Duration.Width
+            Y: =lbl_AppPerfHeader_RunID.Y
+            ZIndex: =2
+
+        lbl_AppPerfHeader_Duration As label:
+            Fill: =SUBGROUPCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =lbl_AppPerfHeader_RunID.Height
+            PaddingRight: =0
+            Size: =12
+            Text: ="Duration (seconds)"
+            Width: =165
+            X: =lbl_AppPerfHeader_EndTime.X + lbl_AppPerfHeader_EndTime.Width
+            Y: =lbl_AppPerfHeader_RunID.Y
+            ZIndex: =3
+
+        lbl_AppPerfHeader_EndTime As label:
+            Fill: =SUBGROUPCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =lbl_AppPerfHeader_RunID.Height
+            Size: =12
+            Text: ="EndTime"
+            Width: =lbl_AppPerfHeader_StartTime.Width
+            X: =lbl_AppPerfHeader_StartTime.X + lbl_AppPerfHeader_StartTime.Width
+            Y: =lbl_AppPerfHeader_RunID.Y
+            ZIndex: =4
+
+        lbl_AppPerfHeader_StartTime As label:
+            Fill: =SUBGROUPCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =lbl_AppPerfHeader_RunID.Height
+            Size: =12
+            Text: ="StartTime"
+            Width: =135
+            X: =lbl_AppPerfHeader_RunID.X + lbl_AppPerfHeader_RunID.Width
+            Y: =lbl_AppPerfHeader_RunID.Y
+            ZIndex: =5
+
+        lbl_AppPerfHeader_RunID As label:
+            Fill: =SUBGROUPCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =35
+            Size: =12
+            Text: ="ID"
+            Width: =65
+            ZIndex: =6
+
+    lbl_ScreenTitle_AP As label:
+        DisabledColor: =BlueControlDarkBackground
+        DisabledFill: =Self.Fill
+        DisplayMode: =DisplayMode.Disabled
+        Fill: =GrayCanvasBackground
+        Font: =FontStyle
+        FontWeight: =FontWeight.Bold
+        Height: =55
+        PaddingLeft: =60
+        Size: =18
+        Text: |-
+            ="Total Initial Load Time (seconds): " & Sum(clln_AppPerf, DateDiff(ThisRecord.StartTime, ThisRecord.EndTime, TimeUnit.Milliseconds))/1000
+        Width: =App.Width - Self.X
+        Y: =SS_AppHeader_AP.Height
+        ZIndex: =4
+
+    icon_Back_AP As icon.BackArrow:
+        BorderColor: =RGBA(0, 0, 0, 0)
+        BorderStyle: =BorderStyle.None
+        Color: =BlueControlDarkBackground
+        Height: =30
+        HoverBorderColor: =Self.BorderColor
+        HoverColor: =Color.Purple
+        Icon: =Icon.BackArrow
+        OnSelect: =Navigate(scn_SelfService);
+        Tooltip: ="Back"
+        Width: =Self.Height
+        X: =15
+        Y: =lbl_ScreenTitle_AP.Y + (lbl_ScreenTitle_AP.Height - Self.Height) * 0.50
+        ZIndex: =5
+
+    SS_AppHeader_AP As AppHeader:
+        DropDownSelection: =TrackRequestComponent_AP.HideTrackRequest
+        FeedbackButtonUrl: =var_SendFeedback_URL
+        inputAppDisplayName: =varAppHeaderText
+        ShowSurveyButton: =false
+        Y: =0
+        ZIndex: =6
+
+    TrackRequestComponent_AP As TrackRequestComponent:
+        BlueControlDarkBackground: =BlueControlDarkBackground
+        BlueControlLightBackground: =BlueControlLightBackground
+        BlueNaviHightLightBackground: =BlueNaviHightLightBackground
+        DevOpsBaseUrl: =var_DevOpsBaseURL
+        DevOpsQueryID: =var_DevOpsQueryID
+        FontStyle: =FontStyle
+        GrayCanvasBackground: =GrayCanvasBackground
+        GRAYCOLOR: =GRAYCOLOR
+        GrayControlBackground: =GrayControlBackground
+        IsAdmin: =IsAdmin
+        Reset: =Self.Visible
+        Visible: =SS_AppHeader_AP.DisplayTrackRequest
+        X: =App.Width - Self.Width
+        Y: =SS_AppHeader_AP.Height
+        ZIndex: =7
+

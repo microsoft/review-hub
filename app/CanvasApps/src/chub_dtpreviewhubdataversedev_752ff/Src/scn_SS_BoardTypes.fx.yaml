@@ -1,0 +1,886 @@
+scn_SS_BoardTypes As screen:
+    OnHidden: =
+    OnVisible: |-
+        =ClearCollect(
+                clln_BoardTypes,
+                RenameColumns(
+                    ShowColumns(
+                        ReviewHub_BoardTypes,
+                        "craf2_boardtypename", "craf2_boardtypeid", "craf2_boardtypeshortname", "craf2_boardtypedescription", "craf2_isdisplayinapp", "craf2_bt_displayorder",
+                        "craf2_coordinator", "craf2_expectedautoloaddaypermonth", "chub_reviewlockday"
+                    ),
+                    "craf2_boardtypename", "bt_BoardTypeName", "craf2_boardtypeid", "bt_BoardTypeID", 
+                    "craf2_boardtypeshortname", "bt_BoardTypeShortName", "craf2_boardtypedescription", "bt_BoardTypeDescription", 
+                    "craf2_isdisplayinapp", "bt_IsDisplayInApp", "craf2_bt_displayorder", "bt_DisplayOrder",
+                    "craf2_coordinator", "Coordinator", 
+                    "craf2_expectedautoloaddaypermonth", "bt_ExpectedAutoLoadDay",
+                    "chub_reviewlockday", "bt_ReviewLockDay"
+                )
+            );
+            If(
+                IsBlankOrError(LookUp(clln_BoardTypes, IsMatch(ThisRecord.Coordinator, User().Email, MatchOptions.Contains & MatchOptions.IgnoreCase)).bt_BoardTypeID),
+                Set(IsCoordinator, false),
+                Set(IsCoordinator, true);
+                Set(
+                    IsCoordinator_BoardTypes, 
+                    Concat(
+                        Filter(clln_BoardTypes, IsMatch(ThisRecord.Coordinator, User().Email, MatchOptions.Contains & MatchOptions.IgnoreCase)).bt_BoardTypeID, 
+                        ThisRecord.bt_BoardTypeID & "|"
+                    )
+                )
+            );
+
+    ctn_Edit_BT As groupContainer:
+        Fill: =RGBA(255, 255, 255, 1)
+        Height: |
+            =btn_BT_Save.Y + btn_BT_Save.Height + 25
+        Width: =If(var_EditBT, App.Width - Self.X - 15, 0)
+        X: =ctn_Search_BT.X + ctn_Search_BT.Width + 20
+        Y: =ctn_Search_BT.Y
+        ZIndex: =1
+
+        Back_EditBoardType_Btm As button:
+            BorderColor: =Header_EditProduct_BT.Fill
+            DisabledBorderColor: =Self.BorderColor
+            DisabledFill: =RGBA(0, 0, 0, 0)
+            DisplayMode: =DisplayMode.Disabled
+            Font: =FontStyle
+            Height: =Parent.Height - Self.Y - 1
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Text: =""
+            Width: =Parent.Width - 2
+            X: =1
+            Y: =Header_EditProduct_BT.Height - 1
+            ZIndex: =1
+
+        btn_BT_Cancel As button:
+            BorderColor: =Self.Fill
+            Fill: =GRAYCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =25
+            HoverColor: =Self.Fill
+            HoverFill: =Self.Color
+            OnSelect: |
+                =Concurrent(
+                    Set(record_Edit_This_BoardType, Blank()),
+                    Set(var_EditBT, false),
+                    Select(btn_Reset_BT)
+                );
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Size: =10
+            Text: ="Cancel"
+            Visible: =label_BT_Name.Visible
+            Width: =90
+            X: =btn_BT_Save.X + btn_BT_Save.Width + 30
+            Y: =btn_BT_Save.Y
+            ZIndex: =2
+
+        btn_BT_Save As button:
+            BorderColor: =Self.Fill
+            DisplayMode: =If(Trim(ti_BT_Name.Text) = "" || Trim(ti_ShortName_BT.Text) = "" , DisplayMode.Disabled, DisplayMode.Edit)
+            Fill: =BlueControlDarkBackground
+            Font: =FontStyle
+            FontWeight: =FontWeight.Normal
+            Height: =25
+            HoverColor: =Self.Fill
+            HoverFill: =Self.Color
+            OnSelect: |+
+                =
+                Concurrent(
+                    Patch(
+                        ReviewHub_BoardTypes,
+                        LookUp(ReviewHub_BoardTypes, BoardTypeID = record_Edit_This_BoardType.bt_BoardTypeID),
+                        {
+                            BoardTypeID: record_Edit_This_BoardType.bt_BoardTypeID,
+                            BoardTypeDescription: Trim(ti_Desc_BT.Text),
+                            BoardTypeName: Trim(ti_BT_Name.Text),
+                            BoardTypeShortName: Trim(ti_ShortName_BT.Text),
+                            ExpectedAutoLoadDayPerMonth: If(Trim(ti_ExpectedAutoLoadDay_BT.Text) = "", 5,  Value(ti_ExpectedAutoLoadDay_BT.Text)),
+                            ReviewLockDay: If(Trim(ti_ReviewLockDay_BT.Text) = "", 31, Value(ti_ReviewLockDay_BT.Text)),
+                            bt_DisplayOrder: Value(ti_DisplayOrder_BT.Text),
+                            IsDisplayInApp: tgl_DisplayInApp_BT.Value
+                        }
+                    ),
+                    Patch(
+                        clln_BoardTypes,
+                        LookUp(clln_BoardTypes, bt_BoardTypeID = record_Edit_This_BoardType.bt_BoardTypeID),
+                        {
+                            bt_BoardTypeID: record_Edit_This_BoardType.bt_BoardTypeID,
+                            bt_BoardTypeDescription: Trim(ti_Desc_BT.Text),
+                            bt_BoardTypeName: Trim(ti_BT_Name.Text),
+                            bt_BoardTypeShortName: Trim(ti_ShortName_BT.Text),
+                            bt_ExpectedAutoLoadDay: If(Trim(ti_ExpectedAutoLoadDay_BT.Text) = "", 5,  Value(ti_ExpectedAutoLoadDay_BT.Text)) ,
+                            bt_ReviewLockDay: If(Trim(ti_ReviewLockDay_BT.Text) = "", 31, Value(ti_ReviewLockDay_BT.Text)),
+                            bt_DisplayOrder: Value(ti_DisplayOrder_BT.Text),
+                            bt_IsDisplayInApp: tgl_DisplayInApp_BT.Value
+                        }
+                    ),
+                    Patch(
+                        clln_InsightsGallery_Home,
+                        LookUp(clln_InsightsGallery_Home, bt_BoardTypeID = record_Edit_This_BoardType.bt_BoardTypeID),
+                        {
+                            bt_BoardTypeID: record_Edit_This_BoardType.bt_BoardTypeID,
+                            bt_BoardTypeShortName: Trim(ti_ShortName_BT.Text),
+                            bt_DisplayOrder: Value(ti_DisplayOrder_BT.Text),
+                            BoardNumberCount: LookUp(clln_FMB_GroupByBoardType, ThisRecord.fmb_MetricBoardTypeID=record_Edit_This_BoardType.bt_BoardTypeID).CountByBoardTypeID
+                        }
+                    )
+                
+                );
+                
+                Concurrent(
+                    Set(record_Edit_This_BoardType, Blank()),
+                    Set(var_EditBT, false),
+                    Select(btn_Reset_BT)
+                )
+                
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Size: =10
+            Text: ="Save"
+            Visible: =label_BT_Name.Visible
+            Width: =90
+            X: =ti_Desc_BT.X
+            Y: =ti_Desc_BT.Y + ti_Desc_BT.Height + 25
+            ZIndex: =3
+
+        ti_Desc_BT As text:
+            BorderColor: =GRAYCOLOR
+            BorderThickness: =1
+            Default: =record_Edit_This_BoardType.bt_BoardTypeDescription
+            Font: =FontStyle
+            Height: =100
+            HoverBorderColor: =Self.BorderColor
+            HoverFill: =ColorFade(BlueControlLightBackground, 75%)
+            Mode: =TextMode.MultiLine
+            PaddingLeft: =10
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Size: =11
+            Visible: =label_BT_Name.Visible
+            Width: =Parent.Width - Self.X - 15
+            X: =ti_BT_Name.X
+            Y: =label_Desc_BT.Y + label_Desc_BT.Height
+            ZIndex: =4
+
+        label_Desc_BT As label:
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =30
+            PaddingLeft: =0
+            Size: =11
+            Text: |-
+                ="Description:"
+            Visible: =label_BT_Name.Visible
+            Width: =lbl_ShortName_BT.Width
+            X: =15
+            Y: =If (IsAdmin, ti_DisplayOrder_BT.Y + ti_DisplayOrder_BT.Height + 10 , ti_ReviewLockDay_BT.Y + ti_ReviewLockDay_BT.Height + 10)
+            ZIndex: =6
+
+        ti_ShortName_BT As text:
+            BorderColor: =GRAYCOLOR
+            BorderThickness: =1
+            Default: =record_Edit_This_BoardType.bt_BoardTypeShortName
+            Font: =FontStyle
+            Height: =ti_BT_Name.Height
+            HoverBorderColor: =Self.BorderColor
+            HoverFill: =ColorFade(BlueControlLightBackground, 75%)
+            PaddingLeft: =10
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Size: =11
+            Visible: =label_BT_Name.Visible
+            Width: =Parent.Width - Self.X - 15
+            X: =ti_BT_Name.X
+            Y: =lbl_ShortName_BT.Y + lbl_ShortName_BT.Height
+            ZIndex: =7
+
+        lbl_ShortName_BT As label:
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =30
+            PaddingLeft: =0
+            Size: =11
+            Text: |-
+                ="*Short Name: "
+            Visible: =label_BT_Name.Visible
+            Width: =180
+            X: =label_Desc_BT.X
+            Y: |
+                =ti_BT_Name.Y + ti_BT_Name.Height + 15
+            ZIndex: =8
+
+        ti_BT_Name As text:
+            BorderColor: =GRAYCOLOR
+            BorderThickness: =1
+            Color: =Color.Black
+            Default: =record_Edit_This_BoardType.bt_BoardTypeName
+            Font: =FontStyle
+            Height: =30
+            HoverBorderColor: =Self.BorderColor
+            HoverFill: =ColorFade(BlueControlLightBackground, 75%)
+            PaddingLeft: =10
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Size: =11
+            Visible: =label_BT_Name.Visible
+            Width: =Parent.Width - Self.X - 15
+            X: =label_BT_Name.X
+            Y: =label_BT_Name.Y + label_BT_Name.Height
+            ZIndex: =9
+
+        label_BT_Name As label:
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =30
+            PaddingLeft: =0
+            Size: =11
+            Text: |-
+                ="*Name: "
+            Width: =Parent.Width - Self.X - 15
+            X: =15
+            Y: |-
+                =Header_EditProduct_BT.Y + Header_EditProduct_BT.Height + 10
+                   
+            ZIndex: =10
+
+        Header_EditProduct_BT As button:
+            Align: =Align.Left
+            BorderColor: =Self.Fill
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =0
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =Color.Black
+            DisabledFill: =Self.Fill
+            DisplayMode: =DisplayMode.Disabled
+            Fill: =SUBGROUPCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =60
+            PaddingLeft: =20
+            RadiusBottomLeft: |
+                =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: |
+                =25
+            RadiusTopRight: |
+                =25
+            Size: =14
+            Text: |-
+                ="Edit - BoardType ID: " & record_Edit_This_BoardType.bt_BoardTypeID
+                        
+            Width: =Parent.Width
+            ZIndex: =11
+
+        btn_Reset_BT As button:
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =0
+            Color: =BlueControlDarkBackground
+            Fill: =RGBA(0, 0, 0, 0)
+            Font: =FontStyle
+            HoverColor: =Color.Purple
+            HoverFill: =Self.Fill
+            OnSelect: |-
+                =Concurrent(
+                    Reset(ti_BT_Name), Reset(ti_Desc_BT), Reset(ti_ShortName_BT), Reset(ti_ExpectedAutoLoadDay_BT), Reset(ti_ReviewLockDay_BT), Reset(tgl_DisplayInApp_BT)
+                )
+            PressedColor: =Self.Color
+            PressedFill: =Self.Fill
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Size: =12
+            Text: ="Reset"
+            Underline: =true
+            Visible: ="Edit" in Header_EditProduct_BT.Text
+            Width: =55
+            X: =Parent.Width - Self.Width - 10
+            Y: =(Header_EditProduct_BT.Height - Self.Height) * 0.50
+            ZIndex: =12
+
+        ti_ReviewLockDay_BT As text:
+            BorderColor: =GRAYCOLOR
+            BorderThickness: =1
+            Default: |
+                =record_Edit_This_BoardType.bt_ReviewLockDay
+            Font: =FontStyle
+            Format: =TextFormat.Number
+            Height: =ti_BT_Name.Height
+            HintText: ="Last Day a Metric Value can be updated"
+            HoverBorderColor: =Self.BorderColor
+            HoverFill: =ColorFade(BlueControlLightBackground, 75%)
+            PaddingLeft: =10
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Size: =11
+            Visible: =label_BT_Name.Visible
+            Width: =Parent.Width - Self.X - 15
+            X: =ti_BT_Name.X
+            Y: =lbl_ReviewLockDay_BT.Y + lbl_ReviewLockDay_BT.Height
+            ZIndex: =13
+
+        lbl_ReviewLockDay_BT As label:
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =30
+            PaddingLeft: =0
+            Size: =11
+            Text: |-
+                ="*Review Lock Day per Month: Default(31)"
+            Visible: =label_BT_Name.Visible
+            Width: =Parent.Width - Self.X
+            X: =label_Desc_BT.X
+            Y: |
+                =ti_ExpectedAutoLoadDay_BT.Y + ti_ExpectedAutoLoadDay_BT.Height + 15
+            ZIndex: =14
+
+        ti_ExpectedAutoLoadDay_BT As text:
+            BorderColor: =GRAYCOLOR
+            BorderThickness: =1
+            Default: |
+                =record_Edit_This_BoardType.bt_ExpectedAutoLoadDay
+            Font: =FontStyle
+            Format: =TextFormat.Number
+            Height: =ti_BT_Name.Height
+            HintText: ="The day the metric values are expected to be available"
+            HoverBorderColor: =Self.BorderColor
+            HoverFill: =ColorFade(BlueControlLightBackground, 75%)
+            PaddingLeft: =10
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Size: =11
+            Visible: =label_BT_Name.Visible
+            Width: =Parent.Width - Self.X - 15
+            X: =ti_BT_Name.X
+            Y: =lbl_ExpectedAutoLoadDay_BT.Y + lbl_ExpectedAutoLoadDay_BT.Height
+            ZIndex: =15
+
+        lbl_ExpectedAutoLoadDay_BT As label:
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =30
+            PaddingLeft: =0
+            Size: =11
+            Text: |-
+                ="*Expected Auto Load Day per Month: Default(5)"
+            Visible: =label_BT_Name.Visible
+            Width: =Parent.Width - Self.X
+            X: =label_Desc_BT.X
+            Y: |
+                =ti_ShortName_BT.Y + ti_ShortName_BT.Height + 15
+            ZIndex: =16
+
+        ti_DisplayOrder_BT As text:
+            BorderColor: =GRAYCOLOR
+            BorderThickness: =1
+            Default: |
+                =record_Edit_This_BoardType.bt_DisplayOrder
+            Font: =FontStyle
+            Format: =TextFormat.Number
+            Height: =lbl_DisplayOrder_BT.Height
+            HintText: ="Order of the board types when displayed on the home screen"
+            HoverBorderColor: =Self.BorderColor
+            HoverFill: =ColorFade(BlueControlLightBackground, 75%)
+            PaddingLeft: =10
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Size: =11
+            Visible: =IsAdmin
+            Width: =Parent.Width - lbl_DisplayOrder_BT.Width - lbl_DisplayOrder_BT.X - 15
+            X: =lbl_DisplayOrder_BT.X + lbl_DisplayOrder_BT.Width 
+            Y: =lbl_DisplayOrder_BT.Y
+            ZIndex: =17
+
+        lbl_DisplayOrder_BT As label:
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =If(IsAdmin, 30, 0)
+            PaddingLeft: =0
+            Size: =11
+            Text: |-
+                ="Display Order:"
+            Visible: =IsAdmin
+            Width: =120
+            X: =label_Desc_BT.X
+            Y: |
+                =lbl_DisplaInApp_BT.Y + lbl_DisplaInApp_BT.Height + 15
+            ZIndex: =18
+
+        lbl_DisplaInApp_BT As label:
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =If(IsAdmin, 30, 0)
+            PaddingLeft: =0
+            Size: =11
+            Text: |-
+                ="Display In App:"
+            Visible: =IsAdmin
+            Width: =120
+            X: =label_Desc_BT.X
+            Y: |
+                =ti_ReviewLockDay_BT.Y + ti_ReviewLockDay_BT.Height + 15
+            ZIndex: =19
+
+        tgl_DisplayInApp_BT As toggleSwitch:
+            Default: =record_Edit_This_BoardType.bt_IsDisplayInApp
+            FalseFill: =GrayControlBackground
+            FalseText: ="No"
+            Font: =Font.'Segoe UI'
+            Height: =lbl_DisplaInApp_BT.Height
+            TrueFill: =BlueControlDarkBackground
+            TrueText: ="Yes"
+            X: =lbl_DisplaInApp_BT.X + lbl_DisplaInApp_BT.Width
+            Y: =lbl_DisplaInApp_BT.Y
+            ZIndex: =20
+
+    ctn_Search_BT As groupContainer:
+        Height: =App.Height - Self.Y - 10
+        Width: =If(var_EditBT, App.Width * 0.70, App.Width - 30)
+        X: |+
+            =15
+            
+        Y: =Label_BT_Header.Y + Label_BT_Header.Height + 10
+        ZIndex: =2
+
+        glry_Search_BT As gallery.variableTemplateHeightGallery:
+            BorderColor: =SUBGROUPCOLOR
+            BorderThickness: =2
+            Height: =Parent.Height - Self.Y - 1
+            Items: |-
+                =Ungroup( //Ungroup function to add a Row Number column.
+                        ForAll(
+                            Sequence(CountRows(
+                                SortByColumns( Search(
+                                    Filter(
+                                    clln_BoardTypes,
+                                        IsAdmin || (IsCoordinator && ThisRecord.bt_BoardTypeID in IsCoordinator_BoardTypes)
+                                    )
+                                    ,
+                                    Trim(ti_Search_BT.Text),
+                                    "bt_BoardTypeName",
+                                    "bt_BoardTypeShortName"
+                                ), "bt_BoardTypeID", SortOrder.Ascending)
+                            )),
+                            {
+                                Record: Table(Last(FirstN(
+                                        SortByColumns( Search(
+                                            Filter(
+                                            clln_BoardTypes,
+                                                IsAdmin || (IsCoordinator && ThisRecord.bt_BoardTypeID in IsCoordinator_BoardTypes)
+                                            )
+                                            ,
+                                            Trim(ti_Search_BT.Text),
+                                            "bt_BoardTypeName",
+                                            "bt_BoardTypeShortName"
+                                        ), "bt_BoardTypeID", SortOrder.Ascending), Value
+                                    )
+                                )),
+                                RowNumber: Value
+                            }
+                        ),
+                        "Record"
+                    )
+            Layout: =Layout.Vertical
+            TemplateFill: |-
+                =If(Mod(ThisItem.RowNumber, 2) > 0,
+                If(ThisItem.IsSelected, ColorFade(BlueNaviHightLightBackground, 85%), RGBA(0, 0, 0, 0)),
+                If(ThisItem.IsSelected, ColorFade(BlueNaviHightLightBackground, 85%), GrayCanvasBackground))
+            TemplatePadding: =0
+            TemplateSize: =60
+            Width: =Parent.Width - 2
+            X: =1
+            Y: =Header_ID_BT.Y + Header_ID_BT.Height - 1
+            ZIndex: =1
+
+            btn_Edit_BT As icon.Edit:
+                BorderColor: =Self.Color
+                BorderThickness: =2
+                Color: =BlueControlDarkBackground
+                Height: =25
+                HoverBorderColor: =Self.Color
+                HoverColor: =Color.White
+                HoverFill: =Self.Color
+                Icon: =Icon.Edit
+                OnSelect: |-
+                    =Set(record_Edit_This_BoardType, ThisItem);
+                    Set(var_EditBT, true);
+                PaddingBottom: =3
+                PaddingLeft: =3
+                PaddingRight: =3
+                PaddingTop: =3
+                Tooltip: ="Edit"
+                Width: =25
+                X: =Header_Conrol_BT.X + (Header_Conrol_BT.Width - Self.Width) * 0.50
+                Y: =(txt_ID_BT.Height - Self.Height) * 0.50
+                ZIndex: =2
+
+            txt_ReviewLockDate_BT As label:
+                Align: =Align.Center
+                Fill: =Parent.Fill
+                Font: =FontStyle
+                FontWeight: =txt_ID_BT.FontWeight
+                Height: =txt_ID_BT.Height
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =11
+                Text: =ThisItem.bt_ReviewLockDay
+                Width: =Header_ExpectedAutoLoadDay_BT.Width
+                X: =Header_ReviewLockDate_BT.X
+                ZIndex: =3
+
+            txt_ExpectedAutoLoadDay_BT As label:
+                Align: =Align.Center
+                Fill: =Parent.Fill
+                Font: =FontStyle
+                FontWeight: =txt_ID_BT.FontWeight
+                Height: =txt_ID_BT.Height
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =11
+                Text: =ThisItem.bt_ExpectedAutoLoadDay
+                Width: =Header_ExpectedAutoLoadDay_BT.Width
+                X: =Header_ExpectedAutoLoadDay_BT.X
+                ZIndex: =4
+
+            txt_BoardTypeDesc_BT As label:
+                AutoHeight: =true
+                Fill: =Parent.Fill
+                Font: =FontStyle
+                FontWeight: =txt_ID_BT.FontWeight
+                Height: =txt_ID_BT.Height
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =11
+                Text: =ThisItem.bt_BoardTypeDescription
+                Width: =Header_BoardTypeDesc_BT.Width
+                X: =Header_BoardTypeDesc_BT.X
+                Y: =(txt_ID_BT.Height - Self.Height) * 0.50
+                ZIndex: =5
+
+            txt_BoardTypeName_BT As label:
+                AutoHeight: =true
+                Fill: =Parent.Fill
+                Font: =FontStyle
+                FontWeight: =txt_ID_BT.FontWeight
+                Height: =50
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =10
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =11
+                Text: =ThisItem.bt_BoardTypeName
+                Width: =Header_BoardTypeName_BT.Width
+                X: =Header_BoardTypeName_BT.X
+                Y: =(txt_ID_BT.Height - Self.Height) * 0.50
+                ZIndex: =6
+
+            txt_BoardTypeShortName_BT As label:
+                Align: =Align.Center
+                Fill: =Parent.Fill
+                Font: =FontStyle
+                FontWeight: =txt_ID_BT.FontWeight
+                Height: =txt_ID_BT.Height
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =11
+                Text: =ThisItem.bt_BoardTypeShortName
+                Width: =Header_BoardTypeShortName_BT.Width
+                X: =Header_BoardTypeShortName_BT.X
+                ZIndex: =7
+
+            txt_ID_BT As label:
+                Align: =Align.Center
+                Fill: =Parent.Fill
+                Font: =FontStyle
+                FontWeight: =If(ThisItem.IsSelected, FontWeight.Bold, FontWeight.Normal)
+                Height: =60
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =10
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =11
+                Text: =ThisItem.bt_BoardTypeID
+                Width: =Header_ID_BT.Width
+                X: =Header_ID_BT.X
+                ZIndex: =8
+
+        Header_Conrol_BT As label:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            DisplayMode: =DisplayMode.View
+            Fill: =SUBGROUPCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =Header_ID_BT.Height
+            PaddingBottom: =0
+            PaddingTop: =0
+            Size: =10
+            Text: ="Edit"
+            Width: =100
+            X: =Header_ReviewLockDate_BT.X + Header_ReviewLockDate_BT.Width
+            Y: =Header_ID_BT.Y
+            ZIndex: =2
+
+        Header_ReviewLockDate_BT As label:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            DisplayMode: =DisplayMode.View
+            Fill: =SUBGROUPCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =Header_ID_BT.Height
+            PaddingBottom: =0
+            PaddingTop: =0
+            Size: =10
+            Text: ="Review Lock Day"
+            Width: =160
+            X: =Header_ExpectedAutoLoadDay_BT.X + Header_ExpectedAutoLoadDay_BT.Width
+            Y: =Header_ID_BT.Y
+            ZIndex: =3
+
+        Header_ExpectedAutoLoadDay_BT As label:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            DisplayMode: =DisplayMode.View
+            Fill: =SUBGROUPCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =Header_ID_BT.Height
+            PaddingBottom: =0
+            PaddingTop: =0
+            Size: =10
+            Text: ="Expected Auto Load Day"
+            Width: =160
+            X: =Header_BoardTypeDesc_BT.X + Header_BoardTypeDesc_BT.Width
+            Y: =Header_ID_BT.Y
+            ZIndex: =4
+
+        Header_BoardTypeDesc_BT As label:
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            DisplayMode: =DisplayMode.View
+            Fill: =SUBGROUPCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =Header_ID_BT.Height
+            PaddingBottom: =0
+            PaddingTop: =0
+            Size: =10
+            Text: ="Description"
+            Width: =Parent.Width - Header_ID_BT.Width - Header_BoardTypeShortName_BT.Width - Header_BoardTypeName_BT.Width - Header_ExpectedAutoLoadDay_BT.Width - Header_Conrol_BT.Width - Header_ReviewLockDate_BT.Width
+            X: =Header_BoardTypeName_BT.X+Header_BoardTypeName_BT.Width
+            Y: =Header_ID_BT.Y
+            ZIndex: =5
+
+        Header_BoardTypeName_BT As label:
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            DisplayMode: =DisplayMode.View
+            Fill: =SUBGROUPCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =Header_ID_BT.Height
+            PaddingBottom: =0
+            PaddingLeft: =10
+            PaddingTop: =0
+            Size: =10
+            Text: ="Name"
+            Width: =App.Width * 0.15
+            X: =Header_BoardTypeShortName_BT.X+Header_BoardTypeShortName_BT.Width
+            Y: =Header_ID_BT.Y
+            ZIndex: =6
+
+        Header_BoardTypeShortName_BT As label:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            DisplayMode: =DisplayMode.View
+            Fill: =SUBGROUPCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =Header_ID_BT.Height
+            PaddingBottom: =0
+            PaddingTop: =0
+            Size: =10
+            Text: ="Short Name"
+            Width: =App.Width * 0.1
+            X: =Header_ID_BT.X + Header_ID_BT.Width
+            Y: =Header_ID_BT.Y
+            ZIndex: =7
+
+        Header_ID_BT As label:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            DisplayMode: =DisplayMode.View
+            Fill: =SUBGROUPCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingTop: =0
+            Size: =10
+            Text: ="ID"
+            Width: =90
+            Y: =Back_SearchProduct_BT.Y + Back_SearchProduct_BT.Height
+            ZIndex: =8
+
+        Back_SearchProduct_BT As button:
+            Align: =Align.Left
+            BorderColor: =Self.Fill
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =0
+            Color: =RGBA(0, 0, 0, 1)
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =Self.Color
+            DisabledFill: =Self.Fill
+            DisplayMode: =DisplayMode.Disabled
+            Fill: =ColorFade(BlueNaviHightLightBackground, 50%)
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            PaddingLeft: =15
+            RadiusBottomLeft: |
+                =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =20
+            RadiusTopRight: =20
+            Size: =11
+            Text: |-
+                =If(!IsAdmin, "Your ") & "BoardTypes in Review Hub (count: " & CountRows(glry_Search_BT.AllItems) & ")"
+            Width: =Parent.Width
+            ZIndex: =9
+
+        ti_Search_BT As text:
+            BorderColor: =GrayControlBackground
+            BorderThickness: =1
+            Clear: =true
+            Default: =""
+            Font: =FontStyle
+            Height: =25
+            HintText: ="Search by Board Type Name, Short Name"
+            HoverBorderColor: =Self.BorderColor
+            HoverFill: =ColorFade(BlueControlLightBackground, 75%)
+            PaddingBottom: =0
+            PaddingTop: =0
+            PressedBorderColor: =Self.BorderColor
+            RadiusBottomLeft: =14
+            RadiusBottomRight: =14
+            RadiusTopLeft: =14
+            RadiusTopRight: =14
+            Size: =9
+            Width: =400
+            X: =Back_SearchProduct_BT.Width - Self.Width - 15
+            Y: =(Back_SearchProduct_BT.Height - Self.Height) * 0.50
+            ZIndex: =10
+
+        icon_SearchProduct_BT As icon.Search:
+            DisabledBorderColor: =RGBA(0, 0, 0, 0)
+            DisabledColor: =RGBA(0, 0, 0, 1)
+            DisplayMode: =DisplayMode.Disabled
+            Height: =ti_Search_BT.Height
+            Icon: =Icon.Search
+            PaddingBottom: =2
+            PaddingLeft: =2
+            PaddingRight: =2
+            PaddingTop: =2
+            Width: =ti_Search_BT.Height
+            X: =ti_Search_BT.X - Self.Width - 5
+            Y: =ti_Search_BT.Y
+            ZIndex: =11
+
+    Label_BT_Header As label:
+        DisabledColor: =BlueControlDarkBackground
+        DisabledFill: =Self.Fill
+        DisplayMode: =DisplayMode.Disabled
+        Fill: =GrayCanvasBackground
+        Font: =FontStyle
+        FontWeight: =FontWeight.Bold
+        Height: =55
+        PaddingLeft: =60
+        Size: =18
+        Text: ="Update Board Type Information"
+        Width: =App.Width - Self.X
+        Y: =SS_AppHeader_BT.Height
+        ZIndex: =3
+
+    icon_Back_BT As icon.BackArrow:
+        BorderColor: =RGBA(0, 0, 0, 0)
+        BorderStyle: =BorderStyle.None
+        Color: =BlueControlDarkBackground
+        Height: =30
+        HoverBorderColor: =Self.BorderColor
+        HoverColor: =Color.Purple
+        Icon: =Icon.BackArrow
+        OnSelect: =Navigate(scn_SelfService);
+        Tooltip: ="Back"
+        Width: =Self.Height
+        X: =15
+        Y: =Label_BT_Header.Y + (Label_BT_Header.Height - Self.Height) * 0.50
+        ZIndex: =4
+
+    SS_AppHeader_BT As AppHeader:
+        DropDownSelection: =TrackRequestComponent_BT.HideTrackRequest
+        FeatureRequestUrl: =var_FeatureRequestURL
+        FeedbackButtonUrl: =var_SendFeedback_URL
+        inputAppDisplayName: =varAppHeaderText
+        ScorecardOnboardingFeatureUrl: =var_ScorecardOnboardingRequestURL
+        ShowSurveyButton: =false
+        Y: =0
+        ZIndex: =5
+
+    TrackRequestComponent_BT As TrackRequestComponent:
+        BlueControlDarkBackground: =BlueControlDarkBackground
+        BlueControlLightBackground: =BlueControlLightBackground
+        BlueNaviHightLightBackground: =BlueNaviHightLightBackground
+        DevOpsBaseUrl: =var_DevOpsBaseURL
+        DevOpsQueryID: =var_DevOpsQueryID
+        FontStyle: =FontStyle
+        GrayCanvasBackground: =GrayCanvasBackground
+        GRAYCOLOR: =GRAYCOLOR
+        GrayControlBackground: =GrayControlBackground
+        IsAdmin: =IsAdmin
+        Reset: =Self.Visible
+        Visible: =SS_AppHeader_BT.DisplayTrackRequest
+        X: =App.Width - Self.Width
+        Y: =SS_AppHeader_BT.Height
+        ZIndex: =6
+

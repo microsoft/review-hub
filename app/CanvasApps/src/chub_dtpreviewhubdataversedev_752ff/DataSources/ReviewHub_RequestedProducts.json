@@ -1,0 +1,149 @@
+[
+  {
+    "CdsFCBContext": "{\"FileType\":true,\"ImageExternalStorage\":true}",
+    "EntitySetName": "craf2_reviewhub_requestedproducts",
+    "IsHidden": false,
+    "IsSampleData": false,
+    "IsWritable": true,
+    "LogicalName": "craf2_reviewhub_requestedproduct",
+    "MaxGetRowsCount": 2000,
+    "Name": "ReviewHub_RequestedProducts",
+    "NativeCDSDataSourceInfoNameMapping": {
+      "_ownerid_value": "Owner",
+      "cr207_proposedaccessrevokeddate": "ProposedAccessRevokedDate (cr207_proposedaccessrevokeddate)",
+      "craf2_AccessRequest": "AccessRequest",
+      "craf2_accessrevokeddate": "AccessRevokedDate",
+      "craf2_approvercomment": "ApproverComment",
+      "craf2_approveremail": "ApproverEmail",
+      "craf2_BoardType": "BoardType",
+      "craf2_decision": "Decision",
+      "craf2_decisiondate": "DecisionDate",
+      "craf2_isaccessrevoked": "IsAccessRevoked",
+      "craf2_name": "ID",
+      "craf2_Product": "Product",
+      "craf2_proposedaccessrevokeddate": "ProposedAccessRevokedDate (craf2_proposedaccessrevokeddate)",
+      "craf2_reviewhub_requestedproduct_AsyncOperations": "System Jobs",
+      "craf2_reviewhub_requestedproduct_BulkDeleteFailures": "Bulk Delete Failures",
+      "craf2_reviewhub_requestedproduct_DuplicateBaseRecord": "Duplicate Records (craf2_reviewhub_requestedproduct_DuplicateBaseRecord)",
+      "craf2_reviewhub_requestedproduct_DuplicateMatchingRecord": "Duplicate Records (craf2_reviewhub_requestedproduct_DuplicateMatchingRecord)",
+      "craf2_reviewhub_requestedproduct_MailboxTrackingFolders": "Mailbox Auto Tracking Folders",
+      "craf2_reviewhub_requestedproduct_PrincipalObjectAttributeAccesses": "Field Sharing",
+      "craf2_reviewhub_requestedproduct_ProcessSession": "Process Sessions",
+      "craf2_reviewhub_requestedproduct_SyncErrors": "Sync Errors",
+      "craf2_reviewhub_requestedproductid": "ReviewHub_RequestedProduct",
+      "createdby": "Created By",
+      "createdon": "Created On",
+      "createdonbehalfby": "Created By (Delegate)",
+      "importsequencenumber": "Import Sequence Number",
+      "modifiedby": "Modified By",
+      "modifiedon": "Modified On",
+      "modifiedonbehalfby": "Modified By (Delegate)",
+      "overriddencreatedon": "Record Created On",
+      "owningbusinessunit": "Owning Business Unit",
+      "owningteam": "Owning Team",
+      "owninguser": "Owning User",
+      "statecode": "Status",
+      "statuscode": "Status Reason",
+      "timezoneruleversionnumber": "Time Zone Rule Version Number",
+      "utcconversiontimezonecode": "UTC Conversion Time Zone Code",
+      "versionnumber": "Version Number"
+    },
+    "PreferredName": "ReviewHub_RequestedProducts",
+    "Type": "NativeCDSDataSourceInfo"
+  },
+  {
+    "DisplayName": "ReviewHub_RequestedProducts (Views)",
+    "Name": "_craf2_reviewhub_requestedproduct_views",
+    "RelatedEntityName": "ReviewHub_RequestedProducts",
+    "TrimmedViewName": true,
+    "Type": "ViewInfo",
+    "ViewInfoNameMapping": {
+      "506c52f4-778c-4ff5-8d42-66796372501d": "Inactive ReviewHub_RequestedProducts",
+      "5aaf1a84-d17a-423d-ace8-5034417fd060": "ReviewHub_RequestedProduct Associated View",
+      "a162b53a-5d84-4437-8b86-a5f817798cfd": "Active ReviewHub_RequestedProducts",
+      "aae5bb23-91c5-46fb-aa8d-3808d1a3fa00": "ReviewHub_RequestedProduct Lookup View",
+      "ac6a1f2e-9e30-4228-ba97-0bb1461d623e": "ReviewHub_RequestedProduct Advanced Find View"
+    }
+  },
+  {
+    "DisplayName": "Decision (ReviewHub_RequestedProducts)",
+    "Name": "craf2_reviewhub_requestedproduct_craf2_decision",
+    "OptionSetInfoNameMapping": {
+      "803840000": "Declined",
+      "803840001": "Approved",
+      "803840002": "Pending"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "craf2_decision",
+        "OptionSetReferenceEntityName": "ReviewHub_RequestedProducts"
+      }
+    },
+    "OptionSetTypeKey": "PicklistType",
+    "RelatedColumnInvariantName": "craf2_decision",
+    "RelatedEntityName": "ReviewHub_RequestedProducts",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "IsAccessRevoked (ReviewHub_RequestedProducts)",
+    "Name": "craf2_reviewhub_requestedproduct_craf2_isaccessrevoked",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "craf2_isaccessrevoked",
+        "OptionSetReferenceEntityName": "ReviewHub_RequestedProducts"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "craf2_isaccessrevoked",
+    "RelatedEntityName": "ReviewHub_RequestedProducts",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Status (ReviewHub_RequestedProducts)",
+    "Name": "craf2_reviewhub_requestedproduct_statecode",
+    "OptionSetInfoNameMapping": {
+      "0": "Active",
+      "1": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statecode",
+        "OptionSetReferenceEntityName": "ReviewHub_RequestedProducts"
+      }
+    },
+    "OptionSetTypeKey": "StateType",
+    "RelatedColumnInvariantName": "statecode",
+    "RelatedEntityName": "ReviewHub_RequestedProducts",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Status Reason (ReviewHub_RequestedProducts)",
+    "Name": "craf2_reviewhub_requestedproduct_statuscode",
+    "OptionSetInfoNameMapping": {
+      "1": "Active",
+      "2": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statuscode",
+        "OptionSetReferenceEntityName": "ReviewHub_RequestedProducts"
+      }
+    },
+    "OptionSetTypeKey": "StatusType",
+    "RelatedColumnInvariantName": "statuscode",
+    "RelatedEntityName": "ReviewHub_RequestedProducts",
+    "Type": "OptionSetInfo"
+  }
+]

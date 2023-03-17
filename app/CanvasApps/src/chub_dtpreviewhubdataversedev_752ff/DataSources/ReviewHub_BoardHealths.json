@@ -1,0 +1,103 @@
+[
+  {
+    "CdsFCBContext": "{\"FileType\":true,\"ImageExternalStorage\":true}",
+    "EntitySetName": "craf2_reviewhub_boardhealths",
+    "IsHidden": false,
+    "IsSampleData": false,
+    "IsWritable": true,
+    "LogicalName": "craf2_reviewhub_boardhealth",
+    "MaxGetRowsCount": 2000,
+    "Name": "ReviewHub_BoardHealths",
+    "NativeCDSDataSourceInfoNameMapping": {
+      "_ownerid_value": "Owner",
+      "craf2_comment": "Comment",
+      "craf2_displayorder": "DisplayOrder",
+      "craf2_healthrating": "HealthRating",
+      "craf2_img": "Img",
+      "craf2_imgid": "craf2_ImgId",
+      "craf2_lowerboundscore": "LowerBoundScore",
+      "craf2_reviewhub_boardhealth_AsyncOperations": "System Jobs",
+      "craf2_reviewhub_boardhealth_BulkDeleteFailures": "Bulk Delete Failures",
+      "craf2_reviewhub_boardhealth_DuplicateBaseRecord": "Duplicate Records (craf2_reviewhub_boardhealth_DuplicateBaseRecord)",
+      "craf2_reviewhub_boardhealth_DuplicateMatchingRecord": "Duplicate Records (craf2_reviewhub_boardhealth_DuplicateMatchingRecord)",
+      "craf2_reviewhub_boardhealth_MailboxTrackingFolders": "Mailbox Auto Tracking Folders",
+      "craf2_reviewhub_boardhealth_PrincipalObjectAttributeAccesses": "Field Sharing",
+      "craf2_reviewhub_boardhealth_ProcessSession": "Process Sessions",
+      "craf2_reviewhub_boardhealth_SyncErrors": "Sync Errors",
+      "craf2_reviewhub_boardhealthid": "ReviewHub_BoardHealth",
+      "craf2_upperboundscore": "UpperBoundScore",
+      "createdby": "Created By",
+      "createdon": "Created On",
+      "createdonbehalfby": "Created By (Delegate)",
+      "importsequencenumber": "Import Sequence Number",
+      "modifiedby": "Modified By",
+      "modifiedon": "Modified On",
+      "modifiedonbehalfby": "Modified By (Delegate)",
+      "overriddencreatedon": "Record Created On",
+      "owningbusinessunit": "Owning Business Unit",
+      "owningteam": "Owning Team",
+      "owninguser": "Owning User",
+      "statecode": "Status",
+      "statuscode": "Status Reason",
+      "timezoneruleversionnumber": "Time Zone Rule Version Number",
+      "utcconversiontimezonecode": "UTC Conversion Time Zone Code",
+      "versionnumber": "Version Number"
+    },
+    "PreferredName": "ReviewHub_BoardHealths",
+    "Type": "NativeCDSDataSourceInfo"
+  },
+  {
+    "DisplayName": "ReviewHub_BoardHealths (Views)",
+    "Name": "_craf2_reviewhub_boardhealth_views",
+    "RelatedEntityName": "ReviewHub_BoardHealths",
+    "TrimmedViewName": true,
+    "Type": "ViewInfo",
+    "ViewInfoNameMapping": {
+      "0ef95fcd-b2ab-4eb4-a45d-a2176f239e8a": "ReviewHub_BoardHealth Advanced Find View",
+      "202c72a0-0851-4aab-ad21-bcb8eddb2582": "Inactive ReviewHub_BoardHealths",
+      "4c6647e0-2fe9-42c8-b122-8928ca81bb2f": "ReviewHub_BoardHealth Lookup View",
+      "8a0ccbab-c83e-4788-accb-6f45dda530ab": "Active ReviewHub_BoardHealths",
+      "a2da62bc-5c45-41e6-9fc4-ea4598efa29b": "ReviewHub_BoardHealth Associated View"
+    }
+  },
+  {
+    "DisplayName": "Status (ReviewHub_BoardHealths)",
+    "Name": "craf2_reviewhub_boardhealth_statecode",
+    "OptionSetInfoNameMapping": {
+      "0": "Active",
+      "1": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statecode",
+        "OptionSetReferenceEntityName": "ReviewHub_BoardHealths"
+      }
+    },
+    "OptionSetTypeKey": "StateType",
+    "RelatedColumnInvariantName": "statecode",
+    "RelatedEntityName": "ReviewHub_BoardHealths",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Status Reason (ReviewHub_BoardHealths)",
+    "Name": "craf2_reviewhub_boardhealth_statuscode",
+    "OptionSetInfoNameMapping": {
+      "1": "Active",
+      "2": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statuscode",
+        "OptionSetReferenceEntityName": "ReviewHub_BoardHealths"
+      }
+    },
+    "OptionSetTypeKey": "StatusType",
+    "RelatedColumnInvariantName": "statuscode",
+    "RelatedEntityName": "ReviewHub_BoardHealths",
+    "Type": "OptionSetInfo"
+  }
+]

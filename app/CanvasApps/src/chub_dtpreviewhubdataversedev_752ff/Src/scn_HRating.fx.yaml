@@ -1,0 +1,1131 @@
+scn_HRating As screen:
+    OnHidden: =
+    OnVisible: |
+        =Set(var_TRCVisible, !var_TRCVisible);
+        Concurrent(
+            Set(var_PieChart_Raing_Selected, -1), //Initial variable.
+            Set(varSelectedBoardId, -5),
+            ClearCollect(
+                clln_PSRating,
+                GroupBy(
+                    ShowColumns( 
+                        clln_factMetricBoard,  
+                        "fmb_BoardHealthDisplayOrder", "fmb_BoardHealthRating", "fmb_BoardHealthImage", "fmb_ReviewLockDate", "fmb_ReviewMonth", "fmb_ReviewYear", "fmb_ProductName", "fmb_HealthScore", "fmb_ID", "fmb_ProductID", "fmb_TemplateID", "fmb_MetricBoardTypeID"
+                    ),
+                    "fmb_BoardHealthDisplayOrder", "fmb_BoardHealthRating", "fmb_ReviewMonth", "fmb_ReviewYear", "fmb_MetricBoardTypeID", "PSR_ProductsGroup"
+                )
+            )
+        );
+
+    lbl_glry_HR_Tip As label:
+        Color: =RGBA(116, 116, 116, 1)
+        DisplayMode: =DisplayMode.View
+        Font: =FontStyle
+        Height: =25
+        PaddingBottom: =0
+        PaddingRight: =0
+        PaddingTop: =0
+        Size: =10
+        Text: ="(Click a row to navigate to a scorecard)"
+        Width: =400
+        X: =ctn_glry_HR.X + ctn_glry_HR.Width
+        Y: =ctn_glry_HR.Y + ctn_glry_HR.Height - Self.Height
+        ZIndex: =1
+
+    ctn_glry_HR As groupContainer.manualLayoutContainer:
+        BorderStyle: =BorderStyle.None
+        Height: =App.Height-Self.Y-10
+        Width: =Max(670, (App.Width - Self.X) * 0.5)
+        X: =LeftNavi_HRating.Width + 10
+        Y: =ctn_PieChart_HR.Y
+        ZIndex: =2
+
+        glry_HR_Items As gallery.variableTemplateHeightGallery:
+            BorderColor: =btn_HeaderBack_HR.Fill
+            BorderThickness: =2
+            Height: =Parent.Height - Self.Y - 1
+            Items: |-
+                =SortByColumns(
+                    Filter(
+                        clln_PSRating,
+                        fmb_ReviewYear = var_PSR_Year && fmb_ReviewMonth = var_PSR_MonthNum 
+                            && fmb_MetricBoardTypeID = dpdn_Scorecard_HR.Selected.filter_BoardTypeID
+                    ),
+                    "fmb_BoardHealthDisplayOrder",
+                    SortOrder.Ascending
+                )
+            Layout: =Layout.Vertical
+            TemplateFill: |-
+                =Switch(
+                    ThisItem.fmb_BoardHealthDisplayOrder,
+                    1, RGBA(0, 24, 143, 0.08),
+                    2, RGBA(0, 158, 73, 0.08), 
+                    3, RGBA(255, 140, 0, 0.08), 
+                    4, RGBA(204, 65, 37, 0.08), 
+                    5, RGBA(217, 217, 217, 0.25)
+                )
+            TemplatePadding: =0
+            TemplateSize: =glry_PSR_ProductsGroup.Height
+            Width: =Parent.Width - 2
+            X: =1
+            Y: =ctn_glry_Header_HR.Y + ctn_glry_Header_HR.Height
+            ZIndex: =1
+
+            glry_PSR_ProductsGroup As gallery.variableTemplateHeightGallery:
+                Height: =(bttn_PSR_Product.Height + PSR_Products_Separator.Height) * CountRows(ThisItem.PSR_ProductsGroup)
+                Items: =SortByColumns(ThisItem.PSR_ProductsGroup, "fmb_HealthScore", SortOrder.Descending)
+                Layout: =Layout.Vertical
+                OnSelect: |-
+                    =Concurrent(
+                        Set(var_LastGalleryText, Blank()), //This will turn on the Getting Data animation GIF on BoardScreen.
+                        Set(varSelectedBoardId, ThisItem.fmb_ID),
+                        Set(var_BoardSrn_ProductID, ThisItem.fmb_ProductID),
+                        Set(var_BoardSrn_FMB_TemplateID, ThisItem.fmb_TemplateID),
+                        Set(var_BoardTypeSelected_Home, dpdn_Scorecard_HR.Selected.filter_BoardTypeID),
+                    
+                        If(
+                            CountRows(Filter(varLeftNavOptions, ID = ThisItem.fmb_ID)) = 0
+                                && CountRows(Filter(varLeftNavOptions, ThisRecord.PID = ThisItem.fmb_ProductID && ThisRecord.BoardTypeID = dpdn_Scorecard_HR.Selected.filter_BoardTypeID)) = 0,
+                            //Add a New Tab to Left Navigation
+                            Collect(
+                                varLeftNavOptions,
+                                {
+                                    Title: ThisItem.fmb_ProductName,
+                                    Screen: BoardScreen,
+                                    ID: ThisItem.fmb_ID,
+                                    ImagePath: Concatenate(
+                                        var_BlobStorageURL,
+                                        "/bagiaimages/ProductLogos/",
+                                        Text(ThisItem.fmb_ProductID),
+                                        ".png"
+                                    ),
+                                    PID: ThisItem.fmb_ProductID,
+                                    TemplateID: ThisItem.fmb_TemplateID,
+                                    BoardTypeID: dpdn_Scorecard_HR.Selected.filter_BoardTypeID, //LookUp(clln_factMetricBoard, ThisRecord.fmb_ID = ThisItem.fmb_ID).fmb_MetricBoardTypeID,
+                                    ReviewDate: ThisItem.fmb_ReviewLockDate
+                                }
+                            ),
+                    
+                            If(     //if this Product already in Left Navi.
+                                CountRows(Filter(varLeftNavOptions, ThisRecord.PID = ThisItem.fmb_ProductID && ThisRecord.BoardTypeID = dpdn_Scorecard_HR.Selected.filter_BoardTypeID)) <> 0, 
+                                Patch(
+                                    varLeftNavOptions,
+                                    LookUp(varLeftNavOptions, ThisRecord.PID = ThisItem.fmb_ProductID && ThisRecord.BoardTypeID = dpdn_Scorecard_HR.Selected.filter_BoardTypeID),
+                                    {
+                                        ID: ThisItem.fmb_ID, 
+                                        TemplateID: ThisItem.fmb_TemplateID,
+                                        ReviewDate: ThisItem.fmb_ReviewLockDate
+                                    }
+                                )
+                            )
+                        )
+                    );
+                    
+                    Navigate(BoardScreen);
+                ShowScrollbar: =false
+                TemplatePadding: =0
+                TemplateSize: =30
+                Transition: =Transition.Push
+                Width: =Parent.Width - Label_PSR_Rating.X - Label_PSR_Rating.Width
+                X: =Label_PSR_Rating.X + Label_PSR_Rating.Width
+                Y: |
+                    =0
+                ZIndex: =1
+
+                bttn_PSR_HealthScore As button:
+                    Align: =Align.Left
+                    BorderThickness: =0
+                    Color: =RGBA(0, 0, 0, 1)
+                    Fill: =Parent.Fill
+                    Font: =FontStyle
+                    FontWeight: =FontWeight.Normal
+                    Height: =bttn_PSR_Product.Height
+                    HoverColor: =RGBA(0, 0, 0, 1)
+                    HoverFill: =RowHoverOverColor
+                    OnSelect: =Select(Parent);
+                    PaddingBottom: =0
+                    PaddingLeft: =25
+                    PaddingRight: =0
+                    PaddingTop: =0
+                    PressedFill: =BlueNaviHightLightBackground
+                    RadiusBottomLeft: =0
+                    RadiusBottomRight: =0
+                    RadiusTopLeft: =0
+                    RadiusTopRight: =0
+                    Size: =11
+                    Text: =Round(ThisItem.fmb_HealthScore * 100, 2) & "%"
+                    Tooltip: =
+                    Visible: =!IsBlank(ThisItem.fmb_HealthScore)
+                    Width: =header_HealthScore_HR.Width
+                    X: =bttn_PSR_Product.X + bttn_PSR_Product.Width
+                    Y: =bttn_PSR_Product.Y
+                    ZIndex: =2
+
+                bttn_PSR_Product As button:
+                    Align: =Align.Left
+                    BorderThickness: =0
+                    Color: =RGBA(0, 0, 0, 1)
+                    Fill: =Parent.Fill
+                    Font: =FontStyle
+                    FontWeight: =FontWeight.Normal
+                    Height: =35
+                    HoverColor: =RGBA(0, 0, 0, 1)
+                    HoverFill: =RowHoverOverColor
+                    OnSelect: =Select(Parent);
+                    PaddingBottom: =0
+                    PaddingLeft: =10
+                    PaddingRight: =0
+                    PaddingTop: =0
+                    PressedColor: =Self.Color
+                    PressedFill: =BlueNaviHightLightBackground
+                    RadiusBottomLeft: =0
+                    RadiusBottomRight: =0
+                    RadiusTopLeft: =0
+                    RadiusTopRight: =0
+                    Size: =11
+                    Text: =ThisItem.fmb_ProductName
+                    Tooltip: =
+                    Width: =header_Products_HR.Width
+                    ZIndex: =3
+
+                PSR_Products_Separator As rectangle:
+                    BorderColor: =RGBA(0, 0, 0, 0)
+                    BorderStyle: =BorderStyle.None
+                    DisabledFill: =SUBGROUPCOLOR
+                    DisplayMode: =DisplayMode.View
+                    Fill: =Rectangle_PSR_Separator.Fill
+                    Height: =1
+                    OnSelect: =Select(Parent)
+                    Width: =Parent.Width
+                    Y: =bttn_PSR_Product.Height
+                    ZIndex: =5
+
+                btn_PSR_Top As button:
+                    AutoDisableOnSelect: =false
+                    BorderStyle: =BorderStyle.None
+                    BorderThickness: =0
+                    Color: =RGBA(0, 0, 0, 0)
+                    Fill: =RGBA(0, 0, 0, 0)
+                    FontWeight: =FontWeight.Normal
+                    Height: =bttn_PSR_Product.Height + 1
+                    HoverFill: =RowHoverOverColor
+                    OnSelect: =Select(Parent)
+                    PressedFill: =
+                    RadiusBottomLeft: =0
+                    RadiusBottomRight: =0
+                    RadiusTopLeft: =0
+                    RadiusTopRight: =0
+                    Size: =10
+                    Text: =""
+                    Width: =Parent.Width
+                    ZIndex: =6
+
+            divider_Vertical_HR As rectangle:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Fill: =Rectangle_PSR_Separator.Fill
+                Height: =Label_PSR_Rating.Height
+                OnSelect: =Select(Parent)
+                Width: =1
+                X: =Label_PSR_Rating.X + Label_PSR_Rating.Width
+                ZIndex: =2
+
+            Label_PSR_Rating As label:
+                Font: =FontStyle
+                FontWeight: =If(ThisItem.fmb_BoardHealthDisplayOrder = var_PieChart_Raing_Selected, FontWeight.Bold, FontWeight.Normal)
+                Height: =Max(glry_PSR_ProductsGroup.Height, bttn_PSR_Product.Height)
+                OnSelect: =Select(Parent)
+                PaddingLeft: =8
+                PaddingTop: =10
+                Size: =11
+                Text: =ThisItem.fmb_BoardHealthRating
+                VerticalAlign: =VerticalAlign.Top
+                Width: =header_Rating_HR.Width - Self.X
+                X: =Image_PSR_Img.X+Image_PSR_Img.Width
+                Y: |
+                    =0
+                ZIndex: =3
+
+            Image_PSR_Img As image:
+                Height: |
+                    =35
+                Image: =LookUp(clln_MetricBoardHealth, ThisItem.fmb_BoardHealthDisplayOrder=ThisRecord.DisplayOrder).Image //ThisItem.fmb_BoardHealthImage
+                OnSelect: =Select(Parent)
+                PaddingLeft: =10
+                Width: =35
+                X: =5
+                Y: =1
+                ZIndex: =4
+
+            Rectangle_PSR_Separator As rectangle:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Fill: =ColorFade(SUBGROUPCOLOR, 10%)
+                Height: =1
+                OnSelect: =Select(Parent)
+                Width: =Label_PSR_Rating.X + Label_PSR_Rating.Width
+                Y: =Label_PSR_Rating.Height - 1
+                ZIndex: =5
+
+            btn_PSR_Rating As button:
+                AutoDisableOnSelect: =false
+                BorderColor: =
+                BorderStyle: =BorderStyle.None
+                BorderThickness: =0
+                Color: =RGBA(0, 0, 0, 0)
+                Fill: =RGBA(0, 0, 0, 0)
+                FontWeight: =FontWeight.Normal
+                Height: =Label_PSR_Rating.Height
+                HoverColor: =RGBA(0, 0, 0, 0)
+                HoverFill: =RowHoverOverColor
+                OnSelect: =Set(var_PieChart_Raing_Selected, ThisItem.fmb_BoardHealthDisplayOrder)
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Size: =10
+                Text: =""
+                Width: =Label_PSR_Rating.X + Label_PSR_Rating.Width
+                ZIndex: =6
+
+        ctn_glry_Header_HR As groupContainer.manualLayoutContainer:
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            Height: =Top_Background_HR.Height - 1
+            Width: =Parent.Width
+            ZIndex: =2
+
+            btn_HeaderBack_HR As button:
+                DisplayMode: =DisplayMode.View
+                Fill: =ColorFade(BlueNaviHightLightBackground, 50%)
+                OnSelect: =
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =20
+                RadiusTopRight: =20
+                Text: =""
+                Width: =Parent.Width
+                ZIndex: =1
+
+            header_HealthScore_HR As label:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                DisplayMode: =DisplayMode.View
+                Font: =FontStyle
+                FontWeight: =FontWeight.Bold
+                Height: =Parent.Height
+                OnSelect: =
+                PaddingBottom: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =11
+                Text: ="Health Score"
+                Width: |
+                    =130
+                X: =header_Products_HR.X + header_Products_HR.Width
+                ZIndex: =2
+
+            header_Products_HR As label:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                DisplayMode: =DisplayMode.View
+                Font: =FontStyle
+                FontWeight: =FontWeight.Bold
+                Height: =Parent.Height
+                OnSelect: =
+                PaddingBottom: =0
+                PaddingLeft: =10
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =11
+                Text: ="Business Unit"
+                Width: =Parent.Width - header_Rating_HR.Width - header_HealthScore_HR.Width
+                X: =header_Rating_HR.X + header_Rating_HR.Width
+                ZIndex: =3
+
+            header_Rating_HR As label:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Font: =FontStyle
+                FontWeight: =FontWeight.Bold
+                Height: =Parent.Height
+                OnSelect: =
+                PaddingBottom: =0
+                PaddingLeft: =25
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =11
+                Text: ="Rating"
+                Width: =Parent.Width * 0.25
+                ZIndex: =4
+
+    Label_NoData_HR As label:
+        Align: =Align.Center
+        Fill: =RGBA(255, 255, 255, 1)
+        Font: =FONTNAME
+        FontWeight: =FontWeight.Semibold
+        Height: =35
+        Size: =9
+        Text: ="No rating data generated for the selected month."
+        Visible: |-
+            =If(
+                CountRows(Filter(
+                    clln_PSRating,
+                    ThisRecord.fmb_ReviewYear = var_PSR_Year && ThisRecord.fmb_ReviewMonth = var_PSR_MonthNum && ThisRecord.fmb_MetricBoardTypeID = dpdn_Scorecard_HR.Selected.filter_BoardTypeID
+                ))=0,
+                true,
+                false
+            )
+        Width: =450
+        X: =ctn_glry_HR.X + 100
+        Y: =ctn_glry_HR.Y + 150
+        ZIndex: =3
+
+    ctn_PieChart_HR As groupContainer:
+        BorderColor: =RGBA(0, 0, 0, 0)
+        BorderStyle: =BorderStyle.None
+        Height: =ctn_glry_HR.Height - 100
+        X: =ctn_glry_HR.X + ctn_glry_HR.Width + 10
+        Y: =ctn_TopBanner_HR.Y + ctn_TopBanner_HR.Height + 10
+        ZIndex: =4
+
+        Lower_Background_HR As button:
+            BorderColor: =Top_Background_HR.Fill
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =Self.Color
+            DisabledFill: =RGBA(255, 255, 255, 1)
+            DisplayMode: =DisplayMode.Disabled
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =Parent.Height - Self.Y - 2
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Self.Color
+            HoverFill: =Self.Fill
+            PressedBorderColor: =Self.BorderColor
+            PressedColor: =Self.Color
+            PressedFill: =Self.Fill
+            RadiusBottomLeft: =Top_Background_HR.RadiusTopLeft
+            RadiusBottomRight: =Top_Background_HR.RadiusTopRight
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Text: ="Button"
+            Width: =Top_Background_HR.Width - 2
+            X: =2
+            Y: =Top_Background_HR.Y + Top_Background_HR.Height - 1
+            ZIndex: =1
+
+        lbl_RatingNote_HR As label:
+            Font: =Font.'Segoe UI'
+            Height: =30
+            PaddingLeft: =25
+            PaddingRight: =0
+            PaddingTop: =3
+            Size: =10
+            Text: ="**Health Rating is based on the above Health Score Range."
+            VerticalAlign: =VerticalAlign.Top
+            Width: =glry_SmileyFaceRubric_HR.Width
+            X: =glry_SmileyFaceRubric_HR.X
+            Y: =Parent.Height - Self.Height - 5
+            ZIndex: =2
+
+        Top_Background_HR As button:
+            BorderColor: =Self.Fill
+            DisabledColor: =Self.Color
+            DisplayMode: =DisplayMode.View
+            Fill: =SUBGROUPCOLOR
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =20
+            RadiusTopRight: =20
+            Size: =10
+            Text: =""
+            Width: |
+                =Parent.Width - 2
+            X: =1
+            ZIndex: =3
+
+        "glry_SmileyFaceRubric_HR As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver4.0'":
+            BorderColor: =RGBA(0, 0,0, 0)
+            BorderStyle: =BorderStyle.None
+            Height: =200
+            Items: =SortByColumns(clln_MetricBoardHealth, "DisplayOrder")
+            Layout: =Layout.Vertical
+            TemplatePadding: =0
+            TemplateSize: =40
+            Width: =Parent.Width * 0.9
+            X: =(Parent.Width - Self.Width) * 0.50
+            Y: =lbl_RatingNote_HR.Y - Self.Height 
+            ZIndex: =4
+
+            lbl_ForPieChart As label:
+                Color: =RGBA(0, 0, 0, 0)
+                Height: =0
+                OnSelect: =Select(Parent)
+                Text: =lbl_RatingCount_HR.Text & " (" & lbl_RatingRatio_HR.Text & ")"
+                Visible: =false
+                Width: =0
+                ZIndex: =1
+
+            Item_Background_HR As button:
+                BorderColor: =RGBA(0,0,0,0)
+                BorderStyle: =BorderStyle.None
+                BorderThickness: =0
+                Color: =RGBA(0, 0, 0, 0)
+                DisplayMode: =DisplayMode.View
+                Fill: |-
+                    =If(
+                        ThisItem.DisplayOrder = var_PieChart_Raing_Selected, 
+                        Switch(
+                            ThisItem.DisplayOrder,
+                            1, RGBA(0, 24, 143, 0.08),
+                            2, RGBA(0, 158, 73, 0.08), 
+                            3, RGBA(255, 140, 0, 0.08), 
+                            4, RGBA(204, 65, 37, 0.08), 
+                            5, RGBA(217, 217, 217, 0.25)
+                        ), 
+                        RGBA(237, 237, 237, 0.5)
+                    )
+                Height: =Parent.TemplateHeight - 10
+                OnSelect: =Select(Parent)
+                RadiusBottomLeft: =20
+                RadiusBottomRight: =20
+                RadiusTopLeft: =20
+                RadiusTopRight: =20
+                Text: =""
+                Width: =Parent.Width 
+                X: =(Parent.Width - Self.Width) * 0.50
+                Y: =(Parent.TemplateHeight - Self.Height) * 0.50
+                ZIndex: =2
+
+            lbl_RatingRatio_HR As label:
+                Align: =Align.Center
+                Color: =BlueControlDarkBackground
+                DisplayMode: =DisplayMode.View
+                Font: =Font.'Segoe UI'
+                FontWeight: =lbl_RatingName_HR.FontWeight
+                Height: =lbl_ScoreRange_HR.Height
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: |-
+                    =If(
+                        IsBlank(Sum(glry_HR_Items.AllItems, CountRows(ThisRecord.PSR_ProductsGroup))),
+                        "",
+                        Round(
+                            Value(lbl_RatingCount_HR.Text) * 100 / (Sum(glry_HR_Items.AllItems, CountRows(ThisRecord.PSR_ProductsGroup)) + 0.0000001), //Add 0.0000001 to avoid division by zero error.
+                            2
+                        ) & "%"
+                    )
+                VerticalAlign: =VerticalAlign.Top
+                Width: =lbl_Ratio_HR.Width
+                X: =lbl_RatingCount_HR.X + lbl_RatingCount_HR.Width
+                Y: =lbl_ScoreRange_HR.Y
+                ZIndex: =3
+
+            lbl_RatingCount_HR As label:
+                Align: =Align.Center
+                Color: =BlueControlDarkBackground
+                DisplayMode: =DisplayMode.View
+                Font: =Font.'Segoe UI'
+                FontWeight: =lbl_RatingName_HR.FontWeight
+                Height: =lbl_ScoreRange_HR.Height
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: |-
+                    =If(
+                        IsBlank(CountRows(LookUp(glry_HR_Items.AllItems, ThisRecord.fmb_BoardHealthDisplayOrder = ThisItem.DisplayOrder).PSR_ProductsGroup)),
+                        0,
+                        CountRows(LookUp(glry_HR_Items.AllItems, ThisRecord.fmb_BoardHealthDisplayOrder = ThisItem.DisplayOrder).PSR_ProductsGroup)
+                    )
+                VerticalAlign: =VerticalAlign.Top
+                Width: =lbl_Count_HR.Width
+                X: =lbl_ScoreRange_HR.X + lbl_ScoreRange_HR.Width + 10
+                Y: =lbl_ScoreRange_HR.Y
+                ZIndex: =4
+
+            img_SmileyFaces_HR As image:
+                DisplayMode: =DisplayMode.View
+                Height: =28
+                Image: =ThisItem.Image
+                ImagePosition: =ImagePosition.Stretch
+                OnSelect: =Select(Parent)
+                PaddingBottom: =3
+                PaddingLeft: =3
+                PaddingRight: =3
+                PaddingTop: =3
+                Width: =28
+                X: =22
+                Y: =(Parent.TemplateHeight / 2) - (Self.Height / 2)
+                ZIndex: =5
+
+            lbl_RatingName_HR As label:
+                DisplayMode: =DisplayMode.View
+                Font: =Font.'Segoe UI'
+                FontWeight: =If(ThisItem.DisplayOrder = var_PieChart_Raing_Selected, FontWeight.Bold, FontWeight.Normal)
+                Height: =Self.Size * 1.8
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: =ThisItem.Rating
+                VerticalAlign: =VerticalAlign.Top
+                Width: =Max(145, Parent.Width * 0.30)
+                X: =img_SmileyFaces_HR.X + img_SmileyFaces_HR.Width + 10
+                Y: =Self.Height * 0.5 + 3
+                ZIndex: =6
+
+            lbl_ScoreRange_HR As label:
+                DisplayMode: =DisplayMode.View
+                Font: =Font.'Segoe UI'
+                FontWeight: =lbl_RatingName_HR.FontWeight
+                Height: =Self.Size * 1.8
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =10
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: =ThisItem.MinScore*100 & "% - " & Round(ThisItem.MaxScore*100, 1) & "%"
+                VerticalAlign: =VerticalAlign.Top
+                Visible: =ThisItem.DisplayOrder <> 5 //Hide this label for Not Rated.
+                Width: =110
+                X: =img_SmileyFaces_HR.X + img_SmileyFaces_HR.Width + 150
+                Y: =Self.Height * 0.5 + 3
+                ZIndex: =7
+
+        lbl_HealthScoreRange_HR As label:
+            Font: =Font.'Segoe UI'
+            FontWeight: =FontWeight.Semibold
+            Height: =30
+            PaddingRight: =0
+            Size: =10
+            Text: ="Health Score Range**"
+            X: |
+                =lbl_HealthRating_HR.X + lbl_HealthRating_HR.Width - 40
+            Y: =lbl_HealthRating_HR.Y
+            ZIndex: =5
+
+        lbl_Ratio_HR As label:
+            Align: =Align.Center
+            Font: =Font.'Segoe UI'
+            FontWeight: =FontWeight.Semibold
+            Height: =30
+            PaddingLeft: =0
+            PaddingRight: =0
+            Size: =10
+            Text: ="Ratio"
+            Width: =65
+            X: =lbl_Count_HR.X + lbl_Count_HR.Width - 3
+            Y: =lbl_HealthRating_HR.Y
+            ZIndex: =6
+
+        lbl_Count_HR As label:
+            Align: =Align.Center
+            Font: =Font.'Segoe UI'
+            FontWeight: =FontWeight.Semibold
+            Height: =30
+            PaddingLeft: =0
+            PaddingRight: =0
+            Size: =10
+            Text: ="Count"
+            Width: =55
+            X: =lbl_HealthScoreRange_HR.X + lbl_HealthScoreRange_HR.Width + 5
+            Y: =lbl_HealthRating_HR.Y
+            ZIndex: =7
+
+        lbl_HealthRating_HR As label:
+            Font: =Font.'Segoe UI'
+            FontWeight: =FontWeight.Semibold
+            Height: =30
+            Size: =10
+            Text: ="Health Rating**"
+            Width: =180
+            X: =50
+            Y: =glry_SmileyFaceRubric_HR.Y - Self.Height + 5
+            ZIndex: =8
+
+        lbl_PieChart_Tip As label:
+            Align: =Align.Right
+            Color: =RGBA(116, 116, 116, 1)
+            DisplayMode: =DisplayMode.View
+            Font: =FontStyle
+            Height: =25
+            PaddingBottom: =0
+            PaddingRight: =10
+            PaddingTop: =2
+            Size: =10
+            Text: ="(Try to click on a pie slice)"
+            VerticalAlign: =VerticalAlign.Top
+            Width: =200
+            X: =PieChart_Rating_HR.X + PieChart_Rating_HR.Width - Self.Width
+            Y: =PieChart_Rating_HR.Y
+            ZIndex: =9
+
+        PieChart_Rating_HR As pieChart:
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            Color: =BlueControlDarkBackground
+            Explode: =5
+            Font: =FontStyle
+            Height: =lbl_HealthRating_HR.Y - Self.Y
+            HoverBorderColor: =ColorFade(Self.BorderColor, 50%)
+            ItemBorderThickness: =0
+            ItemColorSet: =[RGBA(0, 24, 143, 0.9), RGBA(0, 158, 73, 1), RGBA(255, 140, 0, 1), RGBA(204, 65, 37, 1), RGBA(217, 217, 217, 1)]
+            Items: |-
+                =ShowColumns(
+                    glry_SmileyFaceRubric_HR.AllItems,
+                    "DisplayOrder",
+                    "lbl_ForPieChart",
+                    "lbl_RatingCount_HR"
+                )
+            OnSelect: =Set(var_PieChart_Raing_Selected, Self.Selected.'data-ADB4D7A662F548B49FAC2B986E348A1BDisplayOrder')
+            PressedBorderColor: =ColorFade(Self.BorderColor, -50%)
+            Width: =Parent.Width
+            Y: =lbl_TotalCount_HR.Y + lbl_TotalCount_HR.Height
+            ZIndex: =10
+
+        lbl_TotalCount_HR As label:
+            Align: =Align.Center
+            Font: =Font.'Segoe UI'
+            FontWeight: =FontWeight.Bold
+            Height: =Top_Background_HR.Height
+            PaddingBottom: =0
+            PaddingLeft: =25
+            PaddingRight: =25
+            PaddingTop: =0
+            Size: =11
+            Text: |-
+                ="Total Count: " & 
+                If(
+                    IsBlank(Sum(glry_HR_Items.AllItems, CountRows(ThisRecord.PSR_ProductsGroup))), 
+                    0, 
+                    Sum(glry_HR_Items.AllItems, CountRows(ThisRecord.PSR_ProductsGroup))
+                ) 
+            Width: =Parent.Width
+            ZIndex: =11
+
+    ctn_TopBanner_HR As groupContainer.manualLayoutContainer:
+        Height: =80
+        Width: =App.Width - Self.X
+        X: =LeftNavi_HRating.Width
+        Y: =BAGIAAppHeader_HR.Y + BAGIAAppHeader_HR.Height
+        ZIndex: =5
+
+        divider_TopBanner_HR As rectangle:
+            BorderStyle: =BorderStyle.None
+            DisplayMode: =DisplayMode.View
+            Fill: =GrayBorderLight
+            Height: =2
+            Width: =Parent.Width
+            Y: =Parent.Height - Self.Height
+            ZIndex: =1
+
+        dpdn_Scorecard_HR As dropdown:
+            BorderColor: =
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =0
+            ChevronBackground: =Self.Fill
+            ChevronDisabledFill: =RGBA(0, 0, 0, 0)
+            ChevronFill: =RGBA(0, 0, 0, 1)
+            ChevronHoverBackground: =BlueControlLightBackground
+            ChevronHoverFill: =RGBA(0, 0, 0, 1)
+            Default: ="Product Review"
+            Fill: =GrayControlBackground
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: |
+                =30
+            HoverFill: =Self.ChevronHoverBackground
+            Items: |-
+                =RenameColumns(
+                    AddColumns(
+                        ForAll(Distinct(clln_factMetricBoard, fmb_MetricBoardTypeID), {Result: ThisRecord.Value}).Result, 
+                        "filter_BoardTypeName", LookUp(ReviewHub_BoardTypes, ThisRecord.BoardTypeID = Result).BoardTypeName
+                    ),
+                    "Result", "filter_BoardTypeID"
+                )
+            OnChange: =
+            PressedColor: =BlueControlDarkBackground
+            PressedFill: =BlueControlLightBackground
+            SelectionFill: =BlueNaviHightLightBackground
+            Size: =11
+            Width: =190
+            X: =Label_Scorecard_HR.X + Label_Scorecard_HR.Width
+            Y: =(Parent.Height - Self.Height) * 0.50
+            ZIndex: =2
+
+        Label_Scorecard_HR As label:
+            Align: =Align.Right
+            DisplayMode: =DisplayMode.View
+            Font: =FontStyle
+            Height: =Parent.Height
+            PaddingRight: =10
+            Size: =11
+            Text: |-
+                ="Scorecard:"
+            Width: =100
+            X: =dpdn_MthYr_HR.X + dpdn_MthYr_HR.Width + 20
+            Y: =Label_Title_HR.Y
+            ZIndex: =3
+
+        dpdn_MthYr_HR As dropdown:
+            BorderColor: =
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =0
+            ChevronBackground: =Self.Fill
+            ChevronDisabledFill: =RGBA(0, 0, 0, 0)
+            ChevronFill: =RGBA(0, 0, 0, 1)
+            ChevronHoverBackground: =BlueControlLightBackground
+            ChevronHoverFill: =RGBA(0, 0, 0, 1)
+            Default: =First(clln_dropdown_ReviewMthYr).Month_Year
+            Fill: =GrayControlBackground
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: |
+                =30
+            HoverFill: =Self.ChevronHoverBackground
+            Items: =clln_dropdown_ReviewMthYr
+            OnChange: |-
+                =Set(var_PSR_MonthNum, LookUp(clln_dropdown_ReviewMthYr, Month_Year=dpdn_MthYr_HR.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BMonth_Year').MonthNum);
+                Set(var_PSR_Year, LookUp(clln_dropdown_ReviewMthYr, Month_Year=dpdn_MthYr_HR.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BMonth_Year').Year);
+            PressedColor: =BlueControlDarkBackground
+            PressedFill: =BlueControlLightBackground
+            SelectionFill: =BlueNaviHightLightBackground
+            Size: =11
+            Width: =155
+            X: =Label_ReviewMonth_HR.X + Label_ReviewMonth_HR.Width
+            Y: =(Parent.Height - Self.Height) * 0.50
+            ZIndex: =4
+
+        Label_ReviewMonth_HR As label:
+            Align: =Align.Right
+            DisplayMode: =DisplayMode.View
+            Font: =FontStyle
+            Height: =Parent.Height
+            PaddingRight: =10
+            Size: =11
+            Text: |-
+                ="Review Month:"
+            Width: =130
+            X: =Label_Title_HR.X + Label_Title_HR.Width
+            Y: =Label_Title_HR.Y
+            ZIndex: =5
+
+        Label_Title_HR As label:
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =Parent.Height
+            PaddingLeft: =15
+            Size: =14
+            Text: ="Health Rating"
+            Width: =165
+            ZIndex: =6
+
+    LeftNavi_HRating As groupContainer.manualLayoutContainer:
+        BorderStyle: =BorderStyle.None
+        Fill: =BlueControlDarkBackground
+        Height: =App.Height - Self.Y
+        Width: =var_LeftNavi_Width
+        Y: =BAGIAAppHeader_HR.Height
+        ZIndex: =6
+
+        glry_LeftNavi_3 As gallery.variableTemplateHeightGallery:
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            Height: =Parent.Height - Self.Y
+            Items: |-
+                =Sort(
+                    varLeftNavOptions,
+                    If(ThisRecord.ID < 0, ID),
+                    SortOrder.Descending
+                )
+            Layout: =Layout.Vertical
+            OnSelect: |
+                =Set(varSelectedBoardId, ThisItem.ID);
+                Navigate(ThisItem.Screen);
+            ShowScrollbar: =false
+            TemplateFill: |-
+                =If(
+                    ThisItem.ID = varSelectedBoardId,
+                    ColorFade(BlueControlDarkBackground, 20%), 
+                    RGBA(0,0,0,0)
+                )
+            TemplatePadding: =0
+            TemplateSize: =45
+            Width: =Parent.Width
+            Y: =icon_CollapseExpand_3.Y + icon_CollapseExpand_3.Height
+            ZIndex: =1
+
+            imgCircle_LN_3 As circle:
+                DisplayMode: =DisplayMode.View
+                Fill: =RGBA(255, 255, 255, 0.90)
+                Height: =img_LN_3.Height - 5
+                OnSelect: =Select(Parent)
+                Visible: =If(IsBlank(ThisItem.BoardTypeID), false, true)
+                Width: =Self.Height
+                X: =img_LN_3.X + (img_LN_3.Width - Self.Width) * 0.5 
+                Y: =(Parent.TemplateHeight - Self.Height) * 0.5
+                ZIndex: =1
+
+            NoImage_LN_3 As label:
+                Align: =Align.Center
+                Color: =BlueControlDarkBackground
+                FocusedBorderThickness: =1
+                Font: =Font.'Segoe UI'
+                FontWeight: =FontWeight.Semibold
+                Height: =img_LN_3.Height
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Text: =Upper(Left(ThisItem.Title, 2))
+                Tooltip: =ThisItem.Title
+                Visible: |-
+                    =If(
+                        IsBlankOrError(ThisItem.PID), //It means this is not a scorecard tab and should always have a logo.
+                        false, 
+                        If(
+                            IsBlankOrError(LookUp(ReviewHub_Products, ThisRecord.ProductID = ThisItem.PID).LogoImage), //When on scorecard tab, the product logo is missing, 
+                            true,
+                            false
+                        )
+                    )
+                Width: =img_LN_3.Width
+                X: =rect_LN_3.X + rect_LN_3.Width
+                ZIndex: =2
+
+            img_LN_3 As image:
+                AutoDisableOnSelect: =false
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Height: =Self.Width
+                Image: |-
+                    =If(
+                        NoImage_LN_3.Visible,
+                        Blank(),
+                        If(IsBlankOrError(ThisItem.PID), 
+                        ThisItem.ImagePath , LookUp(ReviewHub_Products, ThisRecord.ProductID = ThisItem.PID).LogoImage.Value)
+                    )
+                OnSelect: =Select(Parent)
+                PaddingBottom: =If(IsBlank(ThisItem.BoardTypeID), 3, 9)
+                PaddingLeft: =If(IsBlank(ThisItem.BoardTypeID), 3, 8)
+                PaddingRight: =If(IsBlank(ThisItem.BoardTypeID), 3, 8)
+                PaddingTop: =If(IsBlank(ThisItem.BoardTypeID), 3, 9)
+                Tooltip: =ThisItem.Title
+                Width: =Parent.TemplateHeight
+                X: =rect_LN_3.X + rect_LN_3.Width
+                ZIndex: =3
+
+            html_LN_3 As htmlViewer:
+                Color: =RGBA(255, 255, 255, 1)
+                DisplayMode: =DisplayMode.View
+                Fill: =RGBA(0, 0, 0, 0)
+                Font: =FontStyle
+                Height: =45
+                HtmlText: |-
+                    ="<span style='background-color: " 
+                    & If(
+                        Parent.Width = var_LeftNavi_ExpandWidth, 
+                        "#79b5de; color: #FFFFFF;  display: inline-block; padding: 1px 6px; font-weight: ", 
+                        "rgba(121, 181, 222, 0.75); color: #FFFFFF;  display: inline-block; padding: 1px 3px; font-weight: "
+                    ) 
+                    & If(ThisItem.ID = varSelectedBoardId, "600", "400") & "; border-radius: 5px;'>"
+                    & If(
+                        Parent.Width = var_LeftNavi_ExpandWidth, 
+                        LookUp(clln_BoardTypes, ThisRecord.bt_BoardTypeID = ThisItem.BoardTypeID).bt_BoardTypeShortName,
+                        Upper(Left(LookUp(clln_BoardTypes, ThisRecord.bt_BoardTypeID = ThisItem.BoardTypeID).bt_BoardTypeShortName,2))
+                    )
+                    & "</span></font>"
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =Title_LN_3.PaddingLeft
+                PaddingRight: =Title_LN_3.PaddingRight
+                PaddingTop: =If(Parent.Width = var_LeftNavi_ExpandWidth, 6, 0)
+                Size: =Title_LN_3.Size
+                Visible: =If(IsBlank(ThisItem.BoardTypeID), false, true)
+                Width: =If(Parent.Width = var_LeftNavi_ExpandWidth, Title_LN_3.Width, img_LN_3.Width)
+                X: =If(Parent.Width = var_LeftNavi_ExpandWidth, Title_LN_3.X, img_LN_3.X)
+                ZIndex: =4
+
+            Title_LN_3 As label:
+                BorderColor: =RGBA(32, 54, 71, 1)
+                BorderStyle: =BorderStyle.None
+                Color: =RGBA(255, 255, 255, 1)
+                DisplayMode: =DisplayMode.View
+                FocusedBorderColor: =Title_LN_3.BorderColor
+                Font: =FontStyle
+                FontWeight: =If(ThisItem.ID = varSelectedBoardId, FontWeight.Semibold, FontWeight.Normal)
+                Height: =Parent.TemplateHeight
+                HoverBorderColor: =Title_LN_3.BorderColor
+                HoverColor: =Title_LN_3.Color
+                HoverFill: =Title_LN_3.Fill
+                LineHeight: =1
+                OnSelect: =Select(Parent)
+                PaddingBottom: =If(IsBlank(ThisItem.BoardTypeID), 0, 5)
+                PaddingLeft: =2
+                PaddingTop: =0
+                PressedBorderColor: =Title_LN_3.BorderColor
+                PressedColor: =Title_LN_3.Color
+                PressedFill: =Title_LN_3.Fill
+                Size: =9
+                Text: =ThisItem.Title
+                Tooltip: =ThisItem.Title
+                VerticalAlign: =If(IsBlank(ThisItem.BoardTypeID), VerticalAlign.Middle, VerticalAlign.Bottom)
+                Width: =Parent.Width - Self.X
+                Wrap: =false
+                X: =img_LN_3.X + img_LN_3.Width
+                ZIndex: =5
+
+            TopDivider_LN_3 As rectangle:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Fill: =RGBA(0, 91, 159, 0.30)
+                Height: =1
+                OnSelect: =Select(Parent)
+                Width: =Parent.Width
+                ZIndex: =6
+
+            rect_LN_3 As rectangle:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Fill: =If(ThisItem.ID = varSelectedBoardId, BlueNaviHightLightBackground, TABLEHEADERCOLOR)
+                FocusedBorderColor: =rect_LN_3.BorderColor
+                Height: =Parent.TemplateHeight - Self.Y
+                HoverFill: =rect_LN_3.Fill
+                OnSelect: =Select(Parent)
+                Tooltip: =
+                Width: =6
+                Y: =1
+                ZIndex: =7
+
+            btn_LN_Top_3 As button:
+                AutoDisableOnSelect: =false
+                BorderColor: =
+                BorderStyle: =BorderStyle.None
+                BorderThickness: =0
+                Color: =RGBA(0, 0, 0, 0)
+                DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                DisabledColor: =RGBA(0, 0, 0, 0)
+                DisabledFill: =RGBA(0, 0, 0, 0)
+                Fill: =RGBA(0, 0, 0, 0)
+                Font: =FontStyle
+                Height: =Parent.TemplateHeight
+                HoverBorderColor: =
+                HoverColor: =RGBA(0, 0, 0, 0)
+                HoverFill: =
+                OnSelect: =Select(Parent)
+                PressedBorderColor: =
+                PressedColor: =
+                Text: =//Need this button for the hover-over hand cursor.
+                Tooltip: |
+                    =If(
+                        IsBlankOrError(ThisItem.BoardTypeID),
+                        ThisItem.Title,
+                        Text(ThisItem.ReviewDate, "mmmm yyyy") &
+                            " - (" & LookUp(clln_BoardTypes, ThisRecord.bt_BoardTypeID = ThisItem.BoardTypeID).bt_BoardTypeShortName & ") " 
+                            & ThisItem.Title
+                    )
+                Width: =Parent.TemplateWidth
+                ZIndex: =8
+
+            close_LN_3 As icon.CancelBadge:
+                AutoDisableOnSelect: =false
+                BorderStyle: =BorderStyle.None
+                Color: =RGBA(255, 255, 255, 1)
+                Height: =25
+                HoverColor: =RedFontColor
+                HoverFill: =BlueNaviHightLightBackground
+                Icon: =Icon.Cancel
+                OnSelect: |-
+                    =If(
+                        App.ActiveScreen.Name = "BoardScreen", //When user is currently staying on a Board Screen, navigate to Home Screen.
+                        Navigate(HomeScreen)
+                    );
+                    
+                    RemoveIf(varLeftNavOptions, ThisRecord.ID = ThisItem.ID)
+                    /*
+                    Concurrent(
+                        RemoveIf(varLeftNavOptions, ThisRecord.ID = ThisItem.ID),
+                        RemoveIf(clln_ProductMetrics_BS, ThisRecord.pm_ProductID = ThisItem.PID),
+                        RemoveIf(clln_factMetrics_BS, ThisRecord.fm_ProductID = ThisItem.PID)
+                    );
+                    */
+                PaddingBottom: =5
+                PaddingLeft: =5
+                PaddingRight: =5
+                PaddingTop: =5
+                Tooltip: ="Close this tab"
+                Visible: =!IsBlankOrError(ThisItem.BoardTypeID) && Parent.Width = var_LeftNavi_ExpandWidth //When collapsed, not showing close button.
+                Width: =25
+                X: =Title_LN_3.X + Title_LN_3.Width - Self.Width
+                ZIndex: =9
+
+        icon_CollapseExpand_3 As icon.Add:
+            BorderColor: =RGBA(32, 54, 71, 1)
+            Color: =RGBA(255, 255, 255, 1)
+            DisabledFill: =icon_CollapseExpand_3.Fill
+            FocusedBorderColor: =icon_CollapseExpand_3.BorderColor
+            Height: |
+                =45
+            HoverBorderColor: =ColorFade(icon_CollapseExpand_3.BorderColor, 20%)
+            HoverColor: =ColorFade(icon_CollapseExpand_3.Color, 20%)
+            HoverFill: =icon_CollapseExpand_3.Fill
+            Icon: =If(Parent.Width = var_LeftNavi_ExpandWidth, Icon.DockLeft, Icon.DockRight)
+            OnSelect: =Set(var_LeftNavi_Width, If(Parent.Width = var_LeftNavi_CollapseWidth, var_LeftNavi_ExpandWidth, var_LeftNavi_CollapseWidth))
+            PaddingBottom: =10
+            PaddingLeft: =10
+            PaddingRight: =10
+            PaddingTop: =10
+            PressedBorderColor: =ColorFade(icon_CollapseExpand_3.BorderColor, -20%)
+            PressedColor: =ColorFade(icon_CollapseExpand_3.Color, -20%)
+            PressedFill: =icon_CollapseExpand_3.Fill
+            Tooltip: ="Collapse/Expand"
+            Width: =var_LeftNavi_CollapseWidth
+            X: =Parent.Width - Self.Width
+            ZIndex: =2
+
+    BAGIAAppHeader_HR As AppHeader:
+        DropDownSelection: =TrackRequestComponent_HR.HideTrackRequest
+        FeatureRequestUrl: =var_FeatureRequestURL
+        FeedbackButtonUrl: =var_SendFeedback_URL
+        inputAppDisplayName: =varAppHeaderText
+        Reset: =SurveyComponent_HR.HideSurvey
+        ScorecardOnboardingFeatureUrl: =var_ScorecardOnboardingRequestURL
+        Y: =0
+        ZIndex: =7
+
+    TrackRequestComponent_HR As TrackRequestComponent:
+        BlueControlDarkBackground: =BlueControlDarkBackground
+        BlueControlLightBackground: =BlueControlLightBackground
+        BlueNaviHightLightBackground: =BlueNaviHightLightBackground
+        DevOpsBaseUrl: =var_DevOpsBaseURL
+        DevOpsQueryID: =var_DevOpsQueryID
+        FontStyle: =FontStyle
+        GrayCanvasBackground: =GrayCanvasBackground
+        GRAYCOLOR: =GRAYCOLOR
+        GrayControlBackground: =GrayControlBackground
+        IsAdmin: =IsAdmin
+        Reset: =Self.Visible
+        Visible: =BAGIAAppHeader_HR.DisplayTrackRequest
+        X: =App.Width - Self.Width
+        Y: =BAGIAAppHeader_HR.Height
+        ZIndex: =8
+
+    SurveyComponent_HR As SurveyComponent:
+        Reset: =BAGIAAppHeader_HR.ShowSurvey
+        Survey: =var_ReviewHubSurvey
+        Visible: =BAGIAAppHeader_HR.ShowSurvey
+        Y: =BAGIAAppHeader_HR.Height
+        ZIndex: =9
+

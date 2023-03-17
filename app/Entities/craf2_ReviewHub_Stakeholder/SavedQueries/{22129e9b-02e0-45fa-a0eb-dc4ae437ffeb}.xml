@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<savedqueries xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <savedquery>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>0</CanBeDeleted>
+    <isquickfindquery>0</isquickfindquery>
+    <isprivate>0</isprivate>
+    <isdefault>1</isdefault>
+    <savedqueryid>{22129e9b-02e0-45fa-a0eb-dc4ae437ffeb}</savedqueryid>
+    <layoutxml>
+      <grid name="resultset" jump="craf2_title" select="1" icon="1" preview="1">
+        <row name="result" id="craf2_reviewhub_stakeholderid">
+          <cell name="craf2_title" width="158" />
+          <cell name="craf2_boardtype" width="143" />
+          <cell name="craf2_product" width="100" />
+          <cell name="craf2_productstakeholders" width="300" />
+          <cell name="craf2_stakeholdernames" width="300" />
+          <cell name="createdon" width="125" />
+          <cell name="modifiedon" width="100" />
+        </row>
+      </grid>
+    </layoutxml>
+    <querytype>0</querytype>
+    <fetchxml>
+      <fetch version="1.0" mapping="logical">
+        <entity name="craf2_reviewhub_stakeholder">
+          <attribute name="craf2_reviewhub_stakeholderid" />
+          <attribute name="craf2_title" />
+          <attribute name="createdon" />
+          <filter type="and">
+            <condition attribute="statecode" operator="eq" value="0" />
+          </filter>
+          <attribute name="craf2_boardtype" />
+          <attribute name="craf2_product" />
+          <attribute name="craf2_productstakeholders" />
+          <attribute name="modifiedon" />
+          <attribute name="craf2_stakeholdernames" />
+          <order attribute="craf2_stakeholdernames" descending="false" />
+        </entity>
+      </fetch>
+    </fetchxml>
+    <IntroducedVersion>1.0.0.0</IntroducedVersion>
+    <LocalizedNames>
+      <LocalizedName description="Active ReviewHub_Stakeholders" languagecode="1033" />
+    </LocalizedNames>
+  </savedquery>
+</savedqueries>

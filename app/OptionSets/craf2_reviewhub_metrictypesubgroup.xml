@@ -1,0 +1,95 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<optionset Name="craf2_reviewhub_metrictypesubgroup" localizedName="ReviewHub_MetricTypeSubgroup" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <OptionSetType>picklist</OptionSetType>
+  <IsGlobal>1</IsGlobal>
+  <IntroducedVersion>1.0.0.0</IntroducedVersion>
+  <IsCustomizable>1</IsCustomizable>
+  <displaynames>
+    <displayname description="ReviewHub_MetricTypeSubgroup" languagecode="1033" />
+  </displaynames>
+  <Descriptions>
+    <Description description="" languagecode="1033" />
+  </Descriptions>
+  <options>
+    <option value="803840009">
+      <labels>
+        <label description="Why would I use anything else?(raving)" languagecode="1033" />
+      </labels>
+    </option>
+    <option value="803840000">
+      <labels>
+        <label description="Can I get my issues resolved?" languagecode="1033" />
+      </labels>
+    </option>
+    <option value="803840001">
+      <labels>
+        <label description="How can I learn about the product?" languagecode="1033" />
+      </labels>
+    </option>
+    <option value="803840002">
+      <labels>
+        <label description="How can I try this product?" languagecode="1033" />
+      </labels>
+    </option>
+    <option value="803840003">
+      <labels>
+        <label description="Is it easy to buy?" languagecode="1033" />
+      </labels>
+    </option>
+    <option value="803840004">
+      <labels>
+        <label description="Is MSFT listening to me?" languagecode="1033" />
+      </labels>
+    </option>
+    <option value="803840005">
+      <labels>
+        <label description="Is the product high quality?" languagecode="1033" />
+      </labels>
+    </option>
+    <option value="803840006">
+      <labels>
+        <label description="Is the product useful?" languagecode="1033" />
+      </labels>
+    </option>
+    <option value="803840007">
+      <labels>
+        <label description="Is this product going in the right direction?" languagecode="1033" />
+      </labels>
+    </option>
+    <option value="803840008">
+      <labels>
+        <label description="What product can help me with the problem?" languagecode="1033" />
+      </labels>
+    </option>
+    <option value="803840010">
+      <labels>
+        <label description="Will this product meet my needs?" languagecode="1033" />
+      </labels>
+    </option>
+    <option value="840660000">
+      <labels>
+        <label description="Deliver world class support experiences for DTP customers" languagecode="1033" />
+      </labels>
+    </option>
+    <option value="840660001">
+      <labels>
+        <label description="Reduce Incidents &amp; Support Costs by implementing self-help solutions" languagecode="1033" />
+      </labels>
+    </option>
+    <option value="840660002">
+      <labels>
+        <label description="Improve CPT by delivering tools, solutions, &amp; improved readiness" languagecode="1033" />
+      </labels>
+    </option>
+    <option value="840660003">
+      <labels>
+        <label description="Improve CSAT &amp; CPT by improving speed &amp; quality of the resolution" languagecode="1033" />
+      </labels>
+    </option>
+    <option value="840660004">
+      <labels>
+        <label description="Improve CSAT to elevate Cx exp. by collab. &amp; engaging in Spt. Practice" languagecode="1033" />
+      </labels>
+    </option>
+  </options>
+</optionset>

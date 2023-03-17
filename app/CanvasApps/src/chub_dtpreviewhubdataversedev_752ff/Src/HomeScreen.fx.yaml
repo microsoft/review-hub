@@ -1,0 +1,1426 @@
+HomeScreen As screen:
+    OnHidden: |
+        =Set(varSearchComponentReset, true);
+        Set(var_ctn_LoadingGIF_MTG_Visible, false);
+    OnVisible: |
+        =Concurrent(
+            Set(
+                var_TRCVisible,
+                !var_TRCVisible
+            ),
+            Set(
+                var_HTCVisible,
+                false
+            ),
+            Set(
+                var_HTCReset,
+                false
+            ),
+            Set(
+                varSelectedBoardId,
+                -1
+            ),
+            Set(
+                varSearchComponentReset,
+                false
+            ),
+            Set(
+                var_BoardTypeSelected_Home,
+                InsightsGallery.Selected.bt_BoardTypeID
+            ),
+            If(
+                IsFmbEditedByAdmin = true,
+                Select(btn_get_data_Home)
+            ),
+            If(
+                IsFactMetricsFullyLoaded = false,
+                //Loading clln_factMetrics.
+                Collect(
+                    clln_AppPerf_130,
+                    {
+                        RunID: 131,
+                        Description: "HomeScreen.OnVisible - Loading clln_FactMetrics collection",
+                        StartTime: Now(),
+                        EndTime: Blank()
+                    }
+                );
+                
+                Concurrent(
+                    Set(
+                        IsFactMetricsFullyLoaded,
+                        true
+                    ),
+                    //clln_factMetrics should take more time to load than clln_ProductMetrics. Hence, heat map screen can display after clln_factMetrics is fully loaded.
+                    Collect(
+                        varLeftNavOptions,
+                        {
+                            Title: "Heat Map",
+                            Screen: scn_HeatMap,
+                            ImagePath: icon_HeatMap,
+                            ID: -2,
+                            PID: Blank(),
+                            ReviewDate: Blank()
+                        }
+                    );
+                    //For Admin/Operator/Coordinator role, add Self Service. 
+        If(
+                        IsOperator || IsAdmin || IsCoordinator,
+                        Collect(
+                            varLeftNavOptions,
+                            {
+                                Title: "Self-Service",
+                                Screen: scn_SelfService,
+                                ImagePath: icon_Admin,
+                                ID: -99,
+                                PID: Blank(),
+                                ReviewDate: Blank()
+                            }
+                        )
+                    ),
+                    Patch(
+                        clln_AppPerf_130,
+                        LookUp(
+                            clln_AppPerf_130,
+                            ThisRecord.RunID = 131
+                        ),
+                        {
+                            Description: "HomeScreen.OnVisible - Loaded clln_FactMetrics collection (Records: " & CountRows(clln_factMetrics) & ")",
+                            EndTime: Now()
+                        }
+                    )
+                );
+            ),
+            If(
+                IsProductMetricsFullyLoaded = false,
+                Collect(
+                    clln_AppPerf_120,
+                    {
+                        RunID: 121,
+                        Description: "HomeScreen.OnVisible - Loading clln_ProductMetrics collection",
+                        StartTime: Now(),
+                        EndTime: Blank()
+                    }
+                );
+                
+                Concurrent(
+                    Set(
+                        IsProductMetricsFullyLoaded,
+                        true
+                    ),
+                    Patch(
+                        clln_AppPerf_120,
+                        LookUp(
+                            clln_AppPerf_120,
+                            ThisRecord.RunID = 121
+                        ),
+                        {
+                            Description: "HomeScreen.OnVisible - Loaded clln_ProductMetrics collection (Records: " & CountRows(clln_ProductMetrics) & ")",
+                            EndTime: Now()
+                        }
+                    )
+                );
+            )
+        );
+
+    Timer_IfGalleryLoaded_home As timer:
+        AutoStart: =true
+        Duration: =If(IsAppStart, 14000, 5000)
+        OnTimerEnd: =Set(var_ctn_IfGalleryLoaded_home_Visible, false)
+        Visible: =false
+        X: =1130
+        Y: =51
+        ZIndex: =1
+
+    Timer_DelayDisplayLabel As timer:
+        AutoStart: =true
+        Duration: =2000
+        OnTimerEnd: |-
+            =If(
+                CountRows(MainTileGallery.AllItems) = 0,
+                Set(
+                    var_Display_Label_NoData,
+                    true
+                )
+            );
+            //Select(btn_get_data_Home);
+        OnTimerStart: |
+            =Set(
+                cardsInRow,
+                Max(1, Min(7, RoundDown((App.Width - MainTileGallery.X) / (CARD_FRAME_WIDTH + TEMPLATE_PADDING), 0)))
+            )
+        Repeat: =true
+        Visible: =false
+        X: =1041
+        Y: =63
+        ZIndex: =3
+
+    btn_get_data_Home As button:
+        OnSelect: |-
+            =ClearCollect(
+                clln_FMB_GroupByBoardType,
+                AddColumns(
+                GroupBy(
+                    Filter(clln_factMetricBoard, fmb_ReviewYear=varReviewYear && fmb_ReviewMonth=varReviewMonthNum),
+                    "fmb_MetricBoardTypeID",
+                    "GroupByBoardTypeID"
+                ),
+                "CountByBoardTypeID", CountA(ThisRecord.GroupByBoardTypeID.fmb_ID)
+                )
+            );
+            
+            ClearCollect(
+                clln_InsightsGallery_Home,
+                AddColumns(
+                    ShowColumns(
+                        Filter(clln_BoardTypes, Text(ThisRecord.bt_IsDisplayInApp) = "Yes"),
+                        "bt_BoardTypeID", "bt_BoardTypeShortName", "bt_DisplayOrder"
+                    ),
+                "BoardNumberCount", LookUp(clln_FMB_GroupByBoardType, ThisRecord.fmb_MetricBoardTypeID = bt_BoardTypeID).CountByBoardTypeID
+                )
+            );
+            
+            Collect(
+                clln_InsightsGallery_Home,
+                {
+                    bt_BoardTypeID: 0,
+                    bt_BoardTypeShortName: "My Reviews",
+                    bt_DisplayOrder: 0,
+                    BoardNumberCount: CountRows(
+                        Filter(
+                                Filter(clln_factMetricBoard, fmb_ReviewYear=varReviewYear && fmb_ReviewMonth=varReviewMonthNum),
+                                IsMatch(fmb_ReviewOwnerClaims, User().Email, MatchOptions.Contains & MatchOptions.IgnoreCase)
+                                    || fmb_ReviewOwnerClaims = User().Email
+                        )
+                    )
+                }
+            ) 
+        Text: ="Hidden For Home Screen"
+        Visible: =false
+        Width: =444
+        X: =900
+        Y: =51
+        ZIndex: =4
+
+    ctn_Home_MainTileGallery As groupContainer.manualLayoutContainer:
+        Fill: =GrayCanvasBackground
+        Height: =App.Height - Self.Y
+        Width: =App.Width - Self.X
+        X: =ctn_Home_Insights.X
+        Y: =home_Insights_BottomBorder.Y + home_Insights_BottomBorder.Height
+        ZIndex: =5
+
+        Label_NoData_Home As label:
+            DisplayMode: =DisplayMode.View
+            Font: =FontStyle
+            Height: =35
+            Size: =12
+            Text: |-
+                =If(
+                    var_Display_Label_NoData && CountRows(MainTileGallery.AllItems) = 0,
+                    If(
+                        var_BoardTypeSelected_Home = 0,
+                        "No scorecards in your reviews for the selected month.",
+                        "No scorecards generated based on your selection."
+                    ),
+                    ""
+                )
+            Visible: |-
+                =If(
+                    var_ctn_IfGalleryLoaded_home_Visible, 
+                    false, 
+                    If(CountRows(MainTileGallery.AllItems) = 0, true, false)
+                )
+            Width: =480
+            X: =ctn_HealthRating_Selector.X
+            Y: |
+                =ctn_HealthRating_Selector.Y + ctn_HealthRating_Selector.Height + 80
+            ZIndex: =1
+
+        MainTileGallery As gallery.galleryVertical:
+            BorderColor: =RGBA(230, 230, 230, 1)
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =1
+            DelayItemLoading: =true
+            Height: =Parent.Height - Self.Y
+            Items: |-
+                =SortByColumns(
+                    Search(
+                        Filter(
+                            Filter(
+                                clln_factMetricBoard, 
+                                fmb_ReviewYear=varReviewYear 
+                                    && fmb_ReviewMonth=varReviewMonthNum
+                                    && 
+                                    (var_Home_HealthRating_Selected_DisplayOrder = 0 
+                                        || var_Home_HealthRating_Selected_DisplayOrder = ThisRecord.fmb_BoardHealthDisplayOrder)
+                            ),
+                            (
+                                InsightsGallery.Selected.bt_BoardTypeID = 0 
+                                && (fmb_ReviewOwnerClaims = User().Email || IsMatch(fmb_ReviewOwnerClaims, User().Email, MatchOptions.Contains & MatchOptions.IgnoreCase))
+                            )
+                                || 
+                                (
+                                    (InsightsGallery.Selected.bt_BoardTypeID <> 0 || IsBlankOrError(InsightsGallery.Selected.bt_BoardTypeID)) 
+                                        && fmb_MetricBoardTypeID = InsightsGallery.Selected.bt_BoardTypeID
+                                )
+                        ),
+                        Trim(SearchComponent_Home.OutText),
+                        "fmb_ProductName",
+                        "fmb_ReviewOwnerName"
+                    ),
+                    "fmb_ProductName", SortOrder.Ascending
+                )
+            Layout: =Layout.Vertical
+            LoadingSpinner: =LoadingSpinner.Controls
+            OnSelect: |
+                =Concurrent(
+                    Set(var_LastGalleryText, Blank()), //This will turn on the Getting Data animation GIF on BoardScreen.
+                
+                    Set(varSelectedBoardId, ThisItem.fmb_ID); //i.e., clln_factMetricBoard.ID
+                    Set(var_ctn_LoadingGIF_MTG_Visible, true), //Trigger the loading animation GIF.
+                
+                    Set(var_BoardSrn_ProductID, ThisItem.fmb_ProductID),
+                    Set(var_BoardSrn_FMB_TemplateID, ThisItem.fmb_TemplateID),
+                    If(
+                        //If this product has been clicked earlier or not.
+                        CountRows(Filter(varLeftNavOptions, ThisRecord.PID = ThisItem.fmb_ProductID)) = 0,
+                        //Add a New Tab to Left Navigation
+                        Collect(
+                            varLeftNavOptions,
+                            {
+                                Title: ThisItem.fmb_ProductName,
+                                Screen: BoardScreen,
+                                ID: ThisItem.fmb_ID,
+                                //ImagePath: LookUp(ReviewHub_Products, ThisRecord.ProductID = ThisItem.fmb_ProductID).LogoImage.Full, //This will slow down navigation speed.
+                                ImagePath: Concatenate(
+                                    var_BlobStorageURL,
+                                    "/bagiaimages/ProductLogos/",
+                                    Text(ThisItem.fmb_ProductID),
+                                    ".png"
+                                ),
+                                PID: ThisItem.fmb_ProductID,
+                                TemplateID: ThisItem.fmb_TemplateID,
+                                BoardTypeID: ThisItem.fmb_MetricBoardTypeID,
+                                ReviewDate: ThisItem.fmb_ReviewLockDate
+                            }
+                        ),
+                        //Update an existing tab in Left Navigation.
+                        Patch(
+                            varLeftNavOptions,
+                            LookUp(varLeftNavOptions, ThisRecord.PID = ThisItem.fmb_ProductID),
+                            {
+                                BoardTypeID: ThisItem.fmb_MetricBoardTypeID,
+                                ID: ThisItem.fmb_ID, 
+                                TemplateID: ThisItem.fmb_TemplateID,
+                                ReviewDate: ThisItem.fmb_ReviewLockDate
+                            }
+                        )
+                    )
+                );
+                 Navigate(BoardScreen);
+            ShowNavigation: =true
+            TemplatePadding: =TEMPLATE_PADDING
+            TemplateSize: =Min(279, Self.Height)
+            Transition: =Transition.Pop
+            Width: =Parent.Width
+            WrapCount: =cardsInRow
+            Y: |
+                =Label_Reviews.Y + Label_Reviews.Height - 8
+            ZIndex: =2
+
+            btn_MainTile_Back As button:
+                BorderColor: =GrayBorderDark
+                Color: =RGBA(0, 0, 0, 0)
+                DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                DisabledColor: =RGBA(0, 0, 0, 0)
+                DisabledFill: =RGBA(0, 0, 0, 0)
+                DisplayMode: =DisplayMode.View
+                Fill: =RGBA(255, 255, 255, 1)
+                Height: =Parent.TemplateHeight
+                HoverBorderColor: =
+                HoverColor: =RGBA(0, 0, 0, 0)
+                HoverFill: =
+                PressedBorderColor: =
+                PressedColor: =
+                PressedFill: =
+                Text: =""
+                Width: =Parent.TemplateWidth
+                ZIndex: =1
+
+            Img_SmileyFace As image:
+                DisplayMode: =DisplayMode.View
+                Height: =Self.Width
+                Image: =ThisItem.fmb_BoardHealthImage
+                OnSelect: =Select(Parent)
+                Tooltip: =
+                Width: =33
+                X: =Parent.TemplateWidth*0.5 - Self.Width*0.5
+                Y: |
+                    =html_HealthRating.Y + 33
+                ZIndex: =2
+
+            Image_Loading_MTG As image:
+                Height: =Img_SmileyFace.Height
+                Image: =img_loading
+                OnSelect: =Select(Parent)
+                Visible: =IsBlankOrError(ThisItem.fmb_BoardHealthRating)
+                Width: =Img_SmileyFace.Width
+                X: =Img_SmileyFace.X
+                Y: =Img_SmileyFace.Y
+                ZIndex: =3
+
+            html_HealthRating As htmlViewer:
+                AutoHeight: =true
+                Font: =FontStyle
+                Height: =
+                HtmlText: |-
+                    ="<center><font style='font-weight: 600; font-size: 15px;'>Health Rating: </font>" 
+                    & "<br><br><br><font style='font-weight: 600; font-size: 15px;'>"
+                    & ThisItem.fmb_BoardHealthRating  //& Self.Y + Self.Height
+                    & "</font></center>" 
+                OnSelect: =Select(Parent)
+                PaddingBottom: =10
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =10
+                Size: =10
+                Width: =Parent.TemplateWidth
+                Y: =splitter_ReviewOwner_Btm.Y + splitter_ReviewOwner_Btm.Height
+                ZIndex: =4
+
+            splitter_ReviewOwner_Btm As rectangle:
+                BorderColor: =GrayBorderLight
+                BorderStyle: =BorderStyle.None
+                Fill: =GrayBorderLight
+                Height: =1
+                OnSelect: =Select(Parent)
+                Width: =Parent.TemplateWidth
+                Y: =html_ReviewOwner.Y + html_ReviewOwner.Height
+                ZIndex: =5
+
+            html_ReviewOwner As htmlViewer:
+                Font: =FontStyle
+                Height: =52
+                HtmlText: |
+                    ="<center><font style='font-weight: 600; font-size: 15px;'>Review Owner: </font><br><font style='font-weight: normal; font-size: 15px;'>" 
+                    & ThisItem.fmb_ReviewOwnerName
+                    & If(IsBlankOrError(Office365Users.UserProfileV2(ThisItem.fmb_ReviewOwnerClaims)), "*", "") & "</font></center>" //Review Owner
+                OnSelect: =Select(Parent)
+                PaddingLeft: =8
+                PaddingRight: =8
+                Size: =10
+                Width: =Parent.TemplateWidth
+                Y: =splitter_ReviewOwner_Top.Y + splitter_ReviewOwner_Top.Height
+                ZIndex: =6
+
+            ctn_LoadingGIF_MTG As groupContainer.manualLayoutContainer:
+                Fill: =RGBA(255, 255, 255, 0.95)
+                Height: =btn_MainTile_Back.Height - Self.Y - 5
+                Visible: =varSelectedBoardId = ThisItem.fmb_ID && var_ctn_LoadingGIF_MTG_Visible = true
+                Width: =btn_MainTile_Back.Width - 10
+                X: =(btn_MainTile_Back.Width - Self.Width) * 0.50
+                Y: =splitter_ReviewOwner_Top.Y + splitter_ReviewOwner_Top.Height
+                ZIndex: =7
+
+                Label_BoardSrn_Loading_home_1 As label:
+                    Align: =Align.Center
+                    Color: =LEFTNAVHIGLIGHTCOLOR
+                    Font: =FontStyle
+                    FontWeight: =FontWeight.Semibold
+                    Height: =30
+                    Size: =12
+                    Text: ="Getting data..."
+                    Width: =Parent.Width
+                    Y: =img_GettingData_MTG.Y + img_GettingData_MTG.Height
+                    ZIndex: =1
+
+                img_GettingData_MTG As image:
+                    Height: =35
+                    Image: =img_loading
+                    Width: =35
+                    X: =(Parent.Width - Self.Width) * 0.50
+                    Y: =(Parent.Height - Self.Height * 2) * 0.50 
+                    ZIndex: =2
+
+            splitter_ReviewOwner_Top As rectangle:
+                BorderColor: =GrayBorderLight
+                BorderStyle: =BorderStyle.None
+                Fill: =GrayBorderLight
+                Height: =1
+                OnSelect: =Select(Parent)
+                Width: =Parent.TemplateWidth
+                Y: =lbl_MTG_ProductName.Y + lbl_MTG_ProductName.Height
+                ZIndex: =8
+
+            lbl_MTG_ProductName As label:
+                Align: =Align.Center
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =57
+                OnSelect: =Select(Parent)
+                PaddingBottom: =10
+                PaddingLeft: =8
+                PaddingRight: =8
+                Text: =ThisItem.fmb_ProductArray.ProductName
+                Width: =Parent.TemplateWidth
+                Y: =Circle_ProductLogo.Y + Circle_ProductLogo.Height
+                ZIndex: =9
+
+            lbl_MTG_LogoNotExist As label:
+                Align: =Align.Center
+                Color: =RGBA(149, 149, 149, 1)
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =Img_ProductLogo.Width
+                OnSelect: =Select(Parent)
+                Size: =14
+                Text: =Upper(Left(ThisItem.fmb_ProductArray.ProductName, 2))
+                Visible: =IsBlankOrError(LookUp(ReviewHub_Products, ThisRecord.ProductID = ThisItem.fmb_ProductID).LogoImage)
+                Width: =Img_ProductLogo.Width
+                X: =Img_ProductLogo.X
+                Y: =Img_ProductLogo.Y
+                ZIndex: =10
+
+            Img_ProductLogo As image:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Height: =Self.Width
+                Image: |-
+                    =If(
+                        lbl_MTG_LogoNotExist.Visible,
+                        Blank(),
+                        LookUp(ReviewHub_Products, ThisRecord.ProductID = ThisItem.fmb_ProductID).LogoImage.Value
+                    )
+                OnSelect: =Select(Parent)
+                Visible: =!lbl_MTG_LogoNotExist.Visible
+                Width: =40
+                X: =Parent.TemplateWidth*0.5 - Self.Width*0.5
+                Y: =18
+                ZIndex: =11
+
+            Circle_ProductLogo As circle:
+                BorderColor: =RGBA(237, 237, 237, 1)
+                BorderThickness: =1
+                DisplayMode: =DisplayMode.View
+                Fill: =RGBA(0, 0, 0, 0)
+                Height: =Self.Width
+                OnSelect: =Select(Parent)
+                Width: |
+                    =Img_ProductLogo.Width + 25
+                X: =Parent.TemplateWidth*0.5 - Self.Width*0.5
+                Y: =Img_ProductLogo.Y - 13
+                ZIndex: =12
+
+            html_BoardType_MTG As htmlViewer:
+                AutoHeight: =true
+                Font: =FontStyle
+                HtmlText: |-
+                    ="<span style='background-color: rgba(121, 181, 222, 0.65); color: #FFFFFF;  display: inline-block; padding: 1px 4px; font-weight: 600; border-radius: 5px;'>" 
+                    & Upper(Left(ThisItem.fmb_MetricBoardTypeValue,2))
+                OnSelect: =Select(Parent)
+                Size: =10
+                Width: =60
+                ZIndex: =13
+
+            btn_MainTile_Front As button:
+                BorderColor: =btn_MainTile_Back.BorderColor
+                BorderStyle: =btn_MainTile_Back.BorderStyle
+                BorderThickness: =btn_MainTile_Back.BorderThickness
+                Color: =RGBA(0, 0, 0, 0)
+                DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                DisabledColor: =RGBA(0, 0, 0, 0)
+                DisabledFill: =RGBA(0, 0, 0, 0)
+                Fill: =RGBA(0, 0, 0, 0)
+                Height: =Parent.TemplateHeight
+                HoverBorderColor: =
+                HoverColor: =RGBA(0, 0, 0, 0)
+                HoverFill: =
+                OnSelect: =Select(Parent)
+                PressedBorderColor: =
+                PressedColor: =
+                PressedFill: =
+                RadiusBottomLeft: =btn_MainTile_Back.RadiusBottomLeft
+                RadiusBottomRight: =btn_MainTile_Back.RadiusBottomRight
+                RadiusTopLeft: =btn_MainTile_Back.RadiusBottomLeft
+                RadiusTopRight: =btn_MainTile_Back.RadiusTopRight
+                Text: =""
+                Width: =Parent.TemplateWidth
+                ZIndex: =14
+
+        ctn_HealthRating_Selector As groupContainer.manualLayoutContainer:
+            Height: =Label_Reviews.Height
+            Width: =Parent.Width - Self.X
+            X: =Label_Reviews.X + Label_Reviews.Width
+            Y: =Label_Reviews.Y
+            ZIndex: =3
+
+            btn_HealthSelect_None As button:
+                BorderStyle: =BorderStyle.None
+                BorderThickness: =0
+                Color: =If(var_Home_HealthRating_Selected_DisplayOrder = 5, BlueControlDarkBackground, RGBA(0, 0, 0, 1))
+                Fill: =RGBA(0, 0, 0, 0)
+                Font: =FontStyle
+                FontWeight: =If(Self.Color = BlueControlDarkBackground, FontWeight.Bold, FontWeight.Normal) 
+                Height: =Parent.Height * 0.75
+                HoverBorderColor: =Self.Fill
+                HoverColor: =BlueControlDarkBackground
+                HoverFill: =Self.Fill
+                OnSelect: =Set(var_Home_HealthRating_Selected_DisplayOrder, 5)
+                PressedColor: =BlueControlDarkBackground
+                PressedFill: =Self.Fill
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Size: =10
+                Text: ="Not Rated"
+                Underline: =true
+                Width: =85
+                X: =btn_HealthSelect_NeedsImpr.X + btn_HealthSelect_NeedsImpr.Width + 10
+                Y: =(Parent.Height - Self.Height)*0.50
+                ZIndex: =1
+
+            btn_HealthSelect_NeedsImpr As button:
+                BorderStyle: =BorderStyle.None
+                BorderThickness: =0
+                Color: =If(var_Home_HealthRating_Selected_DisplayOrder = LookUp(clln_MetricBoardHealth, ThisRecord.Rating = Self.Text).DisplayOrder, BlueControlDarkBackground, RGBA(0, 0, 0, 1))
+                Fill: =RGBA(0, 0, 0, 0)
+                Font: =FontStyle
+                FontWeight: =If(Self.Color = BlueControlDarkBackground, FontWeight.Bold, FontWeight.Normal) 
+                Height: =Parent.Height * 0.75
+                HoverBorderColor: =Self.Fill
+                HoverColor: =BlueControlDarkBackground
+                HoverFill: =Self.Fill
+                OnSelect: =Set(var_Home_HealthRating_Selected_DisplayOrder, LookUp(clln_MetricBoardHealth, ThisRecord.Rating = Self.Text).DisplayOrder)
+                PressedColor: =BlueControlDarkBackground
+                PressedFill: =Self.Fill
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Size: =10
+                Text: ="Needs Improvement"
+                Underline: =true
+                Width: =155
+                X: =btn_HealthSelect_Avg.X + btn_HealthSelect_Avg.Width + 10
+                Y: =(Parent.Height - Self.Height)*0.50
+                ZIndex: =2
+
+            btn_HealthSelect_Avg As button:
+                BorderStyle: =BorderStyle.None
+                BorderThickness: =0
+                Color: =If(var_Home_HealthRating_Selected_DisplayOrder = LookUp(clln_MetricBoardHealth, ThisRecord.Rating = Self.Text).DisplayOrder, BlueControlDarkBackground, RGBA(0, 0, 0, 1))
+                Fill: =RGBA(0, 0, 0, 0)
+                Font: =FontStyle
+                FontWeight: =If(Self.Color = BlueControlDarkBackground, FontWeight.Bold, FontWeight.Normal) 
+                Height: =Parent.Height * 0.75
+                HoverBorderColor: =Self.Fill
+                HoverColor: =BlueControlDarkBackground
+                HoverFill: =Self.Fill
+                OnSelect: =Set(var_Home_HealthRating_Selected_DisplayOrder, LookUp(clln_MetricBoardHealth, ThisRecord.Rating = Self.Text).DisplayOrder)
+                PressedColor: =BlueControlDarkBackground
+                PressedFill: =Self.Fill
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Size: =10
+                Text: ="Average"
+                Underline: =true
+                Width: =80
+                X: =btn_HealthSelect_Good.X + btn_HealthSelect_Good.Width + 10
+                Y: =(Parent.Height - Self.Height)*0.50
+                ZIndex: =3
+
+            btn_HealthSelect_Good As button:
+                BorderStyle: =BorderStyle.None
+                BorderThickness: =0
+                Color: =If(var_Home_HealthRating_Selected_DisplayOrder = LookUp(clln_MetricBoardHealth, ThisRecord.Rating = Self.Text).DisplayOrder, BlueControlDarkBackground, RGBA(0, 0, 0, 1))
+                Fill: =RGBA(0, 0, 0, 0)
+                Font: =FontStyle
+                FontWeight: =If(Self.Color = BlueControlDarkBackground, FontWeight.Bold, FontWeight.Normal) 
+                Height: =Parent.Height * 0.75
+                HoverBorderColor: =Self.Fill
+                HoverColor: =BlueControlDarkBackground
+                HoverFill: =Self.Fill
+                OnSelect: =Set(var_Home_HealthRating_Selected_DisplayOrder, LookUp(clln_MetricBoardHealth, ThisRecord.Rating = Self.Text).DisplayOrder)
+                PressedColor: =BlueControlDarkBackground
+                PressedFill: =Self.Fill
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Size: =10
+                Text: ="Good"
+                Underline: =true
+                Width: =75
+                X: =btn_HealthSelect_Execllent.X + btn_HealthSelect_Execllent.Width + 10
+                Y: =(Parent.Height - Self.Height)*0.50
+                ZIndex: =4
+
+            btn_HealthSelect_Execllent As button:
+                BorderStyle: =BorderStyle.None
+                BorderThickness: =0
+                Color: =If(var_Home_HealthRating_Selected_DisplayOrder = LookUp(clln_MetricBoardHealth, ThisRecord.Rating = Self.Text).DisplayOrder, BlueControlDarkBackground, RGBA(0, 0, 0, 1))
+                Fill: =RGBA(0, 0, 0, 0)
+                Font: =FontStyle
+                FontWeight: =If(Self.Color = BlueControlDarkBackground, FontWeight.Bold, FontWeight.Normal) 
+                Height: =Parent.Height * 0.75
+                HoverBorderColor: =Self.Fill
+                HoverColor: =BlueControlDarkBackground
+                HoverFill: =Self.Fill
+                OnSelect: =Set(var_Home_HealthRating_Selected_DisplayOrder, LookUp(clln_MetricBoardHealth, ThisRecord.Rating = Self.Text).DisplayOrder)
+                PressedColor: =BlueControlDarkBackground
+                PressedFill: =Self.Fill
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Size: =10
+                Text: ="Excellent"
+                Underline: =true
+                Width: =80
+                X: =btn_HealthSelect_All.X + btn_HealthSelect_All.Width + 10
+                Y: =(Parent.Height - Self.Height)*0.50
+                ZIndex: =5
+
+            btn_HealthSelect_All As button:
+                BorderStyle: =BorderStyle.None
+                BorderThickness: =0
+                Color: =If(var_Home_HealthRating_Selected_DisplayOrder = 0, BlueControlDarkBackground, RGBA(0, 0, 0, 1))
+                Fill: =RGBA(0, 0, 0, 0)
+                Font: =FontStyle
+                FontWeight: =If(Self.Color = BlueControlDarkBackground, FontWeight.Bold, FontWeight.Normal) 
+                Height: =Parent.Height * 0.75
+                HoverBorderColor: =Self.Fill
+                HoverColor: =BlueControlDarkBackground
+                HoverFill: =Self.Fill
+                OnSelect: =Set(var_Home_HealthRating_Selected_DisplayOrder, 0)
+                PressedColor: =BlueControlDarkBackground
+                PressedFill: =Self.Fill
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Size: =10
+                Text: ="All"
+                Underline: =true
+                Width: =50
+                Y: =(Parent.Height - Self.Height)*0.50
+                ZIndex: =6
+
+        Label_Reviews As label:
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =45
+            PaddingLeft: =25
+            Size: =home_lbl_Insights.Size
+            Text: ="Reviews"
+            Width: =140
+            ZIndex: =4
+
+    ctn_Home_Insights As groupContainer.manualLayoutContainer:
+        BorderColor: =RGBA(0, 0, 0, 0)
+        BorderStyle: =BorderStyle.None
+        Height: =80
+        Width: =App.Width - Self.X
+        X: =LeftNavi_Home.Width
+        Y: =BAGIAAppHeader_Home.Height
+        ZIndex: =6
+
+        InsightsGallery As gallery.galleryHorizontal:
+            BorderColor: =
+            BorderStyle: =BorderStyle.None
+            Default: |-
+                =If(
+                    IsBlankOrError(var_BoardTypeSelected_Home), 
+                    First( SortByColumns(Filter(clln_InsightsGallery_Home, ThisRecord.BoardNumberCount > 0), "bt_DisplayOrder", SortOrder.Ascending) ),
+                    LookUp(clln_InsightsGallery_Home, ThisRecord.bt_BoardTypeID=var_BoardTypeSelected_Home)
+                )
+            Height: =home_lbl_Insights.Height
+            Items: |-
+                =SortByColumns(
+                    Filter(
+                        clln_InsightsGallery_Home, 
+                        (!IsBlankOrError(ThisRecord.BoardNumberCount) && ThisRecord.bt_BoardTypeID<>0)  //If it is not My Reviews, hide when = 0.
+                            || ThisRecord.bt_BoardTypeID=0),  //If it is My Reviews, show it.
+                    "bt_DisplayOrder", 
+                    SortOrder.Ascending
+                )
+            NavigationStep: =3
+            OnSelect: |
+                =Set(var_BoardTypeSelected_Home, ThisItem.bt_BoardTypeID);
+            ShowNavigation: =true
+            ShowScrollbar: =false
+            TemplateFill: =If(ThisItem.IsSelected, GrayCanvasBackground, RGBA(0, 0, 0, 0))
+            TemplatePadding: =
+            TemplateSize: =180
+            Transition: =Transition.Pop
+            Width: =Parent.Width - Self.X
+            X: |+
+                =img_Home_ReviewMonth_Info.X + img_Home_ReviewMonth_Info.Width + 20
+                
+            Y: =home_lbl_Insights.Y
+            ZIndex: =1
+
+            Insights_VSplitter As rectangle:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Fill: =home_Insights_BottomBorder.Fill
+                Height: =Parent.Height
+                Width: =2
+                X: =Parent.TemplateWidth - Self.Width
+                ZIndex: =1
+
+            InsightNumberCircle As circle:
+                Fill: =If(ThisItem.IsSelected, BlueControlLightBackground, GrayBorderLight)
+                Height: =Self.Width
+                OnSelect: =Select(Parent)
+                Width: =60
+                X: =20
+                Y: =InsightName.Height*0.5 - Self.Height*0.5
+                ZIndex: =2
+
+            InsightNumber As label:
+                Align: =Align.Center
+                Color: =If(ThisItem.IsSelected, BlueControlDarkBackground, RGBA(0, 0, 0, 1))
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =Self.Width
+                OnSelect: =Select(Parent)
+                Size: =18
+                Text: =If(!IsBlankOrError(ThisItem.BoardNumberCount), ThisItem.BoardNumberCount, 0)
+                Width: =InsightNumberCircle.Width
+                X: =InsightNumberCircle.X
+                Y: =InsightNumberCircle.Y
+                ZIndex: =3
+
+            InsightName As label:
+                Color: =If(ThisItem.IsSelected, BlueControlDarkBackground, RGBA(0, 0, 0, 1))
+                Font: =FontStyle
+                FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
+                Height: =78
+                OnSelect: =Select(Parent)
+                PaddingLeft: =10
+                PaddingRight: =10
+                Size: =11
+                Text: =ThisItem.bt_BoardTypeShortName
+                Width: =Parent.TemplateWidth - Self.X
+                X: =InsightNumberCircle.X + InsightNumberCircle.Width
+                ZIndex: =4
+
+            btn_InsightsGallery As button:
+                BorderColor: =
+                BorderStyle: =BorderStyle.None
+                BorderThickness: =0
+                Color: =RGBA(0, 0, 0, 0)
+                Fill: =RGBA(0, 0, 0, 0)
+                Height: =Parent.TemplateHeight
+                HoverBorderColor: =
+                HoverColor: =RGBA(0, 0, 0, 0)
+                HoverFill: =
+                OnSelect: =Select(Parent)
+                PressedBorderColor: =
+                PressedColor: =
+                PressedFill: =
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Text: =//Need this button for the hand cursor
+                Width: =Parent.TemplateWidth
+                ZIndex: =5
+
+        ctn_Home_Insights_VSplitter As rectangle:
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            DisplayMode: =DisplayMode.View
+            Fill: =home_Insights_BottomBorder.Fill
+            Height: =Parent.Height
+            Width: =2
+            X: =InsightsGallery.X - Self.Width
+            ZIndex: =2
+
+        img_Home_ReviewMonth_Info As image:
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            DisplayMode: =DisplayMode.View
+            Height: =Self.Width
+            Image: =icon_Information
+            PaddingBottom: =6
+            PaddingLeft: =5
+            PaddingRight: =5
+            PaddingTop: =6
+            Tooltip: ="Data as of " & Text(DateAdd(Date(dropdown_ReviewMthYr_hm.Selected.Year, dropdown_ReviewMthYr_hm.Selected.MonthNum, 1), -1, TimeUnit.Days), "mmmm dd, yyyy")
+            Width: =30
+            X: =dropdown_ReviewMthYr_hm.X + dropdown_ReviewMthYr_hm.Width + 5
+            Y: =(Parent.Height - Self.Height) * 0.50
+            ZIndex: =4
+
+        dropdown_ReviewMthYr_hm As dropdown:
+            BorderColor: =
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =0
+            ChevronBackground: =Self.Fill
+            ChevronFill: =Color.Black
+            ChevronHoverBackground: =BlueControlLightBackground
+            ChevronHoverFill: =RGBA(0, 0, 0, 1)
+            Default: =First(clln_dropdown_ReviewMthYr).Month_Year
+            Fill: =GrayControlBackground
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =30
+            HoverFill: =Self.ChevronHoverBackground
+            Items: =FirstN(clln_dropdown_ReviewMthYr, 12)  //ReviewHub only stores 12 months data
+            OnChange: |-
+                =Concurrent(
+                
+                    Set(varReviewMonthNum, dropdown_ReviewMthYr_hm.Selected.MonthNum),
+                    Set(varReviewYear, dropdown_ReviewMthYr_hm.Selected.Year),
+                    Set(IsAppStart, false)
+                
+                );
+                
+                Select(btn_get_data_Home);
+            PressedColor: =BlueControlDarkBackground
+            PressedFill: =BlueControlLightBackground
+            SelectionFill: =BlueNaviHightLightBackground
+            Size: =11
+            Width: =155
+            X: =home_lbl_Insights.X+home_lbl_Insights.Width
+            Y: =home_lbl_Insights.Y + (home_lbl_Insights.Height*0.5 - Self.Height*0.5)
+            ZIndex: =5
+
+        home_lbl_Insights As label:
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =Parent.Height
+            PaddingLeft: =15
+            Size: =14
+            Text: ="Insights by Month & Year"
+            Tooltip: =User().Email
+            Width: =155
+            ZIndex: =6
+
+    home_Insights_BottomBorder As rectangle:
+        BorderColor: =Self.Fill
+        BorderStyle: =BorderStyle.None
+        DisplayMode: =DisplayMode.View
+        Fill: =GrayBorderLight
+        Height: =2
+        Width: =App.Width - Self.X
+        X: =ctn_Home_Insights.X
+        Y: =ctn_Home_Insights.Y + ctn_Home_Insights.Height - 2
+        ZIndex: =7
+
+    LeftNavi_Home As groupContainer.manualLayoutContainer:
+        BorderStyle: =BorderStyle.None
+        Fill: =BlueControlDarkBackground
+        Height: =App.Height - Self.Y
+        Width: =var_LeftNavi_Width
+        Y: =BAGIAAppHeader_Home.Height
+        ZIndex: =8
+
+        glry_LeftNavi_1 As gallery.variableTemplateHeightGallery:
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            Height: =Parent.Height - Self.Y
+            Items: |-
+                =Sort(
+                    varLeftNavOptions,
+                    If(ThisRecord.ID < 0, ID),
+                    SortOrder.Descending
+                )
+            Layout: =Layout.Vertical
+            OnSelect: |
+                =Set(varSelectedBoardId, ThisItem.ID);
+                Navigate(ThisItem.Screen);
+            ShowScrollbar: =false
+            TemplateFill: |-
+                =If(
+                    ThisItem.ID = varSelectedBoardId,
+                    ColorFade(BlueControlDarkBackground, 20%), 
+                    RGBA(0,0,0,0)
+                )
+            TemplatePadding: =0
+            TemplateSize: =45
+            Width: =Parent.Width
+            Y: =icon_CollapseExpand_1.Y + icon_CollapseExpand_1.Height
+            ZIndex: =1
+
+            imgCircle_LN_1 As circle:
+                DisplayMode: =DisplayMode.View
+                Fill: =RGBA(255, 255, 255, 0.90)
+                Height: =img_LN_1.Height - 5
+                OnSelect: =Select(Parent)
+                Visible: =If(IsBlank(ThisItem.BoardTypeID), false, true)
+                Width: =Self.Height
+                X: =img_LN_1.X + (img_LN_1.Width - Self.Width) * 0.5 
+                Y: =(Parent.TemplateHeight - Self.Height) * 0.5
+                ZIndex: =1
+
+            NoImage_LN_1 As label:
+                Align: =Align.Center
+                Color: =BlueControlDarkBackground
+                FocusedBorderThickness: =1
+                Font: =Font.'Segoe UI'
+                FontWeight: =FontWeight.Semibold
+                Height: =img_LN_1.Height
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Text: =Upper(Left(ThisItem.Title, 2))
+                Tooltip: =ThisItem.Title
+                Visible: |-
+                    =If(
+                        IsBlankOrError(ThisItem.PID), //It means this is not a scorecard tab and should always have a logo.
+                        false, 
+                        If(
+                            IsBlankOrError(LookUp(ReviewHub_Products, ThisRecord.ProductID = ThisItem.PID).LogoImage), //When on scorecard tab, the product logo is missing, 
+                            true,
+                            false
+                        )
+                    )
+                Width: =img_LN_1.Width
+                X: =rect_LN_1.X + rect_LN_1.Width
+                ZIndex: =2
+
+            img_LN_1 As image:
+                AutoDisableOnSelect: =false
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Height: =Self.Width
+                Image: |-
+                    =If(
+                        NoImage_LN_1.Visible,
+                        Blank(),
+                        If(IsBlankOrError(ThisItem.PID), 
+                        ThisItem.ImagePath , LookUp(ReviewHub_Products, ThisRecord.ProductID = ThisItem.PID).LogoImage.Value)
+                    )
+                OnSelect: =Select(Parent)
+                PaddingBottom: =If(IsBlank(ThisItem.BoardTypeID), 3, 9)
+                PaddingLeft: =If(IsBlank(ThisItem.BoardTypeID), 3, 8)
+                PaddingRight: =If(IsBlank(ThisItem.BoardTypeID), 3, 8)
+                PaddingTop: =If(IsBlank(ThisItem.BoardTypeID), 3, 9)
+                Tooltip: =ThisItem.Title
+                Width: =Parent.TemplateHeight
+                X: =rect_LN_1.X + rect_LN_1.Width
+                ZIndex: =3
+
+            html_LN_1 As htmlViewer:
+                Color: =RGBA(255, 255, 255, 1)
+                DisplayMode: =DisplayMode.View
+                Fill: =RGBA(0, 0, 0, 0)
+                Font: =FontStyle
+                Height: =45
+                HtmlText: |-
+                    ="<span style='background-color: " 
+                    & If(
+                        Parent.Width = var_LeftNavi_ExpandWidth, 
+                        "#79b5de; color: #FFFFFF;  display: inline-block; padding: 1px 6px; font-weight: ", 
+                        "rgba(121, 181, 222, 0.75); color: #FFFFFF;  display: inline-block; padding: 1px 3px; font-weight: "
+                    ) 
+                    & If(ThisItem.ID = varSelectedBoardId, "600", "400") & "; border-radius: 5px;'>"
+                    & If(
+                        Parent.Width = var_LeftNavi_ExpandWidth, 
+                        LookUp(clln_BoardTypes, ThisRecord.bt_BoardTypeID = ThisItem.BoardTypeID).bt_BoardTypeShortName,
+                        Upper(Left(LookUp(clln_BoardTypes, ThisRecord.bt_BoardTypeID = ThisItem.BoardTypeID).bt_BoardTypeShortName,2))
+                    )
+                    & "</span></font>"
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =Title_LN_1.PaddingLeft
+                PaddingRight: =Title_LN_1.PaddingRight
+                PaddingTop: =If(Parent.Width = var_LeftNavi_ExpandWidth, 6, 0)
+                Size: =Title_LN_1.Size
+                Visible: =If(IsBlank(ThisItem.BoardTypeID), false, true)
+                Width: =If(Parent.Width = var_LeftNavi_ExpandWidth, Title_LN_1.Width, img_LN_1.Width)
+                X: =If(Parent.Width = var_LeftNavi_ExpandWidth, Title_LN_1.X, img_LN_1.X)
+                ZIndex: =4
+
+            Title_LN_1 As label:
+                BorderColor: =RGBA(32, 54, 71, 1)
+                BorderStyle: =BorderStyle.None
+                Color: =RGBA(255, 255, 255, 1)
+                DisplayMode: =DisplayMode.View
+                FocusedBorderColor: =Title_LN_1.BorderColor
+                Font: =FontStyle
+                FontWeight: =If(ThisItem.ID = varSelectedBoardId, FontWeight.Semibold, FontWeight.Normal)
+                Height: =Parent.TemplateHeight
+                HoverBorderColor: =Title_LN_1.BorderColor
+                HoverColor: =Title_LN_1.Color
+                HoverFill: =Title_LN_1.Fill
+                LineHeight: =1
+                OnSelect: =Select(Parent)
+                PaddingBottom: =If(IsBlank(ThisItem.BoardTypeID), 0, 5)
+                PaddingLeft: =2
+                PaddingTop: =0
+                PressedBorderColor: =Title_LN_1.BorderColor
+                PressedColor: =Title_LN_1.Color
+                PressedFill: =Title_LN_1.Fill
+                Size: =9
+                Text: =ThisItem.Title
+                Tooltip: =ThisItem.Title
+                VerticalAlign: =If(IsBlank(ThisItem.BoardTypeID), VerticalAlign.Middle, VerticalAlign.Bottom)
+                Width: =Parent.Width - Self.X
+                Wrap: =false
+                X: =img_LN_1.X + img_LN_1.Width
+                ZIndex: =5
+
+            TopDivider_LN_1 As rectangle:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Fill: =RGBA(0, 91, 159, 0.30)
+                Height: =1
+                OnSelect: =Select(Parent)
+                Width: =Parent.Width
+                ZIndex: =6
+
+            rect_LN_1 As rectangle:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Fill: =If(ThisItem.ID = varSelectedBoardId, BlueNaviHightLightBackground, TABLEHEADERCOLOR)
+                FocusedBorderColor: =rect_LN_1.BorderColor
+                Height: =Parent.TemplateHeight - Self.Y
+                HoverFill: =rect_LN_1.Fill
+                OnSelect: =Select(Parent)
+                Tooltip: =
+                Width: =6
+                Y: =1
+                ZIndex: =7
+
+            btn_LN_Top_1 As button:
+                AutoDisableOnSelect: =false
+                BorderColor: =
+                BorderStyle: =BorderStyle.None
+                BorderThickness: =0
+                Color: =RGBA(0, 0, 0, 0)
+                DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                DisabledColor: =RGBA(0, 0, 0, 0)
+                DisabledFill: =RGBA(0, 0, 0, 0)
+                Fill: =RGBA(0, 0, 0, 0)
+                Font: =FontStyle
+                Height: =Parent.TemplateHeight
+                HoverBorderColor: =
+                HoverColor: =RGBA(0, 0, 0, 0)
+                HoverFill: =
+                OnSelect: =Select(Parent)
+                PressedBorderColor: =
+                PressedColor: =
+                Text: =//Need this button for the hover-over hand cursor.
+                Tooltip: |
+                    =If(
+                        IsBlankOrError(ThisItem.BoardTypeID),
+                        ThisItem.Title,
+                        Text(ThisItem.ReviewDate, "mmmm yyyy") &
+                            " - (" & LookUp(clln_BoardTypes, ThisRecord.bt_BoardTypeID = ThisItem.BoardTypeID).bt_BoardTypeShortName & ") " 
+                            & ThisItem.Title
+                    )
+                Width: =Parent.TemplateWidth
+                ZIndex: =8
+
+            close_LN_1 As icon.CancelBadge:
+                AutoDisableOnSelect: =false
+                BorderStyle: =BorderStyle.None
+                Color: =RGBA(255, 255, 255, 1)
+                Height: =25
+                HoverColor: =RedFontColor
+                HoverFill: =BlueNaviHightLightBackground
+                Icon: =Icon.Cancel
+                OnSelect: |-
+                    =If(
+                        App.ActiveScreen.Name = "BoardScreen", //When user is currently staying on a Board Screen, navigate to Home Screen.
+                        Navigate(HomeScreen)
+                    );
+                    
+                    RemoveIf(varLeftNavOptions, ThisRecord.ID = ThisItem.ID)
+                    /*
+                    Concurrent(
+                        RemoveIf(varLeftNavOptions, ThisRecord.ID = ThisItem.ID),
+                        RemoveIf(clln_ProductMetrics_BS, ThisRecord.pm_ProductID = ThisItem.PID),
+                        RemoveIf(clln_factMetrics_BS, ThisRecord.fm_ProductID = ThisItem.PID)
+                    );
+                    */
+                PaddingBottom: =5
+                PaddingLeft: =5
+                PaddingRight: =5
+                PaddingTop: =5
+                Tooltip: ="Close this tab"
+                Visible: =!IsBlankOrError(ThisItem.BoardTypeID) && Parent.Width = var_LeftNavi_ExpandWidth //When collapsed, not showing close button.
+                Width: =25
+                X: =Title_LN_1.X + Title_LN_1.Width - Self.Width
+                ZIndex: =9
+
+        icon_CollapseExpand_1 As icon.Add:
+            BorderColor: =RGBA(32, 54, 71, 1)
+            Color: =RGBA(255, 255, 255, 1)
+            DisabledFill: =icon_CollapseExpand_1.Fill
+            FocusedBorderColor: =icon_CollapseExpand_1.BorderColor
+            Height: |
+                =45
+            HoverBorderColor: =ColorFade(icon_CollapseExpand_1.BorderColor, 20%)
+            HoverColor: =ColorFade(icon_CollapseExpand_1.Color, 20%)
+            HoverFill: =icon_CollapseExpand_1.Fill
+            Icon: =If(Parent.Width = var_LeftNavi_ExpandWidth, Icon.DockLeft, Icon.DockRight)
+            OnSelect: =Set(var_LeftNavi_Width, If(Parent.Width = var_LeftNavi_CollapseWidth, var_LeftNavi_ExpandWidth, var_LeftNavi_CollapseWidth))
+            PaddingBottom: =10
+            PaddingLeft: =10
+            PaddingRight: =10
+            PaddingTop: =10
+            PressedBorderColor: =ColorFade(icon_CollapseExpand_1.BorderColor, -20%)
+            PressedColor: =ColorFade(icon_CollapseExpand_1.Color, -20%)
+            PressedFill: =icon_CollapseExpand_1.Fill
+            Tooltip: ="Collapse/Expand"
+            Width: =var_LeftNavi_CollapseWidth
+            X: =Parent.Width - Self.Width
+            ZIndex: =2
+
+    ctn_IfGalleryLoaded_home As groupContainer:
+        BorderStyle: =BorderStyle.None
+        Fill: =RGBA(255, 255, 255, 0.95)
+        Height: =App.Height - BAGIAAppHeader_Home.Height  // MainTileGallery.Height 
+        Visible: |-
+            =var_ctn_IfGalleryLoaded_home_Visible 
+                || IsEmpty(clln_InsightsGallery_Home)
+        Width: =App.Width // MainTileGallery.Width
+        X: =0 //MainTileGallery.X
+        Y: =BAGIAAppHeader_Home.Height //MainTileGallery.Y
+        ZIndex: =9
+
+        Label_BoardSrn_Loading_home As label:
+            Align: =Align.Center
+            Color: =LEFTNAVHIGLIGHTCOLOR
+            Font: =FontStyle
+            Size: =18
+            Text: ="Getting data..."
+            Width: =Image_BoardSrn_Loading_home.Width
+            X: =Image_BoardSrn_Loading_home.X
+            Y: =Image_BoardSrn_Loading_home.Y + Image_BoardSrn_Loading_home.Height - 10
+            ZIndex: =1
+
+        Image_BoardSrn_Loading_home As image:
+            Image: =boardsrn_loading
+            PaddingBottom: =20
+            PaddingRight: =10
+            PaddingTop: =10
+            Width: =300
+            X: =Parent.Width * 0.5 - Self.Width * 0.5 - 50
+            Y: =Parent.Height * 0.5 - Self.Height * 0.5 - 100
+            ZIndex: =2
+
+    BAGIAAppHeader_Home As AppHeader:
+        DropDownSelection: =TrackRequestComponent_Home.HideTrackRequest
+        FeatureRequestUrl: =var_FeatureRequestURL
+        FeedbackButtonUrl: =var_SendFeedback_URL
+        inputAppDisplayName: =varAppHeaderText
+        Reset: =SurveyComponent_Home.HideSurvey
+        ScorecardOnboardingFeatureUrl: =var_ScorecardOnboardingRequestURL
+        Y: =0
+        ZIndex: =10
+
+    Label_UserRole_Home As label:
+        Align: =Align.Center
+        BorderColor: =RGBA(0, 0, 0, 0)
+        BorderStyle: =BorderStyle.None
+        Color: =RGBA(255, 255, 255, 1)
+        Font: =FontStyle
+        Size: =10
+        Text: |-
+            =If(
+                !IsBlankOrError(Text(UserRole)),
+                Text(UserRole),
+                If(
+                    IsCoordinator,
+                    "Coordinator",
+                    Blank()
+                )
+            )
+        Width: =126
+        X: =App.Width - 567
+        ZIndex: =11
+
+    SearchComponent_Home As SearchComponent:
+        FontSize: =10
+        ResetTextInput: =varSearchComponentReset
+        SearchDefaultMessage: ="Search by Product and Review Owner"
+        X: =Parent.Width/2-Self.Width/2
+        ZIndex: =12
+
+    ctn_Privacy As groupContainer:
+        Fill: =RGBA(255, 255, 255, 1)
+        Height: =App.Height
+        Visible: |
+            =If(
+                IsBlankOrError(var_IsPrivacyRecFound_and_IsInTimeRange),
+                false,
+                var_IsPrivacyRecFound_and_IsInTimeRange <> 11
+            )
+        Width: =App.Width
+        ZIndex: =13
+
+        html_PrivacyFooter As htmlViewer:
+            Font: =FontStyle
+            Height: =150
+            HtmlText: |-
+                =Concatenate(
+                    "<p style='text-align: center;'><i>By clicking accept, your alias and today’s date (",
+                    Text(
+                        Now(),
+                        "m/d/yyyy"
+                    ),
+                    ") will be recorded. </i><br><br><br>Please note that your acceptance will be requested every 90 days from your latest acceptance date.</p>"
+                )
+            PaddingTop: =0
+            Width: =btn_PrivacyHeader.Width
+            X: =btn_PrivacyHeader.X
+            Y: =btn_PrivacyAccept.Y + btn_PrivacyAccept.Height - 5
+            ZIndex: =1
+
+        btn_PrivacyAccept As button:
+            Font: =FontStyle
+            OnSelect: |-
+                =Set(Copy_var_IsPrivacyRecFound_and_IsInTimeRange, var_IsPrivacyRecFound_and_IsInTimeRange);
+                
+                Set(var_IsPrivacyRecFound_and_IsInTimeRange, 11);
+                
+                Switch(
+                    Copy_var_IsPrivacyRecFound_and_IsInTimeRange,
+                    0, //No record found
+                    Patch(
+                        ReviewHub_PrivacyAgreements,
+                        Defaults(ReviewHub_PrivacyAgreements),
+                        {
+                            UserPrincipalEmail: User().Email,
+                            UserDisplayName: User().FullName,
+                            CurrentAgreementDateTime: Now(),
+                            NextAgreementDateTime: DateAdd(Now(), 90, TimeUnit.Days)
+                        }
+                    ),
+                    10, //Record found but out of time range
+                    Patch(
+                        ReviewHub_PrivacyAgreements,
+                        LookUp(ReviewHub_PrivacyAgreements, ThisRecord.UserPrincipalEmail=User().Email),
+                        {
+                            UserDisplayName: User().FullName,
+                            CurrentAgreementDateTime: Now(),
+                            NextAgreementDateTime: DateAdd(Now(), 90, TimeUnit.Days)
+                        }
+                    )
+                );
+            Size: =11
+            Text: ="I accept, take me to Review Hub.  🡲"
+            Width: =300
+            X: =App.Width*0.5 - Self.Width*0.5
+            Y: =html_PrivacyBody.Y + html_PrivacyBody.Height
+            ZIndex: =2
+
+        html_PrivacyBody As htmlViewer:
+            Font: =FontStyle
+            Height: =275
+            HtmlText: ="privacy agreement"
+            Width: =btn_PrivacyHeader.Width
+            X: =btn_PrivacyHeader.X
+            Y: =btn_PrivacyHeader.Y + btn_PrivacyHeader.Height
+            ZIndex: =3
+
+        btn_PrivacyHeader As button:
+            Color: =RGBA(0, 0, 0, 1)
+            DisplayMode: =DisplayMode.View
+            Fill: =RGBA(255, 255, 255, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =30
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            Size: =11
+            Text: ="Data Privacy and Compliance Notice "
+            Width: =800
+            X: =App.Width*0.5 - Self.Width*0.5
+            Y: =100
+            ZIndex: =4
+
+    Label5 As label:
+        Align: =Align.Center
+        Fill: =RGBA(56, 96, 178, 1)
+        Size: =12
+        Text: ="BlueBerry 1-3"
+        Visible: =false
+        Width: =130
+        X: =360
+        ZIndex: =14
+
+    TrackRequestComponent_Home As TrackRequestComponent:
+        BlueControlDarkBackground: =BlueControlDarkBackground
+        BlueControlLightBackground: =BlueControlLightBackground
+        BlueNaviHightLightBackground: =BlueNaviHightLightBackground
+        DevOpsBaseUrl: =var_DevOpsBaseURL
+        DevOpsQueryID: =var_DevOpsQueryID
+        FontStyle: =FontStyle
+        GrayCanvasBackground: =GrayCanvasBackground
+        GRAYCOLOR: =GRAYCOLOR
+        GrayControlBackground: =GrayControlBackground
+        IsAdmin: =IsAdmin
+        Reset: =Self.Visible
+        Visible: =BAGIAAppHeader_Home.DisplayTrackRequest
+        Y: =BAGIAAppHeader_Home.Height
+        ZIndex: =15
+
+    SurveyComponent_Home As SurveyComponent:
+        Reset: =BAGIAAppHeader_Home.ShowSurvey
+        Survey: =var_ReviewHubSurvey
+        Visible: =BAGIAAppHeader_Home.ShowSurvey
+        Y: =BAGIAAppHeader_Home.Height
+        ZIndex: =16
+
+    HowToComponent_Home As HowToComponent:
+        Reset: =var_HTCReset
+        VideoUrl: =var_HowToVideo
+        Visible: =var_HTCVisible && !Self.HideHowTo
+        Y: =BAGIAAppHeader_Home.Height
+        ZIndex: =17
+
+    HTC_Image As image:
+        Height: =Label_UserRole_Home.Height - 15
+        Image: =Icon_TutorialSVG
+        OnSelect: |
+            =Set(var_HTCReset, !var_HTCReset);
+            Set(var_HTCVisible, true);
+        Tooltip: ="How to Navigate"
+        Width: =Label_UserRole_Home.Height - 15
+        X: =Label_UserRole_Home.X - Self.Width + 5
+        Y: =(BAGIAAppHeader_Home.Height - Self.Height) * 0.50 + 1
+        ZIndex: =18
+
+    HTC_Button As button:
+        AutoDisableOnSelect: =false
+        BorderColor: =
+        BorderStyle: =BorderStyle.None
+        BorderThickness: =0
+        Color: =RGBA(0, 0, 0, 0)
+        DisabledBorderColor: =RGBA(0, 0, 0, 0)
+        DisabledColor: =RGBA(0, 0, 0, 0)
+        DisabledFill: =RGBA(0, 0, 0, 0)
+        Fill: =RGBA(0, 0, 0, 0)
+        Font: =FontStyle
+        Height: =HTC_Image.Height
+        HoverBorderColor: =
+        HoverColor: =RGBA(0, 0, 0, 0)
+        HoverFill: =
+        OnSelect: =Select(HTC_Image)
+        PressedBorderColor: =
+        PressedColor: =
+        RadiusBottomLeft: =0
+        RadiusBottomRight: =0
+        RadiusTopLeft: =0
+        RadiusTopRight: =0
+        Text: =//Need this button for the hover-over hand cursor.
+        Tooltip: =HTC_Image.Tooltip
+        Width: =HTC_Image.Width
+        X: =HTC_Image.X
+        Y: =HTC_Image.Y
+        ZIndex: =19
+

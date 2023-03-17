@@ -1,0 +1,1678 @@
+scn_SS_UploadMetricDetails As screen:
+    OnHidden: =Set(var_ICVisible, false)
+    OnVisible: |-
+        =Concurrent(
+            ClearCollect(
+                clln_BoardTypes,
+                RenameColumns(
+                    ShowColumns(
+                        ReviewHub_BoardTypes,
+                        "craf2_boardtypename", "craf2_boardtypeid", "craf2_boardtypeshortname", "craf2_boardtypedescription", "craf2_isdisplayinapp", "craf2_bt_displayorder",
+                        "craf2_coordinator", "craf2_expectedautoloaddaypermonth", "chub_reviewlockday"
+                    ),
+                    "craf2_boardtypename", "bt_BoardTypeName", "craf2_boardtypeid", "bt_BoardTypeID", 
+                    "craf2_boardtypeshortname", "bt_BoardTypeShortName", "craf2_boardtypedescription", "bt_BoardTypeDescription", 
+                    "craf2_isdisplayinapp", "bt_IsDisplayInApp", "craf2_bt_displayorder", "bt_DisplayOrder",
+                    "craf2_coordinator", "Coordinator", 
+                    "craf2_expectedautoloaddaypermonth", "bt_ExpectedAutoLoadDay",
+                    "chub_reviewlockday", "bt_ReviewLockDay"
+                )
+            );
+            If(
+                IsBlankOrError(LookUp(clln_BoardTypes, IsMatch(ThisRecord.Coordinator, User().Email, MatchOptions.Contains & MatchOptions.IgnoreCase)).bt_BoardTypeID),
+                Set(IsCoordinator, false),
+                Set(IsCoordinator, true);
+                Set(
+                    IsCoordinator_BoardTypes, 
+                    Concat(
+                        Filter(clln_BoardTypes, IsMatch(ThisRecord.Coordinator, User().Email, MatchOptions.Contains & MatchOptions.IgnoreCase)).bt_BoardTypeID, 
+                        ThisRecord.bt_BoardTypeID & "|"
+                    )
+                )
+            ),
+            Set(
+                Toggle_Button_Launch_Loading,
+                false
+            ),
+            Set(
+                Toggle_Button_Launch_Done,
+                false
+            ),
+            Set(
+                Toggle_Button_Validate_Loading,
+                false
+            ),
+            Set(
+                Toggle_Button_Validate_Done,
+                false
+            ),
+            Set(
+                Toggle_Button_Submit_Loading,
+                false
+            ),
+            Set(
+                Toggle_Button_Submit_Done,
+                false
+            ),
+            Select(refreshSharepoint)
+            ,
+            ClearCollect(
+                BulkUpdateScreenLogs,
+                Table(
+                    {
+                        message: "(Logs will display here.)",
+                        timestamp: Now()
+                    }
+                )
+            ),
+            //Set(var_CountUploads_BUM, 0),
+            ClearCollect(clln_MAXID_BUM, {ID:0}),
+            
+            ClearCollect(clln_DistinctMetricTypes,ForAll(GroupBy(AddColumns(clln_MetricTypeDetail, "id", ThisRecord.mtd_MetricTypeId ), "id", "grouped"), If(First(ThisRecord.grouped).mtd_BoardTypeID = 2,  First(Filter(ThisRecord.grouped, ThisRecord.mtd_TemplateName = "BAP")), First(ThisRecord.grouped))));
+            Set(var_JSONMetricTypeDetails, JSON(clln_DistinctMetricTypes)),
+            
+        
+            ClearCollect(clln_JSONValueType, []);
+            ForAll(
+                Choices(ReviewHub_MetricValueType),
+                Collect(clln_JSONValueType, Text(Value))
+            );
+            Set(var_JSONValueType, 
+                Lower(
+                    JSON(
+                        clln_JSONValueType
+                    )
+                )
+            ),
+            ClearCollect(clln_JSONpdateMethod, []);
+            ForAll(
+                Choices(ReviewHub_MetricTypeUpdateMethod),
+                Collect(clln_JSONpdateMethod, Text(Value))
+            );
+            Set(var_JSONUpdateMethod, 
+                Lower(
+                    JSON(
+                       clln_JSONpdateMethod
+                    )
+                )
+            ),
+            ClearCollect(clln_JSONQuarterlyCalculationMethod, []);
+            ForAll(
+                Choices(ReviewHub_QuaterlyCalculationMethod),
+                Collect(clln_JSONQuarterlyCalculationMethod, Text(Value))
+            );
+            Set(var_JSONQuarterlyCalculationMethod, 
+                Lower(
+                    JSON(
+                        clln_JSONQuarterlyCalculationMethod
+                    )
+                )
+            )
+            /*,
+            ClearCollect(clln_JSONStage, []);
+            ForAll(
+                Choices(ReviewHub_MetricTypeStage),
+                Collect(clln_JSONStage, Text(Value))
+            );
+            Set(var_JSONStage, 
+                Lower(
+                    JSON(
+                        clln_JSONStage
+                    )
+                )
+            )
+            */
+        );
+        ClearCollect(clln_Error, {});
+        //First(Filter(Choices(ReviewHub_QuaterlyCalculationMethod), Text(Value) = "Average")).Value
+
+    ctn_Main_BUM As groupContainer.manualLayoutContainer:
+        BorderStyle: =BorderStyle.None
+        Height: =App.Height - Self.Y - 10
+        Width: |
+            =(App.Width - Self.X) - 15
+        X: =15
+        Y: =lbl_ScreenTitle_BUM.Y + lbl_ScreenTitle_BUM.Height + 5
+        ZIndex: =1
+
+        ctn_Step5_BUM As groupContainer.manualLayoutContainer:
+            BorderStyle: =BorderStyle.None
+            Height: =Parent.Height - Self.Y
+            Width: =ctn_Step4_BUM.Width
+            Y: =ctn_Step4_BUM.Y + ctn_Step4_BUM.Height + 15
+            ZIndex: =1
+
+            GalleryLogs_BI_1 As gallery.galleryVertical:
+                BorderColor: =Back_Step5_BUM.Fill
+                BorderThickness: =2
+                Height: =Parent.Height - Self.Y - 1 //Min(Parent.Height - Self.Y - 2, 200)
+                Items: |-
+                    =Sort(
+                    Ungroup( //Ungroup function to add a Row Number column.
+                            ForAll(
+                                Sequence(CountRows(BulkUpdateScreenLogs)),
+                                {
+                                    Record: Table(Last(FirstN(BulkUpdateScreenLogs, Value))),
+                                    RowNumber: Value
+                                }
+                            ),
+                            "Record"
+                        ), timestamp)
+                Layout: =Layout.Vertical
+                TemplateFill: |-
+                    =If(Mod(ThisItem.RowNumber, 2) = 0, ColorValue("#F3F8FC"), RGBA(255, 255, 255, 1))
+                TemplatePadding: =0
+                TemplateSize: =30
+                Width: =Parent.Width - 2
+                X: =1
+                Y: =Back_Step5_BUM.Y + Back_Step5_BUM.Height - 1
+                ZIndex: =1
+
+                lbl_Msg_BI_1 As label:
+                    Font: =FontStyle
+                    Height: =lbl_Timestamp_BI_1.Height
+                    OnSelect: =Select(Parent)
+                    Size: =12
+                    Text: =ThisItem.message
+                    Width: =Parent.Width - Self.X
+                    X: =lbl_Timestamp_BI_1.X + lbl_Timestamp_BI_1.Width
+                    Y: =lbl_Timestamp_BI_1.Y
+                    ZIndex: =1
+
+                lbl_Timestamp_BI_1 As label:
+                    Font: =FontStyle
+                    Height: =30
+                    OnSelect: =Select(Parent)
+                    PaddingLeft: =10
+                    PaddingRight: =0
+                    Size: =12
+                    Text: =ThisItem.timestamp
+                    Width: =175
+                    ZIndex: =2
+
+            Back_Step5_BUM As button:
+                BorderColor: =Self.Fill
+                BorderStyle: =BorderStyle.None
+                BorderThickness: =0
+                DisabledBorderColor: =Self.BorderColor
+                DisabledColor: =Self.Color
+                DisabledFill: =Self.Fill
+                DisplayMode: =DisplayMode.Disabled
+                Fill: =ColorFade(BlueNaviHightLightBackground, 50%)
+                Height: =Label_Step5_BUM.Height
+                RadiusBottomLeft: |
+                    =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =20
+                RadiusTopRight: =20
+                Text: =""
+                Width: =Label_Step5_BUM.Width
+                ZIndex: =2
+
+            Label_Step5_BUM As label:
+                BorderStyle: =BorderStyle.None
+                Font: =FontStyle
+                FontWeight: =FontWeight.Bold
+                PaddingLeft: =15
+                Size: =11
+                Text: ="Activity Logs"
+                Width: =Parent.Width
+                X: |
+                    =0
+                ZIndex: =3
+
+        ctn_Step4_BUM As groupContainer.manualLayoutContainer:
+            BorderStyle: =BorderStyle.None
+            Height: =110
+            Width: =750
+            Y: =HtmlText_Note_BUM.Y + HtmlText_Note_BUM.Height + 10
+            ZIndex: =2
+
+            Back_Step2_Lower_BUM As label:
+                BorderColor: =Back_Step4_BUM.Fill
+                BorderThickness: =2
+                Height: =Parent.Height - Self.Y - 1
+                Text: =""
+                Width: =Back_Step4_BUM.Width - 2
+                X: =1
+                Y: =Label_Step4_BUM.Height - 1
+                ZIndex: =1
+
+            Label_UploadedRec_BUM As label:
+                Color: =RGBA(255, 0, 0, 1)
+                Font: =FontStyle
+                Height: =TextBatchName_BUM.Height
+                Size: =11
+                Text: |-
+                    =Concatenate(
+                        "Number of records uploaded: ",
+                        Text(
+                            CountA(
+                                clln_MAXID_BUM.ID
+                               /*
+                                Filter(
+                                    ReviewHub_MetricTypes,
+                                    !IsBlankOrError(Filter(clln_MAXID_BUM, ThisRecord.ID = MetricTypeID)) && 'Modified On' >= First(BulkUpdateScreenLogs).timestamp && 'Modified On' <= Last(BulkUpdateScreenLogs).timestamp
+                                ).MetricTypeID
+                                */
+                            ) - 1
+                        )
+                    )
+                Width: =270
+                X: =btn_Submit_Loading_BUM.X + btn_Submit_Loading_BUM.Width + 20
+                Y: =TextBatchName_BUM.Y
+                ZIndex: =2
+
+            btn_Submit_Done_BUM As icon.CheckBadge:
+                Color: =RGBA(127, 178, 57, 1)
+                DisplayMode: =DisplayMode.View
+                FocusedBorderThickness: =10
+                Height: =btn_Submit_BUM.Height
+                Icon: =Icon.CheckBadge
+                PaddingBottom: =8
+                PaddingLeft: =5
+                PaddingRight: =5
+                PaddingTop: =8
+                Visible: =Toggle_Button_Submit_Done
+                Width: =Self.Height
+                X: =btn_Submit_BUM.X + btn_Submit_BUM.Width + 5
+                Y: =btn_Submit_BUM.Y
+                ZIndex: =3
+
+            btn_Submit_Loading_BUM As image:
+                Height: =btn_Submit_BUM.Height
+                Image: =img_loading
+                Visible: =Toggle_Button_Submit_Loading
+                Width: =Self.Height
+                X: =btn_Submit_BUM.X + btn_Submit_BUM.Width + 5
+                Y: =btn_Submit_BUM.Y
+                ZIndex: =4
+
+            btn_Submit_BUM As button:
+                BorderColor: =Self.Fill
+                DisplayMode: |-
+                    =If(IsBlankOrError(TextBatchName_BUM.Text)||Trim(TextBatchName_BUM.Text)=""|| 
+                    CountA(
+                        Filter(colMetricTypesToUploads, ThisRecord.ValidationStatus <> "Pass").ValidationStatus
+                    ) > 0 || CountA(colMetricTypesToUploads.ValidationStatus) < 1
+                    , DisplayMode.Disabled, DisplayMode.Edit)
+                Fill: =BlueControlDarkBackground
+                Font: =FontStyle
+                Height: =30
+                HoverBorderColor: =Self.Fill
+                HoverColor: =Self.Fill
+                HoverFill: =Self.Color
+                OnSelect: |-
+                    =If(
+                        !IsBlankOrError(TextBatchName_BUM.Text),
+                        ClearCollect(
+                            clln_MAXID_BUM,
+                            {
+                                ID: Max(
+                                    ReviewHub_MetricTypes,
+                                    craf2_metrictypeid
+                                ) + 1,
+                                MetricName: ""
+                            }
+                        );
+                        Set(
+                            Toggle_Button_Submit_Loading,
+                            true
+                        );
+                        Set(
+                            Toggle_Button_Submit_Done,
+                            false
+                        );
+                        //Set(var_CountUploads_BUM, 0);
+                    ClearCollect(
+                            BulkUpdateScreenLogs,
+                            Table(
+                                {
+                                    message: "Logs: Import Started",
+                                    timestamp: Now()
+                                }
+                            )
+                        );
+                        ForAll(
+                            colMetricTypesToUploads,
+                            Collect(
+                                BulkUpdateScreenLogs,
+                                {
+                                    message: Concatenate(
+                                        If(
+                                            "Create" in dpdn_ActionType_BUM.Selected.name,
+                                            "Adding row for - ",
+                                            "Updating row with MetricID - "
+                                        ),
+                                        If(
+                                            IsBlankOrError(ThisRecord.ID),
+                                            ThisRecord.ShortName,
+                                            ThisRecord.ID
+                                        ),
+                                        " Date:",
+                                        ThisRecord.EffectiveDate
+                                    ),
+                                    timestamp: Now()
+                                }
+                            );
+                            Collect(
+                                clln_MAXID_BUM,
+                                {
+                                    ID: If(
+                                        "Create" in dpdn_ActionType_BUM.Selected.name,
+                                        Max(
+                                            ReviewHub_MetricTypes,
+                                            craf2_metrictypeid
+                                        ) + 1,
+                                        ID
+                                    ),
+                                    MetricName: MetricName
+                                }
+                            );
+                            Concurrent(
+                                If(
+                                    "Create" in dpdn_ActionType_BUM.Selected.name,
+                                    Patch(
+                                        ReviewHub_MetricTypes,
+                                        Defaults(ReviewHub_MetricTypes),
+                                    //Update records because when review cycle created, the dummy records were generated by admin.
+                                        {
+                                            craf2_metrictypename: Trim(MetricName),
+                                            craf2_metrictypeid: Last(clln_MAXID_BUM).ID,
+                                            craf2_metrictypedescription: Trim(MetricDescription),
+                                            craf2_metrictypesource: Trim(DataSource),
+                                            craf2_metrictypestage: First(
+                                                Filter(
+                                                    Choices(ReviewHub_MetricTypeStage),
+                                                    Text(Value) = Trim(Stage)
+                                                )
+                                            ).Value,
+                                            craf2_valuetype: First(
+                                                Filter(
+                                                    Choices(ReviewHub_MetricValueType),
+                                                    Text(Value) = Trim(ValueType)
+                                                )
+                                            ).Value,
+                                            craf2_metrictypeshortname: Trim(ShortName),
+                                            //craf2_metrictypesubgroup: dpdn_MTSubgroup.Selected.ValuHe,
+                                            craf2_metrictypehealthweight: Value(HealthWeight),
+                                            craf2_metrictypeenumerateoptions: Trim(EnumerateOptions),
+                                            craf2_metrictypeistrenddown: If(
+                                                IsTrendDown = "Yes",
+                                                true,
+                                                false
+                                            ),
+                                            craf2_metrictypeeffectivedate: DateTimeValue(EffectiveDate)
+                                        }
+                                    );
+                                    ,
+                                    Patch(
+                                        ReviewHub_MetricTypes,
+                                        LookUp(
+                                            ReviewHub_MetricTypes,
+                                            ThisRecord.MetricTypeID = Last(clln_MAXID_BUM).ID
+                                        ),
+                                    //Update records because when review cycle created, the dummy records were generated by admin.
+                                        {
+                                            craf2_metrictypename: Trim(MetricName),
+                                            craf2_metrictypeid: Last(clln_MAXID_BUM).ID,
+                                            craf2_metrictypedescription: Trim(MetricDescription),
+                                            craf2_metrictypesource: Trim(DataSource),
+                                            craf2_metrictypestage: First(
+                                                Filter(
+                                                    Choices(ReviewHub_MetricTypeStage),
+                                                    Text(Value) = Trim(Stage)
+                                                )
+                                            ).Value,
+                                            craf2_valuetype: First(
+                                                Filter(
+                                                    Choices(ReviewHub_MetricValueType),
+                                                    Text(Value) = Trim(ValueType)
+                                                )
+                                            ).Value,
+                                            craf2_metrictypeshortname: Trim(ShortName),
+                                            //craf2_metrictypesubgroup: dpdn_MTSubgroup.Selected.ValuHe,
+                                            craf2_metrictypehealthweight: Value(HealthWeight),
+                                            craf2_metrictypeenumerateoptions: Trim(EnumerateOptions),
+                                            craf2_metrictypeistrenddown: If(
+                                                IsTrendDown = "Yes",
+                                                true,
+                                                false
+                                            ),
+                                            craf2_metrictypeeffectivedate: DateTimeValue(EffectiveDate)
+                                        }
+                                    );
+                                );
+                                If(
+                                    IsBlankOrError(
+                                        LookUp(
+                                            ReviewHub_MetricTypeObjectives,
+                                            ThisRecord.mto_BoardTypeID = dpdn_BoardType_BUM.Selected.bt_BoardTypeID && ThisRecord.mto_ObjectiveName = Objective
+                                        )
+                                    ),
+                                    Patch(
+                                        ReviewHub_MetricTypeObjectives,
+                                        Defaults(ReviewHub_MetricTypeObjectives),
+                                        {
+                                            mto_BoardTypeID: dpdn_BoardType_BUM.Selected.bt_BoardTypeID,
+                                            mto_ObjectiveID: Max(
+                                                ReviewHub_MetricTypeObjectives,
+                                                mto_ObjectiveID
+                                            ) + 1,
+                                            mto_ObjectiveName: Objective
+                                        }
+                                    )
+                                );
+                                
+                                    If(
+                                        "Create" in dpdn_ActionType_BUM.Selected.name,
+                                        
+                                        Patch(
+                                            ReviewHub_MetricTypeDetails,
+                                            Defaults(ReviewHub_MetricTypeDetails),
+                                            {
+                                                craf2_MetricType: LookUp(
+                                                    ReviewHub_MetricTypes,
+                                                    ThisRecord.craf2_metrictypeid = Last(clln_MAXID_BUM).ID
+                                                ),
+                                                craf2_metrictypedetailupdatemethod: First(
+                                                    Filter(
+                                                        Choices(ReviewHub_MetricTypeUpdateMethod),
+                                                        Text(Value) = Trim(UpdateMethod)
+                                                    )
+                                                ).Value,
+                                                craf2_metrictypequaterlycalcmethod: First(
+                                                    Filter(
+                                                        Choices(ReviewHub_QuaterlyCalculationMethod),
+                                                        Text(Value) = Trim(QuarterlyCalculationMethod)
+                                                    )
+                                                ).Value,
+                                                craf2_metrictypedetailpowerbiurl: Trim(PowerBIUrl),
+                                                craf2_MetricTypeDetailTemplate: If(
+                                                    dpdn_BoardType_BUM.Selected.bt_BoardTypeID = 2,
+                                                    LookUp(
+                                                        ReviewHub_MetricTemplates,
+                                                        ThisRecord.TemplateBoardType.BoardTypeID = dpdn_BoardType_BUM.Selected.bt_BoardTypeID && ThisRecord.TemplateName = "BAP"
+                                                    ),
+                                                    LookUp(
+                                                        ReviewHub_MetricTemplates,
+                                                        ThisRecord.TemplateBoardType.BoardTypeID = dpdn_BoardType_BUM.Selected.bt_BoardTypeID
+                                                    )
+                                                ),
+                                                craf2_mtd_BoardType: LookUp(
+                                                    ReviewHub_BoardTypes,
+                                                    ThisRecord.BoardTypeID = dpdn_BoardType_BUM.Selected.bt_BoardTypeID
+                                                ),
+                                                mtd_Objective: LookUp(
+                                                    ReviewHub_MetricTypeObjectives,
+                                                    ThisRecord.mto_BoardTypeID = dpdn_BoardType_BUM.Selected.bt_BoardTypeID && ThisRecord.mto_ObjectiveName = Objective
+                                                ),
+                                                craf2_mtd_displayorder: If(
+                                                    IsBlankOrError(
+                                                        LookUp(
+                                                            ReviewHub_MetricTypeDetails,
+                                                            ThisRecord.MetricType.MetricTypeID = Last(clln_MAXID_BUM).ID && ThisRecord.MetricTypeDetailTemplate.TemplateID = 1
+                                                        )
+                                                    ),
+                                                    Max(
+                                                        Filter(
+                                                            ReviewHub_MetricTypeDetails,
+                                                            ThisRecord.craf2_MetricTypeDetailTemplate.craf2_templateid = 1
+                                                        ),
+                                                        craf2_mtd_displayorder
+                                                    ) + 1,
+                                                    LookUp(
+                                                        ReviewHub_MetricTypeDetails,
+                                                        ThisRecord.MetricType.MetricTypeID = Last(clln_MAXID_BUM).ID && ThisRecord.MetricTypeDetailTemplate.TemplateID = 1
+                                                    ).mtd_DisplayOrder
+                                                )
+                                            }
+                                        ),
+                                        Patch(
+                                            ReviewHub_MetricTypeDetails,
+                                            LookUp(
+                                                ReviewHub_MetricTypeDetails,
+                                                ThisRecord.MetricType.MetricTypeID = Value(ID)
+                                            ),
+                                            {
+                                                craf2_MetricType: LookUp(
+                                                    ReviewHub_MetricTypes,
+                                                    ThisRecord.craf2_metrictypeid = Last(clln_MAXID_BUM).ID
+                                                ),
+                                                craf2_metrictypedetailupdatemethod: First(
+                                                    Filter(
+                                                        Choices(ReviewHub_MetricTypeUpdateMethod),
+                                                        Text(Value) = Trim(UpdateMethod)
+                                                    )
+                                                ).Value,
+                                                craf2_metrictypequaterlycalcmethod: First(
+                                                    Filter(
+                                                        Choices(ReviewHub_QuaterlyCalculationMethod),
+                                                        Text(Value) = Trim(QuarterlyCalculationMethod)
+                                                    )
+                                                ).Value,
+                                                craf2_metrictypedetailpowerbiurl: Trim(PowerBIUrl),
+                                                craf2_MetricTypeDetailTemplate: If(
+                                                    dpdn_BoardType_BUM.Selected.bt_BoardTypeID = 2,
+                                                    LookUp(
+                                                        ReviewHub_MetricTemplates,
+                                                        ThisRecord.TemplateBoardType.BoardTypeID = dpdn_BoardType_BUM.Selected.bt_BoardTypeID && ThisRecord.TemplateName = "BAP"
+                                                    ),
+                                                    LookUp(
+                                                        ReviewHub_MetricTemplates,
+                                                        ThisRecord.TemplateBoardType.BoardTypeID = dpdn_BoardType_BUM.Selected.bt_BoardTypeID
+                                                    )
+                                                ),
+                                                craf2_mtd_BoardType: LookUp(
+                                                    ReviewHub_BoardTypes,
+                                                    ThisRecord.BoardTypeID = dpdn_BoardType_BUM.Selected.bt_BoardTypeID
+                                                ),
+                                                mtd_Objective: LookUp(
+                                                    ReviewHub_MetricTypeObjectives,
+                                                    ThisRecord.mto_BoardTypeID = dpdn_BoardType_BUM.Selected.bt_BoardTypeID && ThisRecord.mto_ObjectiveName = Objective
+                                                ),
+                                                craf2_mtd_displayorder: If(
+                                                    IsBlankOrError(
+                                                        LookUp(
+                                                            ReviewHub_MetricTypeDetails,
+                                                            ThisRecord.MetricType.MetricTypeID = Last(clln_MAXID_BUM).ID && ThisRecord.MetricTypeDetailTemplate.TemplateID = 1
+                                                        )
+                                                    ),
+                                                    Max(
+                                                        Filter(
+                                                            ReviewHub_MetricTypeDetails,
+                                                            ThisRecord.craf2_MetricTypeDetailTemplate.craf2_templateid = 1
+                                                        ),
+                                                        craf2_mtd_displayorder
+                                                    ) + 1,
+                                                    LookUp(
+                                                        ReviewHub_MetricTypeDetails,
+                                                        ThisRecord.MetricType.MetricTypeID = Last(clln_MAXID_BUM).ID && ThisRecord.MetricTypeDetailTemplate.TemplateID = 1
+                                                    ).mtd_DisplayOrder
+                                                )
+                                            }
+                                        )
+                                    
+                                ),
+                                If(
+                                    "Create" in dpdn_ActionType_BUM.Selected.name,
+                                    Patch(
+                                        clln_MetricTypeDetail,
+                                        Defaults(clln_MetricTypeDetail),
+                                        {
+                                            //mtd_TemplateID : TemplateID, 
+                                    //mtd_TemplateName : TemplateName,
+                    mtd_MetricTypeId: Last(clln_MAXID_BUM).ID,
+                                            mtd_MetricTypeName: MetricName,
+                                            mtd_UpdateMethod: UpdateMethod,
+                                            mtd_MetricCreatedDate: DateTimeValue(EffectiveDate),
+                                            mtd_MetricShortName: ShortName,
+                                            mtd_BoardTypeID: dpdn_BoardType_BUM.Selected.bt_BoardTypeID,
+                                            //MetricTemplateRec.TemplateBoardType.BoardTypeID,
+                    mtd_BoardTypeName: dpdn_BoardType_BUM.Selected.bt_BoardTypeName,
+                                            //MetricTemplateRec.TemplateBoardType.BoardTypeName,
+                    mtd_MetricDisplayOrder: If(
+                                                IsBlankOrError(
+                                                    LookUp(
+                                                        ReviewHub_MetricTypeDetails,
+                                                        ThisRecord.MetricType.MetricTypeID = Last(clln_MAXID_BUM).ID && ThisRecord.MetricTypeDetailTemplate.TemplateName = Template && ThisRecord.MetricTypeDetailTemplate.TemplateBoardType.BoardTypeID = dpdn_BoardType_BUM.Selected.bt_BoardTypeID
+                                                    )
+                                                ),
+                                                Max(
+                                                    Filter(
+                                                        ReviewHub_MetricTypeDetails,
+                                                        ThisRecord.MetricTypeDetailTemplate.TemplateName = Template && ThisRecord.MetricTypeDetailTemplate.TemplateBoardType.BoardTypeID = dpdn_BoardType_BUM.Selected.bt_BoardTypeID
+                                                    ),
+                                                    craf2_mtd_displayorder
+                                                ) + 1,
+                                                LookUp(
+                                                    ReviewHub_MetricTypeDetails,
+                                                    ThisRecord.MetricType.MetricTypeID = Last(clln_MAXID_BUM).ID && ThisRecord.MetricTypeDetailTemplate.TemplateName = Template && ThisRecord.MetricTypeDetailTemplate.TemplateBoardType.BoardTypeID = dpdn_BoardType_BUM.Selected.bt_BoardTypeID
+                                                ).mtd_DisplayOrder
+                                            ),
+                                            mtd_MetricStage: Stage,
+                                            mtd_MetricTypeSubgroup: Objective,
+                                            //Text(ThisRecord.MetricType.MetricTypeSubgroup),
+                    mtd_MetricValueType: ValueType,
+                                            mtd_IsTrendDown: If(
+                                                IsTrendDown = "Yes",
+                                                true,
+                                                false
+                                            ),
+                                            mtd_MetricTypeEnumerateOptions: EnumerateOptions,
+                                            mtd_MetricTypeSource: DataSource,
+                                            mtd_MetricTypeHealthWeight: Value(HealthWeight),
+                                            mtd_MetricPowerBIUrl: PowerBIUrl,
+                                            mtd_MetricTypeDescription: MetricDescription,
+                                            mtd_MetricTypeQuaterlyCalcMethod: QuarterlyCalculationMethod
+                                        }
+                                    );
+                                    Patch(
+                                        clln_MetricTypeDetail,
+                                        LookUp(
+                                            clln_MetricTypeDetail,
+                                            ThisRecord.mtd_MetricTypeId = Last(clln_MAXID_BUM).ID
+                                        ),
+                                        {
+                                            //mtd_TemplateID : TemplateID, 
+                                    //mtd_TemplateName : TemplateName,
+                    mtd_MetricTypeId: Last(clln_MAXID_BUM).ID,
+                                            mtd_MetricTypeName: MetricName,
+                                            mtd_UpdateMethod: UpdateMethod,
+                                            mtd_MetricCreatedDate: DateTimeValue(EffectiveDate),
+                                            mtd_MetricShortName: ShortName,
+                                            mtd_BoardTypeID: dpdn_BoardType_BUM.Selected.bt_BoardTypeID,
+                                            //MetricTemplateRec.TemplateBoardType.BoardTypeID,
+                    mtd_BoardTypeName: dpdn_BoardType_BUM.Selected.bt_BoardTypeName,
+                                            //MetricTemplateRec.TemplateBoardType.BoardTypeName,
+                    mtd_MetricDisplayOrder: If(
+                                                IsBlankOrError(
+                                                    LookUp(
+                                                        ReviewHub_MetricTypeDetails,
+                                                        ThisRecord.MetricType.MetricTypeID = Last(clln_MAXID_BUM).ID && ThisRecord.MetricTypeDetailTemplate.TemplateName = Template && ThisRecord.MetricTypeDetailTemplate.TemplateBoardType.BoardTypeID = dpdn_BoardType_BUM.Selected.bt_BoardTypeID
+                                                    )
+                                                ),
+                                                Max(
+                                                    Filter(
+                                                        ReviewHub_MetricTypeDetails,
+                                                        ThisRecord.MetricTypeDetailTemplate.TemplateName = Template && ThisRecord.MetricTypeDetailTemplate.TemplateBoardType.BoardTypeID = dpdn_BoardType_BUM.Selected.bt_BoardTypeID
+                                                    ),
+                                                    craf2_mtd_displayorder
+                                                ) + 1,
+                                                LookUp(
+                                                    ReviewHub_MetricTypeDetails,
+                                                    ThisRecord.MetricType.MetricTypeID = Last(clln_MAXID_BUM).ID && ThisRecord.MetricTypeDetailTemplate.TemplateName = Template && ThisRecord.MetricTypeDetailTemplate.TemplateBoardType.BoardTypeID = dpdn_BoardType_BUM.Selected.bt_BoardTypeID
+                                                ).mtd_DisplayOrder
+                                            ),
+                                            mtd_MetricStage: Stage,
+                                            mtd_MetricTypeSubgroup: Objective,
+                                            //Text(ThisRecord.MetricType.MetricTypeSubgroup),
+                    mtd_MetricValueType: ValueType,
+                                            mtd_IsTrendDown: If(
+                                                IsTrendDown = "Yes",
+                                                true,
+                                                false
+                                            ),
+                                            mtd_MetricTypeEnumerateOptions: EnumerateOptions,
+                                            mtd_MetricTypeSource: DataSource,
+                                            mtd_MetricTypeHealthWeight: Value(HealthWeight),
+                                            mtd_MetricPowerBIUrl: PowerBIUrl,
+                                            mtd_MetricTypeDescription: MetricDescription,
+                                            mtd_MetricTypeQuaterlyCalcMethod: QuarterlyCalculationMethod
+                                        }
+                                    );
+                                );
+                            )
+                        );
+                        Collect(
+                            BulkUpdateScreenLogs,
+                            {
+                                message: "Completed uploading for this Batch (Batch Name: " & TextBatchName_BUM.Text & ")!",
+                                timestamp: Now()
+                            }
+                        );
+                        Patch(
+                            ReviewHub_MetricUploadLogs,
+                            Defaults(ReviewHub_MetricUploadLogs),
+                            {
+                                BatchName: Trim(TextBatchName_BUM.Text),
+                                Action: dpdn_ActionType_BUM.Selected.name,
+                                AffectedRows: CountA(clln_MAXID_BUM.ID) - 1,
+                                mul_BoardType: LookUp(
+                                    ReviewHub_BoardTypes,
+                                    ThisRecord.BoardTypeID = dpdn_BoardType_BUM.Selected.bt_BoardTypeID
+                                ),
+                                FileName: Trim(combo_File_BUM.Selected.Name)
+                            }
+                        );
+                        
+                        Concurrent( 
+                            //ClearCollect(clln_MAXID_BUM, {ID:0}),
+                            'ReviewHub-DeleteExcelFile'.Run(Trim(combo_File_BUM.Selected.Name & ".xlsx"))
+                            ,
+                            RemoveIf(
+                                varLeftNavOptions,
+                                !IsBlankOrError(ThisRecord.PID)
+                            ),
+                            Set(
+                                Toggle_Button_Submit_Loading,
+                                false
+                            ),
+                            Set(
+                                Toggle_Button_Submit_Done,
+                                true
+                            ),
+                            
+                            //Clear(colMetricTypesToUploads),
+                            Set(
+                                Toggle_Button_Launch_Loading,
+                                false
+                            ),
+                            Set(
+                                Toggle_Button_Launch_Done,
+                                false
+                            ),
+                            Set(
+                                Toggle_Button_Validate_Loading,
+                                false
+                            ),
+                            Set(
+                                Toggle_Button_Validate_Done,
+                                false
+                            ),
+                            Reset(TextBatchName_BUM)
+                            /*
+                            Reset(combo_File_BUM),
+                            Reset(TextBatchName_BUM),
+                            ClearCollect(
+                                BulkUpdateScreenLogs,
+                                Table(
+                                    {
+                                        message: "(Logs will display here.)",
+                                        timestamp: Now()
+                                    }
+                                )
+                            )
+                            */
+                            
+                            //Set(var_CountUploads_BUM, 0)
+                        );
+                        
+                    Select(refreshSharepoint);
+                        
+                    )
+                RadiusBottomLeft: =40
+                RadiusBottomRight: =40
+                RadiusTopLeft: =40
+                RadiusTopRight: =40
+                Size: =11
+                Text: ="Submit"
+                Width: =100
+                X: =TextBatchName_BUM.X + TextBatchName_BUM.Width + 30
+                Y: =TextBatchName_BUM.Y
+                ZIndex: =5
+
+            TextBatchName_BUM As text:
+                BorderColor: =GRAYCOLOR
+                BorderThickness: =1
+                Default: =""
+                Font: =FontStyle
+                Height: =30
+                HintText: ="Enter Batch Name"
+                HoverBorderColor: =RGBA(204, 204, 204, 1)
+                HoverFill: =ColorFade(BlueControlLightBackground, 75%)
+                RadiusBottomLeft: =20
+                RadiusBottomRight: =20
+                RadiusTopLeft: =20
+                RadiusTopRight: =20
+                Size: =10
+                Width: =270
+                X: =20
+                Y: =Back_Step4_BUM.Y + Back_Step4_BUM.Height+ 20
+                ZIndex: =6
+
+            Back_Step4_BUM As button:
+                BorderColor: =Self.Fill
+                BorderStyle: =BorderStyle.None
+                BorderThickness: =0
+                DisabledBorderColor: =Self.BorderColor
+                DisabledColor: =Self.Color
+                DisabledFill: =Self.Fill
+                DisplayMode: =DisplayMode.Disabled
+                Fill: =ColorFade(BlueNaviHightLightBackground, 50%)
+                Height: =Label_Step4_BUM.Height
+                RadiusBottomLeft: |
+                    =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =20
+                RadiusTopRight: =20
+                Text: =""
+                Width: =Label_Step4_BUM.Width
+                ZIndex: =7
+
+            Label_Step4_BUM As label:
+                BorderStyle: =BorderStyle.None
+                Font: =FontStyle
+                FontWeight: =FontWeight.Bold
+                PaddingLeft: =15
+                Size: =11
+                Text: |-
+                    ="Step 4: Enter Batch Name and Submit"
+                Width: =750
+                X: |
+                    =0
+                ZIndex: =8
+
+        HtmlText_Note_BUM As htmlViewer:
+            Font: =FontStyle
+            Height: =71
+            HtmlText: |-
+                ="* Rows with required columns that contain blank value will be highlighted in <font color=FFE3E3>Misty Rose</font>.<br>" & 
+                "* Duplicate Rows will be highlighted in <font color=FFFCE6>Beige</font>.<br>"& 
+                "* Rows with invalid data types for values will be highlighted with <font color=E5F2FF>Alice Blue</font>.<br>"
+            PaddingLeft: =15
+            Width: =Parent.Width - 4
+            Y: =ctn_DataPreview_BUM.Y + ctn_DataPreview_BUM.Height 
+            ZIndex: =3
+
+        ctn_DataPreview_BUM As groupContainer.manualLayoutContainer:
+            Height: =(App.Height - SS_AppHeader_BUM.Height) * 0.36
+            Width: =Parent.Width
+            Y: =btn_Validate_BUM.Y + btn_Validate_BUM.Height + 10
+            ZIndex: =4
+
+            BulkUploadGallery_BUM As gallery.galleryVertical:
+                BorderColor: =SUBGROUPCOLOR
+                BorderThickness: =2
+                Height: =Parent.Height - Self.Y - 1
+                Items: |
+                    =
+                    //Table3
+                    
+                    
+                        Ungroup( //Ungroup function to add a Row Number column.
+                            ForAll(
+                                Sequence(CountRows(Search(colMetricTypesToUploads, Trim(Filter_MetricType_BUM.Text), "MetricName", "ShortName", "ID", "Stage", "Objective"))),
+                                {
+                                    Record: Table(Last(FirstN(Search(colMetricTypesToUploads, Trim(Filter_MetricType_BUM.Text), "MetricName", "ShortName", "ID", "Stage", "Objective"), Value))),
+                                    RowNumber: Value
+                                }
+                            ),
+                            "Record"
+                        )
+                Layout: =Layout.Vertical
+                TemplateFill: =If(Mod(ThisItem.RowNumber, 2) = 0, If(ThisItem.ValidationStatus = "Pass",  GrayCanvasBackground, If(ThisItem.ValidationStatus = "Missing Required Values", RGBA(255, 148, 148, 1), If(ThisItem.ValidationStatus = "Duplicate", RGBA(255, 252, 230, 1) , RGBA(229, 242, 255, 1)) )),  If(ThisItem.ValidationStatus = "Pass",  RGBA(255, 255, 255, 1), If(ThisItem.ValidationStatus = "Missing Required Values", RGBA(255, 148, 148, 1), If(ThisItem.ValidationStatus = "Duplicate", RGBA(255, 252, 230, 1) , RGBA(229, 242, 255, 1) ) )))
+                TemplatePadding: =0
+                TemplateSize: =60
+                Width: =Label_Step3_BUM.Width - 2
+                X: =1
+                Y: =hdr_MetricID_BUM.Y + hdr_MetricID_BUM.Height
+                ZIndex: =1
+
+                lbl_ValidationStatus_BUM As label:
+                    Align: =Align.Center
+                    Font: =FontStyle
+                    OnSelect: =Select(Parent)
+                    Size: =10
+                    Text: =ThisItem.ValidationStatus
+                    Tooltip: =ThisItem.QuarterlyCalculationMethod
+                    Width: =hdr_ValidationStatus_BUM.Width
+                    X: =hdr_ValidationStatus_BUM.X
+                    Y: =(Parent.TemplateHeight - Self.Height) * 0.50
+                    ZIndex: =1
+
+                lbl_QuarterlyCalcMethod_BUM As label:
+                    Align: =Align.Center
+                    Font: =FontStyle
+                    OnSelect: =Select(Parent)
+                    Size: =10
+                    Text: =ThisItem.QuarterlyCalculationMethod
+                    Tooltip: =ThisItem.QuarterlyCalculationMethod
+                    Width: =hdr_QuarterlyCalcMethod_BUM.Width
+                    X: =hdr_QuarterlyCalcMethod_BUM.X
+                    Y: =(Parent.TemplateHeight - Self.Height) * 0.50
+                    ZIndex: =2
+
+                lbl_UpdateMethod_BUM As label:
+                    Align: =Align.Center
+                    Font: =FontStyle
+                    OnSelect: =Select(Parent)
+                    Size: =10
+                    Text: =ThisItem.UpdateMethod
+                    Width: =hdr_UpdateMethod_BUM.Width
+                    X: =hdr_UpdateMethod_BUM.X
+                    Y: =(Parent.TemplateHeight - Self.Height) * 0.50
+                    ZIndex: =3
+
+                lbl_IsTrend_Down_BUM As label:
+                    Align: =Align.Center
+                    Font: =FontStyle
+                    OnSelect: =Select(Parent)
+                    Size: =10
+                    Text: =ThisItem.IsTrendDown
+                    Width: =hdr_IsTrendDown_BUM.Width
+                    Wrap: =false
+                    X: =hdr_IsTrendDown_BUM.X
+                    Y: =(Parent.TemplateHeight - Self.Height) * 0.50
+                    ZIndex: =4
+
+                lbl_ValueType_BUM As label:
+                    Align: =Align.Center
+                    Font: =FontStyle
+                    OnSelect: =Select(Parent)
+                    Size: =10
+                    Text: =ThisItem.ValueType
+                    Width: =hdr_ValueType_BUM.Width
+                    X: =hdr_ValueType_BUM.X
+                    Y: =(Parent.TemplateHeight - Self.Height) * 0.50
+                    ZIndex: =5
+
+                lbl_Template_BUM As label:
+                    Align: =Align.Center
+                    AutoHeight: =true
+                    Font: =FontStyle
+                    OnSelect: =Select(Parent)
+                    Size: =10
+                    Text: =ThisItem.ValidationMessage
+                    Tooltip: =ThisItem.EffectiveDate
+                    Width: =hdr_Template_BUM.Width
+                    X: =hdr_Template_BUM.X
+                    Y: =(Parent.TemplateHeight - Self.Height) * 0.50
+                    ZIndex: =6
+
+                lbl_Objective_BUM As label:
+                    Align: =Align.Center
+                    AutoHeight: =true
+                    Font: =FontStyle
+                    OnSelect: =Select(Parent)
+                    Size: =10
+                    Text: =ThisItem.Objective
+                    Width: =hdr_Objective_BUM.Width
+                    X: =hdr_Objective_BUM.X
+                    Y: =(Parent.TemplateHeight - Self.Height) * 0.50
+                    ZIndex: =7
+
+                lbl_Stage_BUM As label:
+                    Align: =Align.Center
+                    AutoHeight: =true
+                    Font: =FontStyle
+                    OnSelect: =Select(Parent)
+                    Size: =10
+                    Text: =ThisItem.Stage
+                    Width: =hdr_Stage_BUM.Width
+                    X: =hdr_Stage_BUM.X
+                    Y: =(Parent.TemplateHeight - Self.Height) * 0.50
+                    ZIndex: =8
+
+                lbl_MetricName_BUM As label:
+                    Align: =Align.Center
+                    AutoHeight: =true
+                    Font: =FontStyle
+                    OnSelect: =Select(Parent)
+                    Size: =10
+                    Text: =ThisItem.MetricName
+                    Width: =hdr_MetricName_BUM.Width
+                    X: =hdr_MetricName_BUM.X
+                    Y: =(Parent.TemplateHeight - Self.Height) * 0.50
+                    ZIndex: =9
+
+                lbl_MetricTypeID_BUM As label:
+                    Align: =Align.Center
+                    Font: =FontStyle
+                    OnSelect: =Select(Parent)
+                    Size: =10
+                    Text: =ThisItem.ID
+                    Width: =hdr_MetricID_BUM.Width
+                    X: =hdr_MetricID_BUM.X
+                    Y: =(Parent.TemplateHeight - Self.Height) * 0.50
+                    ZIndex: =10
+
+            hdr_ValidationStatus_BUM As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Fill: =SUBGROUPCOLOR
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Size: =10
+                Text: ="Validation Status"
+                Width: =185
+                X: =hdr_QuarterlyCalcMethod_BUM.X + hdr_QuarterlyCalcMethod_BUM.Width
+                Y: =hdr_MetricID_BUM.Y
+                ZIndex: =2
+
+            hdr_QuarterlyCalcMethod_BUM As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Fill: =SUBGROUPCOLOR
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Size: =10
+                Text: ="Quaterly Calculation Method"
+                Width: =185
+                X: =hdr_UpdateMethod_BUM.X + hdr_UpdateMethod_BUM.Width
+                Y: =hdr_MetricID_BUM.Y
+                ZIndex: =3
+
+            hdr_UpdateMethod_BUM As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Fill: =SUBGROUPCOLOR
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Size: =10
+                Text: ="Update Method"
+                Width: =130
+                X: =hdr_IsTrendDown_BUM.X + hdr_IsTrendDown_BUM.Width
+                Y: =hdr_MetricID_BUM.Y
+                ZIndex: =4
+
+            hdr_IsTrendDown_BUM As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Fill: =SUBGROUPCOLOR
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Size: =10
+                Text: ="IsTrendDown"
+                Width: =100
+                X: =hdr_ValueType_BUM.X + hdr_ValueType_BUM.Width
+                Y: =hdr_MetricID_BUM.Y
+                ZIndex: =5
+
+            hdr_ValueType_BUM As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Fill: =SUBGROUPCOLOR
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Size: =10
+                Text: ="Value Type"
+                Width: =130
+                X: =hdr_Objective_BUM.X + hdr_Objective_BUM.Width
+                Y: =hdr_MetricID_BUM.Y
+                ZIndex: =6
+
+            hdr_Template_BUM As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Fill: =SUBGROUPCOLOR
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Size: =10
+                Text: ="Validation Message"
+                Width: =210
+                X: =hdr_ValidationStatus_BUM.X + hdr_ValidationStatus_BUM.Width
+                Y: =hdr_MetricID_BUM.Y
+                ZIndex: =7
+
+            hdr_Objective_BUM As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Fill: =SUBGROUPCOLOR
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Size: =10
+                Text: ="Objectve"
+                Width: =App.Width * 0.2
+                X: =hdr_Stage_BUM.X + hdr_Stage_BUM.Width
+                Y: =hdr_MetricID_BUM.Y
+                ZIndex: =8
+
+            hdr_Stage_BUM As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Fill: =SUBGROUPCOLOR
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Size: =10
+                Text: ="Stage"
+                Width: =(Parent.Width - 4) / 9
+                X: =hdr_MetricName_BUM.X + hdr_MetricName_BUM.Width
+                Y: =hdr_MetricID_BUM.Y
+                ZIndex: =9
+
+            hdr_MetricName_BUM As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Fill: =SUBGROUPCOLOR
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Size: =10
+                Text: ="Name"
+                Width: =App.Width * 0.18
+                X: =hdr_MetricID_BUM.X + hdr_MetricID_BUM.Width
+                Y: =hdr_MetricID_BUM.Y
+                ZIndex: =10
+
+            hdr_MetricID_BUM As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Fill: =SUBGROUPCOLOR
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Size: =10
+                Text: ="ID"
+                Width: =35
+                Y: =Back_Step3_BUM.Height - 1
+                ZIndex: =11
+
+            Back_Step3_BUM As button:
+                BorderColor: =Self.Fill
+                BorderStyle: =BorderStyle.None
+                BorderThickness: =0
+                DisabledBorderColor: =Self.BorderColor
+                DisabledColor: =Self.Color
+                DisabledFill: =Self.Fill
+                DisplayMode: =DisplayMode.Disabled
+                Fill: =ColorFade(BlueNaviHightLightBackground, 50%)
+                Height: =Label_Step3_BUM.Height
+                RadiusBottomLeft: |
+                    =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =20
+                RadiusTopRight: =20
+                Text: =""
+                Width: =Label_Step3_BUM.Width
+                ZIndex: =12
+
+            Label_Step3_BUM As label:
+                BorderStyle: =BorderStyle.None
+                Font: =FontStyle
+                FontWeight: =FontWeight.Bold
+                PaddingLeft: =15
+                Size: =11
+                Text: |-
+                    ="Step 3: Confirm your entries show here after validating.  (Row Count: " & CountRows(colMetricTypesToUploads) & ")"
+                Width: =hdr_Template_BUM.X + hdr_Template_BUM.Width
+                X: |
+                    =0
+                ZIndex: =13
+
+            Filter_MetricType_BUM As text:
+                BorderColor: =GrayControlBackground
+                BorderThickness: =1
+                Clear: =true
+                Default: =""
+                Font: =FontStyle
+                Height: |
+                    =25
+                HintText: ="Filter By Metric Type Name, Objective, Stage, ID"
+                HoverBorderColor: =RGBA(204, 204, 204, 1)
+                HoverFill: =ColorFade(BlueControlLightBackground, 75%)
+                RadiusBottomLeft: =20
+                RadiusBottomRight: =20
+                RadiusTopLeft: =20
+                RadiusTopRight: =20
+                Size: =10
+                Width: =375
+                X: =Label_Step3_BUM.X + Label_Step3_BUM.Width - Self.Width - 15
+                Y: =Label_Step3_BUM.Y + (Label_Step3_BUM.Height - Self.Height) * 0.50
+                ZIndex: =14
+
+        btn_Validate_Done_BUM As icon.CheckBadge:
+            Color: =RGBA(127, 178, 57, 1)
+            DisplayMode: =DisplayMode.View
+            FocusedBorderThickness: =10
+            Height: =btn_Validate_BUM.Height + 5
+            Icon: =Icon.CheckBadge
+            PaddingBottom: =8
+            PaddingLeft: =5
+            PaddingRight: =5
+            PaddingTop: =8
+            Visible: =Toggle_Button_Validate_Done && btn_Validate_BUM.Visible
+            Width: =Self.Height
+            X: =btn_Validate_BUM.X + btn_Validate_BUM.Width + 5
+            Y: =btn_Validate_BUM.Y - 2
+            ZIndex: =6
+
+        btn_Validate_Loading_BUM As image:
+            DisplayMode: =DisplayMode.View
+            Height: =btn_Validate_BUM.Height + 5
+            Image: =img_loading
+            Visible: =Toggle_Button_Validate_Loading && btn_Validate_BUM.Visible
+            Width: =Self.Height
+            X: =btn_Validate_BUM.X + btn_Validate_BUM.Width + 5
+            Y: =btn_Validate_BUM.Y - 2
+            ZIndex: =7
+
+        btn_Validate_BUM As button:
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =0
+            Color: =RGBA(0, 0, 0, 1)
+            Fill: |-
+                =ColorValue("#ECECEC")
+            Font: =FontStyle
+            Height: =25
+            HoverFill: =BlueControlDarkBackground
+            OnSelect: |+
+                =
+                
+                Set(
+                    Toggle_Button_Validate_Loading,
+                    true
+                );
+                Set(
+                    Toggle_Button_Validate_Done,
+                    false
+                );
+                ClearCollect(colMetricTypesToUploads, 'ReviewHub-ValidateExcelUpload'.Run( var_JSONValueType, combo_File_BUM.Selected.Name & ".xlsx" ,dpdn_BoardType_BUM.Selected.bt_BoardTypeID, dpdn_ActionType_BUM.Selected.name, var_JSONValueType, var_JSONUpdateMethod, var_JSONQuarterlyCalculationMethod));
+                
+                Set(
+                    Toggle_Button_Validate_Loading,
+                    false
+                );
+                Set(
+                    Toggle_Button_Validate_Done,
+                    true
+                );
+                
+            PressedFill: =BlueControlDarkBackground
+            RadiusBottomLeft: =7
+            RadiusBottomRight: =7
+            RadiusTopLeft: =7
+            RadiusTopRight: =7
+            Size: =10
+            Text: ="Upload"
+            Visible: =!("Launch" in combo_File_BUM.Selected.Name || IsBlank(combo_File_BUM.Selected.Name))
+            Width: =100
+            X: =combo_File_BUM.X + combo_File_BUM.Width +  20
+            Y: =lbl_BoardType_BUM.Y
+            ZIndex: =8
+
+        btn_Launch_Done_BUM As icon.CheckBadge:
+            Color: =RGBA(127, 178, 57, 1)
+            DisplayMode: =DisplayMode.View
+            FocusedBorderThickness: =10
+            Height: =btn_LaunchFile_BUM.Height + 5
+            Icon: =Icon.CheckBadge
+            PaddingBottom: =8
+            PaddingLeft: =5
+            PaddingRight: =5
+            PaddingTop: =8
+            Visible: =Toggle_Button_Launch_Done && btn_LaunchFile_BUM.Visible
+            Width: =Self.Height
+            X: =btn_LaunchFile_BUM.X + btn_LaunchFile_BUM.Width + 5
+            Y: =btn_LaunchFile_BUM.Y - 2
+            ZIndex: =9
+
+        btn_Launch_Loading_BUM As image:
+            DisplayMode: =DisplayMode.View
+            Height: =btn_LaunchFile_BUM.Height + 5
+            Image: =img_loading
+            Visible: =Toggle_Button_Launch_Loading && btn_LaunchFile_BUM.Visible
+            Width: =Self.Height
+            X: =btn_LaunchFile_BUM.X + btn_LaunchFile_BUM.Width + 5
+            Y: =btn_LaunchFile_BUM.Y - 2
+            ZIndex: =10
+
+        btn_LaunchFile_BUM As button:
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =0
+            Color: =RGBA(0, 0, 0, 1)
+            DisplayMode: = DisplayMode.Edit
+            Fill: |-
+                =ColorValue("#ECECEC")
+            Font: =FontStyle
+            Height: =btn_Validate_BUM.Height
+            HoverFill: =BlueControlDarkBackground
+            OnSelect: |+
+                =
+                Set(
+                    Toggle_Button_Launch_Loading,
+                    true
+                );
+                Set(
+                    Toggle_Button_Launch_Done,
+                    false
+                );
+                Clear(colMetricTypesToUploads);
+                Set(var_UploadMetricData, 'ReviewHub-LaunchExcelFile'.Run( dpdn_BoardType_BUM.Selected.bt_BoardTypeName, dpdn_ActionType_BUM.Selected.shortName, var_JSONMetricTypeDetails));
+                Launch(var_UploadMetricData.sharablelink);
+                Set(
+                    Toggle_Button_Launch_Loading,
+                    false
+                );
+                Set(
+                    Toggle_Button_Launch_Done,
+                    true
+                );
+                //Select(refreshSharepoint);
+                Collect(clln_ReviewHubSharepoint_BUM, {Name : First(ForAll(Split(var_UploadMetricData.filename, ".xlsx"), {Result: ThisRecord.Value}).Result).Result});
+                Set(var_ShowLaunch_BUM, false);
+                
+                
+            PressedFill: =BlueControlDarkBackground
+            RadiusBottomLeft: =7
+            RadiusBottomRight: =7
+            RadiusTopLeft: =7
+            RadiusTopRight: =7
+            Size: =10
+            Text: ="Launch Excel File"
+            Visible: ="Launch" in combo_File_BUM.Selected.Name || ( var_ShowLaunch_BUM && dpdn_ActionType_BUM.Selected.value <> 1)
+            Width: =140
+            X: |-
+                =If((var_ShowLaunch_BUM && dpdn_ActionType_BUM.Selected.value <> 1),
+                dpdn_ActionType_BUM.X + dpdn_ActionType_BUM.Width + 20,
+                combo_File_BUM.X + combo_File_BUM.Width +  20)
+            Y: =lbl_ActionType_BUM.Y
+            ZIndex: =11
+
+        dpdn_ActionType_BUM As dropdown:
+            BorderColor: =
+            BorderThickness: =0
+            ChevronBackground: =Self.Fill
+            ChevronDisabledBackground: =Self.ChevronBackground
+            ChevronDisabledFill: =ColorFade(Self.ChevronFill, 50%)
+            ChevronFill: =Color.Black
+            ChevronHoverBackground: =BlueControlLightBackground
+            ChevronHoverFill: =RGBA(0, 0, 0, 1)
+            Default: ="Select an Action"
+            DisplayMode: =If(IsBlank(combo_File_BUM.Selected.Name), DisplayMode.Edit, DisplayMode.Disabled)
+            Fill: =GrayControlBackground
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =25
+            HoverFill: =Self.ChevronHoverBackground
+            Items: |-
+                =Table(
+                    { 
+                        name: "Select an Action",
+                        value: 1,
+                        shortName: "Select"
+                    },
+                    {
+                        name: "Create New Metrics",
+                        value: 2,
+                        shortName: "Create"
+                        
+                    },
+                    {
+                        name: "Update Existing Metrics",
+                        value: 3,
+                        shortName: "Update"
+                    }
+                )
+            OnChange: =Select(refreshSharepoint)
+            PressedColor: =BlueControlDarkBackground
+            PressedFill: =BlueControlLightBackground
+            SelectionFill: =BlueNaviHightLightBackground
+            Size: =11
+            Width: =210
+            X: =lbl_ActionType_BUM.X + lbl_ActionType_BUM.Width
+            Y: =lbl_ActionType_BUM.Y
+            ZIndex: =12
+
+        lbl_ActionType_BUM As label:
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =25
+            PaddingBottom: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =11
+            Text: ="Action"
+            Width: =60
+            X: =dpdn_BoardType_BUM.X + dpdn_BoardType_BUM.Width + 20
+            Y: =dpdn_BoardType_BUM.Y
+            ZIndex: =13
+
+        dpdn_BoardType_BUM As dropdown:
+            BorderColor: =
+            BorderThickness: =0
+            ChevronBackground: =Self.Fill
+            ChevronDisabledBackground: =Self.ChevronBackground
+            ChevronDisabledFill: =ColorFade(Self.ChevronFill, 50%)
+            ChevronFill: =Color.Black
+            ChevronHoverBackground: =BlueControlLightBackground
+            ChevronHoverFill: =RGBA(0, 0, 0, 1)
+            Default: ="Select a Review Type"
+            DisplayMode: =If(IsBlank(combo_File_BUM.Selected.Name), DisplayMode.Edit, DisplayMode.Disabled)
+            Fill: =GrayControlBackground
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =25
+            HoverFill: =Self.ChevronHoverBackground
+            Items: |-
+                =
+                Filter(
+                clln_BoardTypes,
+                    (IsAdmin || (IsCoordinator && ThisRecord.bt_BoardTypeID in IsCoordinator_BoardTypes)) && ThisRecord.bt_IsDisplayInApp
+                )
+            OnChange: =Select(refreshSharepoint)
+            PressedColor: =BlueControlDarkBackground
+            PressedFill: =BlueControlLightBackground
+            SelectionFill: =BlueNaviHightLightBackground
+            Size: =11
+            Width: =170
+            X: =lbl_BoardType_BUM.X + lbl_BoardType_BUM.Width
+            Y: =lbl_BoardType_BUM.Y
+            ZIndex: =14
+
+        lbl_BoardType_BUM As label:
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =25
+            PaddingBottom: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =11
+            Text: ="Scorecard (Board)"
+            Width: =135
+            Y: =7
+            ZIndex: =15
+
+        combo_File_BUM As combobox:
+            BorderColor: =RGBA(0, 0, 0, 1)
+            BorderThickness: =1
+            ChevronBackground: =Self.Fill
+            ChevronDisabledFill: =RGBA(0, 0, 0, 0)
+            ChevronFill: =RGBA(0, 0, 0, 1)
+            ChevronHoverBackground: =
+            Default: |-
+                ={ 'File name with extension'  : "Launch a File" }
+            DefaultSelectedItems: =
+            DisplayFields: =["{Name}","{FilenameWithExtension}","Picture"]
+            Font: =FontStyle
+            Height: =25
+            HoverBorderColor: =
+            HoverFill: =ColorFade(BlueNaviHightLightBackground, 85%)
+            InputTextPlaceholder: ="Search by name of the file or Launch a New File"
+            Items: =clln_ReviewHubSharepoint_BUM
+            NoSelectionText: ="Search by name of the file or Launch a New File"
+            OnChange: =Select(refreshSharepoint)
+            PaddingBottom: =0
+            PaddingLeft: =8
+            PaddingTop: =0
+            PressedColor: =BlueControlDarkBackground
+            PressedFill: =BlueControlLightBackground
+            SearchFields: =["{Name}"]
+            SearchItems: =Search(clln_ReviewHubSharepoint_BUM,combo_File_BUM.SearchText,"{Name}")
+            SelectionFill: =BlueNaviHightLightBackground
+            SelectMultiple: =false
+            Size: =11
+            Tooltip: =
+            Visible: =dpdn_ActionType_BUM.Selected.value <> 1 && !var_ShowLaunch_BUM
+            Width: =355
+            X: =dpdn_ActionType_BUM.X + dpdn_ActionType_BUM.Width + 20
+            Y: =lbl_BoardType_BUM.Y
+            ZIndex: =17
+
+        btn_Reset_BUM As button:
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =0
+            Color: =RGBA(0, 0, 0, 1)
+            Fill: |-
+                =ColorValue("#ECECEC")
+            Font: =FontStyle
+            Height: =25
+            HoverFill: =BlueControlDarkBackground
+            OnSelect: |
+                =Concurrent( 
+                    RemoveIf(
+                        varLeftNavOptions,
+                        !IsBlankOrError(ThisRecord.PID)
+                    ),
+                    Set(
+                        Toggle_Button_Submit_Loading,
+                        false
+                    ),
+                    Clear(colMetricTypesToUploads),
+                    
+                    Set(
+                        Toggle_Button_Launch_Loading,
+                        false
+                    ),
+                    Set(
+                        Toggle_Button_Launch_Done,
+                        false
+                    ),
+                    Set(
+                        Toggle_Button_Validate_Loading,
+                        false
+                    ),
+                    Set(
+                        Toggle_Button_Validate_Done,
+                        false
+                    ),
+                    Reset(combo_File_BUM),
+                    Reset(TextBatchName_BUM),
+                    ClearCollect(
+                        BulkUpdateScreenLogs,
+                        Table(
+                            {
+                                message: "(Logs will display here.)",
+                                timestamp: Now()
+                            }
+                        )
+                    ),
+                    
+                    //Set(var_CountUploads_BUM, 0),
+                    Select(refreshSharepoint)
+                );
+                
+                
+                    
+            PressedFill: =BlueControlDarkBackground
+            RadiusBottomLeft: =7
+            RadiusBottomRight: =7
+            RadiusTopLeft: =7
+            RadiusTopRight: =7
+            Size: =10
+            Text: ="Reset"
+            Width: =100
+            X: =Label_Step3_BUM.Width - Self.Width
+            Y: =lbl_BoardType_BUM.Y
+            ZIndex: =18
+
+    lbl_ScreenTitle_BUM As label:
+        DisabledColor: =BlueControlDarkBackground
+        DisabledFill: =Self.Fill
+        DisplayMode: =DisplayMode.Disabled
+        Fill: =GrayCanvasBackground
+        Font: =FontStyle
+        FontWeight: =FontWeight.Bold
+        Height: =55
+        PaddingLeft: =60
+        Size: =18
+        Text: ="Bulk Upload Metric Types"
+        Width: =App.Width - Self.X
+        Y: =SS_AppHeader_BUM.Height
+        ZIndex: =2
+
+    icon_Back_BUM As icon.BackArrow:
+        BorderColor: =RGBA(0, 0, 0, 0)
+        BorderStyle: =BorderStyle.None
+        Color: =BlueControlDarkBackground
+        Height: =30
+        HoverBorderColor: =Self.BorderColor
+        HoverColor: =Color.Purple
+        Icon: =Icon.BackArrow
+        OnSelect: =Navigate(scn_SelfService);
+        Tooltip: ="Back"
+        Width: =Self.Height
+        X: =15
+        Y: =lbl_ScreenTitle_BUM.Y + (lbl_ScreenTitle_BUM.Height - Self.Height) * 0.50
+        ZIndex: =3
+
+    SS_AppHeader_BUM As AppHeader:
+        DropDownSelection: =TrackRequestComponent_BUM.HideTrackRequest
+        FeatureRequestUrl: =var_FeatureRequestURL
+        FeedbackButtonUrl: =var_SendFeedback_URL
+        inputAppDisplayName: =varAppHeaderText
+        ScorecardOnboardingFeatureUrl: =var_ScorecardOnboardingRequestURL
+        ShowSurveyButton: =false
+        Y: =0
+        ZIndex: =4
+
+    TrackRequestComponent_BUM As TrackRequestComponent:
+        BlueControlDarkBackground: =BlueControlDarkBackground
+        BlueControlLightBackground: =BlueControlLightBackground
+        BlueNaviHightLightBackground: =BlueNaviHightLightBackground
+        DevOpsBaseUrl: =var_DevOpsBaseURL
+        DevOpsQueryID: =var_DevOpsQueryID
+        FontStyle: =FontStyle
+        GrayCanvasBackground: =GrayCanvasBackground
+        GRAYCOLOR: =GRAYCOLOR
+        GrayControlBackground: =GrayControlBackground
+        IsAdmin: =IsAdmin
+        Reset: =Self.Visible
+        Visible: =SS_AppHeader_BUM.DisplayTrackRequest
+        X: =App.Width - Self.Width
+        Y: =SS_AppHeader_BUM.Height
+        ZIndex: =5
+
+    refreshSharepoint As button:
+        OnSelect: |-
+            =ClearCollect(clln_ReviewHubSharepoint_BUM, {Name: "Launch a New File"});
+            
+            Collect(clln_ReviewHubSharepoint_BUM,  SortByColumns(Filter('Review Hub Bulk Metric Upload', IsFolder = false && 'Folder path' = "Review Hub Bulk Metric Upload/Uploads/" &&  dpdn_BoardType_BUM.Selected.bt_BoardTypeName in 'File name with extension' && dpdn_ActionType_BUM.Selected.shortName in 'File name with extension' && 'Modified By'.Email = User().Email), "Modified", SortOrder.Descending).Name);
+            
+            Set(var_ShowLaunch_BUM, If(CountRows(clln_ReviewHubSharepoint_BUM) > 1, false, true))
+        Text: ="Button"
+        Visible: =false
+        X: =60
+        Y: =60
+        ZIndex: =6
+
+    InstructionsComponent_BUM As InstructionsComponent:
+        Instructions: |-
+            =Table(
+                {
+                    Instruction: "Select a review type", 
+                    Step: 1, 
+                    Image: 'Select Review Type'
+                },
+                {
+                    Instruction: "Select the action you wish to carry out", 
+                    Step: 2, 
+                    Image: 'Select An Action'
+                },
+                {
+                    Instruction: "Select the 'Launch Excel' Button to open up the excel template in a new tab", 
+                    Step: 3, 
+                    Image: 'Select Launch Excel Button'
+                },
+                {
+                    Instruction: "Make adjustments to excel file following the examples made in the example's column", 
+                    Step: 4, 
+                    Image: 'Excel File Opens In a new tab'
+                },
+                {
+                    Instruction: "Come back to the app, a new drop down will be visible. Search for the file you wish to upload", 
+                    Step: 5, 
+                    Image: 'Upload File'
+                },
+                {
+                    Instruction: "Come back to the app and select the 'Upload' Button", 
+                    Step: 6, 
+                    Image: 'Select the validate button'
+                },
+                {
+                    Instruction: "Confirm if all the data is loaded correctly", 
+                    Step: 7, 
+                    Image: 'Loaded Data Specific'
+                },
+                {
+                    Instruction: "Input a batch name to help identify the action if a roll back is necessary later", 
+                    Step: 8, 
+                    Image: 'Select Submit Button'
+                },
+                {
+                    Instruction: "Confirm the Upload was completed successfully", 
+                    Step: 9, 
+                    Image: 'Upload Complete'
+                }
+            )
+        Visible: =var_ICVisible && !Self.Hide
+        ZIndex: =7
+

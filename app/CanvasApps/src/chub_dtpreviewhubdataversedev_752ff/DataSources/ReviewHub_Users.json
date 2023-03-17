@@ -1,0 +1,119 @@
+[
+  {
+    "CdsFCBContext": "{\"FileType\":true,\"ImageExternalStorage\":true}",
+    "EntitySetName": "craf2_reviewhub_userses",
+    "IsHidden": false,
+    "IsSampleData": false,
+    "IsWritable": true,
+    "LogicalName": "craf2_reviewhub_users",
+    "MaxGetRowsCount": 2000,
+    "Name": "ReviewHub_Users",
+    "NativeCDSDataSourceInfoNameMapping": {
+      "_ownerid_value": "Owner",
+      "craf2_reviewhub_users_AsyncOperations": "System Jobs",
+      "craf2_reviewhub_users_BulkDeleteFailures": "Bulk Delete Failures",
+      "craf2_reviewhub_users_DuplicateBaseRecord": "Duplicate Records (craf2_reviewhub_users_DuplicateBaseRecord)",
+      "craf2_reviewhub_users_DuplicateMatchingRecord": "Duplicate Records (craf2_reviewhub_users_DuplicateMatchingRecord)",
+      "craf2_reviewhub_users_MailboxTrackingFolders": "Mailbox Auto Tracking Folders",
+      "craf2_reviewhub_users_PrincipalObjectAttributeAccesses": "Field Sharing",
+      "craf2_reviewhub_users_ProcessSession": "Process Sessions",
+      "craf2_reviewhub_users_SyncErrors": "Sync Errors",
+      "craf2_reviewhub_usersid": "ReviewHub_Users",
+      "craf2_userdisplayname": "UserDisplayName",
+      "craf2_userprincipalemail": "UserPrincipalEmail",
+      "craf2_userrole": "UserRole",
+      "createdby": "Created By",
+      "createdon": "Created On",
+      "createdonbehalfby": "Created By (Delegate)",
+      "importsequencenumber": "Import Sequence Number",
+      "modifiedby": "Modified By",
+      "modifiedon": "Modified On",
+      "modifiedonbehalfby": "Modified By (Delegate)",
+      "overriddencreatedon": "Record Created On",
+      "owningbusinessunit": "Owning Business Unit",
+      "owningteam": "Owning Team",
+      "owninguser": "Owning User",
+      "statecode": "Status",
+      "statuscode": "Status Reason",
+      "timezoneruleversionnumber": "Time Zone Rule Version Number",
+      "utcconversiontimezonecode": "UTC Conversion Time Zone Code",
+      "versionnumber": "Version Number"
+    },
+    "PreferredName": "ReviewHub_Users",
+    "Type": "NativeCDSDataSourceInfo"
+  },
+  {
+    "DisplayName": "ReviewHub_Users (Views)",
+    "Name": "_craf2_reviewhub_users_views",
+    "RelatedEntityName": "ReviewHub_Users",
+    "TrimmedViewName": true,
+    "Type": "ViewInfo",
+    "ViewInfoNameMapping": {
+      "55a31e0f-16b5-4957-83b7-7051bbb2f5ab": "Inactive ReviewHub_Users",
+      "585a6468-4441-4aea-a2f8-14ec6e643e91": "ReviewHub_Users Associated View",
+      "861565cd-06a1-4d3e-9307-4a0e88825ea4": "Active ReviewHub_Users",
+      "b6914435-8f4d-48bd-bee6-0787f8c35ab7": "ReviewHub_Users Advanced Find View",
+      "c43594f3-1492-43b1-82d4-f4712ff3939a": "ReviewHub_Users Lookup View"
+    }
+  },
+  {
+    "DisplayName": "ReviewHub_UserRole",
+    "Name": "craf2_reviewhub_userrole",
+    "OptionSetInfoNameMapping": {
+      "803840000": "Administrator",
+      "803840001": "Operator"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": true,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "craf2_userrole",
+        "OptionSetReferenceEntityName": "ReviewHub_Users"
+      }
+    },
+    "OptionSetTypeKey": "PicklistType",
+    "RelatedColumnInvariantName": "craf2_userrole",
+    "RelatedEntityName": "ReviewHub_Users",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Status (ReviewHub_Users)",
+    "Name": "craf2_reviewhub_users_statecode",
+    "OptionSetInfoNameMapping": {
+      "0": "Active",
+      "1": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statecode",
+        "OptionSetReferenceEntityName": "ReviewHub_Users"
+      }
+    },
+    "OptionSetTypeKey": "StateType",
+    "RelatedColumnInvariantName": "statecode",
+    "RelatedEntityName": "ReviewHub_Users",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Status Reason (ReviewHub_Users)",
+    "Name": "craf2_reviewhub_users_statuscode",
+    "OptionSetInfoNameMapping": {
+      "1": "Active",
+      "2": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statuscode",
+        "OptionSetReferenceEntityName": "ReviewHub_Users"
+      }
+    },
+    "OptionSetTypeKey": "StatusType",
+    "RelatedColumnInvariantName": "statuscode",
+    "RelatedEntityName": "ReviewHub_Users",
+    "Type": "OptionSetInfo"
+  }
+]

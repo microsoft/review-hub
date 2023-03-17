@@ -1,0 +1,55 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<savedqueries xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <savedquery>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>0</CanBeDeleted>
+    <isquickfindquery>0</isquickfindquery>
+    <isprivate>0</isprivate>
+    <isdefault>1</isdefault>
+    <savedqueryid>{c426fc6a-2bae-4a36-a7bd-f6cdb05f77d7}</savedqueryid>
+    <layoutxml>
+      <grid name="resultset" jump="craf2_boardtypename" select="1" icon="1" preview="1">
+        <row name="result" id="craf2_reviewhub_boardtypeid">
+          <cell name="craf2_boardtypename" width="152" />
+          <cell name="craf2_boardtypeid" width="100" />
+          <cell name="craf2_boardtypeshortname" width="100" />
+          <cell name="craf2_boardtypedescription" width="100" />
+          <cell name="craf2_coordinator" width="100" />
+          <cell name="craf2_isdisplayinapp" width="100" />
+          <cell name="craf2_bt_displayorder" width="100" />
+          <cell name="createdby" width="100" />
+          <cell name="createdon" width="100" />
+          <cell name="modifiedby" width="100" />
+          <cell name="modifiedon" width="100" />
+        </row>
+      </grid>
+    </layoutxml>
+    <querytype>0</querytype>
+    <fetchxml>
+      <fetch version="1.0" mapping="logical">
+        <entity name="craf2_reviewhub_boardtype">
+          <attribute name="craf2_reviewhub_boardtypeid" />
+          <attribute name="craf2_boardtypename" />
+          <order attribute="craf2_boardtypename" descending="false" />
+          <filter type="and">
+            <condition attribute="statecode" operator="eq" value="0" />
+          </filter>
+          <attribute name="craf2_boardtypeid" />
+          <attribute name="craf2_boardtypeshortname" />
+          <attribute name="craf2_boardtypedescription" />
+          <attribute name="createdby" />
+          <attribute name="craf2_isdisplayinapp" />
+          <attribute name="craf2_bt_displayorder" />
+          <attribute name="craf2_coordinator" />
+          <attribute name="createdon" />
+          <attribute name="modifiedby" />
+          <attribute name="modifiedon" />
+        </entity>
+      </fetch>
+    </fetchxml>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <LocalizedNames>
+      <LocalizedName description="Active ReviewHub_BoardTypes" languagecode="1033" />
+    </LocalizedNames>
+  </savedquery>
+</savedqueries>

@@ -1,0 +1,1885 @@
+scn_Admin_NewMetricBoard As screen:
+    OnHidden: |+
+        =
+        
+    OnVisible: |+
+        =Concurrent(
+            NewForm(Form_NewMetricsBoard),
+            Select(btn_GetReviewLockDate_NM),
+            ClearCollect(
+                MetricBoardScreenLogs,
+                Table(
+                    {
+                        MessageId: 0,
+                        message: "(Logs will display here)",
+                        timestamp: Now()
+                    }
+                )
+            ),
+            ClearCollect(
+                clln_NR_ReviewMonth,
+                AddColumns(
+                    Sequence(12),
+                    "DisplayValue", ThisRecord.Value & " - " & Text(Date(2022, ThisRecord.Value, 1), "mmmm")
+                )
+            )
+        );
+        
+
+    ctn_Main_NM As groupContainer.horizontalAutoLayoutContainer:
+        Height: =App.Height - Self.Y - 10
+        LayoutGap: =10
+        LayoutMode: =LayoutMode.Auto
+        Width: =App.Width - Self.X * 2
+        X: =SS_AppHeader_NM.X+ 15
+        Y: |-
+            =If(
+                IsEmpty(
+                    Filter(
+                        clln_factMetricBoard, 
+                        ThisRecord.fmb_MetricBoardTypeID = DataCardValueBoardType.Selected.BoardTypeID 
+                            && ThisRecord.fmb_ProductID = DataCardValueProduct.Selected.craf2_productid
+                            && fmb_ReviewMonth = LookUp(
+                clln_NR_ReviewMonth,
+                ThisRecord.DisplayValue = DataCardValueReviewMonth.Selected.DisplayValue).Value
+                            && fmb_ReviewYear = DataCardValueReviewYear.Selected.Value
+                    )
+                ),
+                lbl_ScreenTitle_NM.Y + lbl_ScreenTitle_NM.Height + 5,
+                lbl_SubHeader_NM.Y + lbl_SubHeader_NM.Height + 5
+            )
+        ZIndex: =1
+
+        ctn_Left_NM As groupContainer.manualLayoutContainer:
+            AlignInContainer: =AlignInContainer.SetByContainer
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            Height: =Parent.Height//910
+            LayoutMinHeight: =100
+            LayoutMinWidth: =250
+            X: =60
+            Y: =60
+            ZIndex: =1
+
+            GalleryLogs As gallery.variableTemplateHeightGallery:
+                BorderColor: =SUBGROUPCOLOR
+                BorderThickness: =2
+                Height: =Parent.Height - Self.Y - 20 //Min(Parent.Height - Self.Y, 240) - 2
+                Items: |-
+                    =Sort(
+                        Ungroup( //Ungroup function to add a Row Number column.
+                            ForAll(
+                                Sequence(CountRows(MetricBoardScreenLogs)),
+                                {
+                                    Record: Table(Last(FirstN(MetricBoardScreenLogs, Value))),
+                                    RowNumber: Value
+                                }
+                            ),
+                            "Record"
+                        ),timestamp)
+                Layout: =Layout.Vertical
+                TemplateFill: =If(Mod(ThisItem.RowNumber, 2) = 0, GrayCanvasBackground, RGBA(0, 0, 0, 0))
+                TemplatePadding: =1
+                TemplateSize: =35
+                Width: =Parent.Width - 2
+                X: =1
+                Y: =lbl_ActivityLogs_NM.Y + lbl_ActivityLogs_NM.Height - 1
+                ZIndex: =1
+
+                Label_NR_LogMsg As htmlViewer:
+                    AutoHeight: =true
+                    BorderColor: =RGBA(0, 0, 0, 0)
+                    Fill: =RGBA(0, 0, 0, 0)
+                    Font: =FontStyle
+                    Height: =35
+                    HtmlText: |-
+                        =Text(ThisItem.timestamp, "[$-en-US]H:mm AM/PM") & ": " & ThisItem.message
+                    OnSelect: =Select(Parent)
+                    PaddingLeft: =15
+                    Size: =10
+                    Width: =Parent.Width
+                    ZIndex: =1
+
+            lbl_ActivityLogs_NM As button:
+                Align: =Align.Left
+                BorderColor: =Self.Fill
+                BorderStyle: =BorderStyle.None
+                BorderThickness: =0
+                Color: =RGBA(0, 0, 0, 1)
+                DisabledBorderColor: =Self.BorderColor
+                DisabledColor: =Self.Color
+                DisabledFill: =Self.Fill
+                DisplayMode: =DisplayMode.Disabled
+                Fill: =ColorFade(BlueNaviHightLightBackground, 50%)
+                Font: =FontStyle
+                FontWeight: =FontWeight.Bold
+                Height: =30
+                PaddingLeft: =15
+                RadiusBottomLeft: |
+                    =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =20
+                RadiusTopRight: =20
+                Size: =11
+                Text: ="Activity Logs"
+                Width: =Parent.Width
+                Y: =Back_Steps_NM.Y + Back_Steps_NM.Height + 15
+                ZIndex: =3
+
+            Back_Steps_NM As label:
+                BorderColor: =lbl_Step1_NM.Fill
+                BorderThickness: =2
+                DisabledBorderColor: =Self.BorderColor
+                DisabledColor: =RGBA(0, 0, 0, 0)
+                DisplayMode: =DisplayMode.Disabled
+                Height: =Btn_CreateBoard_NM.Y + Btn_CreateBoard_NM.Height + 10
+                Text: =""
+                Width: =lbl_Step1_NM.Width - 2
+                X: =1
+                ZIndex: =4
+
+            btn_GetDataReady_NM As button:
+                OnSelect: |+
+                    =Concurrent(
+                        ClearCollect(
+                            clln_Table_NR_MetricTypes,
+                            Sort(
+                                Filter(
+                                    clln_MetricTypeDetail, 
+                                    mtd_BoardTypeID=DataCardValueBoardType.Selected.BoardTypeID 
+                                        && mtd_TemplateID = DataCardValueTemplate.Selected.TemplateID
+                                        && mtd_MetricCreatedDate <= varNRSelectedReviewDate
+                                        && (
+                                            mtd_MetricDeprecatedDate >= varNRSelectedReviewDate
+                                            || IsBlankOrError(mtd_MetricDeprecatedDate)
+                                        )
+                                ),
+                                mtd_MetricTypeName
+                            )
+                        ),
+                    
+                        ClearCollect(
+                            clln_Table_NR_MetricsExisted,
+                            Sort(
+                                Filter(
+                                    AddColumns(
+                                    AddColumns(
+                                        RenameColumns(
+                                        ShowColumns(
+                                        Filter(
+                                            ReviewHub_ProductMetrics, 
+                                            ThisRecord.pm_ProductID = DataCardValueProduct.Selected.craf2_productid 
+                                                && !IsBlankOrError(DataCardValueProduct.Selected.craf2_productid)
+                                                && ThisRecord.pm_MetricTypeID in Filter(clln_MetricTypeDetail, ThisRecord.mtd_BoardTypeID = DataCardValueBoardType.Selected.BoardTypeID).mtd_MetricTypeId
+                                        ), 
+                                        "craf2_productmetricid",
+                                        "chub_pm_metrictypeid"
+                                        ),
+                                        "craf2_productmetricid",
+                                        "pm_ID",
+                                        "chub_pm_metrictypeid",
+                                        "pm_MetricTypeID"
+                                        ),
+                                        "MetricTypeDetailRec",
+                                        LookUp(clln_MetricTypeDetail, ThisRecord.mtd_MetricTypeId = pm_MetricTypeID)
+                                    ),
+                                    "BoardTypeID", MetricTypeDetailRec.mtd_BoardTypeID,
+                                    "DisplayOrder", MetricTypeDetailRec.mtd_MetricDisplayOrder,
+                                    "pm_MetricTypeName", MetricTypeDetailRec.mtd_MetricTypeName,
+                                    "DeprecatedDate", MetricTypeDetailRec.mtd_MetricDeprecatedDate
+                                    ),
+                                    ThisRecord.DeprecatedDate >= varNRSelectedReviewDate || IsBlankOrError(ThisRecord.DeprecatedDate)
+                                ),
+                                pm_MetricTypeName,
+                                SortOrder.Ascending
+                            )
+                        ),
+                        
+                        Clear(clln_Table_NR_MetricsToAdd)
+                    );
+                    
+                    ForAll(
+                        clln_Table_NR_MetricTypes,
+                        If(
+                            IsBlankOrError( 
+                                LookUp(clln_Table_NR_MetricsExisted, ThisRecord.pm_MetricTypeID = clln_Table_NR_MetricTypes[@mtd_MetricTypeId]) 
+                            ),
+                            Collect(
+                                clln_Table_NR_MetricsToAdd,
+                                {
+                                    ProductID: DataCardValueProduct.Selected.craf2_productid,
+                                    ProductName: DataCardValueProduct.Selected.craf2_productname,
+                                    MetricTypeID: mtd_MetricTypeId,
+                                    MetricTypeName: mtd_MetricTypeName,
+                                    IsMetricActive: true,
+                                    MetricValueType: mtd_MetricValueType
+                                }
+                            )
+                        )
+                    );
+                    
+                Text: ="Hidden Button - Get Data Ready for tables here"
+                Visible: =false
+                Width: =Parent.Width
+                Y: =240
+                ZIndex: =5
+
+            btn_GetReviewLockDate_NM As button:
+                OnSelect: |-
+                    =Set(
+                        varNRSelectedReviewDate,//Review Lock Date is the Month End date of selected Review Month & Year.
+                        DateAdd(
+                            DateAdd(
+                                Date(
+                                    DataCardValueReviewYear.Selected.Value,
+                                    LookUp(
+                        clln_NR_ReviewMonth,
+                        ThisRecord.DisplayValue = DataCardValueReviewMonth.Selected.DisplayValue).Value,
+                                    1
+                                ),
+                                1,
+                                TimeUnit.Months
+                            ),
+                            -1,
+                            TimeUnit.Days
+                        )
+                    )
+                Size: =10
+                Text: ="Hidden Button - Get Review Lock Date based on Reivew Month and Year Selection"
+                Visible: =false
+                Width: =Parent.Width
+                Y: =240
+                ZIndex: =6
+
+            Btn_CreateBoard_NM As button:
+                BorderColor: =Self.Fill
+                DisplayMode: |-
+                    =If(
+                        Max(MetricBoardScreenLogs, MessageId) = 2,
+                        If(Toggle_Btn_CreateMetrics_Check, DisplayMode.Edit, Btn_CreateMetrics_NM.DisplayMode),
+                        DisplayMode.Disabled
+                    )  
+                    //Btn_CreateMetrics.DisplayMode
+                Fill: =BlueControlDarkBackground
+                Font: =FontStyle
+                Height: =30
+                HoverBorderColor: =Self.Fill
+                HoverColor: =Self.Fill
+                HoverFill: =Self.Color
+                OnSelect: |
+                    =Set(
+                        Toggle_Btn_CreateBoard_Loading,
+                        true
+                    );
+                    Concurrent(
+                        Set(
+                            varNRSelectedProductName,
+                            DataCardValueProduct.Selected.craf2_productname
+                        ),
+                        Collect(
+                            MetricBoardScreenLogs,
+                            {
+                                MessageId: 3,
+                                message: "Creating records in [FactMetrics] table...",
+                                timestamp: Now()
+                            }
+                        ),
+                    
+                        ClearCollect(
+                            MaxFm_ID,{ id:        Max(
+                                ReviewHub_FactMetrics,
+                                FactMetricID
+                            ) }
+                        );
+                    );
+                    //Initial data insert to [FactMetrics] for this Review Cycle and this Product.
+                    Clear(clln_factMetrics_NewRecords);
+                    ForAll(
+                        Filter(
+                            clln_ProductMetrics_NewRecords,
+                            ThisRecord.pm_ProductID = DataCardValueProduct.Selected.craf2_productid && ThisRecord.pm_MetricTypeID in clln_Table_NR_MetricTypes.mtd_MetricTypeId
+                        ),
+                        Collect(MaxFm_ID, {id : Last(MaxFm_ID).id + 1});
+                        If(
+                            (pm_ProductID in clln_LoadedBoardTypes.ProductID && DataCardValueBoardType.Selected.BoardTypeID in clln_LoadedBoardTypes.BoardTypeID && varNRSelectedReviewDate in clln_LoadedBoardTypes.ReviewLockDate),
+                            Collect(
+                                clln_factMetrics,//For the cache, so user don't need to refresh the app.
+                                {
+                                    fm_Title: "Initial-" & DataCardValueBoardType.Selected.BoardTypeID & "-" & DataCardValueProduct.Selected.craf2_productid & Text(
+                                        varNRSelectedReviewDate,
+                                        "-mmddyyyy"
+                                    ),
+                                    fm_ID: Last(MaxFm_ID).id + 1,
+                                    fm_ProductMetricID: ThisRecord.pm_ID,
+                                    fm_ProductID: ThisRecord.pm_ProductID,
+                                    fm_TargetNumber: ThisRecord.pm_LatestTargetNumber,
+                                    fm_TargetYesNo: ThisRecord.pm_LatestTargetYesNo,
+                                    fm_TargetText: ThisRecord.pm_LatestTargetText,
+                                    fm_GreenTargetStart: ThisRecord.pm_LatestGreenTargetStart,
+                                    fm_YellowTargetStart: ThisRecord.pm_LatestYellowTargetStart,
+                                    fm_ValueDate: Date(
+                                        Year(varNRSelectedReviewDate),
+                                        Month(varNRSelectedReviewDate),
+                                        1
+                                    ),
+                                    fm_ValueMonth: Month(varNRSelectedReviewDate),
+                                    fm_ValueYear: Year(varNRSelectedReviewDate),
+                                    fm_IsNotApplicable: 'fm_IsNotApplicable (ReviewHub_FactMetrics)'.'0',
+                                    fm_ReviewLockDate: varNRSelectedReviewDate,
+                                    fm_BoardTypeID: DataCardValueBoardType.Selected.BoardTypeID
+                                }
+                            )
+                        );
+                        Collect(
+                            clln_factMetrics_NewRecords,//For the following Patch function to update Dataverse table.
+                            {
+                                fm_Title: "Initial-" & DataCardValueBoardType.Selected.BoardTypeID & "-" & DataCardValueProduct.Selected.craf2_productid & Text(
+                                    varNRSelectedReviewDate,
+                                    "-mmddyyyy"
+                                ),
+                                fm_ID: Last(MaxFm_ID).id + 1,
+                                fm_ProductMetricID: ThisRecord.pm_ID,
+                                fm_ProductID: ThisRecord.pm_ProductID,
+                                fm_TargetNumber: ThisRecord.pm_LatestTargetNumber,
+                                fm_TargetYesNo: ThisRecord.pm_LatestTargetYesNo,
+                                fm_TargetText: ThisRecord.pm_LatestTargetText,
+                                fm_GreenTargetStart: ThisRecord.pm_LatestGreenTargetStart,
+                                fm_YellowTargetStart: ThisRecord.pm_LatestYellowTargetStart,
+                                fm_ValueDate: Date(
+                                    Year(varNRSelectedReviewDate),
+                                    Month(varNRSelectedReviewDate),
+                                    1
+                                ),
+                                fm_ValueMonth: Month(varNRSelectedReviewDate),
+                                fm_ValueYear: Year(varNRSelectedReviewDate),
+                                fm_IsNotApplicable: 'fm_IsNotApplicable (ReviewHub_FactMetrics)'.'0',
+                                fm_ReviewLockDate: varNRSelectedReviewDate,
+                                fm_BoardTypeID: DataCardValueBoardType.Selected.BoardTypeID
+                            }
+                        )
+                    );
+                    ForAll(
+                        clln_factMetrics_NewRecords,
+                        Patch(
+                            ReviewHub_FactMetrics,
+                            Defaults(ReviewHub_FactMetrics),
+                            {
+                                craf2_factmetrictitle: ThisRecord.fm_Title,
+                                craf2_factmetricid: ThisRecord.fm_ID,
+                                craf2_fm_ProductMetric: LookUp(
+                                    ReviewHub_ProductMetrics,
+                                    ThisRecord.craf2_productmetricid = fm_ProductMetricID
+                                ),
+                                chub_fm_boardtypeid: ThisRecord.fm_BoardTypeID,
+                                craf2_fm_productid: ThisRecord.fm_ProductID,
+                                craf2_fm_valuedate: ThisRecord.fm_ValueDate,
+                                craf2_fm_reviewlockdate: ThisRecord.fm_ReviewLockDate,
+                                craf2_fm_targetnumber: ThisRecord.fm_TargetNumber,
+                                craf2_fm_targettext: ThisRecord.fm_TargetText,
+                                craf2_fm_targetyesno: ThisRecord.fm_TargetYesNo,
+                                craf2_fm_yellowtargetstart: ThisRecord.fm_YellowTargetStart,
+                                craf2_fm_greentargetstart: ThisRecord.fm_GreenTargetStart
+                            }
+                        );
+                        
+                    );
+                    Concurrent(
+                        Set(
+                            Toggle_Btn_CreateBoard_Loading,
+                            false
+                        ),
+                        Set(
+                            Toggle_Btn_CreateBoard_Check,
+                            true
+                        ),
+                        Collect(
+                            MetricBoardScreenLogs,
+                            {
+                                MessageId: 4,
+                                message: "Created <b>" & CountRows(
+                                    Filter(
+                                        clln_ProductMetrics_NewRecords,
+                                        ThisRecord.pm_ProductID = DataCardValueProduct.Selected.craf2_productid && ThisRecord.pm_MetricTypeID in clln_Table_NR_MetricTypes.mtd_MetricTypeId
+                                    )
+                                ) & "</b> [FactMetrics] records.",
+                                timestamp: Now()
+                            }
+                        ),
+                        Remove(
+                            varLeftNavOptions,
+                            LookUp(
+                                varLeftNavOptions,
+                                ThisRecord.PID = DataCardValueProduct.Selected.craf2_productid
+                            )
+                        ),
+                        ClearCollect(
+                            Loader_FactMetrics,//Loading prequisite collection for [clln_factMetrics].
+                            AddColumns(
+                                Sequence(
+                                    RoundUp(
+                                        Max(
+                                            ReviewHub_FactMetrics,
+                                            craf2_factmetricid
+                                        ) / 2000.0,
+                                        0
+                                    )
+                                ),
+                                "Loader_Min",
+                                (Value - 1) * 2000,
+                                "Loader_Max",
+                                Value * 2000
+                            )
+                        )
+                    );
+                    //SubmitForm(EditMetricsBoardForm);
+                    Patch(
+                        ReviewHub_FactMetricBoards,
+                        Defaults(ReviewHub_FactMetricBoards),
+                        {
+                            craf2_factmetricboardid: Max(
+                                ReviewHub_FactMetricBoards,
+                                craf2_factmetricboardid
+                            ) + 1,
+                            craf2_fmb_BoardType: LookUp(
+                                ReviewHub_BoardTypes,
+                                ThisRecord.craf2_boardtypeid = DataCardValueBoardType.Selected.BoardTypeID
+                            ),
+                            craf2_fmb_Product: LookUp(
+                                ReviewHub_Products,
+                                ThisRecord.craf2_productid = DataCardValueProduct.Selected.craf2_productid
+                            ),
+                            craf2_fmb_reviewlockdate: varNRSelectedReviewDate,
+                            craf2_fmb_reviewownername: DataCardValueReviewOwner.Selected.DisplayName,
+                            craf2_fmb_reviewownerprincipal: Trim(DataCardValueReviewOwner.Selected.UserPrincipalName),
+                            //Substitute(DataCardValueReviewOwner.Selected.Claims, "i:0#.f|membership|", ""),
+                    craf2_fmb_Template: LookUp(
+                                ReviewHub_MetricTemplates,
+                                ThisRecord.craf2_templateid = DataCardValueTemplate.Selected.TemplateID
+                            )
+                        }
+                    );
+                    Collect(
+                        MetricBoardScreenLogs,
+                        {
+                            MessageId: 5,
+                            message: "Generated scorecard for product (<b>" & varNRSelectedProductName & "</b>) and review date (<b>" & Text(
+                                varNRSelectedReviewDate,
+                                "m/d/yyyy"
+                            ) & "</b>)!",
+                            timestamp: Now()
+                        },
+                        {
+                            MessageId: 6,
+                            message: "<font color='ForestGreen'><b>Completed creating new scorecard!</b></font><br>",
+                            timestamp: Now()
+                        }
+                    );
+                    ResetForm(Form_NewMetricsBoard);
+                    NewForm(Form_NewMetricsBoard);
+                    Concurrent(
+                        Clear(clln_Table_NR_MetricsExisted),
+                        ClearCollect(
+                            clln_factMetricBoard,
+                            RenameColumns(
+                                ShowColumns(
+                                    AddColumns(
+                                        AddColumns(
+                                            ReviewHub_FactMetricBoards,
+                                            "fmb_MetricBoardTypeID",
+                                            craf2_fmb_BoardType.craf2_boardtypeid,
+                                            "fmb_MetricBoardTypeValue",
+                                            craf2_fmb_BoardType.craf2_boardtypename,
+                                            "fmb_ProductArray",
+                                            craf2_fmb_Product,
+                                            "fmb_ProductID",
+                                            craf2_fmb_Product.craf2_productid,
+                                            "fmb_ProductName",
+                                            craf2_fmb_Product.craf2_productname,
+                                            "fmb_ReviewMonth",
+                                            Month(craf2_fmb_reviewlockdate),
+                                            "fmb_ReviewYear",
+                                            Year(craf2_fmb_reviewlockdate),
+                                            "fmb_ReviewOwnerClaims",
+                                            craf2_fmb_reviewownerprincipal,
+                                            "fmb_TemplateID",
+                                            craf2_fmb_Template.craf2_templateid,
+                                            "fmb_TemplateName",
+                                            craf2_fmb_Template.craf2_templatename,
+                                            "DateValue_ReviewLockDate",
+                                            DateValue(
+                                                Text(
+                                                    craf2_fmb_reviewlockdate,
+                                                    DateTimeFormat.ShortDate
+                                                )
+                                            ),
+                                            "fmb_BoardHealth",
+                                            LookUp(
+                                                clln_MetricBoardHealth,
+                                                (IsBlankOrError(craf2_fmb_healthscore) && MinScore <= -999) || (!IsBlankOrError(craf2_fmb_healthscore) && (craf2_fmb_healthscore >= MinScore && craf2_fmb_healthscore < MaxScore))
+                                            )
+                                        ),
+                                        "fmb_BoardHealthRating",
+                                        fmb_BoardHealth.Rating,
+                                        "fmb_BoardHealthImage",
+                                        fmb_BoardHealth.Image,
+                                        "fmb_BoardHealthDisplayOrder",
+                                        fmb_BoardHealth.DisplayOrder
+                                    ),
+                                    "craf2_factmetricboardid",
+                                    "fmb_MetricBoardTypeID",
+                                    "fmb_MetricBoardTypeValue",
+                                    "fmb_ProductArray",
+                                    "fmb_ProductID",
+                                    "fmb_ProductName",
+                                    "DateValue_ReviewLockDate",
+                                    "fmb_ReviewMonth",
+                                    "fmb_ReviewYear",
+                                    "craf2_fmb_reviewownername",
+                                    "fmb_ReviewOwnerClaims",
+                                    "craf2_fmb_healthscore",
+                                    "fmb_BoardHealthRating",
+                                    "fmb_BoardHealthImage",
+                                    "fmb_BoardHealthDisplayOrder",
+                                    "fmb_TemplateID",
+                                    "fmb_TemplateName"
+                                ),
+                                "craf2_factmetricboardid",
+                                "fmb_ID",
+                                "DateValue_ReviewLockDate",
+                                "fmb_ReviewLockDate",
+                                "craf2_fmb_reviewownername",
+                                "fmb_ReviewOwnerName",
+                                "craf2_fmb_healthscore",
+                                "fmb_HealthScore"
+                            )
+                        )
+                    );
+                    Concurrent(
+                        Set(
+                            Toggle_Btn_CreateMetrics_Check,
+                            false
+                        ),
+                        Set(
+                            Toggle_Btn_CreateBoard_Check,
+                            false
+                        ),
+                        Set(
+                            IsFmbEditedByAdmin,
+                            true
+                        )//To let home screen know if the collection needs to refresh over there. 
+                       // Clear(clln_ProductMetrics_BS),
+                     //   Clear(clln_factMetrics_BS)
+                    );
+                    //Navigate(HomeScreen);
+                RadiusBottomLeft: =40
+                RadiusBottomRight: =40
+                RadiusTopLeft: =40
+                RadiusTopRight: =40
+                Size: =Btn_CreateMetrics_NM.Size
+                Text: ="Create Scorecard"
+                Width: =Btn_CreateMetrics_NM.Width
+                X: =Btn_CreateMetrics_NM.X
+                Y: =lbl_Step3_NM.Y + lbl_Step3_NM.Height + 10
+                ZIndex: =7
+
+            Btn_CreateMetrics_NM As button:
+                BorderColor: =Self.Fill
+                DisplayMode: |-
+                    =If(
+                        IsBlankOrError(DataCardValueReviewMonth.Selected.DisplayValue) 
+                            || IsBlankOrError(DataCardValueReviewYear.Selected.Value) 
+                            || IsBlankOrError(DataCardValueReviewOwner.Selected.DisplayName)
+                            || IsBlankOrError(DataCardValueBoardType.Selected.BoardTypeID) 
+                            || IsBlankOrError(DataCardValueProduct.Selected.craf2_productid)
+                            || IsEmpty(clln_Table_NR_MetricTypes)
+                            || lbl_SubHeader_NM.Visible
+                            || Toggle_Btn_CreateMetrics_Check=true,
+                        DisplayMode.Disabled,
+                        DisplayMode.Edit
+                    )
+                Fill: =BlueControlDarkBackground
+                Font: =FontStyle
+                Height: =30
+                HoverBorderColor: =Self.BorderColor
+                HoverColor: =Self.Fill
+                HoverFill: =Self.Color
+                OnSelect: |
+                    =Concurrent(
+                        Set(
+                            Toggle_Btn_CreateMetrics_Loading,
+                            true
+                        ),
+                        ClearCollect(
+                            MetricBoardScreenLogs,
+                            {
+                                MessageId: 1,
+                                message: "Checking if new metrics need to add for this cycle<b>...</b>",
+                                timestamp: Now()
+                            }
+                        ),
+                        ClearCollect(
+                            MaxPm_ID,{ id:        Max(
+                                ReviewHub_ProductMetrics,
+                                ProductMetricID
+                            ) }
+                        );
+                        Set(
+                            Count_clln_Table_NR_MetricsToAdd,
+                            CountRows(clln_Table_NR_MetricsToAdd)
+                        )
+                    );
+                    //If Metrics for this Product don't exist in the [Metric] list, then add them to the [Metric] list. 
+                    //If Metrics for this Product exist in the [Metric] list, then do nothing. 
+                    Clear(clln_ProductMetrics_NewRecords);
+                    ForAll(
+                        clln_Table_NR_MetricsToAdd,
+                        Collect(MaxPm_ID, {id : Last(MaxPm_ID).id + 1});
+                        If(
+                            (ProductID in clln_LoadedBoardTypes.ProductID && DataCardValueBoardType.Selected.BoardTypeID in clln_LoadedBoardTypes.BoardTypeID),
+                            Collect(
+                                clln_ProductMetrics,
+                                {
+                                    pm_ID: Last(MaxPm_ID).id + 1,
+                                    pm_BoardTypeID: DataCardValueBoardType.Selected.BoardTypeID,
+                                    pm_ProductID: ThisRecord.ProductID,
+                                    pm_ProductName: ThisRecord.ProductName,
+                                    pm_MetricTypeID: ThisRecord.MetricTypeID,
+                                    pm_MetricTypeName: ThisRecord.MetricTypeName,
+                                    pm_IsMetricActive: true,
+                                    pm_MetricValueType: ThisRecord.MetricValueType
+                                }
+                            )
+                        );
+                        Collect(
+                            clln_ProductMetrics_NewRecords,
+                            {
+                                pm_ID: Last(MaxPm_ID).id + 1,
+                                pm_BoardTypeID: DataCardValueBoardType.Selected.BoardTypeID,
+                                pm_ProductID: ThisRecord.ProductID,
+                                pm_ProductName: ThisRecord.ProductName,
+                                pm_MetricTypeID: ThisRecord.MetricTypeID,
+                                pm_MetricTypeName: ThisRecord.MetricTypeName,
+                                pm_IsMetricActive: true,
+                                pm_MetricValueType: ThisRecord.MetricValueType,
+                                pm_LatestTargetNumber: Blank(),
+                                pm_LatestTargetYesNo: Blank(),
+                                pm_LatestTargetText: Blank(),
+                                pm_LatestGreenTargetStart: Blank(),
+                                pm_LatestYellowTargetStart: Blank()
+                            }
+                        )
+                    );
+                    If(
+                        CountRows(clln_Table_NR_MetricsToAdd) <> 0,
+                        ForAll(
+                            clln_ProductMetrics_NewRecords,//Push above new records from collection to Dataverse.
+                            Patch(
+                                ReviewHub_ProductMetrics,
+                                Defaults(ReviewHub_ProductMetrics),
+                                {
+                                    craf2_productmetrictitle: DataCardValueProduct.Selected.craf2_productname & ": " & ThisRecord.pm_MetricTypeName,
+                                    craf2_productmetricid: ThisRecord.pm_ID,
+                                    craf2_pm_boardtypeid: ThisRecord.pm_BoardTypeID,
+                                    craf2_pm_Product: DataCardValueProduct.Selected,
+                                    craf2_pm_MetricType: LookUp(
+                                        ReviewHub_MetricTypes,
+                                        ThisRecord.craf2_metrictypeid = pm_MetricTypeID
+                                    ),
+                                    craf2_pm_ismetricactive: true
+                                }
+                            )
+                        )
+                    );
+                    If(
+                        Count_clln_Table_NR_MetricsToAdd = 0,
+                        Collect(
+                            MetricBoardScreenLogs,
+                            {
+                                MessageId: 2,
+                                message: "<font color='ForestGreen'><b>All related metrics already existed.</b></font> Please proceed to <b>Step 3</b>.",
+                                timestamp: Now()
+                            }
+                        ),
+                        Collect(
+                            MetricBoardScreenLogs,
+                            {
+                                MessageId: 2,
+                                message: "Added <b>" & Count_clln_Table_NR_MetricsToAdd & "</b> related metric(s). Please proceed to <b>Step 3</b>.",
+                                timestamp: Now()
+                            }
+                        )
+                    );
+                    Set(
+                        Toggle_Btn_CreateMetrics_Loading,
+                        false
+                    );
+                    Set(
+                        Toggle_Btn_CreateMetrics_Check,
+                        true
+                    );
+                    Select(btn_GetDataReady_NM);
+                RadiusBottomLeft: =40
+                RadiusBottomRight: =40
+                RadiusTopLeft: =40
+                RadiusTopRight: =40
+                Size: =11
+                Text: ="Create Related Metrics "
+                Width: =180
+                X: =30
+                Y: =lbl_Step2_NM.Y + lbl_Step2_NM.Height + 10
+                ZIndex: =8
+
+            Btn_CreateMetrics_Check As icon.CheckBadge:
+                Color: =RGBA(127, 178, 57, 1)
+                DisplayMode: =DisplayMode.View
+                FocusedBorderThickness: =10
+                Height: =Btn_CreateMetrics_NM.Height
+                Icon: =Icon.CheckBadge
+                PaddingBottom: =3
+                PaddingTop: =3
+                Visible: =Toggle_Btn_CreateMetrics_Check
+                Width: =Btn_CreateMetrics_NM.Height
+                X: =Btn_CreateMetrics_NM.X + Btn_CreateMetrics_NM.Width + 10
+                Y: =Btn_CreateMetrics_NM.Y
+                ZIndex: =9
+
+            Btn_CreateBoard_Check As icon.CheckBadge:
+                Color: =RGBA(127, 178, 57, 1)
+                DisplayMode: =DisplayMode.View
+                FocusedBorderThickness: =10
+                Height: =Btn_CreateBoard_NM.Height
+                Icon: =Icon.CheckBadge
+                PaddingBottom: =3
+                PaddingTop: =3
+                Visible: =Toggle_Btn_CreateBoard_Check
+                Width: =Btn_CreateBoard_NM.Height
+                X: =Btn_CreateBoard_NM.X + Btn_CreateBoard_NM.Width + 10
+                Y: =Btn_CreateBoard_NM.Y
+                ZIndex: =10
+
+            Btn_CreateMetrics_Loading As image:
+                Height: =Btn_CreateMetrics_Check.Height
+                Image: =img_loading
+                Visible: =Toggle_Btn_CreateMetrics_Loading
+                Width: =Btn_CreateMetrics_Check.Width
+                X: =Btn_CreateMetrics_Check.X
+                Y: =Btn_CreateMetrics_Check.Y
+                ZIndex: =11
+
+            Btn_CreateBoard_Loading As image:
+                Height: =Btn_CreateBoard_Check.Height
+                Image: =img_loading
+                Visible: =Toggle_Btn_CreateBoard_Loading
+                Width: =Btn_CreateBoard_Check.Width
+                X: =Btn_CreateBoard_Check.X
+                Y: =Btn_CreateBoard_Check.Y
+                ZIndex: =12
+
+            lbl_Step3_NM As label:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Fill: =lbl_Step1_NM.Fill
+                Font: =FontStyle
+                FontWeight: =FontWeight.Bold
+                Height: =lbl_Step1_NM.Height
+                PaddingLeft: =lbl_Step1_NM.PaddingLeft
+                Size: =11
+                Text: ="Step 3"
+                Width: =ctn_NewMetricsBoard.Width
+                X: =ctn_NewMetricsBoard.X
+                Y: =Btn_CreateMetrics_NM.Y + Btn_CreateMetrics_NM.Height + 10
+                ZIndex: =13
+
+            lbl_Step2_NM As label:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Fill: =lbl_Step1_NM.Fill
+                Font: =FontStyle
+                FontWeight: =FontWeight.Bold
+                Height: =lbl_Step1_NM.Height
+                PaddingLeft: =lbl_Step1_NM.PaddingLeft
+                Size: =11
+                Text: ="Step 2"
+                Width: =ctn_NewMetricsBoard.Width
+                X: =ctn_NewMetricsBoard.X
+                Y: =ctn_NewMetricsBoard.Y + ctn_NewMetricsBoard.Height
+                ZIndex: =14
+
+            ctn_NewMetricsBoard As groupContainer.manualLayoutContainer:
+                BorderColor: =
+                BorderStyle: =BorderStyle.None
+                Height: =Form_NewMetricsBoard.Height + 10
+                Width: =lbl_Step1_NM.Width - 2
+                X: =1
+                Y: =lbl_Step1_NM.Y + lbl_Step1_NM.Height
+                ZIndex: =15
+
+                Form_NewMetricsBoard As form:
+                    AcceptsFocus: =false
+                    BorderColor: =GrayBorderLight
+                    DataSource: =ReviewHub_FactMetricBoards
+                    Height: =NM_ReviewMonth.Y + NM_ReviewMonth.Height
+                    NumberOfColumns: =1
+                    Width: =Parent.Width
+                    ZIndex: =1
+
+                    NM_MetricTemplate As typedDataCard.comboBoxEditCard:
+                        BorderColor: =GrayBorderLight
+                        BorderStyle: =BorderStyle.None
+                        DataField: ="craf2_fmb_template"
+                        Default: |-
+                            ={
+                                TemplateID:
+                            First(
+                                Sort(
+                                    Filter(
+                                        clln_factMetricBoard,
+                                        ThisRecord.fmb_MetricBoardTypeID = DataCardValueBoardType.Selected.BoardTypeID
+                                            && ThisRecord.fmb_ProductID = DataCardValueProduct.Selected.craf2_productid
+                                    ),
+                                    fmb_ReviewLockDate,
+                                    SortOrder.Descending
+                                )
+                            ).fmb_TemplateID,
+                            
+                                TemplateName:
+                                First(
+                                Sort(
+                                    Filter(
+                                        clln_factMetricBoard,
+                                        ThisRecord.fmb_MetricBoardTypeID = DataCardValueBoardType.Selected.BoardTypeID
+                                            && ThisRecord.fmb_ProductID = DataCardValueProduct.Selected.craf2_productid
+                                    ),
+                                    fmb_ReviewLockDate,
+                                    SortOrder.Descending
+                                )
+                            ).fmb_TemplateName
+                            }
+                        DisplayMode: =Parent.DisplayMode
+                        DisplayName: ="Template"
+                        Fill: =RGBA(0, 0, 0, 0)
+                        Height: =50
+                        Required: =true
+                        Update: =
+                        Width: =Parent.Width
+                        X: =0
+                        Y: =2
+                        ZIndex: =1
+
+                        Card_NR_Template As label:
+                            AutoHeight: =true
+                            Color: =RGBA(0, 0, 0, 1)
+                            Font: =FontStyle
+                            FontWeight: =FontWeight.Semibold
+                            Height: =34
+                            Size: =10
+                            Text: ="Metric Template"
+                            Width: =Parent.Width - 60
+                            Wrap: =false
+                            X: =30
+                            ZIndex: =1
+
+                        ErrorMessage4 As label:
+                            AutoHeight: =true
+                            Height: =10
+                            Live: =Live.Assertive
+                            PaddingBottom: =0
+                            PaddingLeft: =0
+                            PaddingRight: =0
+                            PaddingTop: =0
+                            Text: =Parent.Error
+                            Visible: =Parent.DisplayMode=DisplayMode.Edit
+                            Width: =Parent.Width - 60
+                            X: =30
+                            Y: =DataCardValueTemplate.Y + DataCardValueTemplate.Height
+                            ZIndex: =3
+
+                        StarVisible5 As label:
+                            Align: =Align.Center
+                            Color: =RGBA(246, 88, 16, 1)
+                            Font: =FontStyle
+                            Height: =Card_NR_Template.Height
+                            Text: ="*"
+                            Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                            Width: =30
+                            Wrap: =false
+                            X: =125
+                            Y: =Card_NR_Template.Y
+                            ZIndex: =4
+
+                        DataCardValueTemplate As dropdown:
+                            BorderColor: =GRAYCOLOR
+                            BorderThickness: =1
+                            ChevronBackground: =DataCardValueBoardType.ChevronBackground
+                            ChevronFill: =DataCardValueBoardType.ChevronFill
+                            ChevronHoverBackground: =DataCardValueBoardType.ChevronHoverBackground
+                            ChevronHoverFill: =DataCardValueBoardType.ChevronHoverFill
+                            Default: |-
+                                ={
+                                    TemplateID: First(
+                                        Sort(
+                                            Filter(
+                                                clln_factMetricBoard,
+                                                ThisRecord.fmb_MetricBoardTypeID = DataCardValueBoardType.Selected.BoardTypeID && ThisRecord.fmb_ProductID = DataCardValueProduct.Selected.craf2_productid
+                                            ),
+                                            fmb_ReviewLockDate,
+                                            SortOrder.Descending
+                                        )
+                                    ).fmb_TemplateID,
+                                    TemplateName: First(
+                                        Sort(
+                                            Filter(
+                                                clln_factMetricBoard,
+                                                ThisRecord.fmb_MetricBoardTypeID = DataCardValueBoardType.Selected.BoardTypeID && ThisRecord.fmb_ProductID = DataCardValueProduct.Selected.craf2_productid
+                                            ),
+                                            fmb_ReviewLockDate,
+                                            SortOrder.Descending
+                                        )
+                                    ).fmb_TemplateName
+                                }.TemplateName
+                            DisplayMode: =Parent.DisplayMode
+                            Fill: =RGBA(255,255,255,1)
+                            Font: =FontStyle
+                            Height: =DataCardValueProduct.Height
+                            HoverFill: =Self.ChevronHoverBackground
+                            Items: |-
+                                =Filter(
+                                RenameColumns(
+                                    ShowColumns(
+                                        ReviewHub_MetricTemplates,
+                                        "craf2_templateid", "craf2_templatename", "craf2_TemplateBoardType"
+                                    ),
+                                    "craf2_templateid", "TemplateID", "craf2_templatename", "TemplateName", "craf2_TemplateBoardType", "TemplateBoardTypeRec"
+                                ), 
+                                    ThisRecord.TemplateBoardTypeRec.craf2_boardtypename = DataCardValueBoardType.Selected.BoardTypeName
+                                    && ThisRecord.TemplateID in var_DisplayMetricTemplateID.TemplateID
+                                )
+                            OnChange: =Select(btn_GetDataReady_NM)
+                            OnSelect: =Select(btn_GetDataReady_NM)
+                            PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                            PressedColor: =BlueControlDarkBackground
+                            PressedFill: =BlueControlLightBackground
+                            Reset: =ResetEditMetricsForm
+                            SelectionFill: =BlueNaviHightLightBackground
+                            Size: =10
+                            Width: =Parent.Width - 60
+                            X: =30
+                            Y: =Card_NR_Template.Y + Card_NR_Template.Height
+                            ZIndex: =5
+
+                    NM_MetricBoardType As typedDataCard.comboBoxEditCard:
+                        BorderColor: =GrayBorderLight
+                        BorderStyle: =BorderStyle.None
+                        DataField: ="craf2_fmb_boardtype"
+                        Default: =ThisItem.fmb_BoardType
+                        DisplayMode: =Parent.DisplayMode
+                        DisplayName: ="Board Type (Scorecard Type)"
+                        Fill: =RGBA(0, 0, 0, 0)
+                        Height: =50
+                        Required: =true
+                        Update: =
+                        Visible: =true
+                        Width: =Parent.Width
+                        X: =0
+                        Y: =0
+                        ZIndex: =21
+
+                        DataCardKey24_1 As label:
+                            AutoHeight: =true
+                            Color: =RGBA(0, 0, 0, 1)
+                            Font: =FontStyle
+                            FontWeight: =FontWeight.Semibold
+                            Height: =25
+                            Size: =10
+                            Text: =Parent.DisplayName
+                            Width: =Parent.Width - 60
+                            Wrap: =false
+                            X: =30
+                            ZIndex: =1
+
+                        ErrorMessage24_1 As label:
+                            Height: =2
+                            Live: =Live.Assertive
+                            PaddingBottom: =0
+                            PaddingLeft: =0
+                            PaddingRight: =0
+                            PaddingTop: =0
+                            Text: =Parent.Error
+                            Visible: =Parent.DisplayMode=DisplayMode.Edit
+                            Width: =Parent.Width - 60
+                            X: =30
+                            Y: =DataCardValueBoardType.Y + DataCardValueBoardType.Height
+                            ZIndex: =3
+
+                        StarVisible24_1 As label:
+                            Align: =Align.Center
+                            Color: =RGBA(246, 88, 16, 1)
+                            Font: =FontStyle
+                            Height: =DataCardKey24_1.Height
+                            Text: ="*"
+                            Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                            Width: =30
+                            Wrap: =false
+                            X: =200
+                            Y: =DataCardKey24_1.Y
+                            ZIndex: =4
+
+                        DataCardValueBoardType As dropdown:
+                            BorderColor: =GRAYCOLOR
+                            BorderThickness: =1
+                            ChevronBackground: =GrayControlBackground
+                            ChevronFill: =Color.Black
+                            ChevronHoverBackground: =BlueControlLightBackground
+                            ChevronHoverFill: =Color.Black
+                            Default: =ThisItem.fmb_BoardType.BoardTypeName
+                            DisplayMode: =Parent.DisplayMode
+                            Fill: =RGBA(255,255,255,1)
+                            Font: =FontStyle
+                            Height: =DataCardValueProduct.Height
+                            HoverFill: =Self.ChevronHoverBackground
+                            Items: |-
+                                =Filter(
+                                    RenameColumns(
+                                        ShowColumns(
+                                            Filter(ReviewHub_BoardTypes, ThisRecord.craf2_isdisplayinapp),
+                                            "craf2_boardtypeid", "craf2_boardtypename"
+                                        ),
+                                        "craf2_boardtypeid", "BoardTypeID",
+                                        "craf2_boardtypename", "BoardTypeName"
+                                    ),
+                                    IsAdmin || (IsCoordinator && ThisRecord.BoardTypeID in IsCoordinator_BoardTypes)
+                                )
+                            OnChange: =Select(btn_GetDataReady_NM)
+                            OnSelect: =Select(btn_GetDataReady_NM)
+                            PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                            PressedColor: =BlueControlDarkBackground
+                            PressedFill: =BlueControlLightBackground
+                            Reset: =ResetEditMetricsForm
+                            SelectionFill: =BlueNaviHightLightBackground
+                            Size: =10
+                            Width: =Parent.Width - 60
+                            X: =30
+                            Y: =DataCardKey24_1.Y + DataCardKey24_1.Height 
+                            ZIndex: =5
+
+                    NM_Product As typedDataCard.comboBoxEditCard:
+                        BorderColor: =GRAYCOLOR
+                        BorderStyle: =BorderStyle.None
+                        DataField: ="craf2_fmb_product"
+                        Default: =ThisItem.fmb_Product
+                        DisplayMode: =Parent.DisplayMode
+                        DisplayName: ="Product"
+                        Fill: =RGBA(0, 0, 0, 0)
+                        Height: =50
+                        Required: =true
+                        Update: =
+                        Width: =Parent.Width
+                        X: =0
+                        Y: =1
+                        ZIndex: =21
+
+                        Card_NR_Product As label:
+                            AutoHeight: =true
+                            Color: =RGBA(0, 0, 0, 1)
+                            Font: =FontStyle
+                            FontWeight: =FontWeight.Semibold
+                            Height: =25
+                            Size: =10
+                            Text: =Parent.DisplayName
+                            Width: =Parent.Width - 60
+                            Wrap: =false
+                            X: =30
+                            ZIndex: =1
+
+                        DataCardValueProduct As combobox:
+                            BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                            BorderThickness: =1
+                            ChevronBackground: =DataCardValueBoardType.ChevronBackground
+                            ChevronFill: =DataCardValueBoardType.ChevronFill
+                            ChevronHoverBackground: =
+                            ChevronHoverFill: =DataCardValueBoardType.ChevronHoverFill
+                            DefaultSelectedItems: =Parent.Default
+                            DisplayFields: =["craf2_productname"]
+                            DisplayMode: =Parent.DisplayMode
+                            Font: =FontStyle
+                            Height: =25
+                            HoverBorderColor: =
+                            HoverFill: =DataCardValueBoardType.HoverFill
+                            InputTextPlaceholder: ="Find a product"
+                            Items: =ReviewHub_Products
+                            OnChange: =Select(btn_GetDataReady_NM)
+                            PaddingBottom: =0
+                            PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                            PaddingTop: =0
+                            PressedColor: =BlueControlDarkBackground
+                            PressedFill: =BlueControlLightBackground
+                            Reset: =ResetEditMetricsForm
+                            SearchFields: =["craf2_productname"]
+                            SearchItems: =Search(ReviewHub_Products,DataCardValueProduct.SearchText,"craf2_productname")
+                            SelectionFill: =BlueNaviHightLightBackground
+                            SelectMultiple: =false
+                            Size: =10
+                            Tooltip: =Parent.DisplayName
+                            Width: =Parent.Width - 60
+                            X: =30
+                            Y: =Card_NR_Product.Y + Card_NR_Product.Height
+                            ZIndex: =2
+
+                        ErrorMessage27_1 As label:
+                            Height: =2
+                            Live: =Live.Assertive
+                            PaddingBottom: =0
+                            PaddingLeft: =0
+                            PaddingRight: =0
+                            PaddingTop: =0
+                            Text: =Parent.Error
+                            Visible: =Parent.DisplayMode=DisplayMode.Edit
+                            Width: =Parent.Width - 60
+                            X: =30
+                            Y: =DataCardValueProduct.Y + DataCardValueProduct.Height
+                            ZIndex: =3
+
+                        StarVisible27_1 As label:
+                            Align: =Align.Center
+                            Color: =RGBA(246, 88, 16, 1)
+                            Font: =FontStyle
+                            Height: =Card_NR_Product.Height
+                            Text: ="*"
+                            Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                            Width: =30
+                            Wrap: =false
+                            X: =75
+                            Y: =Card_NR_Product.Y
+                            ZIndex: =4
+
+                    NM_ReviewOwner As typedDataCard.comboBoxEditCard:
+                        BorderColor: =GRAYCOLOR
+                        BorderStyle: =BorderStyle.None
+                        DataField: ="ReviewOwner"
+                        Default: |-
+                            ={
+                                UserPrincipalName: //"i:0#.f|membership|" &
+                            
+                                First(
+                                    Sort(
+                                        Filter(
+                                            ReviewHub_FactMetricBoards,
+                                            ThisRecord.craf2_fmb_BoardType.craf2_boardtypeid = DataCardValueBoardType.Selected.BoardTypeID && ThisRecord.craf2_fmb_Product.craf2_productid = DataCardValueProduct.Selected.craf2_productid
+                                        ),
+                                        craf2_fmb_reviewlockdate,
+                                        SortOrder.Descending
+                                    )
+                                ).craf2_fmb_reviewownerprincipal,
+                            
+                                DisplayName: 
+                                First(
+                                    Sort(
+                                        Filter(
+                                            ReviewHub_FactMetricBoards,
+                                            ThisRecord.craf2_fmb_BoardType.craf2_boardtypeid = DataCardValueBoardType.Selected.BoardTypeID && ThisRecord.craf2_fmb_Product.craf2_productid = DataCardValueProduct.Selected.craf2_productid
+                                        ),
+                                        craf2_fmb_reviewlockdate,
+                                        SortOrder.Descending
+                                    )
+                                ).craf2_fmb_reviewownername
+                            
+                            } 
+                            /*
+                            First(Office365Users.SearchUser({searchTerm: Trim(First(
+                                    Sort(
+                                        Filter(
+                                            ReviewHub_FactMetricBoards,
+                                            ThisRecord.fmb_BoardType.BoardTypeID = DataCardValueBoardType.Selected.BoardTypeID && ThisRecord.fmb_Product.ProductID = DataCardValueProduct.Selected.ProductID
+                                        ),
+                                        fmb_ReviewLockDate,
+                                        Descending
+                                    )
+                                ).fmb_ReviewOwnerPrincipal)})) */
+                        DisplayMode: =Parent.DisplayMode
+                        DisplayName: ="Review Owner"
+                        Fill: =RGBA(0, 0, 0, 0)
+                        Height: =50
+                        Required: =true
+                        Update: =
+                        Width: =Parent.Width
+                        X: =0
+                        Y: =3
+                        ZIndex: =21
+
+                        DataCardKey29_1 As label:
+                            AutoHeight: =true
+                            Color: =RGBA(0, 0, 0, 1)
+                            Font: =FontStyle
+                            FontWeight: =FontWeight.Semibold
+                            Height: =34
+                            Size: =10
+                            Text: =Parent.DisplayName & " (The latest Review Owner selected by default)"
+                            Width: =375
+                            Wrap: =false
+                            X: =30
+                            ZIndex: =1
+
+                        DataCardValueReviewOwner As combobox:
+                            BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                            BorderThickness: =1
+                            ChevronBackground: =GrayControlBackground
+                            ChevronFill: =Color.Black
+                            ChevronHoverBackground: =
+                            ChevronHoverFill: =Color.Black
+                            Default: =Parent.Default
+                            DefaultSelectedItems: =Parent.Default
+                            DisplayFields: =["DisplayName","UserPrincipalName","Picture"]
+                            DisplayMode: =Parent.DisplayMode
+                            Font: =FontStyle
+                            Height: =DataCardValueProduct.Height
+                            HoverBorderColor: =
+                            HoverFill: =BlueControlLightBackground
+                            InputTextPlaceholder: ="(Search by name or principal email alias)"
+                            Items: |-
+                                =Office365Users.SearchUserV2({searchTerm: Trim(Self.SearchText)}).value
+                            OnChange: =Select(btn_GetDataReady_NM)
+                            PaddingBottom: =0
+                            PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                            PaddingTop: =0
+                            PressedColor: =BlueControlDarkBackground
+                            PressedFill: =BlueControlLightBackground
+                            SearchFields: =["UserPrincipalName", "DisplayName"]
+                            SearchItems: |-
+                                =Search(Office365Users.SearchUserV2({searchTerm: Trim(Self.SearchText)}).value,DataCardValueReviewOwner.SearchText,"UserPrincipalName","DisplayName")
+                            SelectionFill: =BlueNaviHightLightBackground
+                            SelectMultiple: =false
+                            Size: =10
+                            Template: =ListItemTemplate.Double
+                            Tooltip: =Parent.DisplayName
+                            Width: =Parent.Width - 60
+                            X: =30
+                            Y: =DataCardKey29_1.Y + DataCardKey29_1.Height
+                            ZIndex: =2
+
+                        ErrorMessage29_1 As label:
+                            Height: =2
+                            Live: =Live.Assertive
+                            PaddingBottom: =0
+                            PaddingLeft: =0
+                            PaddingRight: =0
+                            PaddingTop: =0
+                            Text: =Parent.Error
+                            Visible: =Parent.DisplayMode=DisplayMode.Edit
+                            Width: =Parent.Width - 60
+                            X: =30
+                            Y: =DataCardValueReviewOwner.Y + DataCardValueReviewOwner.Height
+                            ZIndex: =3
+
+                        StarVisible29_1 As label:
+                            Align: =Align.Center
+                            Color: =RGBA(246, 88, 16, 1)
+                            Font: =FontStyle
+                            Height: =DataCardKey29_1.Height
+                            Text: ="*"
+                            Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                            Width: =30
+                            Wrap: =false
+                            X: =DataCardKey29_1.X + DataCardKey29_1.Width
+                            Y: =DataCardKey29_1.Y
+                            ZIndex: =4
+
+                    NM_ReviewMonth As typedDataCard.dateEditCard:
+                        BorderColor: =GrayBorderLight
+                        BorderStyle: =BorderStyle.None
+                        DataField: ="NextReviewDate"
+                        Default: =ThisItem.fmb_ReviewLockDate
+                        DisplayMode: =Parent.DisplayMode
+                        DisplayName: ="NextReviewDate"
+                        Fill: =RGBA(0, 0, 0, 0)
+                        Height: =50
+                        Required: =true
+                        Update: =
+                        Width: =Parent.Width
+                        X: =0
+                        Y: =4
+                        ZIndex: =21
+
+                        ErrorMessage26_1 As label:
+                            Height: =2
+                            Live: =Live.Assertive
+                            PaddingBottom: =0
+                            PaddingLeft: =0
+                            PaddingRight: =0
+                            PaddingTop: =0
+                            Text: =Parent.Error
+                            Visible: =Parent.DisplayMode=DisplayMode.Edit
+                            Width: =Parent.Width - 60
+                            X: =30
+                            Y: =DataCardValueReviewMonth.Y + DataCardValueReviewMonth.Height
+                            ZIndex: =1
+
+                        DataCardKey_ReviewYear As label:
+                            AutoHeight: =true
+                            Color: =RGBA(0, 0, 0, 1)
+                            Font: =FontStyle
+                            FontWeight: =FontWeight.Semibold
+                            Height: =34
+                            Size: =10
+                            Text: ="Review Year"
+                            Width: =Parent.Width - Self.X
+                            Wrap: =false
+                            X: =DataCardKey_ReviewMonth.X + DataCardKey_ReviewMonth.Width
+                            Y: =DataCardKey_ReviewMonth.Y
+                            ZIndex: =2
+
+                        DataCardKey_ReviewMonth As label:
+                            AutoHeight: =true
+                            Color: =RGBA(0, 0, 0, 1)
+                            Font: =FontStyle
+                            FontWeight: =FontWeight.Semibold
+                            Height: =34
+                            Size: =10
+                            Text: ="Review Month"
+                            Width: =(Parent.Width - Self.X) * 0.50
+                            Wrap: =false
+                            X: =30
+                            ZIndex: =3
+
+                        StarVisible26_1 As label:
+                            Align: =Align.Center
+                            Color: =RGBA(246, 88, 16, 1)
+                            Font: =FontStyle
+                            Height: =DataCardKey_ReviewMonth.Height
+                            Text: ="*"
+                            Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                            Width: =30
+                            Wrap: =false
+                            X: =114
+                            Y: =DataCardKey_ReviewMonth.Y
+                            ZIndex: =4
+
+                        DataCardValueReviewMonth As dropdown:
+                            BorderColor: =GRAYCOLOR
+                            BorderThickness: =1
+                            ChevronBackground: =DataCardValueBoardType.ChevronBackground
+                            ChevronFill: =DataCardValueBoardType.ChevronFill
+                            ChevronHoverBackground: =DataCardValueBoardType.ChevronHoverBackground
+                            ChevronHoverFill: =DataCardValueBoardType.ChevronHoverFill
+                            Default: |-
+                                =LookUp(
+                                    clln_NR_ReviewMonth,
+                                    ThisRecord.Value = Month(Now())
+                                ).DisplayValue
+                            DisplayMode: =Parent.DisplayMode
+                            Fill: =RGBA(255,255,255,1)
+                            Font: =FontStyle
+                            Height: =DataCardValueProduct.Height
+                            HoverFill: =Self.ChevronHoverBackground
+                            Items: =clln_NR_ReviewMonth.DisplayValue
+                            OnChange: |-
+                                =Select(btn_GetReviewLockDate_NM);
+                                Select(btn_GetDataReady_NM)
+                            OnSelect: |-
+                                =Select(btn_GetReviewLockDate_NM);
+                                Select(btn_GetDataReady_NM)
+                            PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                            PressedColor: =BlueControlDarkBackground
+                            PressedFill: =BlueControlLightBackground
+                            Reset: =ResetEditMetricsForm
+                            SelectionFill: =BlueNaviHightLightBackground
+                            Size: =10
+                            Width: =DataCardKey_ReviewMonth.Width - 25
+                            X: =30
+                            Y: =DataCardKey24_1.Y + DataCardKey24_1.Height 
+                            ZIndex: =5
+
+                        DataCardValueReviewYear As dropdown:
+                            BorderColor: =GRAYCOLOR
+                            BorderThickness: =1
+                            ChevronBackground: =DataCardValueBoardType.ChevronBackground
+                            ChevronFill: =DataCardValueBoardType.ChevronFill
+                            ChevronHoverBackground: =DataCardValueBoardType.ChevronHoverBackground
+                            ChevronHoverFill: =DataCardValueBoardType.ChevronHoverFill
+                            Default: |-
+                                =LookUp(
+                                    Sequence(2051 - Year(Now()), Year(Now())),
+                                    ThisRecord.Value = If(
+                                        Month(Now()) = 12,
+                                        Year(Now()) + 1, //If Now is in December, choose next year.
+                                        Year(Now())
+                                    )
+                                ).Value
+                            DisplayMode: =Parent.DisplayMode
+                            Fill: =RGBA(255,255,255,1)
+                            Font: =FontStyle
+                            Height: =DataCardValueProduct.Height
+                            HoverFill: =Self.ChevronHoverBackground
+                            Items: =Sequence(2051 - Year(Now()), Year(Now()))
+                            OnChange: |-
+                                =Select(btn_GetReviewLockDate_NM);
+                                Select(btn_GetDataReady_NM)
+                            OnSelect: |-
+                                =Select(btn_GetReviewLockDate_NM);
+                                Select(btn_GetDataReady_NM)
+                            PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                            PressedColor: =BlueControlDarkBackground
+                            PressedFill: =BlueControlLightBackground
+                            Reset: =ResetEditMetricsForm
+                            SelectionFill: =BlueNaviHightLightBackground
+                            Size: =10
+                            Width: =Parent.Width - Self.X - 30
+                            X: =DataCardKey_ReviewYear.X
+                            Y: =DataCardKey24_1.Y + DataCardKey24_1.Height 
+                            ZIndex: =6
+
+            lbl_Step1_NM As label:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Fill: =SUBGROUPCOLOR
+                Font: =FontStyle
+                FontWeight: =FontWeight.Bold
+                Height: =30
+                PaddingLeft: =15
+                Size: =11
+                Text: |-
+                    ="Step 1 : Fill the form"
+                Width: =Parent.Width
+                ZIndex: =16
+
+            Btn_ResetForm_NM As button:
+                BorderColor: =ColorFade(Self.Fill, -35%)
+                BorderThickness: =0
+                Color: =BlueControlDarkBackground
+                DisabledFill: =RGBA(0, 0, 0, 0)
+                Fill: =RGBA(0, 0, 0, 0)
+                Font: =FontStyle
+                Height: =lbl_Step1_NM.Height
+                HoverColor: =Color.Purple
+                HoverFill: =RGBA(0, 0, 0, 0)
+                OnSelect: |-
+                    =ResetForm(Form_NewMetricsBoard); NewForm(Form_NewMetricsBoard);UpdateContext({ResetEditMetricsForm:true});
+                    UpdateContext({ResetEditMetricsForm:false})
+                PaddingLeft: =0
+                PaddingRight: =0
+                PressedColor: =Self.Color
+                PressedFill: =RGBA(0, 0, 0, 0)
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Size: =10
+                Text: ="Reset"
+                Underline: =true
+                Width: =77
+                X: =Parent.Width - Self.Width
+                Y: =lbl_Step1_NM.Y
+                ZIndex: =17
+
+        ctn_Mid_NM As groupContainer.manualLayoutContainer:
+            AlignInContainer: =AlignInContainer.SetByContainer
+            Height: =Max(Parent.Height, ctn_Left_NM.Height)
+            LayoutMinHeight: =100
+            LayoutMinWidth: =250
+            ZIndex: =2
+
+            lbl_MetricsByBoard_Sub_NM As label:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Color: =Color.Black
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =20
+                PaddingBottom: =0
+                PaddingTop: =0
+                Size: =10
+                Text: ="(Only metrics that display here will be implemented!)"
+                Width: =Label_MetricsByBoard_NM.Width
+                Y: =Table_MetricTypes_NM.Y + Table_MetricTypes_NM.Height
+                ZIndex: =1
+
+            Table_MetricTypes_NM As gallery.galleryVertical:
+                BorderColor: =GrayControlBackground
+                BorderThickness: =2
+                Height: =Parent.Height - Self.Y - lbl_MetricsByBoard_Sub_NM.Height
+                Items: |-
+                    =Ungroup( //Ungroup function to add a Row Number column.
+                            ForAll(
+                                Sequence(CountRows(clln_Table_NR_MetricTypes)),
+                                {
+                                    Record: Table(Last(FirstN(clln_Table_NR_MetricTypes, Value))),
+                                    RowNumber: Value
+                                }
+                            ),
+                            "Record"
+                        )
+                Layout: =Layout.Vertical
+                TemplateFill: =If(Mod(ThisItem.RowNumber, 2) = 0, GrayCanvasBackground, RGBA(0, 0, 0, 0))
+                TemplatePadding: =0
+                TemplateSize: =40
+                Width: =Parent.Width - 2
+                X: =1
+                Y: =hdr_MetricType_NM.Y + hdr_MetricType_NM.Height
+                ZIndex: =4
+
+                lbl_Deprecated As label:
+                    Font: =FontStyle
+                    OnSelect: =Select(Parent)
+                    Size: =11
+                    Text: =Text(ThisItem.mtd_MetricDeprecatedDate, DateTimeFormat.ShortDate)
+                    Tooltip: =Text(ThisItem.mtd_MetricDeprecatedDate, DateTimeFormat.ShortDate)
+                    Width: =0.2 * Parent.Width
+                    X: =lbl_Created.X + lbl_Created.Width
+                    Y: =lbl_MetricTypeName.Y
+                    ZIndex: =5
+
+                lbl_Created As label:
+                    Align: =Align.Center
+                    Font: =FontStyle
+                    OnSelect: =Select(Parent)
+                    Size: =11
+                    Text: =Text(ThisItem.mtd_MetricCreatedDate, DateTimeFormat.ShortDate)
+                    Width: =0.2 * Parent.Width
+                    X: =lbl_MetricTypeName.X + lbl_MetricTypeName.Width
+                    Y: =lbl_MetricTypeName.Y
+                    ZIndex: =6
+
+                lbl_MetricTypeName As label:
+                    Font: =FontStyle
+                    OnSelect: =Select(Parent)
+                    PaddingLeft: =10
+                    Size: =11
+                    Text: =ThisItem.mtd_MetricTypeName
+                    Width: =0.6 * Parent.Width
+                    ZIndex: =7
+
+            hdr_MetricDeprecated_NM As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Fill: =GrayControlBackground
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =30
+                Size: =11
+                Text: ="Deprecated"
+                Width: =0.2 * Parent.Width
+                X: =hdr_MetricCreated_NM.X + hdr_MetricCreated_NM.Width
+                Y: =hdr_MetricType_NM.Y
+                ZIndex: =9
+
+            hdr_MetricCreated_NM As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Fill: =GrayControlBackground
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =30
+                Size: =11
+                Text: ="Created"
+                Width: =0.2 * Parent.Width
+                X: =hdr_MetricType_NM.X + hdr_MetricType_NM.Width
+                Y: =hdr_MetricType_NM.Y
+                ZIndex: =10
+
+            hdr_MetricType_NM As label:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Fill: =GrayControlBackground
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =30
+                PaddingLeft: =10
+                Size: =11
+                Text: ="Metric Type Name"
+                Width: =0.6 * Parent.Width
+                Y: =Label_MetricsByBoard_NM.Y + Label_MetricsByBoard_NM.Height
+                ZIndex: =11
+
+            Label_MetricsByBoard_NM As button:
+                BorderColor: =Self.Fill
+                BorderStyle: =BorderStyle.None
+                BorderThickness: =0
+                Color: =RGBA(0, 0, 0, 1)
+                DisabledBorderColor: =Self.BorderColor
+                DisabledColor: =Self.Color
+                DisabledFill: =Self.Fill
+                DisplayMode: =DisplayMode.Disabled
+                Fill: =ColorFade(BlueNaviHightLightBackground, 50%)
+                Font: =FontStyle
+                FontWeight: =FontWeight.Bold
+                RadiusBottomLeft: |
+                    =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =20
+                RadiusTopRight: =20
+                Size: =11
+                Text: |-
+                    ="Metric types for the selected board type (count: " & CountRows(clln_Table_NR_MetricTypes) & ")"
+                Width: =Parent.Width
+                ZIndex: =13
+
+        ctn_Right_NM As groupContainer.manualLayoutContainer:
+            AlignInContainer: =AlignInContainer.SetByContainer
+            Height: =Max(Parent.Height, ctn_Left_NM.Height)
+            LayoutMinHeight: =100
+            LayoutMinWidth: =250
+            ZIndex: =3
+
+            Label_MetricsToAdd_Sub_NM As label:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =lbl_MetricsByBoard_Sub_NM.Height
+                PaddingBottom: =0
+                PaddingTop: =0
+                Size: =10
+                Text: ="(Records in [MetricType] table but NOT in [ProductMetric] table)"
+                Width: =Table_MetricsToAdd_NM.Width
+                X: =Table_MetricsToAdd_NM.X
+                Y: =lbl_MetricsByBoard_Sub_NM.Y
+                ZIndex: =1
+
+            Table_MetricsToAdd_NM As gallery.galleryVertical:
+                BorderColor: =GrayControlBackground
+                BorderThickness: =2
+                Height: =Parent.Height - Self.Y - Label_MetricsToAdd_Sub_NM.Height //Label_NR_MetricsToAdd.Height - hdr_MetricTypeName_2.Height - Label_NR_MetricsToAddByProduct.Height - 20
+                Items: |-
+                    =
+                    
+                    
+                    
+                    
+                        Ungroup( //Ungroup function to add a Row Number column.
+                            ForAll(
+                                Sequence(CountRows(clln_Table_NR_MetricsToAdd)),
+                                {
+                                    Record: Table(Last(FirstN(clln_Table_NR_MetricsToAdd, Value))),
+                                    RowNumber: Value
+                                }
+                            ),
+                            "Record"
+                        )
+                Layout: =Layout.Vertical
+                TemplateFill: =If(Mod(ThisItem.RowNumber, 2) = 0, GrayCanvasBackground, RGBA(0, 0, 0, 0))
+                TemplatePadding: =0
+                TemplateSize: =40
+                Width: =Parent.Width - 2
+                X: =1
+                Y: =hdr_MetricsToAdd_NM.Y + hdr_MetricsToAdd_NM.Height
+                ZIndex: =2
+
+                lbl_MetricTypeName_2 As label:
+                    Font: =FontStyle
+                    OnSelect: =Select(Parent)
+                    PaddingLeft: =10
+                    Size: =11
+                    Text: =ThisItem.MetricTypeName
+                    Width: =Parent.Width
+                    ZIndex: =7
+
+            hdr_MetricsToAdd_NM As label:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Fill: =GrayControlBackground
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =30
+                PaddingLeft: =hdr_MetricType_NM.PaddingLeft
+                Size: =11
+                Text: ="Metric Type Name"
+                Width: =Parent.Width
+                Y: =lbl_MetricsToAdd_NM.Y + lbl_MetricsToAdd_NM.Height
+                ZIndex: =3
+
+            lbl_MetricsToAdd_NM As button:
+                BorderColor: =Self.Fill
+                BorderStyle: =BorderStyle.None
+                BorderThickness: =0
+                Color: =RGBA(0, 0, 0, 1)
+                DisabledBorderColor: =Self.BorderColor
+                DisabledColor: =Self.Color
+                DisabledFill: =Self.Fill
+                DisplayMode: =DisplayMode.Disabled
+                Fill: =ColorFade(BlueNaviHightLightBackground, 50%)
+                Font: =FontStyle
+                FontWeight: =FontWeight.Bold
+                RadiusBottomLeft: |
+                    =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =20
+                RadiusTopRight: =20
+                Size: =11
+                Text: |-
+                    ="Metrics to add for selected product (count: " & CountRows(clln_Table_NR_MetricsToAdd) & ")"
+                Width: =Parent.Width
+                Y: =Table_MetricsExisted_NM.Y + Table_MetricsExisted_NM.Height + 20
+                ZIndex: =5
+
+            Table_MetricsExisted_NM As gallery.galleryVertical:
+                BorderColor: =GrayControlBackground
+                BorderThickness: =2
+                Height: =(0.5 * Parent.Height) - hdr_MetricsExisted_NM.Height - lbl_MetricsExisted_NM.Height
+                Items: |-
+                    =
+                    
+                    
+                    
+                    
+                        Ungroup( //Ungroup function to add a Row Number column.
+                            ForAll(
+                                Sequence(CountRows(clln_Table_NR_MetricsExisted)),
+                                {
+                                    Record: Table(Last(FirstN(clln_Table_NR_MetricsExisted, Value))),
+                                    RowNumber: Value
+                                }
+                            ),
+                            "Record"
+                        )
+                Layout: =Layout.Vertical
+                TemplateFill: =If(Mod(ThisItem.RowNumber, 2) = 0, GrayCanvasBackground, RGBA(0, 0, 0, 0))
+                TemplatePadding: =0
+                TemplateSize: =40
+                Width: =Parent.Width - 2
+                X: =1
+                Y: =hdr_MetricsExisted_NM.Y + hdr_MetricsExisted_NM.Height
+                ZIndex: =6
+
+                lbl_MetricTypeName_1 As label:
+                    Font: =FontStyle
+                    OnSelect: =Select(Parent)
+                    PaddingLeft: =10
+                    Size: =11
+                    Text: =ThisItem.pm_MetricTypeName & " (" & ThisItem.pm_ID & ")"
+                    Width: =Parent.Width
+                    ZIndex: =7
+
+            hdr_MetricsExisted_NM As label:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Fill: =GrayControlBackground
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =30
+                PaddingLeft: =hdr_MetricType_NM.PaddingLeft
+                Size: =11
+                Text: ="Metric Type Name (ProductMetric ID)"
+                Width: =Parent.Width
+                X: =lbl_MetricsExisted_NM.X
+                Y: =lbl_MetricsExisted_NM.Y + lbl_MetricsExisted_NM.Height
+                ZIndex: =7
+
+            lbl_MetricsExisted_NM As button:
+                BorderColor: =Self.Fill
+                BorderStyle: =BorderStyle.None
+                BorderThickness: =0
+                Color: =RGBA(0, 0, 0, 1)
+                DisabledBorderColor: =Self.BorderColor
+                DisabledColor: =Self.Color
+                DisabledFill: =Self.Fill
+                DisplayMode: =DisplayMode.Disabled
+                Fill: =ColorFade(BlueNaviHightLightBackground, 50%)
+                Font: =FontStyle
+                FontWeight: =FontWeight.Bold
+                RadiusBottomLeft: |
+                    =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =20
+                RadiusTopRight: =20
+                Size: =11
+                Text: |-
+                    ="Existing metrics for selected product (count: " & CountRows(clln_Table_NR_MetricsExisted) & ")"
+                Width: =Parent.Width
+                ZIndex: =9
+
+    lbl_SubHeader_NM As label:
+        Color: =RGBA(255, 0, 0, 1)
+        Font: =FontStyle
+        FontWeight: =FontWeight.Semibold
+        Height: =lbl_Step1_NM.Height
+        PaddingTop: =0
+        Size: =11
+        Text: ="The selected Review Cycle for selected Product is already existing. Please check [FactMetricBoard]."
+        Visible: |-
+            =If(
+                IsEmpty(
+                    Filter(
+                        clln_factMetricBoard, 
+                        ThisRecord.fmb_MetricBoardTypeID = DataCardValueBoardType.Selected.BoardTypeID 
+                            && ThisRecord.fmb_ProductID = DataCardValueProduct.Selected.craf2_productid
+                            && fmb_ReviewMonth = LookUp(
+                clln_NR_ReviewMonth,
+                ThisRecord.DisplayValue = DataCardValueReviewMonth.Selected.DisplayValue).Value
+                            && fmb_ReviewYear =  DataCardValueReviewYear.Selected.Value
+                    )
+                ),
+                false,
+                true
+            )
+        Width: =870
+        X: =SS_AppHeader_NM.X + 15
+        Y: =lbl_ScreenTitle_NM.Y + lbl_ScreenTitle_NM.Height
+        ZIndex: =2
+
+    lbl_ScreenTitle_NM As label:
+        DisabledColor: =BlueControlDarkBackground
+        DisabledFill: =Self.Fill
+        DisplayMode: =DisplayMode.Disabled
+        Fill: =GrayCanvasBackground
+        Font: =FontStyle
+        FontWeight: =FontWeight.Bold
+        Height: =55
+        PaddingLeft: =60
+        Size: =18
+        Text: ="Create New Scorecard"
+        Width: =App.Width - Self.X
+        Y: =SS_AppHeader_NM.Height
+        ZIndex: =3
+
+    icon_Back_NM As icon.BackArrow:
+        BorderColor: =RGBA(0, 0, 0, 0)
+        BorderStyle: =BorderStyle.None
+        Color: =BlueControlDarkBackground
+        Height: =30
+        HoverBorderColor: =Self.BorderColor
+        HoverColor: =Color.Purple
+        Icon: =Icon.BackArrow
+        OnSelect: |-
+            =Navigate(scn_SelfService);
+            
+            Concurrent(
+                Set(Toggle_Btn_CreateMetrics_Check, false),
+                Set(Toggle_Btn_CreateMetrics_Loading, false),
+                Set(Toggle_Btn_CreateBoard_Check, false),
+                Set(Toggle_Btn_CreateBoard_Loading, false),
+                Select(Btn_ResetForm_NM)
+            );
+        Tooltip: ="Back"
+        Width: =Self.Height
+        X: =15
+        Y: =lbl_ScreenTitle_NM.Y + (lbl_ScreenTitle_NM.Height - Self.Height) * 0.50
+        ZIndex: =4
+
+    SS_AppHeader_NM As AppHeader:
+        DropDownSelection: =TrackRequestComponent_NM.HideTrackRequest
+        FeatureRequestUrl: =var_FeatureRequestURL
+        FeedbackButtonUrl: =var_SendFeedback_URL
+        inputAppDisplayName: =varAppHeaderText
+        ScorecardOnboardingFeatureUrl: =var_ScorecardOnboardingRequestURL
+        ShowSurveyButton: =false
+        Y: =0
+        ZIndex: =5
+
+    TrackRequestComponent_NM As TrackRequestComponent:
+        BlueControlDarkBackground: =BlueControlDarkBackground
+        BlueControlLightBackground: =BlueControlLightBackground
+        BlueNaviHightLightBackground: =BlueNaviHightLightBackground
+        DevOpsBaseUrl: =var_DevOpsBaseURL
+        DevOpsQueryID: =var_DevOpsQueryID
+        FontStyle: =FontStyle
+        GrayCanvasBackground: =GrayCanvasBackground
+        GRAYCOLOR: =GRAYCOLOR
+        GrayControlBackground: =GrayControlBackground
+        IsAdmin: =IsAdmin
+        Reset: =Self.Visible
+        Visible: =SS_AppHeader_NM.DisplayTrackRequest
+        X: =App.Width - Self.Width
+        Y: =SS_AppHeader_NM.Height
+        ZIndex: =6
+

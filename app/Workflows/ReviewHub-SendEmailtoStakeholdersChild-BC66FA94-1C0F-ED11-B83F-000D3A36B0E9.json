@@ -1,0 +1,1529 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_commondataserviceforapps_1": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "chub_sharedcommondataserviceforapps_72f86"
+        },
+        "api": {
+          "name": "shared_commondataserviceforapps"
+        }
+      },
+      "shared_office365_1": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "chub_sharedoffice365_aaf4a"
+        },
+        "api": {
+          "name": "shared_office365"
+        }
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        },
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        },
+        "EnvVar - ReviewHub - Notification Email (chub_EnvVarReviewHubNotificationEmail)": {
+          "defaultValue": "reviewhub-noreply@microsoft.com",
+          "type": "String",
+          "metadata": {
+            "schemaName": "chub_EnvVarReviewHubNotificationEmail"
+          }
+        },
+        "EnvVar - ReviewHub - Team Email (chub_EnvVarReviewHubTeamEmail)": {
+          "defaultValue": "dtpreviewhub@microsoft.com",
+          "type": "String",
+          "metadata": {
+            "schemaName": "chub_EnvVarReviewHubTeamEmail"
+          }
+        }
+      },
+      "triggers": {
+        "manual": {
+          "metadata": {
+            "operationMetadataId": "2f0d10d3-664e-4d3e-86b3-55ff0f25a4fe"
+          },
+          "type": "Request",
+          "kind": "Button",
+          "inputs": {
+            "schema": {
+              "type": "object",
+              "properties": {},
+              "required": []
+            }
+          }
+        }
+      },
+      "actions": {
+        "Initialize_FailedID_": {
+          "runAfter": {
+            "Add_to_time": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "4770d860-2d36-4e3c-a051-aaa79abace8e"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "FailedID",
+                "type": "array"
+              }
+            ]
+          }
+        },
+        "Initialize_ReviewHubTeamEmail": {
+          "runAfter": {
+            "Initialize_FailedID_": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "74fbdc1b-6e8d-4716-9f93-e3fa5b56572d"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "ReviewHubTeamEmail",
+                "type": "string",
+                "value": "@parameters('EnvVar - ReviewHub - Team Email (chub_EnvVarReviewHubTeamEmail)')"
+              }
+            ]
+          }
+        },
+        "Initialize_Products": {
+          "runAfter": {
+            "Initialize_yearStr": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "0c48d077-2f99-4551-ab9b-c8553cdeca1e"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "Products",
+                "type": "array",
+                "value": []
+              }
+            ]
+          }
+        },
+        "Get_FactMetric_products": {
+          "actions": {
+            "Get_ReviewHub_FactMetrics_products": {
+              "runAfter": {},
+              "metadata": {
+                "operationMetadataId": "d8ef8805-a809-42e2-a41e-9973c0cbbe77"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "connectionName": "shared_commondataserviceforapps_1",
+                  "operationId": "ListRecords",
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                },
+                "parameters": {
+                  "entityName": "craf2_reviewhub_factmetrics",
+                  "$select": "*",
+                  "$filter": "(craf2_fm_valuenumber ne 0 or craf2_fm_valueyesno ne null or craf2_fm_valuetext ne null) and craf2_fm_reviewlockdate eq @{variables('Current Review Month Lock Date')}",
+                  "$expand": "craf2_fm_ProductMetric($select=craf2_productmetricid,craf2_productmetrictitle;$expand=craf2_pm_MetricType($select=craf2_metrictypeid))",
+                  "$top": 1000000
+                },
+                "authentication": {
+                  "type": "Raw",
+                  "value": "@json(decodeBase64(triggerOutputs().headers['X-MS-APIM-Tokens']))['$ConnectionKey']"
+                }
+              },
+              "runtimeConfiguration": {
+                "paginationPolicy": {
+                  "minimumItemCount": 100000
+                }
+              }
+            },
+            "Parse_FactMetric_JSON": {
+              "runAfter": {
+                "Get_ReviewHub_FactMetrics_products": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "fea5068c-f253-4840-8665-57c0e4de0705"
+              },
+              "type": "ParseJson",
+              "inputs": {
+                "content": "@outputs('Get_ReviewHub_FactMetrics_products')?['body/value']",
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "@@odata.type": {
+                        "type": "string"
+                      },
+                      "@@odata.id": {
+                        "type": "string"
+                      },
+                      "@@odata.etag": {
+                        "type": "string"
+                      },
+                      "@@odata.editLink": {
+                        "type": "string"
+                      },
+                      "statecode@OData.Community.Display.V1.FormattedValue": {
+                        "type": "string"
+                      },
+                      "statecode": {
+                        "type": "integer"
+                      },
+                      "_craf2_fm_productmetric_value@OData.Community.Display.V1.FormattedValue": {
+                        "type": "string"
+                      },
+                      "_craf2_fm_productmetric_value@Microsoft.Dynamics.CRM.associatednavigationproperty": {
+                        "type": "string"
+                      },
+                      "_craf2_fm_productmetric_value@Microsoft.Dynamics.CRM.lookuplogicalname": {
+                        "type": "string"
+                      },
+                      "_craf2_fm_productmetric_value@odata.type": {
+                        "type": "string"
+                      },
+                      "_craf2_fm_productmetric_value": {
+                        "type": "string"
+                      },
+                      "craf2_reviewhub_factmetricid@odata.type": {
+                        "type": "string"
+                      },
+                      "craf2_reviewhub_factmetricid": {
+                        "type": "string"
+                      },
+                      "createdon@OData.Community.Display.V1.FormattedValue": {
+                        "type": "string"
+                      },
+                      "createdon@odata.type": {
+                        "type": "string"
+                      },
+                      "createdon": {
+                        "type": "string"
+                      },
+                      "_ownerid_value@OData.Community.Display.V1.FormattedValue": {
+                        "type": "string"
+                      },
+                      "_ownerid_value@Microsoft.Dynamics.CRM.associatednavigationproperty": {
+                        "type": "string"
+                      },
+                      "_ownerid_value@Microsoft.Dynamics.CRM.lookuplogicalname": {
+                        "type": "string"
+                      },
+                      "_ownerid_value@odata.type": {
+                        "type": "string"
+                      },
+                      "_ownerid_value": {
+                        "type": "string"
+                      },
+                      "craf2_factmetrictitle": {
+                        "type": "string"
+                      },
+                      "modifiedon@OData.Community.Display.V1.FormattedValue": {
+                        "type": "string"
+                      },
+                      "modifiedon@odata.type": {
+                        "type": "string"
+                      },
+                      "modifiedon": {
+                        "type": "string"
+                      },
+                      "versionnumber@OData.Community.Display.V1.FormattedValue": {
+                        "type": "string"
+                      },
+                      "versionnumber@odata.type": {
+                        "type": "string"
+                      },
+                      "versionnumber": {
+                        "type": "integer"
+                      },
+                      "timezoneruleversionnumber@OData.Community.Display.V1.FormattedValue": {
+                        "type": "string"
+                      },
+                      "timezoneruleversionnumber": {
+                        "type": "integer"
+                      },
+                      "statuscode@OData.Community.Display.V1.FormattedValue": {
+                        "type": "string"
+                      },
+                      "statuscode": {
+                        "type": "integer"
+                      },
+                      "_modifiedby_value@OData.Community.Display.V1.FormattedValue": {
+                        "type": "string"
+                      },
+                      "_modifiedby_value@Microsoft.Dynamics.CRM.lookuplogicalname": {
+                        "type": "string"
+                      },
+                      "_modifiedby_value@odata.type": {
+                        "type": "string"
+                      },
+                      "_modifiedby_value": {
+                        "type": "string"
+                      },
+                      "craf2_fm_isnotapplicable@OData.Community.Display.V1.FormattedValue": {
+                        "type": "string"
+                      },
+                      "craf2_fm_isnotapplicable": {
+                        "type": "boolean"
+                      },
+                      "craf2_fm_productid@OData.Community.Display.V1.FormattedValue": {
+                        "type": "string"
+                      },
+                      "craf2_fm_productid": {
+                        "type": "integer"
+                      },
+                      "craf2_fm_reviewlockdate@OData.Community.Display.V1.FormattedValue": {
+                        "type": "string"
+                      },
+                      "craf2_fm_reviewlockdate@odata.type": {
+                        "type": "string"
+                      },
+                      "craf2_fm_reviewlockdate": {
+                        "type": "string"
+                      },
+                      "craf2_fm_targettext": {
+                        "type": "string"
+                      },
+                      "_createdby_value@OData.Community.Display.V1.FormattedValue": {
+                        "type": "string"
+                      },
+                      "_createdby_value@Microsoft.Dynamics.CRM.lookuplogicalname": {
+                        "type": "string"
+                      },
+                      "_createdby_value@odata.type": {
+                        "type": "string"
+                      },
+                      "_createdby_value": {
+                        "type": "string"
+                      },
+                      "_owningbusinessunit_value@OData.Community.Display.V1.FormattedValue": {
+                        "type": "string"
+                      },
+                      "_owningbusinessunit_value@Microsoft.Dynamics.CRM.associatednavigationproperty": {
+                        "type": "string"
+                      },
+                      "_owningbusinessunit_value@Microsoft.Dynamics.CRM.lookuplogicalname": {
+                        "type": "string"
+                      },
+                      "_owningbusinessunit_value@odata.type": {
+                        "type": "string"
+                      },
+                      "_owningbusinessunit_value": {
+                        "type": "string"
+                      },
+                      "chub_fm_boardtypeid@OData.Community.Display.V1.FormattedValue": {
+                        "type": "string"
+                      },
+                      "chub_fm_boardtypeid": {
+                        "type": "integer"
+                      },
+                      "_owninguser_value@Microsoft.Dynamics.CRM.lookuplogicalname": {
+                        "type": "string"
+                      },
+                      "_owninguser_value@odata.type": {
+                        "type": "string"
+                      },
+                      "_owninguser_value": {
+                        "type": "string"
+                      },
+                      "craf2_factmetricid@OData.Community.Display.V1.FormattedValue": {
+                        "type": "string"
+                      },
+                      "craf2_factmetricid": {
+                        "type": "integer"
+                      },
+                      "craf2_fm_valuedate@OData.Community.Display.V1.FormattedValue": {
+                        "type": "string"
+                      },
+                      "craf2_fm_valuedate@odata.type": {
+                        "type": "string"
+                      },
+                      "craf2_fm_valuedate": {
+                        "type": "string"
+                      },
+                      "ownerid@odata.associationLink": {
+                        "type": "string"
+                      },
+                      "ownerid@odata.navigationLink": {
+                        "type": "string"
+                      },
+                      "owningbusinessunit@odata.associationLink": {
+                        "type": "string"
+                      },
+                      "owningbusinessunit@odata.navigationLink": {
+                        "type": "string"
+                      },
+                      "craf2_fm_ProductMetric@odata.associationLink": {
+                        "type": "string"
+                      },
+                      "craf2_fm_ProductMetric@odata.navigationLink": {
+                        "type": "string"
+                      },
+                      "craf2_fm_ProductMetric": {
+                        "type": "object",
+                        "properties": {
+                          "@@odata.type": {
+                            "type": "string"
+                          },
+                          "@@odata.id": {
+                            "type": "string"
+                          },
+                          "@@odata.editLink": {
+                            "type": "string"
+                          },
+                          "craf2_productmetricid@OData.Community.Display.V1.FormattedValue": {
+                            "type": "string"
+                          },
+                          "craf2_productmetricid": {
+                            "type": "integer"
+                          },
+                          "craf2_productmetrictitle": {
+                            "type": "string"
+                          },
+                          "craf2_reviewhub_productmetricid@odata.type": {
+                            "type": "string"
+                          },
+                          "craf2_reviewhub_productmetricid": {
+                            "type": "string"
+                          },
+                          "craf2_pm_MetricType@odata.associationLink": {
+                            "type": "string"
+                          },
+                          "craf2_pm_MetricType@odata.navigationLink": {
+                            "type": "string"
+                          },
+                          "craf2_pm_MetricType": {
+                            "type": "object",
+                            "properties": {
+                              "@@odata.type": {
+                                "type": "string"
+                              },
+                              "@@odata.id": {
+                                "type": "string"
+                              },
+                              "@@odata.editLink": {
+                                "type": "string"
+                              },
+                              "craf2_metrictypeid@OData.Community.Display.V1.FormattedValue": {
+                                "type": "string"
+                              },
+                              "craf2_metrictypeid": {
+                                "type": "integer"
+                              },
+                              "craf2_reviewhub_metrictypeid@odata.type": {
+                                "type": "string"
+                              },
+                              "craf2_reviewhub_metrictypeid": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "createdby@odata.associationLink": {
+                        "type": "string"
+                      },
+                      "createdby@odata.navigationLink": {
+                        "type": "string"
+                      },
+                      "createdonbehalfby@odata.associationLink": {
+                        "type": "string"
+                      },
+                      "createdonbehalfby@odata.navigationLink": {
+                        "type": "string"
+                      },
+                      "modifiedby@odata.associationLink": {
+                        "type": "string"
+                      },
+                      "modifiedby@odata.navigationLink": {
+                        "type": "string"
+                      },
+                      "modifiedonbehalfby@odata.associationLink": {
+                        "type": "string"
+                      },
+                      "modifiedonbehalfby@odata.navigationLink": {
+                        "type": "string"
+                      },
+                      "owninguser@odata.associationLink": {
+                        "type": "string"
+                      },
+                      "owninguser@odata.navigationLink": {
+                        "type": "string"
+                      },
+                      "owningteam@odata.associationLink": {
+                        "type": "string"
+                      },
+                      "owningteam@odata.navigationLink": {
+                        "type": "string"
+                      },
+                      "craf2_reviewhub_factmetric_SyncErrors@odata.associationLink": {
+                        "type": "string"
+                      },
+                      "craf2_reviewhub_factmetric_SyncErrors@odata.navigationLink": {
+                        "type": "string"
+                      },
+                      "craf2_reviewhub_factmetric_DuplicateMatchingRecord@odata.associationLink": {
+                        "type": "string"
+                      },
+                      "craf2_reviewhub_factmetric_DuplicateMatchingRecord@odata.navigationLink": {
+                        "type": "string"
+                      },
+                      "craf2_reviewhub_factmetric_DuplicateBaseRecord@odata.associationLink": {
+                        "type": "string"
+                      },
+                      "craf2_reviewhub_factmetric_DuplicateBaseRecord@odata.navigationLink": {
+                        "type": "string"
+                      },
+                      "craf2_reviewhub_factmetric_AsyncOperations@odata.associationLink": {
+                        "type": "string"
+                      },
+                      "craf2_reviewhub_factmetric_AsyncOperations@odata.navigationLink": {
+                        "type": "string"
+                      },
+                      "craf2_reviewhub_factmetric_MailboxTrackingFolders@odata.associationLink": {
+                        "type": "string"
+                      },
+                      "craf2_reviewhub_factmetric_MailboxTrackingFolders@odata.navigationLink": {
+                        "type": "string"
+                      },
+                      "craf2_reviewhub_factmetric_UserEntityInstanceDatas@odata.associationLink": {
+                        "type": "string"
+                      },
+                      "craf2_reviewhub_factmetric_UserEntityInstanceDatas@odata.navigationLink": {
+                        "type": "string"
+                      },
+                      "craf2_reviewhub_factmetric_ProcessSession@odata.associationLink": {
+                        "type": "string"
+                      },
+                      "craf2_reviewhub_factmetric_ProcessSession@odata.navigationLink": {
+                        "type": "string"
+                      },
+                      "craf2_reviewhub_factmetric_BulkDeleteFailures@odata.associationLink": {
+                        "type": "string"
+                      },
+                      "craf2_reviewhub_factmetric_BulkDeleteFailures@odata.navigationLink": {
+                        "type": "string"
+                      },
+                      "craf2_reviewhub_factmetric_PrincipalObjectAttributeAccesses@odata.associationLink": {
+                        "type": "string"
+                      },
+                      "craf2_reviewhub_factmetric_PrincipalObjectAttributeAccesses@odata.navigationLink": {
+                        "type": "string"
+                      },
+                      "craf2_fm_targetyesno@OData.Community.Display.V1.FormattedValue": {
+                        "type": "string"
+                      },
+                      "craf2_fm_targetyesno": {
+                        "type": "integer"
+                      },
+                      "craf2_fm_targetnumber@OData.Community.Display.V1.FormattedValue": {
+                        "type": "string"
+                      },
+                      "craf2_fm_targetnumber@odata.type": {
+                        "type": "string"
+                      },
+                      "craf2_fm_targetnumber": {
+                        "type": [
+                          "integer",
+                          "number"
+                        ]
+                      },
+                      "craf2_fm_yellowtargetstart@OData.Community.Display.V1.FormattedValue": {
+                        "type": "string"
+                      },
+                      "craf2_fm_yellowtargetstart@odata.type": {
+                        "type": "string"
+                      },
+                      "craf2_fm_yellowtargetstart": {
+                        "type": [
+                          "integer",
+                          "number"
+                        ]
+                      }
+                    },
+                    "required": []
+                  }
+                }
+              }
+            },
+            "Filter_FactMetric_products_that_is_not_in_AutomaticNotificationLog": {
+              "runAfter": {
+                "Filter_FactMetric_products_that_is_automated_metric": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "37e8d396-c4da-4da3-823d-c14f232f5114"
+              },
+              "type": "Query",
+              "inputs": {
+                "from": "@body('Filter_FactMetric_products_that_is_automated_metric')",
+                "where": "@not(contains(outputs('ProductIDs'), item()['craf2_fm_productid']))"
+              }
+            },
+            "Set_products": {
+              "runAfter": {
+                "Filter_FactMetric_products_that_is_not_in_AutomaticNotificationLog": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "0903eb31-df1c-42ef-b971-adad25c298aa"
+              },
+              "type": "SetVariable",
+              "inputs": {
+                "name": "Products",
+                "value": "@body('Filter_FactMetric_products_that_is_not_in_AutomaticNotificationLog')"
+              }
+            },
+            "Filter_FactMetric_products_that_is_automated_metric": {
+              "runAfter": {
+                "Parse_FactMetric_JSON": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "37e8d396-c4da-4da3-823d-c14f232f5114"
+              },
+              "type": "Query",
+              "inputs": {
+                "from": "@body('Parse_FactMetric_JSON')",
+                "where": "@contains(outputs('MetricTypeIDs'), item()?['craf2_fm_ProductMetric']?['craf2_pm_MetricType']?['craf2_metrictypeid'])"
+              }
+            }
+          },
+          "runAfter": {
+            "Get_Automated_MetricTypeDetail": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "dbba379a-8393-47cf-b5e5-7db22fcf0c1e"
+          },
+          "type": "Scope"
+        },
+        "Get_NotificationLog_Records": {
+          "actions": {
+            "Get_AutomaticNotificationLog_records": {
+              "runAfter": {},
+              "metadata": {
+                "operationMetadataId": "454457bc-170d-4449-8caf-3e77b797c80e"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "connectionName": "shared_commondataserviceforapps_1",
+                  "operationId": "ListRecords",
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                },
+                "parameters": {
+                  "entityName": "craf2_reviewhub_automaticnotifcationlogs",
+                  "$filter": "craf2_an_date ne null"
+                },
+                "authentication": {
+                  "type": "Raw",
+                  "value": "@json(decodeBase64(triggerOutputs().headers['X-MS-APIM-Tokens']))['$ConnectionKey']"
+                }
+              }
+            },
+            "Filter_AutomaticNotificationLog_records_based_on_current_month_and_year": {
+              "runAfter": {
+                "Get_AutomaticNotificationLog_records": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "973245d8-0656-4689-b055-f9cab30ef826"
+              },
+              "type": "Query",
+              "inputs": {
+                "from": "@outputs('Get_AutomaticNotificationLog_records')?['body/value']",
+                "where": "@and(equals(formatDateTime(item()?['craf2_an_date'], 'MM'), variables('month')), equals(formatDateTime(item()?['craf2_an_date'], 'yyyy'), variables('year')))"
+              }
+            },
+            "Parse_AutomaticNotificationLog_JSON": {
+              "runAfter": {
+                "Filter_AutomaticNotificationLog_records_based_on_current_month_and_year": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "83252b29-e6ff-445b-a9d8-c3f5b99a5303"
+              },
+              "type": "ParseJson",
+              "inputs": {
+                "content": "@body('Filter_AutomaticNotificationLog_records_based_on_current_month_and_year')",
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "@@odata.type": {
+                        "type": "string"
+                      },
+                      "@@odata.id": {
+                        "type": "string"
+                      },
+                      "@@odata.etag": {
+                        "type": "string"
+                      },
+                      "@@odata.editLink": {
+                        "type": "string"
+                      },
+                      "timezoneruleversionnumber@OData.Community.Display.V1.FormattedValue": {
+                        "type": "string"
+                      },
+                      "timezoneruleversionnumber": {
+                        "type": "integer"
+                      },
+                      "_owningbusinessunit_value@OData.Community.Display.V1.FormattedValue": {
+                        "type": "string"
+                      },
+                      "_owningbusinessunit_value@Microsoft.Dynamics.CRM.associatednavigationproperty": {
+                        "type": "string"
+                      },
+                      "_owningbusinessunit_value@Microsoft.Dynamics.CRM.lookuplogicalname": {
+                        "type": "string"
+                      },
+                      "_owningbusinessunit_value@odata.type": {
+                        "type": "string"
+                      },
+                      "_owningbusinessunit_value": {
+                        "type": "string"
+                      },
+                      "craf2_an_productid@OData.Community.Display.V1.FormattedValue": {
+                        "type": "string"
+                      },
+                      "craf2_an_productid": {
+                        "type": "integer"
+                      },
+                      "statecode@OData.Community.Display.V1.FormattedValue": {
+                        "type": "string"
+                      },
+                      "statecode": {
+                        "type": "integer"
+                      },
+                      "statuscode@OData.Community.Display.V1.FormattedValue": {
+                        "type": "string"
+                      },
+                      "statuscode": {
+                        "type": "integer"
+                      },
+                      "_createdby_value@OData.Community.Display.V1.FormattedValue": {
+                        "type": "string"
+                      },
+                      "_createdby_value@Microsoft.Dynamics.CRM.lookuplogicalname": {
+                        "type": "string"
+                      },
+                      "_createdby_value@odata.type": {
+                        "type": "string"
+                      },
+                      "_createdby_value": {
+                        "type": "string"
+                      },
+                      "craf2_name": {
+                        "type": "string"
+                      },
+                      "_ownerid_value@OData.Community.Display.V1.FormattedValue": {
+                        "type": "string"
+                      },
+                      "_ownerid_value@Microsoft.Dynamics.CRM.associatednavigationproperty": {
+                        "type": "string"
+                      },
+                      "_ownerid_value@Microsoft.Dynamics.CRM.lookuplogicalname": {
+                        "type": "string"
+                      },
+                      "_ownerid_value@odata.type": {
+                        "type": "string"
+                      },
+                      "_ownerid_value": {
+                        "type": "string"
+                      },
+                      "modifiedon@OData.Community.Display.V1.FormattedValue": {
+                        "type": "string"
+                      },
+                      "modifiedon@odata.type": {
+                        "type": "string"
+                      },
+                      "modifiedon": {
+                        "type": "string"
+                      },
+                      "_modifiedby_value@OData.Community.Display.V1.FormattedValue": {
+                        "type": "string"
+                      },
+                      "_modifiedby_value@Microsoft.Dynamics.CRM.lookuplogicalname": {
+                        "type": "string"
+                      },
+                      "_modifiedby_value@odata.type": {
+                        "type": "string"
+                      },
+                      "_modifiedby_value": {
+                        "type": "string"
+                      },
+                      "_owninguser_value@Microsoft.Dynamics.CRM.lookuplogicalname": {
+                        "type": "string"
+                      },
+                      "_owninguser_value@odata.type": {
+                        "type": "string"
+                      },
+                      "_owninguser_value": {
+                        "type": "string"
+                      },
+                      "craf2_reviewhub_automaticnotifcationlogid@odata.type": {
+                        "type": "string"
+                      },
+                      "craf2_reviewhub_automaticnotifcationlogid": {
+                        "type": "string"
+                      },
+                      "versionnumber@OData.Community.Display.V1.FormattedValue": {
+                        "type": "string"
+                      },
+                      "versionnumber@odata.type": {
+                        "type": "string"
+                      },
+                      "versionnumber": {
+                        "type": "integer"
+                      },
+                      "craf2_an_date@OData.Community.Display.V1.FormattedValue": {
+                        "type": "string"
+                      },
+                      "craf2_an_date@odata.type": {
+                        "type": "string"
+                      },
+                      "craf2_an_date": {
+                        "type": "string"
+                      },
+                      "createdon@OData.Community.Display.V1.FormattedValue": {
+                        "type": "string"
+                      },
+                      "createdon@odata.type": {
+                        "type": "string"
+                      },
+                      "createdon": {
+                        "type": "string"
+                      },
+                      "owningbusinessunit@odata.associationLink": {
+                        "type": "string"
+                      },
+                      "owningbusinessunit@odata.navigationLink": {
+                        "type": "string"
+                      },
+                      "ownerid@odata.associationLink": {
+                        "type": "string"
+                      },
+                      "ownerid@odata.navigationLink": {
+                        "type": "string"
+                      },
+                      "createdby@odata.associationLink": {
+                        "type": "string"
+                      },
+                      "createdby@odata.navigationLink": {
+                        "type": "string"
+                      },
+                      "createdonbehalfby@odata.associationLink": {
+                        "type": "string"
+                      },
+                      "createdonbehalfby@odata.navigationLink": {
+                        "type": "string"
+                      },
+                      "modifiedby@odata.associationLink": {
+                        "type": "string"
+                      },
+                      "modifiedby@odata.navigationLink": {
+                        "type": "string"
+                      },
+                      "modifiedonbehalfby@odata.associationLink": {
+                        "type": "string"
+                      },
+                      "modifiedonbehalfby@odata.navigationLink": {
+                        "type": "string"
+                      },
+                      "owninguser@odata.associationLink": {
+                        "type": "string"
+                      },
+                      "owninguser@odata.navigationLink": {
+                        "type": "string"
+                      },
+                      "owningteam@odata.associationLink": {
+                        "type": "string"
+                      },
+                      "owningteam@odata.navigationLink": {
+                        "type": "string"
+                      },
+                      "craf2_reviewhub_automaticnotifcationlog_SyncErrors@odata.associationLink": {
+                        "type": "string"
+                      },
+                      "craf2_reviewhub_automaticnotifcationlog_SyncErrors@odata.navigationLink": {
+                        "type": "string"
+                      },
+                      "craf2_reviewhub_automaticnotifcationlog_AsyncOperations@odata.associationLink": {
+                        "type": "string"
+                      },
+                      "craf2_reviewhub_automaticnotifcationlog_AsyncOperations@odata.navigationLink": {
+                        "type": "string"
+                      },
+                      "craf2_reviewhub_automaticnotifcationlog_MailboxTrackingFolders@odata.associationLink": {
+                        "type": "string"
+                      },
+                      "craf2_reviewhub_automaticnotifcationlog_MailboxTrackingFolders@odata.navigationLink": {
+                        "type": "string"
+                      },
+                      "craf2_reviewhub_automaticnotifcationlog_UserEntityInstanceDatas@odata.associationLink": {
+                        "type": "string"
+                      },
+                      "craf2_reviewhub_automaticnotifcationlog_UserEntityInstanceDatas@odata.navigationLink": {
+                        "type": "string"
+                      },
+                      "craf2_reviewhub_automaticnotifcationlog_ProcessSession@odata.associationLink": {
+                        "type": "string"
+                      },
+                      "craf2_reviewhub_automaticnotifcationlog_ProcessSession@odata.navigationLink": {
+                        "type": "string"
+                      },
+                      "craf2_reviewhub_automaticnotifcationlog_BulkDeleteFailures@odata.associationLink": {
+                        "type": "string"
+                      },
+                      "craf2_reviewhub_automaticnotifcationlog_BulkDeleteFailures@odata.navigationLink": {
+                        "type": "string"
+                      },
+                      "craf2_reviewhub_automaticnotifcationlog_PrincipalObjectAttributeAccesses@odata.associationLink": {
+                        "type": "string"
+                      },
+                      "craf2_reviewhub_automaticnotifcationlog_PrincipalObjectAttributeAccesses@odata.navigationLink": {
+                        "type": "string"
+                      },
+                      "craf2_reviewhub_automaticnotifcationlog_DuplicateMatchingRecord@odata.associationLink": {
+                        "type": "string"
+                      },
+                      "craf2_reviewhub_automaticnotifcationlog_DuplicateMatchingRecord@odata.navigationLink": {
+                        "type": "string"
+                      },
+                      "craf2_reviewhub_automaticnotifcationlog_DuplicateBaseRecord@odata.associationLink": {
+                        "type": "string"
+                      },
+                      "craf2_reviewhub_automaticnotifcationlog_DuplicateBaseRecord@odata.navigationLink": {
+                        "type": "string"
+                      }
+                    },
+                    "required": []
+                  }
+                }
+              }
+            },
+            "ProductIDs": {
+              "runAfter": {
+                "Select_the_Product_ID": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "10b4bde3-bad2-478f-b201-ad345daa0308"
+              },
+              "type": "Compose",
+              "inputs": "@union(body('Select_the_Product_ID'), body('Select_the_Product_ID'))"
+            },
+            "Select_the_Product_ID": {
+              "runAfter": {
+                "Parse_AutomaticNotificationLog_JSON": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "454095e0-746e-4317-b281-3f7f9c9aa0f3"
+              },
+              "type": "Select",
+              "inputs": {
+                "from": "@body('Parse_AutomaticNotificationLog_JSON')",
+                "select": "@item()['craf2_an_productid']"
+              }
+            }
+          },
+          "runAfter": {
+            "Initialize_email_status": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "82773665-32a5-4233-b3b4-ec15da59e8f5"
+          },
+          "type": "Scope"
+        },
+        "Initialize_stakeholderEmails": {
+          "runAfter": {
+            "This_Month_Review_Lock_Date": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "e31a7706-d225-4d6e-9d6a-a663042087fb"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "stakeholdersEmails",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "Initialize_monthName": {
+          "runAfter": {
+            "Initialize_monthNum": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "13e80273-a467-4951-af98-c4a0f4554958"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "monthName",
+                "type": "string",
+                "value": "@{formatDateTime(body('Add_to_time'),'MMMM')}"
+              }
+            ]
+          }
+        },
+        "Initialize_email_status": {
+          "runAfter": {
+            "Initialize_stakeholderEmails": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "acfc7ae2-e744-4555-8064-e27f967aa984"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "sm_success",
+                "type": "boolean",
+                "value": false
+              }
+            ]
+          }
+        },
+        "Send_email_notification_to_stakeholders": {
+          "actions": {
+            "Clean_stakeholderEmails": {
+              "runAfter": {},
+              "metadata": {
+                "operationMetadataId": "9eb2be22-d0cd-47f7-9b93-ae4e3485479f"
+              },
+              "type": "Compose",
+              "inputs": "@join(union(split(variables('stakeholdersEmails'), '; '), split(variables('stakeholdersEmails'), '; ')), '; ')",
+              "description": "join(union(split(variables('stakeholdersEmails'), '; '), split(variables('stakeholdersEmails'), '; ')), '; ')"
+            },
+            "Check_if_there_is_a_stakeholderEmail": {
+              "actions": {
+                "Set_send_email_status_to_TRUE": {
+                  "runAfter": {
+                    "Send_email_to_stakeholders": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "7d42117f-3be2-44b5-8d13-e455ab7b3809"
+                  },
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "sm_success",
+                    "value": true
+                  }
+                },
+                "Set_send_email_status_to_FALSE": {
+                  "runAfter": {
+                    "Send_email_to_stakeholders": [
+                      "Failed",
+                      "Skipped",
+                      "TimedOut"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "cdb5fd62-f43c-4c01-b4b0-8873a7955a35"
+                  },
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "sm_success",
+                    "value": false
+                  }
+                },
+                "Apply_to_each_product_ids": {
+                  "foreach": "@body('Filter_FactMetric_products_that_is_not_in_AutomaticNotificationLog')",
+                  "actions": {
+                    "Add_new_record_to_AutomationNotificationLog": {
+                      "runAfter": {},
+                      "metadata": {
+                        "operationMetadataId": "d82b94b7-e2e7-4c38-a9b6-31926a325e44"
+                      },
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "host": {
+                          "connectionName": "shared_commondataserviceforapps_1",
+                          "operationId": "CreateRecord",
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                        },
+                        "parameters": {
+                          "entityName": "craf2_reviewhub_automaticnotifcationlogs",
+                          "item/craf2_an_productid": "@items('Apply_to_each_product_ids')?['craf2_fm_productid']",
+                          "item/craf2_name": "@items('Apply_to_each_product_ids')?['craf2_fm_productid']",
+                          "item/craf2_an_date": "@items('Apply_to_each_product_ids')?['craf2_fm_reviewlockdate']"
+                        },
+                        "authentication": {
+                          "type": "Raw",
+                          "value": "@json(decodeBase64(triggerOutputs().headers['X-MS-APIM-Tokens']))['$ConnectionKey']"
+                        }
+                      }
+                    }
+                  },
+                  "runAfter": {
+                    "Set_send_email_status_to_TRUE": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "c1ec5e8a-a0c8-4e9d-83a8-ba026131df34"
+                  },
+                  "type": "Foreach"
+                },
+                "Append_to_array_variable": {
+                  "runAfter": {
+                    "Set_send_email_status_to_FALSE": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "c52c3b2b-30a5-4836-b2f4-4637a3deac63"
+                  },
+                  "type": "AppendToArrayVariable",
+                  "inputs": {
+                    "name": "FailedID",
+                    "value": "@outputs('ProductIDs')"
+                  }
+                },
+                "Send_email_to_stakeholders": {
+                  "runAfter": {},
+                  "metadata": {
+                    "operationMetadataId": "628310d3-b3f6-4abd-9d0e-fa1f5e48edff"
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "connectionName": "shared_office365_1",
+                      "operationId": "SendEmailV2",
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365"
+                    },
+                    "parameters": {
+                      "emailMessage/To": "@parameters('EnvVar - ReviewHub - Team Email (chub_EnvVarReviewHubTeamEmail)')",
+                      "emailMessage/Subject": "ReviewHub - @{variables('monthName')} @{variables('year')} Review Data",
+                      "emailMessage/Body": "<p>Dear All,<br>\n<br>\n@{variables('monthName')} @{variables('year')} review data is now available.<br>\nPlease log into https://aka.ms/reviewhub to add your commentaries and update manual metrics. &nbsp;&nbsp;<br>\n<br>\nBest regards,<br>\nReview Hub Team<br>\n<br>\n----------------------------------------------------------------------------------<br>\n<em>This is an automated message. Plese do not reply to this email.</em></p>",
+                      "emailMessage/From": "@parameters('EnvVar - ReviewHub - Notification Email (chub_EnvVarReviewHubNotificationEmail)')",
+                      "emailMessage/Bcc": "@outputs('Clean_stakeholderEmails')",
+                      "emailMessage/ReplyTo": "@parameters('EnvVar - ReviewHub - Team Email (chub_EnvVarReviewHubTeamEmail)')",
+                      "emailMessage/Importance": "Normal"
+                    },
+                    "authentication": {
+                      "type": "Raw",
+                      "value": "@json(decodeBase64(triggerOutputs().headers['X-MS-APIM-Tokens']))['$ConnectionKey']"
+                    }
+                  }
+                }
+              },
+              "runAfter": {
+                "Clean_stakeholderEmails": [
+                  "Succeeded"
+                ]
+              },
+              "expression": {
+                "not": {
+                  "equals": [
+                    "@length(variables('stakeholdersEmails'))",
+                    0
+                  ]
+                }
+              },
+              "metadata": {
+                "operationMetadataId": "df7e8e4c-f2ba-43e0-9741-5c28ccf8065a"
+              },
+              "type": "If"
+            }
+          },
+          "runAfter": {
+            "Get_Stakeholders_email": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "f3c69215-d7e4-4837-b045-20d155e7f932"
+          },
+          "type": "Scope"
+        },
+        "Get_Stakeholders_email": {
+          "actions": {
+            "Apply_to_each_FactMetric_products": {
+              "foreach": "@body('Filter_FactMetric_products_that_is_not_in_AutomaticNotificationLog')",
+              "actions": {
+                "Get_stakeholder_emails": {
+                  "runAfter": {},
+                  "metadata": {
+                    "operationMetadataId": "d6c44111-e94a-49a5-9593-ee1bcbfd9187"
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "connectionName": "shared_commondataserviceforapps_1",
+                      "operationId": "ListRecords",
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                    },
+                    "parameters": {
+                      "entityName": "craf2_reviewhub_stakeholders",
+                      "$select": "craf2_productstakeholders",
+                      "$filter": "craf2_productstakeholders ne null and craf2_Product/craf2_productid eq @{items('Apply_to_each_FactMetric_products')['craf2_fm_productid']} and craf2_BoardType/craf2_isdisplayinapp eq  true and craf2_BoardType/chub_reviewlockday ne null",
+                      "$expand": "craf2_Product($select=craf2_productid)",
+                      "$top": 1000000
+                    },
+                    "authentication": {
+                      "type": "Raw",
+                      "value": "@json(decodeBase64(triggerOutputs().headers['X-MS-APIM-Tokens']))['$ConnectionKey']"
+                    }
+                  }
+                },
+                "Apply_to_each_stakeholder_emails": {
+                  "foreach": "@outputs('Get_stakeholder_emails')?['body/value']",
+                  "actions": {
+                    "Append_to_stakeholder_emails": {
+                      "runAfter": {
+                        "Remove_|_from_emails": [
+                          "Succeeded"
+                        ]
+                      },
+                      "metadata": {
+                        "operationMetadataId": "8299f2e8-a469-45fc-a2a6-8af0d1721019"
+                      },
+                      "type": "AppendToStringVariable",
+                      "inputs": {
+                        "name": "stakeholdersEmails",
+                        "value": "@{outputs('Remove_|_from_emails')}; "
+                      }
+                    },
+                    "Remove_|_from_emails": {
+                      "runAfter": {},
+                      "metadata": {
+                        "operationMetadataId": "9aad9c98-d888-42c2-995b-6c0e48d76834"
+                      },
+                      "type": "Compose",
+                      "inputs": "@replace(items('Apply_to_each_stakeholder_emails')?['craf2_productstakeholders'], '|', '; ')"
+                    }
+                  },
+                  "runAfter": {
+                    "Get_stakeholder_emails": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "270a6964-4f49-47cd-bd48-60e4ff3169da"
+                  },
+                  "type": "Foreach"
+                }
+              },
+              "runAfter": {},
+              "metadata": {
+                "operationMetadataId": "55d39a9d-fd27-4877-bc78-50ecab623a49"
+              },
+              "type": "Foreach",
+              "runtimeConfiguration": {
+                "concurrency": {
+                  "repetitions": 50
+                }
+              }
+            }
+          },
+          "runAfter": {
+            "Get_FactMetric_products": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "e3a1131a-ecd3-49ea-9c5c-a0176ed982c9"
+          },
+          "type": "Scope"
+        },
+        "Notify_ReviewHubTeam_if_there_is_a_failure": {
+          "actions": {
+            "Check_if_FailedID_exists": {
+              "actions": {
+                "Convert_FailedID_to_string": {
+                  "runAfter": {},
+                  "metadata": {
+                    "operationMetadataId": "b81bb757-89b8-4f7e-a91a-e1cfa8e19a4a"
+                  },
+                  "type": "Compose",
+                  "inputs": "@join(variables('FailedID'), ', ')"
+                },
+                "Send_an_email_to_dtpreviewhub@microsoft.com": {
+                  "runAfter": {
+                    "Convert_FailedID_to_string": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "93c35d26-89a9-44b1-b71b-90a9e8d860e5"
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "connectionName": "shared_office365_1",
+                      "operationId": "SendEmailV2",
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365"
+                    },
+                    "parameters": {
+                      "emailMessage/To": "@variables('ReviewHubTeamEmail')",
+                      "emailMessage/Subject": "ReviewHub - Notification Failed",
+                      "emailMessage/Body": "<p>Dear Team,<br>\n<br>\nThe automatic notfication flow failed to notify the stakeholders for the following products<br>\n@{outputs('Convert_FailedID_to_string')}<br>\n<br>\nBest regards,<br>\n<br>\n----------------------------------------------------------------------------------<br>\n<em>This is an automated message. Plese do not reply to this email.</em></p>",
+                      "emailMessage/Importance": "Normal"
+                    },
+                    "authentication": {
+                      "type": "Raw",
+                      "value": "@json(decodeBase64(triggerOutputs().headers['X-MS-APIM-Tokens']))['$ConnectionKey']"
+                    }
+                  }
+                }
+              },
+              "runAfter": {},
+              "expression": {
+                "greater": [
+                  "@length(variables('FailedID'))",
+                  0
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "ab874473-1168-4265-ad60-f03e2d8bea98"
+              },
+              "type": "If"
+            }
+          },
+          "runAfter": {
+            "Respond_to_a_PowerApp_or_flow": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "01bdd273-0683-49b4-9935-027396df8dd2"
+          },
+          "type": "Scope"
+        },
+        "Initialize_monthNum": {
+          "runAfter": {
+            "Initialize_ReviewHubTeamEmail": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "52838f7a-4f2f-40a3-86a7-101da7901f0b"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "month",
+                "type": "string",
+                "value": "@{\r\nformatDateTime(utcNow(), 'MM')}"
+              }
+            ]
+          },
+          "description": "formatDateTime(utcNow(), 'MM')"
+        },
+        "Initialize_yearStr": {
+          "runAfter": {
+            "Initialize_monthName": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "f1a5424f-5907-48e0-8036-9fa83fc7cb6d"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "year",
+                "type": "string",
+                "value": "@{formatDateTime(utcNow(), 'yyyy')}"
+              }
+            ]
+          },
+          "description": "formatDateTime(utcNow(), 'yyyy')"
+        },
+        "Respond_to_a_PowerApp_or_flow": {
+          "runAfter": {
+            "Send_email_notification_to_stakeholders": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "97ec227e-5870-41db-967f-9232db7b1167"
+          },
+          "type": "Response",
+          "kind": "PowerApp",
+          "inputs": {
+            "statusCode": 200,
+            "body": {
+              "status": "Done"
+            },
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "title": "status",
+                  "x-ms-dynamically-added": true,
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "Add_to_time": {
+          "runAfter": {},
+          "metadata": {
+            "operationMetadataId": "774fe284-78b6-4752-af8e-7d92fa254d3d"
+          },
+          "type": "Expression",
+          "kind": "AddToTime",
+          "inputs": {
+            "baseTime": "@{utcNow()}",
+            "interval": -1,
+            "timeUnit": "Month"
+          }
+        },
+        "This_Month_Review_Lock_Date": {
+          "runAfter": {
+            "Initialize_Products": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "94c27cad-ed61-4dda-8ef8-809421eea41a"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "Current Review Month Lock Date",
+                "type": "string",
+                "value": "@{formatDateTime(addDays(startOfMonth(addToTime(convertFromUtc(utcNow(), 'Pacific Standard Time'), 1, 'month')), -1), 'yyyy-MM-dd')}"
+              }
+            ]
+          }
+        },
+        "Get_Automated_MetricTypeDetail": {
+          "actions": {
+            "Get_Automated_MetricTypeDetail_records": {
+              "runAfter": {},
+              "metadata": {
+                "operationMetadataId": "454457bc-170d-4449-8caf-3e77b797c80e"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "connectionName": "shared_commondataserviceforapps_1",
+                  "operationId": "ListRecords",
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                },
+                "parameters": {
+                  "entityName": "craf2_reviewhub_metrictypedetails",
+                  "$expand": "craf2_MetricType($select=craf2_metrictypeid)"
+                },
+                "authentication": {
+                  "type": "Raw",
+                  "value": "@json(decodeBase64(triggerOutputs().headers['X-MS-APIM-Tokens']))['$ConnectionKey']"
+                }
+              },
+              "runtimeConfiguration": {
+                "paginationPolicy": {
+                  "minimumItemCount": 100000
+                }
+              }
+            },
+            "MetricTypeIDs": {
+              "runAfter": {
+                "Select_the_Metric_Type_ID": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "10b4bde3-bad2-478f-b201-ad345daa0308"
+              },
+              "type": "Compose",
+              "inputs": "@union(body('Select_the_Metric_Type_ID'), body('Select_the_Metric_Type_ID'))"
+            },
+            "Select_the_Metric_Type_ID": {
+              "runAfter": {
+                "Filter_array": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "454095e0-746e-4317-b281-3f7f9c9aa0f3"
+              },
+              "type": "Select",
+              "inputs": {
+                "from": "@body('Filter_array')",
+                "select": "@item()?['craf2_metrictype/craf2_metrictypeid']"
+              }
+            },
+            "Filter_array": {
+              "runAfter": {
+                "Get_Automated_MetricTypeDetail_records": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "82010ce7-cb64-45cc-8623-05c92a51d20d"
+              },
+              "type": "Query",
+              "inputs": {
+                "from": "@outputs('Get_Automated_MetricTypeDetail_records')?['body/value']",
+                "where": "@equals(item()?['craf2_metrictypedetailupdatemethod@OData.Community.Display.V1.FormattedValue'], 'BAG IA automated')"
+              }
+            }
+          },
+          "runAfter": {
+            "Get_NotificationLog_Records": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "82773665-32a5-4233-b3b4-ec15da59e8f5"
+          },
+          "type": "Scope"
+        }
+      }
+    },
+    "templateName": ""
+  },
+  "schemaVersion": "1.0.0.0"
+}

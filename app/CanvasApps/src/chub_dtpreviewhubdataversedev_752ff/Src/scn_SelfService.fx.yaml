@@ -1,0 +1,658 @@
+scn_SelfService As screen:
+    OnHidden: =
+    OnVisible: |-
+        =Set(var_TRCVisible, !var_TRCVisible);
+        Set(varSelectedBoardId, -99);
+        ClearCollect(
+            clln_glry_Admin_SS,
+            Filter(
+                Table(
+                
+                    {
+                        IsEnabled: true,
+                        ID: -4,
+                        ActivityDescription: "<font color=#0072C6><b>[Admin Only]</b></font> Manage <b>read-only and read-write access requests</b>.",
+                        Screen: scn_AC_Administration
+                    },
+                    {
+                        IsEnabled: true,
+                        ID: -3,
+                        ActivityDescription: "<font color=#0072C6><b>[Admin Only]</b></font> Configure <b>metric display order</b> for the scorecard screen.",
+                        Screen: scn_SS_MetricDisplayOrder
+                    },
+                    {
+                        IsEnabled: true,
+                        ID: -2,
+                        ActivityDescription: "<font color=#0072C6><b>[Admin Only]</b></font> Add/Update <b>product</b> information.",
+                        Screen: scn_SS_Product
+                    },
+                    {
+                        IsEnabled: true,
+                        ID: -1,
+                        ActivityDescription: "<font color=#0072C6><b>[Admin Only]</b></font> Manage the <b>administrator</b> and <b>operator</b> user roles for this app. ",
+                        Screen: scn_SS_AdminUsers
+                    },
+                    {
+                        IsEnabled: true,
+                        ID: 1,
+                        ActivityDescription: "Create <b>new scorecards</b> for new review month. ",
+                        Screen: scn_Admin_NewMetricBoard
+                    },
+                    {
+                        IsEnabled: true,
+                        ID: 2,
+                        ActivityDescription: "Create <b>new metric types</b>.",
+                        Screen: scn_SS_NewMetricType 
+                    },
+                    {
+                        IsEnabled: true,
+                        ID: 3,
+                        ActivityDescription: "Update <b>existing metric types</b>. <br>E.g., update <i>Deprecated Date</i>, <i>Description</i>, <i>Health Weight</i>, <i>Short Name</i>, <i>Power BI URL</i>, <i>Display Order</i>, ...",
+                        Screen: scn_SS_UpdateMetricType
+                    }, 
+                    {
+                        IsEnabled: true,
+                        ID: 4,
+                        ActivityDescription: "Update/Delete <b>existing scorecards</b> (a.k.a. metric boards). <br>E.g., update <i>Review Owner</i>, <i>Health Score</i>, ...",
+                        Screen: scn_SS_UpdateFMB
+                    },
+                    {
+                        IsEnabled: true,
+                        ID: 5,
+                        ActivityDescription: "Manage the <b>coordinator</b> user role for this app. ",
+                        Screen: scn_SS_CoordinatorUsers
+                    },
+                    {
+                        IsEnabled: true,
+                        ID: 6,
+                        ActivityDescription: "Configure/View <b>scorecard auto-creation</b> settings for every review month.",
+                        Screen: scn_SS_AutoCreateCards
+                    },
+                    {
+                        IsEnabled: true,
+                        ID: 7,
+                        ActivityDescription: "Bulk <b>Create/ Update Metrics</b>. ", //<font color=#0072C6><b>[Admin Only]</b>
+                        Screen: scn_SS_UploadMetricDetails
+                    },
+                    {
+                        IsEnabled: true,
+                        ID: 8,
+                        ActivityDescription: "Update <b>Product Metric Update Method</b>. ", //<font color=#0072C6><b>[Admin Only]</b>
+                        Screen: scn_SS_UpdateMethod
+                    },
+                    {
+                        IsEnabled: true,
+                        ID: 9,
+                        ActivityDescription: "Update <b>Board Types</b>. ", //<font color=#0072C6><b>[Admin Only]</b>
+                        Screen: scn_SS_BoardTypes
+                    },
+                    {
+                        IsEnabled: true,
+                        ID: 10,
+                        ActivityDescription: "View <b>app loading performance</b>. ", //<font color=#0072C6><b>[Admin Only]</b>
+                        Screen: scn_SS_AppPerformance
+                    }
+                ),
+                IsAdmin || (IsCoordinator && ID >= 1)
+            )
+        )//scn_SS_BoardTypes
+
+    BAGIAAppHeader_SS As AppHeader:
+        DropDownSelection: =TrackRequestComponent_SS.HideTrackRequest
+        FeatureRequestUrl: =var_FeatureRequestURL
+        FeedbackButtonUrl: =var_SendFeedback_URL
+        inputAppDisplayName: =varAppHeaderText
+        Reset: =SurveyComponent_SS.HideSurvey
+        ScorecardOnboardingFeatureUrl: =var_ScorecardOnboardingRequestURL
+        Y: =0
+        ZIndex: =1
+
+    LeftNavi_SS As groupContainer.manualLayoutContainer:
+        BorderStyle: =BorderStyle.None
+        Fill: =BlueControlDarkBackground
+        Height: =App.Height - Self.Y
+        Width: =var_LeftNavi_Width
+        Y: =BAGIAAppHeader_SS.Height
+        ZIndex: =3
+
+        glry_LeftNavi_5 As gallery.variableTemplateHeightGallery:
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            Height: =Parent.Height - Self.Y
+            Items: |-
+                =Sort(
+                    varLeftNavOptions,
+                    If(ThisRecord.ID < 0, ID),
+                    SortOrder.Descending
+                )
+            Layout: =Layout.Vertical
+            OnSelect: |
+                =Set(varSelectedBoardId, ThisItem.ID);
+                Navigate(ThisItem.Screen);
+            ShowScrollbar: =false
+            TemplateFill: |-
+                =If(
+                    ThisItem.ID = varSelectedBoardId,
+                    ColorFade(BlueControlDarkBackground, 20%), 
+                    RGBA(0,0,0,0)
+                )
+            TemplatePadding: =0
+            TemplateSize: =45
+            Width: =Parent.Width
+            Y: =icon_CollapseExpand_5.Y + icon_CollapseExpand_5.Height
+            ZIndex: =1
+
+            imgCircle_LN_5 As circle:
+                DisplayMode: =DisplayMode.View
+                Fill: =RGBA(255, 255, 255, 0.90)
+                Height: =img_LN_5.Height - 5
+                OnSelect: =Select(Parent)
+                Visible: =If(IsBlank(ThisItem.BoardTypeID), false, true)
+                Width: =Self.Height
+                X: =img_LN_5.X + (img_LN_5.Width - Self.Width) * 0.5 
+                Y: =(Parent.TemplateHeight - Self.Height) * 0.5
+                ZIndex: =1
+
+            NoImage_LN_5 As label:
+                Align: =Align.Center
+                Color: =BlueControlDarkBackground
+                FocusedBorderThickness: =1
+                Font: =Font.'Segoe UI'
+                FontWeight: =FontWeight.Semibold
+                Height: =img_LN_5.Height
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Text: =Upper(Left(ThisItem.Title, 2))
+                Tooltip: =ThisItem.Title
+                Visible: |-
+                    =If(
+                        IsBlankOrError(ThisItem.PID), //It means this is not a scorecard tab and should always have a logo.
+                        false, 
+                        If(
+                            IsBlankOrError(LookUp(ReviewHub_Products, ThisRecord.ProductID = ThisItem.PID).LogoImage), //When on scorecard tab, the product logo is missing, 
+                            true,
+                            false
+                        )
+                    )
+                Width: =img_LN_5.Width
+                X: =rect_LN_5.X + rect_LN_5.Width
+                ZIndex: =2
+
+            img_LN_5 As image:
+                AutoDisableOnSelect: =false
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Height: =Self.Width
+                Image: |-
+                    =If(
+                        NoImage_LN_5.Visible,
+                        Blank(),
+                        If(IsBlankOrError(ThisItem.PID), 
+                        ThisItem.ImagePath , LookUp(ReviewHub_Products, ThisRecord.ProductID = ThisItem.PID).LogoImage.Value)
+                    )
+                OnSelect: =Select(Parent)
+                PaddingBottom: =If(IsBlank(ThisItem.BoardTypeID), 3, 9)
+                PaddingLeft: =If(IsBlank(ThisItem.BoardTypeID), 3, 8)
+                PaddingRight: =If(IsBlank(ThisItem.BoardTypeID), 3, 8)
+                PaddingTop: =If(IsBlank(ThisItem.BoardTypeID), 3, 9)
+                Tooltip: =ThisItem.Title
+                Width: =Parent.TemplateHeight
+                X: =rect_LN_5.X + rect_LN_5.Width
+                ZIndex: =3
+
+            html_LN_5 As htmlViewer:
+                Color: =RGBA(255, 255, 255, 1)
+                DisplayMode: =DisplayMode.View
+                Fill: =RGBA(0, 0, 0, 0)
+                Font: =FontStyle
+                Height: =45
+                HtmlText: |-
+                    ="<span style='background-color: " 
+                    & If(
+                        Parent.Width = var_LeftNavi_ExpandWidth, 
+                        "#79b5de; color: #FFFFFF;  display: inline-block; padding: 1px 6px; font-weight: ", 
+                        "rgba(121, 181, 222, 0.75); color: #FFFFFF;  display: inline-block; padding: 1px 3px; font-weight: "
+                    ) 
+                    & If(ThisItem.ID = varSelectedBoardId, "600", "400") & "; border-radius: 5px;'>"
+                    & If(
+                        Parent.Width = var_LeftNavi_ExpandWidth, 
+                        LookUp(clln_BoardTypes, ThisRecord.bt_BoardTypeID = ThisItem.BoardTypeID).bt_BoardTypeShortName,
+                        Upper(Left(LookUp(clln_BoardTypes, ThisRecord.bt_BoardTypeID = ThisItem.BoardTypeID).bt_BoardTypeShortName,2))
+                    )
+                    & "</span></font>"
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =Title_LN_5.PaddingLeft
+                PaddingRight: =Title_LN_5.PaddingRight
+                PaddingTop: =If(Parent.Width = var_LeftNavi_ExpandWidth, 6, 0)
+                Size: =Title_LN_5.Size
+                Visible: =If(IsBlank(ThisItem.BoardTypeID), false, true)
+                Width: =If(Parent.Width = var_LeftNavi_ExpandWidth, Title_LN_5.Width, img_LN_5.Width)
+                X: =If(Parent.Width = var_LeftNavi_ExpandWidth, Title_LN_5.X, img_LN_5.X)
+                ZIndex: =4
+
+            Title_LN_5 As label:
+                BorderColor: =RGBA(32, 54, 71, 1)
+                BorderStyle: =BorderStyle.None
+                Color: =RGBA(255, 255, 255, 1)
+                DisplayMode: =DisplayMode.View
+                FocusedBorderColor: =Title_LN_5.BorderColor
+                Font: =FontStyle
+                FontWeight: =If(ThisItem.ID = varSelectedBoardId, FontWeight.Semibold, FontWeight.Normal)
+                Height: =Parent.TemplateHeight
+                HoverBorderColor: =Title_LN_5.BorderColor
+                HoverColor: =Title_LN_5.Color
+                HoverFill: =Title_LN_5.Fill
+                LineHeight: =1
+                OnSelect: =Select(Parent)
+                PaddingBottom: =If(IsBlank(ThisItem.BoardTypeID), 0, 5)
+                PaddingLeft: =2
+                PaddingTop: =0
+                PressedBorderColor: =Title_LN_5.BorderColor
+                PressedColor: =Title_LN_5.Color
+                PressedFill: =Title_LN_5.Fill
+                Size: =9
+                Text: =ThisItem.Title
+                Tooltip: =ThisItem.Title
+                VerticalAlign: =If(IsBlank(ThisItem.BoardTypeID), VerticalAlign.Middle, VerticalAlign.Bottom)
+                Width: =Parent.Width - Self.X
+                Wrap: =false
+                X: =img_LN_5.X + img_LN_5.Width
+                ZIndex: =5
+
+            TopDivider_LN_5 As rectangle:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Fill: =RGBA(0, 91, 159, 0.30)
+                Height: =1
+                OnSelect: =Select(Parent)
+                Width: =Parent.Width
+                ZIndex: =6
+
+            rect_LN_5 As rectangle:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Fill: =If(ThisItem.ID = varSelectedBoardId, BlueNaviHightLightBackground, TABLEHEADERCOLOR)
+                FocusedBorderColor: =rect_LN_5.BorderColor
+                Height: =Parent.TemplateHeight - Self.Y
+                HoverFill: =rect_LN_5.Fill
+                OnSelect: =Select(Parent)
+                Tooltip: =
+                Width: =6
+                Y: =1
+                ZIndex: =7
+
+            btn_LN_Top_5 As button:
+                AutoDisableOnSelect: =false
+                BorderColor: =
+                BorderStyle: =BorderStyle.None
+                BorderThickness: =0
+                Color: =RGBA(0, 0, 0, 0)
+                DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                DisabledColor: =RGBA(0, 0, 0, 0)
+                DisabledFill: =RGBA(0, 0, 0, 0)
+                Fill: =RGBA(0, 0, 0, 0)
+                Font: =FontStyle
+                Height: =Parent.TemplateHeight
+                HoverBorderColor: =
+                HoverColor: =RGBA(0, 0, 0, 0)
+                HoverFill: =
+                OnSelect: =Select(Parent)
+                PressedBorderColor: =
+                PressedColor: =
+                Text: =//Need this button for the hover-over hand cursor.
+                Tooltip: |
+                    =If(
+                        IsBlankOrError(ThisItem.BoardTypeID),
+                        ThisItem.Title,
+                        Text(ThisItem.ReviewDate, "mmmm yyyy") &
+                            " - (" & LookUp(clln_BoardTypes, ThisRecord.bt_BoardTypeID = ThisItem.BoardTypeID).bt_BoardTypeShortName & ") " 
+                            & ThisItem.Title
+                    )
+                Width: =Parent.TemplateWidth
+                ZIndex: =8
+
+            close_LN_5 As icon.CancelBadge:
+                AutoDisableOnSelect: =false
+                BorderStyle: =BorderStyle.None
+                Color: =RGBA(255, 255, 255, 1)
+                Height: =25
+                HoverColor: =RedFontColor
+                HoverFill: =BlueNaviHightLightBackground
+                Icon: =Icon.Cancel
+                OnSelect: |-
+                    =If(
+                        App.ActiveScreen.Name = "BoardScreen", //When user is currently staying on a Board Screen, navigate to Home Screen.
+                        Navigate(HomeScreen)
+                    );
+                    
+                    RemoveIf(varLeftNavOptions, ThisRecord.ID = ThisItem.ID)
+                    /*
+                    Concurrent(
+                        RemoveIf(varLeftNavOptions, ThisRecord.ID = ThisItem.ID),
+                        RemoveIf(clln_ProductMetrics_BS, ThisRecord.pm_ProductID = ThisItem.PID),
+                        RemoveIf(clln_factMetrics_BS, ThisRecord.fm_ProductID = ThisItem.PID)
+                    );
+                    */
+                PaddingBottom: =5
+                PaddingLeft: =5
+                PaddingRight: =5
+                PaddingTop: =5
+                Tooltip: ="Close this tab"
+                Visible: =!IsBlankOrError(ThisItem.BoardTypeID) && Parent.Width = var_LeftNavi_ExpandWidth //When collapsed, not showing close button.
+                Width: =25
+                X: =Title_LN_5.X + Title_LN_5.Width - Self.Width
+                ZIndex: =9
+
+        icon_CollapseExpand_5 As icon.Add:
+            BorderColor: =RGBA(32, 54, 71, 1)
+            Color: =RGBA(255, 255, 255, 1)
+            DisabledFill: =icon_CollapseExpand_5.Fill
+            FocusedBorderColor: =icon_CollapseExpand_5.BorderColor
+            Height: |
+                =45
+            HoverBorderColor: =ColorFade(icon_CollapseExpand_5.BorderColor, 20%)
+            HoverColor: =ColorFade(icon_CollapseExpand_5.Color, 20%)
+            HoverFill: =icon_CollapseExpand_5.Fill
+            Icon: =If(Parent.Width = var_LeftNavi_ExpandWidth, Icon.DockLeft, Icon.DockRight)
+            OnSelect: =Set(var_LeftNavi_Width, If(Parent.Width = var_LeftNavi_CollapseWidth, var_LeftNavi_ExpandWidth, var_LeftNavi_CollapseWidth))
+            PaddingBottom: =10
+            PaddingLeft: =10
+            PaddingRight: =10
+            PaddingTop: =10
+            PressedBorderColor: =ColorFade(icon_CollapseExpand_5.BorderColor, -20%)
+            PressedColor: =ColorFade(icon_CollapseExpand_5.Color, -20%)
+            PressedFill: =icon_CollapseExpand_5.Fill
+            Tooltip: ="Collapse/Expand"
+            Width: =var_LeftNavi_CollapseWidth
+            X: =Parent.Width - Self.Width
+            ZIndex: =2
+
+    ctn_Coordinator_SS As groupContainer:
+        Height: =App.Height - Self.Y - 10
+        Visible: =IsAdmin || IsCoordinator
+        Width: =(App.Width - Self.X) - 50
+        X: =LeftNavi_SS.Width + 50
+        Y: |-
+            =If(
+                ctn_Operator_SS.Visible, 
+                ctn_Operator_SS.Y + ctn_Operator_SS.Height + 10, 
+                lbl_SelfService_SS.Y+lbl_SelfService_SS.Height+10
+            )
+        ZIndex: =4
+
+        glry_Admin_SS As gallery.variableTemplateHeightGallery:
+            BorderColor: =Top_Back_Coord_SS.Fill
+            BorderThickness: =2
+            Height: =Min(Sum(Self.AllItems, Value(lbl_Height_Coord_SS.Text)) + 1, Parent.Height - Self.Y - 1)
+            Items: |-
+                =Ungroup( //Ungroup function to add a Row Number column.
+                        ForAll(
+                            Sequence(CountRows(clln_glry_Admin_SS)),
+                            {
+                                Record: Table(Last(FirstN(clln_glry_Admin_SS, Value))),
+                                RowNumber: Value
+                            }
+                        ),
+                        "Record"
+                    )
+            Layout: =Layout.Vertical
+            TemplateFill: =If(Mod(ThisItem.RowNumber, 2) = 0, GrayCanvasBackground, RGBA(255, 255, 255, 1))
+            TemplatePadding: =0
+            TemplateSize: =50
+            Width: =Parent.Width - 2
+            X: =1
+            Y: =label_Admin_SS.Y + label_Admin_SS.Height - 1
+            ZIndex: =1
+
+            lbl_Height_Coord_SS As label:
+                BorderStyle: =BorderStyle.None
+                DisabledColor: =RGBA(0, 0, 0, 0)
+                DisplayMode: =DisplayMode.Disabled
+                Height: =20
+                OnSelect: =Select(Parent)
+                Size: =10
+                Text: =html_AdminActivity_SS.Height
+                ZIndex: =1
+
+            html_AdminActivity_SS As htmlViewer:
+                AutoHeight: =true
+                Color: =If(ThisItem.IsEnabled, RGBA(0, 0, 0, 1), Color.LightGray)
+                Font: =FontStyle
+                Height: =37
+                HtmlText: =ThisItem.ActivityDescription
+                PaddingBottom: =10
+                PaddingLeft: =20
+                PaddingRight: =20
+                PaddingTop: =10
+                Size: =12
+                Width: =Parent.Width-Self.X - 15
+                X: =btn_ClickHere_AdminActivity_SS.X + btn_ClickHere_AdminActivity_SS.Width
+                ZIndex: =2
+
+            btn_ClickHere_AdminActivity_SS As button:
+                BorderColor: =Self.Fill
+                Fill: =BlueControlDarkBackground
+                Font: =FontStyle
+                FontWeight: =FontWeight.Bold
+                Height: =25
+                HoverBorderColor: =Self.Fill
+                HoverColor: =Self.Fill
+                HoverFill: =Self.Color
+                OnSelect: =Navigate(ThisItem.Screen)
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                RadiusBottomLeft: =20
+                RadiusBottomRight: =20
+                RadiusTopLeft: =20
+                RadiusTopRight: =20
+                Size: =10
+                Text: ="Click Here"
+                Width: =95
+                X: =20
+                Y: =(html_AdminActivity_SS.Y + html_AdminActivity_SS.Height - Self.Height) * 0.50
+                ZIndex: =4
+
+        Top_Back_Coord_SS As button:
+            BorderColor: =Self.Fill
+            DisabledColor: =Self.Color
+            DisplayMode: =DisplayMode.View
+            Fill: =SUBGROUPCOLOR
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =20
+            RadiusTopRight: =20
+            Size: =10
+            Text: =""
+            Width: =Parent.Width
+            ZIndex: =2
+
+        label_Admin_SS As label:
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            PaddingLeft: =20
+            Size: =14
+            Text: |-
+                =If(
+                    IsAdmin, 
+                    "I am an administrator. I want to...", 
+                    If(
+                        IsCoordinator,
+                        "I am a coordinator. I want to..."
+                    )
+                )
+            Width: =Parent.Width
+            ZIndex: =3
+
+    ctn_Operator_SS As groupContainer:
+        Height: =145
+        Visible: =IsOperator || IsAdmin
+        Width: =(App.Width - Self.X) - 50
+        X: |
+            =LeftNavi_SS.Width + 50
+        Y: =lbl_SelfService_SS.Y + lbl_SelfService_SS.Height + 10
+        ZIndex: =5
+
+        glry_Operator_SS As gallery.variableTemplateHeightGallery:
+            BorderColor: =Top_Back_Operator_SS.Fill
+            BorderThickness: =2
+            Height: =Sum(Self.AllItems, Value(lbl_Height_Operator_SS.Text)) //Parent.Height - label_Operator_SS.Height 
+            Items: |-
+                =Table(
+                    {
+                        Id: 1,
+                        ActivityDescription: "Bulk <b>Upload</b>",
+                        Screen: scn_BulkImporter 
+                    },
+                    {
+                        Id: 2,
+                        ActivityDescription: "Bulk <b>Delete</b>",
+                        Screen: scn_BulkDeleter
+                    }
+                )
+            Layout: =Layout.Vertical
+            TemplateFill: =If(Mod(ThisItem.Id, 2) = 0, GrayCanvasBackground, RGBA(255, 255, 255, 1))
+            TemplatePadding: =0
+            TemplateSize: =50
+            Width: =Parent.Width - 2
+            X: =1
+            Y: =label_Operator_SS.Y + label_Operator_SS.Height
+            ZIndex: =1
+
+            lbl_Height_Operator_SS As label:
+                BorderStyle: =BorderStyle.None
+                DisabledColor: =RGBA(0, 0, 0, 0)
+                DisplayMode: =DisplayMode.Disabled
+                Height: =20
+                OnSelect: =Select(Parent)
+                Size: =10
+                Text: =html_OperatorActivity_SS.Height
+                ZIndex: =1
+
+            html_OperatorActivity_SS As htmlViewer:
+                AutoHeight: =true
+                Font: =FontStyle
+                Height: =48
+                HtmlText: =ThisItem.ActivityDescription
+                PaddingBottom: =10
+                PaddingLeft: =20
+                PaddingRight: =20
+                PaddingTop: =10
+                Size: =12
+                Width: =Parent.Width-Self.X - 15
+                X: =btn_ClickHere_1_SS.X + btn_ClickHere_1_SS.Width
+                ZIndex: =2
+
+            btn_ClickHere_1_SS As button:
+                BorderColor: =Self.Fill
+                Fill: =BlueControlDarkBackground
+                Font: =FontStyle
+                FontWeight: =FontWeight.Bold
+                Height: =25
+                HoverBorderColor: =Self.Fill
+                HoverColor: =Self.Fill
+                HoverFill: =Self.Color
+                OnSelect: =Navigate(ThisItem.Screen)
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                RadiusBottomLeft: =20
+                RadiusBottomRight: =20
+                RadiusTopLeft: =20
+                RadiusTopRight: =20
+                Size: =10
+                Text: ="Click Here"
+                Width: =95
+                X: |
+                    =20
+                Y: =(html_OperatorActivity_SS.Y + html_OperatorActivity_SS.Height - Self.Height) * 0.50
+                ZIndex: =3
+
+        Top_Back_Operator_SS As button:
+            BorderColor: =Self.Fill
+            DisabledColor: =Self.Color
+            DisplayMode: =DisplayMode.View
+            Fill: =SUBGROUPCOLOR
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =20
+            RadiusTopRight: =20
+            Size: =10
+            Text: =""
+            Width: =Parent.Width
+            ZIndex: =2
+
+        label_Operator_SS As label:
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            PaddingLeft: =20
+            PaddingRight: =25
+            Size: =14
+            Text: ="I am an operator. I want to..."
+            Width: =Parent.Width
+            ZIndex: =3
+
+    Label_UserRole_SS As label:
+        Align: =Align.Center
+        BorderColor: =RGBA(0, 0, 0, 0)
+        BorderStyle: =BorderStyle.None
+        Color: =RGBA(255, 255, 255, 1)
+        Font: =FontStyle
+        Size: =10
+        Text: |-
+            =If(
+                !IsBlankOrError(Text(UserRole)),
+                Text(UserRole),
+                If(
+                    IsCoordinator,
+                    "Coordinator",
+                    Blank()
+                )
+            )
+        Width: =126
+        X: =App.Width - 567
+        ZIndex: =6
+
+    lbl_SelfService_SS As label:
+        Color: =BlueControlDarkBackground
+        Font: =FontStyle
+        FontWeight: =FontWeight.Bold
+        PaddingLeft: =0
+        Size: =18
+        Text: ="Self-Service Portal"
+        Width: =(App.Width - Self.X) - 50
+        X: =LeftNavi_SS.Width + 50
+        Y: =BAGIAAppHeader_SS.Y + BAGIAAppHeader_SS.Height + 10
+        ZIndex: =7
+
+    TrackRequestComponent_SS As TrackRequestComponent:
+        BlueControlDarkBackground: =BlueControlDarkBackground
+        BlueControlLightBackground: =BlueControlLightBackground
+        BlueNaviHightLightBackground: =BlueNaviHightLightBackground
+        DevOpsBaseUrl: =var_DevOpsBaseURL
+        DevOpsQueryID: =var_DevOpsQueryID
+        FontStyle: =FontStyle
+        GrayCanvasBackground: =GrayCanvasBackground
+        GRAYCOLOR: =GRAYCOLOR
+        GrayControlBackground: =GrayControlBackground
+        IsAdmin: =IsAdmin
+        Reset: =Self.Visible
+        Visible: =BAGIAAppHeader_SS.DisplayTrackRequest
+        X: =App.Width - Self.Width
+        Y: =BAGIAAppHeader_SS.Height
+        ZIndex: =8
+
+    SurveyComponent_SS As SurveyComponent:
+        Reset: =BAGIAAppHeader_SS.ShowSurvey
+        Survey: =var_ReviewHubSurvey
+        Visible: =BAGIAAppHeader_SS.ShowSurvey
+        Y: =BAGIAAppHeader_SS.Height
+        ZIndex: =9
+

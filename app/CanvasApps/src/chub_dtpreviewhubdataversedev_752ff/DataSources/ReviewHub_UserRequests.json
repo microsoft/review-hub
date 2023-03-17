@@ -1,0 +1,124 @@
+[
+  {
+    "CdsFCBContext": "{\"FileType\":true,\"ImageExternalStorage\":true}",
+    "EntitySetName": "craf2_reviewhub_userrequests",
+    "IsHidden": false,
+    "IsSampleData": false,
+    "IsWritable": true,
+    "LogicalName": "craf2_reviewhub_userrequest",
+    "MaxGetRowsCount": 2000,
+    "Name": "ReviewHub_UserRequests",
+    "NativeCDSDataSourceInfoNameMapping": {
+      "_ownerid_value": "Owner",
+      "chub_approvercomments": "ApproverComments",
+      "chub_approveremail": "ApproverEmail",
+      "chub_decision": "Decision",
+      "chub_decisiondate": "DecisionDate",
+      "craf2_email": "Email",
+      "craf2_justification": "Justification",
+      "craf2_name": "ID",
+      "craf2_reviewhub_userrequest_AsyncOperations": "System Jobs",
+      "craf2_reviewhub_userrequest_BulkDeleteFailures": "Bulk Delete Failures",
+      "craf2_reviewhub_userrequest_DuplicateBaseRecord": "Duplicate Records (craf2_reviewhub_userrequest_DuplicateBaseRecord)",
+      "craf2_reviewhub_userrequest_DuplicateMatchingRecord": "Duplicate Records (craf2_reviewhub_userrequest_DuplicateMatchingRecord)",
+      "craf2_reviewhub_userrequest_MailboxTrackingFolders": "Mailbox Auto Tracking Folders",
+      "craf2_reviewhub_userrequest_PrincipalObjectAttributeAccesses": "Field Sharing",
+      "craf2_reviewhub_userrequest_ProcessSession": "Process Sessions",
+      "craf2_reviewhub_userrequest_SyncErrors": "Sync Errors",
+      "craf2_reviewhub_userrequestid": "ReviewHub_UserRequest",
+      "createdby": "Created By",
+      "createdon": "Created On",
+      "createdonbehalfby": "Created By (Delegate)",
+      "importsequencenumber": "Import Sequence Number",
+      "modifiedby": "Modified By",
+      "modifiedon": "Modified On",
+      "modifiedonbehalfby": "Modified By (Delegate)",
+      "overriddencreatedon": "Record Created On",
+      "owningbusinessunit": "Owning Business Unit",
+      "owningteam": "Owning Team",
+      "owninguser": "Owning User",
+      "statecode": "Status",
+      "statuscode": "Status Reason",
+      "timezoneruleversionnumber": "Time Zone Rule Version Number",
+      "utcconversiontimezonecode": "UTC Conversion Time Zone Code",
+      "versionnumber": "Version Number"
+    },
+    "PreferredName": "ReviewHub_UserRequests",
+    "Type": "NativeCDSDataSourceInfo"
+  },
+  {
+    "DisplayName": "ReviewHub_UserRequests (Views)",
+    "Name": "_craf2_reviewhub_userrequest_views",
+    "RelatedEntityName": "ReviewHub_UserRequests",
+    "TrimmedViewName": true,
+    "Type": "ViewInfo",
+    "ViewInfoNameMapping": {
+      "1970b1b9-a6d0-45fe-9e0a-3c06d691ac6c": "Active ReviewHub_UserRequests",
+      "a178e247-73fa-4c71-9036-bf5d9846702b": "ReviewHub_UserRequest Associated View",
+      "ac00ea55-6a8d-4eee-a7e4-ded3cbb67ae6": "Inactive ReviewHub_UserRequests",
+      "db8104b6-c134-4d2c-9c78-aefcf0f0dc23": "ReviewHub_UserRequest Lookup View",
+      "e01800b0-acd8-4600-8e6d-ac09c5bfd74f": "ReviewHub_UserRequest Advanced Find View"
+    }
+  },
+  {
+    "DisplayName": "Decision (ReviewHub_UserRequests)",
+    "Name": "chub_craf2_reviewhub_userrequest_chub_decision",
+    "OptionSetInfoNameMapping": {
+      "840660000": "Approved",
+      "840660001": "Pending",
+      "840660002": "Declined"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "chub_decision",
+        "OptionSetReferenceEntityName": "ReviewHub_UserRequests"
+      }
+    },
+    "OptionSetTypeKey": "PicklistType",
+    "RelatedColumnInvariantName": "chub_decision",
+    "RelatedEntityName": "ReviewHub_UserRequests",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Status (ReviewHub_UserRequests)",
+    "Name": "craf2_reviewhub_userrequest_statecode",
+    "OptionSetInfoNameMapping": {
+      "0": "Active",
+      "1": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statecode",
+        "OptionSetReferenceEntityName": "ReviewHub_UserRequests"
+      }
+    },
+    "OptionSetTypeKey": "StateType",
+    "RelatedColumnInvariantName": "statecode",
+    "RelatedEntityName": "ReviewHub_UserRequests",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Status Reason (ReviewHub_UserRequests)",
+    "Name": "craf2_reviewhub_userrequest_statuscode",
+    "OptionSetInfoNameMapping": {
+      "1": "Active",
+      "2": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statuscode",
+        "OptionSetReferenceEntityName": "ReviewHub_UserRequests"
+      }
+    },
+    "OptionSetTypeKey": "StatusType",
+    "RelatedColumnInvariantName": "statuscode",
+    "RelatedEntityName": "ReviewHub_UserRequests",
+    "Type": "OptionSetInfo"
+  }
+]

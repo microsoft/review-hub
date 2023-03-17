@@ -1,0 +1,101 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_sharepointonline": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "new_sharedsharepointonline_da547"
+        },
+        "api": {
+          "name": "shared_sharepointonline"
+        }
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        },
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        }
+      },
+      "triggers": {
+        "Recurrence": {
+          "recurrence": {
+            "frequency": "Day",
+            "interval": 1,
+            "startTime": "2022-09-15T09:00:00Z"
+          },
+          "metadata": {
+            "operationMetadataId": "cedeb02d-b6ec-4f63-8d07-6ef014556e76"
+          },
+          "type": "Recurrence"
+        }
+      },
+      "actions": {
+        "Get_files_(properties_only)": {
+          "runAfter": {},
+          "metadata": {
+            "operationMetadataId": "81eb082f-1e7a-410f-a09d-9664c0398ae7"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "connectionName": "shared_sharepointonline",
+              "operationId": "GetFileItems"
+            },
+            "parameters": {
+              "dataset": "https://microsoft.sharepoint.com/teams/MetricsBoardDevelopment",
+              "table": "d9ebcdd0-02cf-4b0a-bba8-c03e85b5d369",
+              "folderPath": "/Review Hub Bulk Metric Upload/Uploads",
+              "$filter": "Modified lt '@{formatDateTime(addDays(utcNow(), -7), 'yyyy-MM-dd')}'"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Delete_Items": {
+          "foreach": "@outputs('Get_files_(properties_only)')?['body/value']",
+          "actions": {
+            "Delete_file": {
+              "runAfter": {},
+              "metadata": {
+                "%252fReview%2bHub%2bBulk%2bMetric%2bUpload%252fUploads%252fCase%2bReview%2bUpdate%2bExisting%2bMetrics%2b2022-09-14T13_14_40.7291121Z.xlsx": "/Review Hub Bulk Metric Upload/Uploads/Case Review Update Existing Metrics 2022-09-14T13_14_40.7291121Z.xlsx",
+                "operationMetadataId": "1f6c2872-30aa-4ace-8744-194258da994a"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                  "connectionName": "shared_sharepointonline",
+                  "operationId": "DeleteFile"
+                },
+                "parameters": {
+                  "dataset": "https://microsoft.sharepoint.com/teams/MetricsBoardDevelopment",
+                  "id": "@items('Delete_Items')?['{Identifier}']"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            }
+          },
+          "runAfter": {
+            "Get_files_(properties_only)": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "02053198-4be3-4f82-9fd1-b7e422278b01"
+          },
+          "type": "Foreach"
+        }
+      }
+    },
+    "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+}

@@ -1,0 +1,178 @@
+AppHeader As CanvasComponent:
+    DisplayTrackRequest: =dropdown_Action.Selected.name = "Tracking Your Request"
+    DropDownSelection: ="Select an action"
+    FeatureRequestUrl: =""
+    FeedbackButtonUrl: =""
+    Fill: =RGBA(0, 0, 0, 1)
+    FontColor: =RGBA(255,255,255,1)
+    FontSize: =12
+    Height: =40
+    inputAppDisplayName: ="Health Hub"
+    OnReset: =Set(var_ShowSurvey, false);
+    Reset: =false
+    ScorecardOnboardingFeatureUrl: =""
+    ShowFeedbackButton: =true
+    ShowSurvey: =var_ShowSurvey
+    ShowSurveyButton: =true
+    Width: =App.Width
+    X: =0
+    Y: =20
+    ZIndex: =2
+
+    BAGIALogo As image:
+        Height: =Parent.Height-20
+        Image: =""
+        Width: =BAGIALogo.Height
+        X: =10
+        Y: =10
+        ZIndex: =1
+
+    lbl_DTP As label:
+        Color: =AppHeader.FontColor
+        Font: =Font.'Segoe UI'
+        Height: =Parent.Height
+        Size: =AppHeader.FontSize
+        Text: ="BAP"
+        Width: =45
+        X: =BAGIALogo.X+BAGIALogo.Width+10
+        ZIndex: =2
+
+    splitter As rectangle:
+        Fill: =RGBA(255, 255, 255, 1)
+        Height: =Parent.Height-18
+        Width: =2
+        X: =lbl_DTP.X+lbl_DTP.Width
+        Y: =10
+        ZIndex: =3
+
+    lbl_TextInput As label:
+        Color: =AppHeader.FontColor
+        Font: =Font.'Segoe UI'
+        FontWeight: =FontWeight.Bold
+        Height: =Parent.Height
+        Size: =AppHeader.FontSize
+        Text: =Parent.inputAppDisplayName
+        Width: =372
+        X: |
+            =splitter.X+splitter.Width+5
+        ZIndex: =4
+
+    img_User As image:
+        Height: =Self.Width
+        Image: =User().Image
+        RadiusBottomLeft: =25
+        RadiusBottomRight: =25
+        RadiusTopLeft: =25
+        RadiusTopRight: =25
+        Width: |
+            =30
+        X: =Parent.Width-10-img_User.Width
+        Y: =(Parent.Height - Self.Height) * 0.50
+        ZIndex: =5
+
+    btn_ReportBug As button:
+        BorderStyle: =BorderStyle.None
+        BorderThickness: =0
+        Color: =RGBA(0, 114, 198, 1)
+        Fill: =RGBA(255, 255, 255, 1)
+        Font: =Font.'Segoe UI'
+        FontWeight: =FontWeight.Bold
+        Height: |
+            =25
+        HoverFill: |-
+            =ColorValue("#1080D9") //ColorFade(RGBA(180,180,180, 1), -10%)
+        OnSelect: =Launch(AppHeader.FeedbackButtonUrl)
+        PaddingBottom: =0
+        PaddingLeft: =0
+        PaddingRight: =0
+        PaddingTop: =0
+        RadiusBottomLeft: =12
+        RadiusBottomRight: =12
+        RadiusTopLeft: =12
+        RadiusTopRight: =12
+        Size: =10
+        Text: ="Report Issue"
+        Visible: =false
+        Width: =105
+        X: =img_User.X - Self.Width - 20
+        Y: =(Parent.Height - Self.Height) * 0.50
+        ZIndex: =6
+
+    dropdown_Action As dropdown:
+        BorderColor: =
+        BorderStyle: =BorderStyle.None
+        BorderThickness: =0
+        ChevronBackground: =Self.Fill
+        ChevronFill: =Color.Black
+        ChevronHoverBackground: =RGBA(218, 240, 250, 1)
+        ChevronHoverFill: =RGBA(0, 0, 0, 1)
+        Default: =Parent.DropDownSelection || Parent.Reset
+        Fill: =RGBA(236, 236, 236, 1)
+        Font: =Font.'Segoe UI'
+        FontWeight: =FontWeight.Semibold
+        Height: =25
+        HoverFill: =Self.ChevronHoverBackground
+        Items: |-
+            =Table({
+                    name: "Select an action"
+                    
+                },
+                {
+                    name: "Feature Request"
+                    
+                },
+                {
+                    name: "New Scorecard Type Request"
+                },
+                {
+                    name: "Report Issue"
+                },
+                {
+                    name: "Tracking Your Request"
+                }
+            )
+        OnChange: |-
+            =If(Self.Selected.name = "Report Issue",  Launch(AppHeader.FeedbackButtonUrl));
+            If(Self.Selected.name = "Feature Request",  Launch(AppHeader.FeatureRequestUrl));
+            If(Self.Selected.name = "New Scorecard Type Request",  Launch(AppHeader.ScorecardOnboardingFeatureUrl));
+        PressedColor: =RGBA(0, 114, 198, 1)
+        PressedFill: =RGBA(218, 240, 250, 1)
+        SelectionFill: =RGBA(121, 181, 222, 1)
+        Size: =11
+        Visible: =AppHeader.ShowFeedbackButton
+        Width: =200
+        X: =img_User.X - Self.Width - 20
+        Y: =(Parent.Height - Self.Height) * 0.50
+        ZIndex: =7
+
+    btn_ShowSurvey As button:
+        BorderColor: =Self.Fill
+        Color: =RGBA(0, 0, 0, 1)
+        DisplayMode: |
+            =DisplayMode.Edit
+        Fill: =RGBA(236, 236, 236, 1)
+        FocusedBorderThickness: =2
+        Font: =Font.'Segoe UI'
+        Height: =23
+        HoverBorderColor: =Self.BorderColor
+        HoverColor: =Self.Color
+        HoverFill: =RGBA(218, 240, 250, 1)
+        OnSelect: =Set(var_ShowSurvey, true);
+        PaddingBottom: =0
+        PaddingLeft: =0
+        PaddingRight: =0
+        PaddingTop: =0
+        PressedBorderColor: =Self.BorderColor
+        PressedColor: =Self.Color
+        PressedFill: =Self.Fill
+        RadiusBottomLeft: =15
+        RadiusBottomRight: =15
+        RadiusTopLeft: =15
+        RadiusTopRight: =15
+        Size: =10
+        Text: ="We need your feedback"
+        Visible: =AppHeader.ShowSurveyButton
+        X: =dropdown_Action.X - Self.Width - 20
+        Y: =(Parent.Height - Self.Height) * 0.50
+        ZIndex: =8
+

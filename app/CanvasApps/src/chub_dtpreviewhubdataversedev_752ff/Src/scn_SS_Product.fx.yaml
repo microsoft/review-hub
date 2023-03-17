@@ -1,0 +1,993 @@
+scn_SS_Product As screen:
+    OnHidden: =
+
+    ctn_Edit_Product As groupContainer:
+        Fill: =RGBA(255, 255, 255, 1)
+        Height: |-
+            =If(
+                !label_UProductName.Visible,
+                btn_AddNew_UP.Y + btn_AddNew_UP.Height + 25,
+                btn_UProduct_Save.Y + btn_UProduct_Save.Height + 25
+            )
+        Width: =App.Width - Self.X - 15
+        X: =ctn_Search_Product.X + ctn_Search_Product.Width + 20
+        Y: =ctn_Search_Product.Y
+        ZIndex: =1
+
+        Back_EditProduct_Btm As button:
+            BorderColor: =Header_EditProduct_UP.Fill
+            DisabledBorderColor: =Self.BorderColor
+            DisabledFill: =RGBA(0, 0, 0, 0)
+            DisplayMode: =DisplayMode.Disabled
+            Font: =FontStyle
+            Height: =Parent.Height - Self.Y - 1
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Text: =""
+            Width: =Parent.Width - 2
+            X: =1
+            Y: =Header_EditProduct_UP.Height - 1
+            ZIndex: =1
+
+        btn_UProduct_Cancel As button:
+            BorderColor: =Self.Fill
+            Fill: =GRAYCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =25
+            HoverColor: =Self.Fill
+            HoverFill: =Self.Color
+            OnSelect: |-
+                =Concurrent(
+                    Set(record_Edit_This_Product, Blank()),
+                    Set(var_Display_UProductCat_Combo, false),
+                    Set(var_AddNewProduct, false)
+                
+                );
+                Reset(ti_InternalPID);
+                Reset(ti_UProductName);
+                Reset(combo_UProductCat);
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Size: =10
+            Text: ="Cancel"
+            Visible: =label_UProductName.Visible
+            Width: =90
+            X: =btn_UProduct_Save.X + btn_UProduct_Save.Width + 30
+            Y: =combo_UProductCat.Y + combo_UProductCat.Height + 25
+            ZIndex: =2
+
+        btn_UProduct_Save As button:
+            BorderColor: =Self.Fill
+            DisplayMode: =If(Trim(ti_UProductName.Text) = "" || Len(html_EditProduct_Warning.HtmlText)<>0, DisplayMode.Disabled, DisplayMode.Edit)
+            Fill: =BlueControlDarkBackground
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =25
+            HoverColor: =Self.Fill
+            HoverFill: =Self.Color
+            OnSelect: |+
+                =If(
+                    var_AddNewProduct,
+                    Patch(
+                        ReviewHub_Products,
+                        Defaults(ReviewHub_Products),
+                        {
+                            ProductName: Trim(ti_UProductName.Text),
+                            ProductID: Max(ReviewHub_Products, ThisRecord.ProductID) + 1,
+                            InternalProductID: If(Trim(ti_InternalPID.Text) = "", Blank(), Value(Trim(ti_InternalPID.Text))),
+                            ProductCategory: If(combo_UProductCat.Visible, combo_UProductCat.Selected.Value, Blank())
+                        }
+                    ),
+                    Patch(
+                        ReviewHub_Products,
+                        LookUp(
+                            ReviewHub_Products, 
+                            ThisRecord.ProductID = Value(record_Edit_This_Product.txt_ProductId) 
+                        ),
+                        {
+                            ProductName: Trim(ti_UProductName.Text),
+                            InternalProductID: If(Trim(ti_InternalPID.Text)="", Blank(), Value(Trim(ti_InternalPID.Text))),
+                            ProductCategory: combo_UProductCat.Selected.Value
+                        }
+                    )
+                );
+                
+                Concurrent(
+                    Set(record_Edit_This_Product, Blank()),
+                    Set(var_Display_UProductCat_Combo, false),
+                    Set(var_AddNewProduct, false),
+                    Select(btn_Reset_UP)
+                )
+                
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Size: =10
+            Text: ="Save"
+            Visible: =label_UProductName.Visible
+            Width: =90
+            X: =combo_UProductCat.X
+            Y: =combo_UProductCat.Y + combo_UProductCat.Height + 25
+            ZIndex: =3
+
+        HtmlText_EditProduct_Tips As htmlViewer:
+            AutoHeight: =true
+            Font: =FontStyle
+            HtmlText: ="Link to look up Internal Product ID"
+            PaddingLeft: =0
+            Visible: =label_UProductName.Visible
+            Width: =Parent.Width - Self.X
+            X: =15
+            Y: =ti_InternalPID.Y + ti_InternalPID.Height
+            ZIndex: =4
+
+        combo_UProductCat As dropdown:
+            BorderColor: =GRAYCOLOR
+            BorderThickness: =1
+            ChevronBackground: =Self.Fill
+            ChevronFill: =Color.Black
+            ChevronHoverBackground: =BlueControlLightBackground
+            ChevronHoverFill: =Self.ChevronFill
+            Default: |+
+                =If(!IsBlankOrError(record_Edit_This_Product),record_Edit_This_Product.txt_ProductCategory)
+                
+            Font: =FontStyle
+            Height: =ti_UProductName.Height
+            HoverBorderColor: =Self.BorderColor
+            HoverFill: =ColorFade(BlueNaviHightLightBackground, 85%)
+            Items: =Choices(ReviewHub_ProductCategory)
+            PaddingBottom: =8
+            PaddingTop: =8
+            PressedFill: =BlueNaviHightLightBackground
+            SelectionColor: =RGBA(0, 0, 0, 1)
+            SelectionFill: |
+                =BlueNaviHightLightBackground
+            Size: =11
+            Visible: =var_Display_UProductCat_Combo || !IsBlankOrError(record_Edit_This_Product.txt_ProductCategory)
+            Width: =150
+            X: =ti_UProductName.X
+            Y: =label_UProduct_Category.Y + label_UProduct_Category.Height
+            ZIndex: =5
+
+        bttn_UProductCategory As button:
+            Align: =Align.Left
+            BorderThickness: =0
+            Color: =BlueControlDarkBackground
+            Fill: =RGBA(0, 0, 0, 0)
+            Font: =FontStyle
+            FontWeight: =FontWeight.Normal
+            Height: =30
+            HoverColor: =Color.Purple
+            HoverFill: =Self.Fill
+            OnSelect: =Set(var_Display_UProductCat_Combo, true)
+            PaddingLeft: =
+            PaddingTop: =0
+            PressedColor: =Self.Color
+            PressedFill: =Self.Fill
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Size: =12
+            Text: ="No Value (Click to edit)"
+            Underline: =true
+            Visible: |-
+                =If (btn_AddNew_UP.Visible, false ,If(
+                    var_Display_UProductCat_Combo,
+                    false,
+                    IsBlankOrError(record_Edit_This_Product.txt_ProductCategory)
+                ))
+            Width: =271.5
+            X: =15
+            Y: =label_UProduct_Category.Y + label_UProduct_Category.Height
+            ZIndex: =6
+
+        label_UProduct_Category As label:
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =30
+            PaddingLeft: =0
+            Size: =11
+            Text: |-
+                ="Product Category:"
+            Visible: =label_UProductName.Visible
+            Width: =lbl_InternalPID.Width
+            X: =15
+            Y: =HtmlText_EditProduct_Tips.Y + HtmlText_EditProduct_Tips.Height + 10
+            ZIndex: =7
+
+        ti_InternalPID As text:
+            BorderColor: =GRAYCOLOR
+            BorderThickness: =1
+            Default: |-
+                =If(
+                    var_AddNewProduct,
+                    Blank(),
+                    record_Edit_This_Product.txt_InternalProductId
+                )
+            Font: =FontStyle
+            Height: =ti_UProductName.Height
+            HoverBorderColor: =Self.BorderColor
+            HoverFill: =ColorFade(BlueControlLightBackground, 75%)
+            PaddingLeft: =10
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Size: =11
+            Visible: =label_UProductName.Visible
+            Width: =Parent.Width - Self.X - 15
+            X: =ti_UProductName.X
+            Y: =lbl_InternalPID.Y + lbl_InternalPID.Height
+            ZIndex: =8
+
+        lbl_InternalPID As label:
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =30
+            PaddingLeft: =0
+            Size: =11
+            Text: |-
+                ="Internal Product ID: "
+            Visible: =label_UProductName.Visible
+            Width: =180
+            X: =label_UProduct_Category.X
+            Y: |
+                =ti_UProductName.Y + ti_UProductName.Height + 15
+            ZIndex: =9
+
+        ti_UProductName As text:
+            BorderColor: =GRAYCOLOR
+            BorderThickness: =1
+            Color: =Color.Black
+            Default: |-
+                =If(
+                    var_AddNewProduct,
+                    Blank(),
+                    record_Edit_This_Product.craf2_productname
+                )
+            Font: =FontStyle
+            Height: =30
+            HoverBorderColor: =Self.BorderColor
+            HoverFill: =ColorFade(BlueControlLightBackground, 75%)
+            PaddingLeft: =10
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Size: =11
+            Visible: =label_UProductName.Visible
+            Width: =Parent.Width - Self.X - 15
+            X: =label_UProductName.X
+            Y: =label_UProductName.Y + label_UProductName.Height
+            ZIndex: =10
+
+        label_UProductName As label:
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =30
+            PaddingLeft: =0
+            Size: =11
+            Text: |-
+                ="*Product Name: "
+            Visible: =!IsBlankOrError(record_Edit_This_Product) || var_AddNewProduct
+            Width: =Parent.Width - Self.X - 15
+            X: =15
+            Y: |-
+                =If(
+                    Len(html_EditProduct_Warning.HtmlText) = 0 || !html_EditProduct_Warning.Visible,
+                    Header_EditProduct_UP.Y + Header_EditProduct_UP.Height + 10,
+                    html_EditProduct_Warning.Y + html_EditProduct_Warning.Height
+                )
+            ZIndex: =11
+
+        html_EditProduct_Warning As htmlViewer:
+            AutoHeight: =true
+            Font: =FontStyle
+            Height: =55
+            HtmlText: |-
+                =If(
+                    !IsBlankOrError(
+                        LookUp(
+                            ReviewHub_Products, 
+                            ThisRecord.ProductName = Trim(ti_UProductName.Text)
+                                && ThisRecord.ProductID <> If(var_AddNewProduct, -999, record_Edit_This_Product.txt_ProductId)
+                        )
+                    ),
+                    "<font color=red><b>Warning: </b>The product <b>" & Trim(ti_UProductName.Text) & "</b> already exists.</font>",
+                    If(
+                        !IsBlankOrError(
+                            LookUp(
+                                ReviewHub_Products, 
+                                ThisRecord.InternalProductID = Value(ti_InternalPID.Text)
+                                    && ThisRecord.InternalProductID <> If(var_AddNewProduct, -999, record_Edit_This_Product.txt_InternalProductId)
+                            )
+                        )
+                            && Len(Trim(ti_InternalPID.Text)) <> 0,
+                        "<font color=red><b>Warning: </b>Internal Product ID - <b>" & Trim(ti_InternalPID.Text) & "</b> (Product Name: <b>" & LookUp(ReviewHub_Products, ThisRecord.InternalProductID = Value(ti_InternalPID.Text)).ProductName & "</b>) already exists.</font>"
+                    )
+                )
+            PaddingLeft: =15
+            PaddingRight: =15
+            Visible: |-
+                =If(
+                    var_AddNewProduct || !IsBlankOrError(record_Edit_This_Product), 
+                    If(
+                        !IsBlankOrError(Trim(ti_UProductName.Text)) && (
+                        !IsBlankOrError(LookUp(ReviewHub_Products, ThisRecord.ProductName = Trim(ti_UProductName.Text)).ProductID) 
+                            || !IsBlankOrError(LookUp(ReviewHub_Products, ThisRecord.InternalProductID = Value(ti_InternalPID.Text)).ProductID)),
+                        true,
+                        false
+                    ),
+                    false
+                )
+            Width: =ctn_Edit_Product.Width
+            Y: =Header_EditProduct_UP.Y + Header_EditProduct_UP.Height
+            ZIndex: =12
+
+        btn_AddNew_UP As button:
+            BorderColor: =Self.Fill
+            Fill: =BlueControlDarkBackground
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =30
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Self.Fill
+            HoverFill: =Self.Color
+            OnSelect: |-
+                =Set(var_AddNewProduct, true);
+                Set(record_Edit_This_Product, Blank());
+            RadiusBottomLeft: =20
+            RadiusBottomRight: =20
+            RadiusTopLeft: =20
+            RadiusTopRight: =20
+            Size: =10
+            Text: ="Clcik Here to Add"
+            Visible: =!label_UProductName.Visible
+            Width: =150
+            X: =(Parent.Width - Self.Width) * 0.50
+            Y: =Header_EditProduct_UP.Y + Header_EditProduct_UP.Height + 15
+            ZIndex: =13
+
+        Header_EditProduct_UP As button:
+            Align: =Align.Left
+            BorderColor: =Self.Fill
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =0
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =Color.Black
+            DisabledFill: =Self.Fill
+            DisplayMode: =DisplayMode.Disabled
+            Fill: =SUBGROUPCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =60
+            PaddingLeft: =20
+            RadiusBottomLeft: |
+                =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: |
+                =25
+            RadiusTopRight: |
+                =25
+            Size: =14
+            Text: |-
+                =If(
+                    var_AddNewProduct,
+                    "Add New Product (Product ID: " & Max(ReviewHub_Products, ThisRecord.ProductID) + 1 & ")",
+                    If(
+                        !IsBlankOrError(record_Edit_This_Product),
+                        "Edit - Product ID: " & record_Edit_This_Product.txt_ProductId,
+                        "Add New Product"
+                    )
+                )
+            Width: =Parent.Width
+            ZIndex: =14
+
+        btn_Reset_UP As button:
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =0
+            Color: =BlueControlDarkBackground
+            Fill: =RGBA(0, 0, 0, 0)
+            Font: =FontStyle
+            HoverColor: =Color.Purple
+            HoverFill: =Self.Fill
+            OnSelect: |-
+                =Concurrent(
+                    Reset(ti_UProductName), Reset(combo_UProductCat), Reset(ti_InternalPID)
+                )
+            PressedColor: =Self.Color
+            PressedFill: =Self.Fill
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Size: =12
+            Text: ="Reset"
+            Underline: =true
+            Visible: ="Edit" in Header_EditProduct_UP.Text
+            Width: =55
+            X: =Parent.Width - Self.Width - 10
+            Y: =(Header_EditProduct_UP.Height - Self.Height) * 0.50
+            ZIndex: =15
+
+    ctn_Search_Product As groupContainer:
+        Height: =App.Height - Self.Y - 10
+        Width: =App.Width * 0.70
+        X: |+
+            =15
+            
+        Y: =Label_UProduct_Header.Y + Label_UProduct_Header.Height + 10
+        ZIndex: =2
+
+        glry_Search_UProduct As gallery.variableTemplateHeightGallery:
+            BorderColor: =SUBGROUPCOLOR
+            BorderThickness: =2
+            Height: =Parent.Height - Self.Y - 1
+            Items: |-
+                =Ungroup( //Ungroup function to add a Row Number column.
+                        ForAll(
+                            Sequence(CountRows(
+                                Search(
+                    SortByColumns(
+                    ShowColumns(
+                        AddColumns(
+                            ReviewHub_Products, 
+                            "txt_InternalProductId", Text(ThisRecord.InternalProductID),
+                            "txt_ProductId", Text(ThisRecord.ProductID),
+                            "txt_ProductCategory", Text(ThisRecord.ProductCategory)
+                        ),
+                        "txt_InternalProductId", "txt_ProductId", "craf2_productname", "txt_ProductCategory", "modifiedon"
+                    ),
+                    "modifiedon", SortOrder.Descending
+                    ),
+                    Trim(ti_Search_Product.Text),
+                    "craf2_productname",
+                    "txt_InternalProductId",
+                    "txt_ProductId",
+                    "txt_ProductCategory"
+                )
+                            )),
+                            {
+                                Record: Table(Last(FirstN(
+                                   Search(
+                    SortByColumns(
+                    ShowColumns(
+                        AddColumns(
+                            ReviewHub_Products, 
+                            "txt_InternalProductId", Text(ThisRecord.InternalProductID),
+                            "txt_ProductId", Text(ThisRecord.ProductID),
+                            "txt_ProductCategory", Text(ThisRecord.ProductCategory)
+                        ),
+                        "txt_InternalProductId", "txt_ProductId", "craf2_productname", "txt_ProductCategory", "modifiedon"
+                    ),
+                    "modifiedon", SortOrder.Descending
+                    ),
+                    Trim(ti_Search_Product.Text),
+                    "craf2_productname",
+                    "txt_InternalProductId",
+                    "txt_ProductId",
+                    "txt_ProductCategory"
+                ), Value
+                )
+                )),
+                                RowNumber: Value
+                            }
+                        ),
+                        "Record"
+                    )
+            Layout: =Layout.Vertical
+            TemplateFill: |-
+                =If(Mod(ThisItem.RowNumber, 2) > 0,
+                If(ThisItem.IsSelected, ColorFade(BlueNaviHightLightBackground, 85%), RGBA(0, 0, 0, 0)),
+                If(ThisItem.IsSelected, ColorFade(BlueNaviHightLightBackground, 85%), GrayCanvasBackground))
+            TemplatePadding: =0
+            TemplateSize: =60
+            Width: =Parent.Width - 2
+            X: =1
+            Y: =Header_ProductID_UP.Y + Header_ProductID_UP.Height - 1
+            ZIndex: =1
+
+            btn_Delete_UP As icon.Edit:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Color: =REDWARNINGCOLOR
+                Height: =btn_Edit_UP.Height + 5
+                HoverColor: =Color.White
+                HoverFill: =REDWARNINGCOLOR
+                Icon: =Icon.Trash
+                OnSelect: |-
+                    =Set(record_Delete_This_Product, ThisItem);
+                    Set(var_Confirm_Delete_This_Product, true);
+                Tooltip: ="Delete"
+                Width: |
+                    =btn_Edit_UP.Width + 5
+                X: |
+                    =btn_Edit_UP.X + btn_Edit_UP.Width + 15
+                Y: =btn_Edit_UP.Y - 2
+                ZIndex: =1
+
+            btn_Edit_UP As icon.Edit:
+                BorderColor: =Self.Color
+                BorderThickness: =2
+                Color: =BlueControlDarkBackground
+                Height: =25
+                HoverBorderColor: =Self.Color
+                HoverColor: =Color.White
+                HoverFill: =Self.Color
+                Icon: =Icon.Edit
+                OnSelect: |-
+                    =Set(record_Edit_This_Product, ThisItem);
+                    Set(var_AddNewProduct, false);
+                PaddingBottom: =3
+                PaddingLeft: =3
+                PaddingRight: =3
+                PaddingTop: =3
+                Tooltip: ="Edit"
+                Width: =25
+                X: =Header_Conrol_UP.X + (Header_Conrol_UP.Width - Self.Width - btn_Delete_UP.Width - 15) * 0.50
+                Y: =(txt_ProductID_UP.Height - Self.Height) * 0.50
+                ZIndex: =2
+
+            txt_LastUpdatedOn_UP As label:
+                Align: =Align.Center
+                Fill: =Parent.Fill
+                Font: =FontStyle
+                FontWeight: =txt_ProductID_UP.FontWeight
+                Height: =txt_ProductID_UP.Height
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =11
+                Text: =ThisItem.modifiedon
+                Width: =Header_LastUpdatedOn_UP.Width
+                X: =Header_LastUpdatedOn_UP.X
+                ZIndex: =3
+
+            txt_Category_UP As label:
+                Align: =Align.Center
+                Fill: =Parent.Fill
+                Font: =FontStyle
+                FontWeight: =txt_ProductID_UP.FontWeight
+                Height: =txt_ProductID_UP.Height
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =11
+                Text: =If(IsBlankOrError(ThisItem.txt_ProductCategory), "(No Value)", ThisItem.txt_ProductCategory)
+                Width: =Header_Category_UP.Width
+                X: =Header_Category_UP.X
+                ZIndex: =4
+
+            txt_ProductName_UP As label:
+                AutoHeight: =true
+                Fill: =Parent.Fill
+                Font: =FontStyle
+                FontWeight: =txt_ProductID_UP.FontWeight
+                Height: =50
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =10
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =11
+                Text: =ThisItem.craf2_productname
+                Width: =Header_ProductName_UP.Width
+                X: =Header_ProductName_UP.X
+                Y: =(txt_ProductID_UP.Height - Self.Height) * 0.50
+                ZIndex: =5
+
+            txt_InternalProductID_UP As label:
+                Align: =Align.Center
+                Fill: =Parent.Fill
+                Font: =FontStyle
+                FontWeight: =txt_ProductID_UP.FontWeight
+                Height: =txt_ProductID_UP.Height
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =11
+                Text: =ThisItem.txt_InternalProductId
+                Width: =Header_InternalProductID_UP.Width
+                X: =Header_InternalProductID_UP.X
+                ZIndex: =6
+
+            txt_ProductID_UP As label:
+                Align: =Align.Center
+                Fill: =Parent.Fill
+                Font: =FontStyle
+                FontWeight: =If(ThisItem.IsSelected, FontWeight.Bold, FontWeight.Normal)
+                Height: =60
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =10
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =11
+                Text: =ThisItem.txt_ProductId
+                Width: =Header_ProductID_UP.Width
+                X: =Header_ProductID_UP.X
+                ZIndex: =7
+
+        Header_Conrol_UP As label:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            DisplayMode: =DisplayMode.View
+            Fill: =SUBGROUPCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =Header_ProductID_UP.Height
+            PaddingBottom: =0
+            PaddingTop: =0
+            Size: =10
+            Text: ="Edit / Delete"
+            Width: =140
+            X: =Header_LastUpdatedOn_UP.X + Header_LastUpdatedOn_UP.Width
+            Y: =Header_ProductID_UP.Y
+            ZIndex: =2
+
+        Header_LastUpdatedOn_UP As label:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            DisplayMode: =DisplayMode.View
+            Fill: =SUBGROUPCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =Header_ProductID_UP.Height
+            PaddingBottom: =0
+            PaddingTop: =0
+            Size: =10
+            Text: ="Last Updated On"
+            Width: =160
+            X: =Header_Category_UP.X + Header_Category_UP.Width
+            Y: =Header_ProductID_UP.Y
+            ZIndex: =3
+
+        Header_Category_UP As label:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            DisplayMode: =DisplayMode.View
+            Fill: =SUBGROUPCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =Header_ProductID_UP.Height
+            PaddingBottom: =0
+            PaddingTop: =0
+            Size: =10
+            Text: ="Category"
+            Width: =90
+            X: =Header_ProductName_UP.X+Header_ProductName_UP.Width
+            Y: =Header_ProductID_UP.Y
+            ZIndex: =4
+
+        Header_ProductName_UP As label:
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            DisplayMode: =DisplayMode.View
+            Fill: =SUBGROUPCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =Header_ProductID_UP.Height
+            PaddingBottom: =0
+            PaddingLeft: =10
+            PaddingTop: =0
+            Size: =10
+            Text: ="Product Name"
+            Width: =Parent.Width - Header_ProductID_UP.Width - Header_InternalProductID_UP.Width - Header_Category_UP.Width - Header_LastUpdatedOn_UP.Width - Header_Conrol_UP.Width
+            X: =Header_InternalProductID_UP.X+Header_InternalProductID_UP.Width
+            Y: =Header_ProductID_UP.Y
+            ZIndex: =5
+
+        Header_InternalProductID_UP As label:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            DisplayMode: =DisplayMode.View
+            Fill: =SUBGROUPCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =Header_ProductID_UP.Height
+            PaddingBottom: =0
+            PaddingTop: =0
+            Size: =10
+            Text: ="Internal Product ID"
+            Width: =90
+            X: =Header_ProductID_UP.X + Header_ProductID_UP.Width
+            Y: =Header_ProductID_UP.Y
+            ZIndex: =6
+
+        Header_ProductID_UP As label:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            DisplayMode: =DisplayMode.View
+            Fill: =SUBGROUPCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingTop: =0
+            Size: =10
+            Text: ="Product ID"
+            Width: =90
+            Y: =Back_SearchProduct_UP.Y + Back_SearchProduct_UP.Height
+            ZIndex: =7
+
+        Back_SearchProduct_UP As button:
+            Align: =Align.Left
+            BorderColor: =Self.Fill
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =0
+            Color: =RGBA(0, 0, 0, 1)
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =Self.Color
+            DisabledFill: =Self.Fill
+            DisplayMode: =DisplayMode.Disabled
+            Fill: =ColorFade(BlueNaviHightLightBackground, 50%)
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            PaddingLeft: =15
+            RadiusBottomLeft: |
+                =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =20
+            RadiusTopRight: =20
+            Size: =11
+            Text: |-
+                ="Existing products in Review Hub (count: " & CountRows(glry_Search_UProduct.AllItems) & ")"
+            Width: =Parent.Width
+            ZIndex: =8
+
+        ti_Search_Product As text:
+            BorderColor: =GrayControlBackground
+            BorderThickness: =1
+            Clear: =true
+            Default: =""
+            Font: =FontStyle
+            Height: =25
+            HintText: ="Search by Product Name, Internal Product ID, Product ID"
+            HoverBorderColor: =Self.BorderColor
+            HoverFill: =ColorFade(BlueControlLightBackground, 75%)
+            PaddingBottom: =0
+            PaddingTop: =0
+            PressedBorderColor: =Self.BorderColor
+            RadiusBottomLeft: =14
+            RadiusBottomRight: =14
+            RadiusTopLeft: =14
+            RadiusTopRight: =14
+            Size: =9
+            Width: =400
+            X: =Back_SearchProduct_UP.Width - Self.Width - 15
+            Y: =(Back_SearchProduct_UP.Height - Self.Height) * 0.50
+            ZIndex: =9
+
+        icon_SearchProduct_UP As icon.Search:
+            DisabledBorderColor: =RGBA(0, 0, 0, 0)
+            DisabledColor: =RGBA(0, 0, 0, 1)
+            DisplayMode: =DisplayMode.Disabled
+            Height: =ti_Search_Product.Height
+            Icon: =Icon.Search
+            PaddingBottom: =2
+            PaddingLeft: =2
+            PaddingRight: =2
+            PaddingTop: =2
+            Width: =ti_Search_Product.Height
+            X: =ti_Search_Product.X - Self.Width - 5
+            Y: =ti_Search_Product.Y
+            ZIndex: =10
+
+    Label_UProduct_Header As label:
+        DisabledColor: =BlueControlDarkBackground
+        DisabledFill: =Self.Fill
+        DisplayMode: =DisplayMode.Disabled
+        Fill: =GrayCanvasBackground
+        Font: =FontStyle
+        FontWeight: =FontWeight.Bold
+        Height: =55
+        PaddingLeft: =60
+        Size: =18
+        Text: ="Add/Update Product Information"
+        Width: =App.Width - Self.X
+        Y: =SS_AppHeader_UProduct.Height
+        ZIndex: =3
+
+    icon_Back_UpdateProduct As icon.BackArrow:
+        BorderColor: =RGBA(0, 0, 0, 0)
+        BorderStyle: =BorderStyle.None
+        Color: =BlueControlDarkBackground
+        Height: =30
+        HoverBorderColor: =Self.BorderColor
+        HoverColor: =Color.Purple
+        Icon: =Icon.BackArrow
+        OnSelect: =Navigate(scn_SelfService);
+        Tooltip: ="Back"
+        Width: =Self.Height
+        X: =15
+        Y: =Label_UProduct_Header.Y + (Label_UProduct_Header.Height - Self.Height) * 0.50
+        ZIndex: =4
+
+    SS_AppHeader_UProduct As AppHeader:
+        DropDownSelection: =TrackRequestComponent_UProduct.HideTrackRequest
+        FeatureRequestUrl: =var_FeatureRequestURL
+        FeedbackButtonUrl: =var_SendFeedback_URL
+        inputAppDisplayName: =varAppHeaderText
+        ScorecardOnboardingFeatureUrl: =var_ScorecardOnboardingRequestURL
+        ShowSurveyButton: =false
+        Y: =0
+        ZIndex: =5
+
+    TrackRequestComponent_UProduct As TrackRequestComponent:
+        BlueControlDarkBackground: =BlueControlDarkBackground
+        BlueControlLightBackground: =BlueControlLightBackground
+        BlueNaviHightLightBackground: =BlueNaviHightLightBackground
+        DevOpsBaseUrl: =var_DevOpsBaseURL
+        DevOpsQueryID: =var_DevOpsQueryID
+        FontStyle: =FontStyle
+        GrayCanvasBackground: =GrayCanvasBackground
+        GRAYCOLOR: =GRAYCOLOR
+        GrayControlBackground: =GrayControlBackground
+        IsAdmin: =IsAdmin
+        Reset: =Self.Visible
+        Visible: =SS_AppHeader_UProduct.DisplayTrackRequest
+        X: =App.Width - Self.Width
+        Y: =SS_AppHeader_UProduct.Height
+        ZIndex: =6
+
+    ctn_Confirm_Delete_Product As groupContainer:
+        Fill: =RGBA(255, 255, 255, 0.95)
+        Height: =App.Height
+        Visible: =var_Confirm_Delete_This_Product
+        Width: =App.Width
+        ZIndex: =7
+
+        Card_SS_Product As button:
+            BorderColor: =SUBGROUPCOLOR
+            Color: =RGBA(0, 0, 0, 0)
+            DisabledBorderColor: =SUBGROUPCOLOR
+            DisabledColor: =RGBA(0, 0, 0, 0)
+            DisabledFill: =RGBA(255, 255, 255, 1)
+            DisplayMode: =DisplayMode.Disabled
+            Fill: =RGBA(0, 0, 0, 0)
+            Font: =Font.'Segoe UI'
+            Height: =hdr_ConfirmDel_Product.Height + html_ConfirmDeleteProduct.Height + 10 + btn_ConfirmDeleteProduct.Height + 20
+            HoverBorderColor: =
+            HoverColor: =RGBA(0, 0, 0, 0)
+            HoverFill: =
+            OnSelect: =
+            PressedBorderColor: =
+            PressedColor: =
+            PressedFill: =
+            RadiusBottomLeft: =Self.RadiusTopLeft
+            RadiusBottomRight: =Self.RadiusTopLeft
+            Text: =""
+            Width: =App.Width * 0.35
+            X: =App.Width * 0.5 - Self.Width*0.5
+            Y: =App.Height*0.5 - Self.Height*0.5 - 60
+            ZIndex: =1
+
+        btn_CancelDeleteProduct As button:
+            BorderColor: =Self.Fill
+            Fill: =GRAYCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =25
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Self.Fill
+            HoverFill: =Self.Color
+            OnSelect: =Set(var_Confirm_Delete_This_Product, false)
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Size: =10
+            Text: ="Cancel"
+            Width: =90
+            X: |-
+                =If(
+                    btn_ConfirmDeleteProduct.Visible, 
+                    btn_ConfirmDeleteProduct.X + btn_ConfirmDeleteProduct.Width + 50, 
+                    Card_SS_Product.X + (Card_SS_Product.X - Self.Width) * 0.50  // horizontally centered to Card_SS_Product item.
+                )
+            Y: =btn_ConfirmDeleteProduct.Y
+            ZIndex: =2
+
+        btn_ConfirmDeleteProduct As button:
+            BorderColor: =Self.Fill
+            Fill: =REDWARNINGCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =25
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Self.Fill
+            HoverFill: =Self.Color
+            OnSelect: |-
+                =RemoveIf(
+                    ReviewHub_Products,
+                    ThisRecord.ProductID = Value(record_Delete_This_Product.txt_ProductId)
+                );
+                Set(var_Confirm_Delete_This_Product, false);
+                Set(record_Edit_This_Product, Blank());
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Size: =10
+            Text: ="Yes, Delete"
+            Visible: |-
+                =If(
+                    IsBlankOrError(LookUp(clln_factMetricBoard, ThisRecord.fmb_ProductID = Value(record_Delete_This_Product.txt_ProductId))),
+                    true,
+                    false
+                )
+            Width: =100
+            X: =html_ConfirmDeleteProduct.X + html_ConfirmDeleteProduct.Width * 0.5 - Self.Width - 20
+            Y: |
+                =html_ConfirmDeleteProduct.Y + html_ConfirmDeleteProduct.Height + 15
+            ZIndex: =3
+
+        html_ConfirmDeleteProduct As htmlViewer:
+            AutoHeight: =true
+            Font: =FontStyle
+            HtmlText: |-
+                =If(
+                    btn_ConfirmDeleteProduct.Visible,
+                "<span style=''><b>Product Name</b></span><span style='margin-left:40px'>: " & record_Delete_This_Product.craf2_productname & "</span><br>"&
+                "<b>Product Category</b> <span style='margin-left: 12px'>: " & If(
+                    IsBlankOrError(record_Delete_This_Product.txt_ProductCategory),
+                    "(No Value)",
+                    record_Delete_This_Product.txt_ProductCategory
+                ) 
+                & "</span>",
+                    "<font color = red><b>Warning: </b>This product <b>" & record_Delete_This_Product.craf2_productname & "</b> (Product ID: " & record_Delete_This_Product.txt_ProductId & "; Internal Product ID: " & record_Delete_This_Product.txt_InternalProductId & ") cannot be deleted because there are scorecards created for this product. Please delete all associated scorecards first."
+                )
+            PaddingBottom: =10
+            PaddingLeft: =30
+            PaddingRight: =10
+            PaddingTop: =15
+            Size: =12
+            Width: =Card_SS_Product.Width
+            X: =App.Width * 0.5 - Self.Width*0.5
+            Y: =hdr_ConfirmDel_Product.Y + hdr_ConfirmDel_Product.Height
+            ZIndex: =4
+
+        hdr_ConfirmDel_Product As button:
+            BorderColor: =Self.Fill
+            BorderThickness: =0
+            Color: =RGBA(0, 0, 0, 1)
+            DisabledBorderColor: =Self.Fill
+            DisabledColor: =RGBA(0, 0, 0, 1)
+            DisabledFill: =Self.Fill
+            DisplayMode: =DisplayMode.Disabled
+            Fill: =SUBGROUPCOLOR
+            FocusedBorderThickness: =0
+            Font: =FontStyle
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Self.Color
+            HoverFill: =Self.Fill
+            PressedBorderColor: =Self.BorderColor
+            PressedColor: =Self.Color
+            PressedFill: =Self.Fill
+            RadiusBottomLeft: =
+            RadiusBottomRight: =
+            Size: =14
+            Text: ="Confirm delete this product"
+            Width: =Card_SS_Product.Width
+            X: =Card_SS_Product.X
+            Y: =Card_SS_Product.Y
+            ZIndex: =5
+

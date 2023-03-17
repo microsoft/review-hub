@@ -1,0 +1,13 @@
+<environmentvariabledefinition schemaname="chub_EnvVarReviewHubHowToVideo">
+  <description default="A link to a video describing how to navigate the app. Microsoft Streams was utilized to host the video.">
+    <label description="A link to a video describing how to navigate the app. Microsoft Streams was utilized to host the video." languagecode="1033" />
+  </description>
+  <displayname default="EnvVar - ReviewHub - How To Video">
+    <label description="EnvVar - ReviewHub - How To Video" languagecode="1033" />
+  </displayname>
+  <introducedversion>1.0.0.12082022</introducedversion>
+  <iscustomizable>1</iscustomizable>
+  <isrequired>0</isrequired>
+  <secretstore>0</secretstore>
+  <type>100000000</type>
+</environmentvariabledefinition>

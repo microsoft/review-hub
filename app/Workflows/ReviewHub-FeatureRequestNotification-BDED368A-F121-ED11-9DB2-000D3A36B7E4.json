@@ -1,0 +1,274 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_office365": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "chub_sharedoffice365_aaf4a"
+        },
+        "api": {
+          "name": "shared_office365"
+        }
+      },
+      "shared_visualstudioteamservices_2": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "chub_sharedvisualstudioteamservices_744ee"
+        },
+        "api": {
+          "name": "shared_visualstudioteamservices"
+        }
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        },
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        },
+        "EnvVar - ReviewHub - Notification Email (chub_EnvVarReviewHubNotificationEmail)": {
+          "defaultValue": "reviewhub-noreply@microsoft.com",
+          "type": "String",
+          "metadata": {
+            "schemaName": "chub_EnvVarReviewHubNotificationEmail"
+          }
+        },
+        "EnvVar - ReviewHub - Team Email (chub_EnvVarReviewHubTeamEmail)": {
+          "defaultValue": "dtpreviewhub@microsoft.com",
+          "type": "String",
+          "metadata": {
+            "schemaName": "chub_EnvVarReviewHubTeamEmail"
+          }
+        },
+        "EnvVar - ReviewHub - Feature Request Title (chub_EnvVarReviewHubFeatureRequestTitle)": {
+          "defaultValue": "review hub feature request",
+          "type": "String",
+          "metadata": {
+            "schemaName": "chub_EnvVarReviewHubFeatureRequestTitle"
+          }
+        }
+      },
+      "triggers": {
+        "When_a_work_item_is_updated": {
+          "recurrence": {
+            "interval": 1,
+            "frequency": "Minute"
+          },
+          "splitOn": "@triggerOutputs()?['body/value']",
+          "metadata": {
+            "operationMetadataId": "dd8f41d0-2ca8-4be4-9279-3ccbebfb848f"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "connectionName": "shared_visualstudioteamservices_2",
+              "operationId": "OnWorkItemUpdatedV2",
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_visualstudioteamservices"
+            },
+            "parameters": {
+              "account": "msazure",
+              "project": "One",
+              "wiql__System_WorkItemType": "Feature",
+              "wiql__System_AreaPath": "One\\BAG Analytics and Insights\\ROBs\\Review Hub\\Product Review",
+              "areaPathComparison": "Equals",
+              "iterationPathComparison": "Equals"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        }
+      },
+      "actions": {
+        "Condition": {
+          "actions": {
+            "Confirm_If_Request_Is_Completed": {
+              "actions": {
+                "Send_Update_Email": {
+                  "runAfter": {},
+                  "metadata": {
+                    "operationMetadataId": "38598a30-79df-4222-baed-57f2cd3d22f7"
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "connectionName": "shared_office365",
+                      "operationId": "SendEmailV2",
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365"
+                    },
+                    "parameters": {
+                      "emailMessage/To": "@split(split(triggerOutputs()?['body/fields/System_CreatedBy'], '<')[1], '>')[0]",
+                      "emailMessage/Subject": "Feature Request Status Notification",
+                      "emailMessage/Body": "<p>Dear @{split(triggerOutputs()?['body/fields/System_CreatedBy'], '<')[0]},<br>\n<br>\nYour Feature Request @{triggerOutputs()?['body/fields/System_Title']} has been completed. &nbsp;You can confirm the most recent comments on the request by visiting @{triggerOutputs()?['body/url']}.<br>\n<br>\nRegards,<br>\nReview Hub Feature Team.</p>",
+                      "emailMessage/From": "@parameters('EnvVar - ReviewHub - Notification Email (chub_EnvVarReviewHubNotificationEmail)')",
+                      "emailMessage/Cc": "@parameters('EnvVar - ReviewHub - Team Email (chub_EnvVarReviewHubTeamEmail)')",
+                      "emailMessage/ReplyTo": "@parameters('EnvVar - ReviewHub - Team Email (chub_EnvVarReviewHubTeamEmail)')",
+                      "emailMessage/Importance": "Normal"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                }
+              },
+              "runAfter": {},
+              "else": {
+                "actions": {
+                  "Confirm_If_Rejected": {
+                    "actions": {
+                      "Send_Rejection_Email": {
+                        "runAfter": {},
+                        "metadata": {
+                          "operationMetadataId": "e5b9d133-a990-44da-ba47-13a314d1154d"
+                        },
+                        "type": "OpenApiConnection",
+                        "inputs": {
+                          "host": {
+                            "connectionName": "shared_office365",
+                            "operationId": "SendEmailV2",
+                            "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365"
+                          },
+                          "parameters": {
+                            "emailMessage/To": "@split(split(triggerOutputs()?['body/fields/System_CreatedBy'], '<')[1], '>')[0]",
+                            "emailMessage/Subject": "Feature Request Status Notification",
+                            "emailMessage/Body": "<p>Dear @{split(triggerOutputs()?['body/fields/System_CreatedBy'], '<')[0]},<br>\n<br>\nYour Feature Request @{triggerOutputs()?['body/fields/System_Title']} has been rejected. &nbsp;You can confirm the most recent comments on the request by visiting @{triggerOutputs()?['body/url']}.<br>\n<br>\nRegards,<br>\nReview Hub Feature Team.</p>",
+                            "emailMessage/From": "@parameters('EnvVar - ReviewHub - Notification Email (chub_EnvVarReviewHubNotificationEmail)')",
+                            "emailMessage/Cc": "@parameters('EnvVar - ReviewHub - Team Email (chub_EnvVarReviewHubTeamEmail)')",
+                            "emailMessage/ReplyTo": "@parameters('EnvVar - ReviewHub - Team Email (chub_EnvVarReviewHubTeamEmail)')",
+                            "emailMessage/Importance": "Normal"
+                          },
+                          "authentication": "@parameters('$authentication')"
+                        }
+                      }
+                    },
+                    "runAfter": {},
+                    "else": {
+                      "actions": {
+                        "Confirm_If_Approved": {
+                          "actions": {
+                            "Send_Approval_Email": {
+                              "runAfter": {},
+                              "metadata": {
+                                "operationMetadataId": "015c67cd-5a9b-4d1a-af43-021098cd4c97"
+                              },
+                              "type": "OpenApiConnection",
+                              "inputs": {
+                                "host": {
+                                  "connectionName": "shared_office365",
+                                  "operationId": "SendEmailV2",
+                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365"
+                                },
+                                "parameters": {
+                                  "emailMessage/To": "@split(split(triggerOutputs()?['body/fields/System_CreatedBy'], '<')[1], '>')[0]",
+                                  "emailMessage/Subject": "Feature Request Status Notification",
+                                  "emailMessage/Body": "<p>Dear @{split(triggerOutputs()?['body/fields/System_CreatedBy'], '<')[0]},<br>\n<br>\nYour Feature Request @{triggerOutputs()?['body/fields/System_Title']} state has been updated to @{triggerOutputs()?['body/fields/System_State']}. &nbsp;You can confirm the most recent comments on the request by visiting @{triggerOutputs()?['body/url']}.<br>\n<br>\nRegards,<br>\nReview Hub Feature Team.</p>",
+                                  "emailMessage/From": "@parameters('EnvVar - ReviewHub - Notification Email (chub_EnvVarReviewHubNotificationEmail)')",
+                                  "emailMessage/Cc": "@parameters('EnvVar - ReviewHub - Team Email (chub_EnvVarReviewHubTeamEmail)')",
+                                  "emailMessage/ReplyTo": "@parameters('EnvVar - ReviewHub - Team Email (chub_EnvVarReviewHubTeamEmail)')",
+                                  "emailMessage/Importance": "Normal"
+                                },
+                                "authentication": "@parameters('$authentication')"
+                              }
+                            }
+                          },
+                          "runAfter": {},
+                          "else": {
+                            "actions": {
+                              "Confirm_If_New": {
+                                "actions": {
+                                  "Send_Notification_Email": {
+                                    "runAfter": {},
+                                    "metadata": {
+                                      "operationMetadataId": "015c67cd-5a9b-4d1a-af43-021098cd4c97"
+                                    },
+                                    "type": "OpenApiConnection",
+                                    "inputs": {
+                                      "host": {
+                                        "connectionName": "shared_office365",
+                                        "operationId": "SendEmailV2",
+                                        "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365"
+                                      },
+                                      "parameters": {
+                                        "emailMessage/To": "@parameters('EnvVar - ReviewHub - Team Email (chub_EnvVarReviewHubTeamEmail)')",
+                                        "emailMessage/Subject": "Feature Request Notification",
+                                        "emailMessage/Body": "<p>Dear Team,<br>\n<br>\nA new feature request has been made by the user @{split(triggerOutputs()?['body/fields/System_CreatedBy'], '<')[0]}. The feature request is titled @{triggerOutputs()?['body/fields/System_Title']} and its current state is @{triggerOutputs()?['body/fields/System_State']}. &nbsp;You can confirm the most recent comments on the request by visiting @{triggerOutputs()?['body/url']}.<br>\n<br>\nRegards,<br>\nReview Hub Feature Team.</p>",
+                                        "emailMessage/From": "@parameters('EnvVar - ReviewHub - Notification Email (chub_EnvVarReviewHubNotificationEmail)')",
+                                        "emailMessage/ReplyTo": "@parameters('EnvVar - ReviewHub - Team Email (chub_EnvVarReviewHubTeamEmail)')",
+                                        "emailMessage/Importance": "Normal"
+                                      },
+                                      "authentication": "@parameters('$authentication')"
+                                    }
+                                  }
+                                },
+                                "runAfter": {},
+                                "expression": {
+                                  "equals": [
+                                    "@triggerOutputs()?['body/fields/System_State']",
+                                    "New"
+                                  ]
+                                },
+                                "metadata": {
+                                  "operationMetadataId": "d7d7464f-ef70-431e-a8fa-44c279736ff1"
+                                },
+                                "type": "If"
+                              }
+                            }
+                          },
+                          "expression": {
+                            "equals": [
+                              "@triggerOutputs()?['body/fields/System_State']",
+                              "Committed"
+                            ]
+                          },
+                          "metadata": {
+                            "operationMetadataId": "d225499a-c865-49cf-9655-da9eba4616fd"
+                          },
+                          "type": "If"
+                        }
+                      }
+                    },
+                    "expression": {
+                      "equals": [
+                        "@triggerOutputs()?['body/fields/Scrum_custom_Status']",
+                        "Rejected"
+                      ]
+                    },
+                    "metadata": {
+                      "operationMetadataId": "03f640ac-93ef-4e2b-afad-fefaeffe8132"
+                    },
+                    "type": "If"
+                  }
+                }
+              },
+              "expression": {
+                "equals": [
+                  "@triggerOutputs()?['body/fields/System_State']",
+                  "Done"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "2e6e5d53-5f93-4032-84bc-d5acaaca65e6"
+              },
+              "type": "If"
+            }
+          },
+          "runAfter": {},
+          "expression": {
+            "contains": [
+              "@toLower(triggerOutputs()?['body/fields/System_Title'])",
+              "@parameters('EnvVar - ReviewHub - Feature Request Title (chub_EnvVarReviewHubFeatureRequestTitle)')"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "d16907ae-179b-4fec-a84e-d38412e927dc"
+          },
+          "type": "If"
+        }
+      }
+    },
+    "templateName": ""
+  },
+  "schemaVersion": "1.0.0.0"
+}

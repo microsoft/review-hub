@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "5d994fb2-0835-4a02-a035-79c4fba486ed",
+    "Name": "ReviewHub-LaunchExcelFile",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "f508ea77-2029-ed11-9db2-000d3a36b7e4"
+  }
+]

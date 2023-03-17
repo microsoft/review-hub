@@ -1,0 +1,941 @@
+scn_AC_GrantAccess As screen:
+    OnVisible: |
+        =UpdateContext({ctx_IfGalleryLoaded: true, ctx_savingData: false});
+        Concurrent(
+            ClearCollect(
+                clln_AllApps,
+                SortByColumns(
+                    AddColumns(
+                        GroupBy(
+                            ShowColumns( 
+                                clln_factMetricBoard,  
+                                "fmb_BoardHealthDisplayOrder", "fmb_BoardHealthRating", "fmb_BoardHealthImage", "fmb_ReviewLockDate", "fmb_ReviewMonth", "fmb_ReviewYear", "fmb_ProductName", "fmb_HealthScore", "fmb_ID", "fmb_ProductID", "fmb_TemplateID", "fmb_MetricBoardTypeID"
+                            ),
+                            "fmb_ProductID", "fmb_MetricBoardTypeID", "PSR_ProductsGroup"
+                        ), 
+                        "ProductName",
+                        First(PSR_ProductsGroup).fmb_ProductName, 
+                        "FirstID",
+                        First(PSR_ProductsGroup).fmb_ID,
+                        "BoardTypeName",
+                        LookUp(ReviewHub_BoardTypes, BoardTypeID = fmb_MetricBoardTypeID).BoardTypeName
+                    ),
+                    "BoardTypeName", SortOrder.Ascending, "ProductName", SortOrder.Ascending
+                )
+            );
+            Clear(clln_SelectedApps);
+            Clear(clln_SelectedApps1);
+            Clear(clln__SelectedApps),
+            Reset('DataValue-UserComment_ACGRA'),
+            Reset(combo_NewUser_ACGRA)
+        );
+        UpdateContext({ctx_IfGalleryLoaded: false, ctx_savingData: false});
+
+    ctn_Main_ACGRA As groupContainer.horizontalAutoLayoutContainer:
+        Height: =App.Height - Self.Y - 10
+        LayoutGap: =10
+        LayoutMode: =LayoutMode.Auto
+        Width: =(App.Width * 0.90) - Self.X * 2
+        X: =SS_AppHeader_ACGRA.X+ 15
+        Y: |
+            =lbl_ScreenTitle_ACGRA.Y + lbl_ScreenTitle_ACGRA.Height + 5
+        ZIndex: =1
+
+        vctn_UserAccess_ACGRA As groupContainer.verticalAutoLayoutContainer:
+            AlignInContainer: =AlignInContainer.Start
+            Height: =Parent.Height//App.Height - Self.Y - 20
+            LayoutAlignItems: =LayoutAlignItems.Stretch
+            LayoutDirection: =LayoutDirection.Vertical
+            LayoutGap: =10
+            LayoutMinHeight: =100
+            LayoutMinWidth: =250
+            LayoutMode: =LayoutMode.Auto
+            LayoutOverflowY: =LayoutOverflow.Scroll
+            Width: =Parent.Width - Self.X - 15 //App.Width - ctn_Left_NM_1.Width - 50
+            Y: =lbl_ScreenTitle_ACGRA.Y + lbl_ScreenTitle_ACGRA.Height + 15
+            ZIndex: =1
+
+            ctn_NewUser_ACGRA As groupContainer:
+                AlignInContainer: =AlignInContainer.SetByContainer
+                FillPortions: =0
+                Height: |-
+                    =If(
+                        IsBlankOrError(combo_NewUser_ACGRA.Selected.DisplayName),
+                        combo_NewUser_ACGRA.Y + combo_NewUser_ACGRA.Height + 150,
+                        html_NewUser_ACGRA.Y + html_NewUser_ACGRA.Height + 25 //App.Height - Self.Y - 25
+                    )
+                LayoutMinHeight: =100
+                LayoutMinWidth: =250
+                Visible: =IsBlankOrError(record_Edit_This_User)
+                Width: =Parent.Width
+                ZIndex: =1
+
+                Back_NewUser_ACGRA As button:
+                    BorderColor: =Back_NewUser_Header_ACGRA.Fill
+                    DisabledBorderColor: =Self.BorderColor
+                    DisabledFill: =RGBA(0, 0, 0, 0)
+                    DisplayMode: =DisplayMode.Disabled
+                    Font: =FontStyle
+                    Height: =Parent.Height - Self.Y - 1
+                    RadiusBottomLeft: =0
+                    RadiusBottomRight: =0
+                    RadiusTopLeft: =0
+                    RadiusTopRight: =0
+                    Text: =""
+                    Width: =Parent.Width - 2
+                    X: =1
+                    Y: =Back_NewUser_Header_ACGRA.Height - 1
+                    ZIndex: =1
+
+                html_NewUser_ACGRA As htmlViewer:
+                    AutoHeight: =true
+                    Font: =FontStyle
+                    Height: =60
+                    HtmlText: |-
+                        ="<b>Name: </b>" & combo_NewUser_ACGRA.Selected.DisplayName 
+                        & "<br><b>Email: </b>" & combo_NewUser_ACGRA.Selected.UserPrincipalName 
+                        & "<br><b>Department: </b>" & combo_NewUser_ACGRA.Selected.Department 
+                    PaddingBottom: =0
+                    PaddingLeft: =0
+                    PaddingTop: =0
+                    Visible: =!IsBlankOrError(combo_NewUser_ACGRA.Selected.UserPrincipalName)
+                    Width: =Parent.Width - Self.X - img_UUser_New_ACGRA.X
+                    X: =img_UUser_New_ACGRA.X + img_UUser_New_ACGRA.Width + 5
+                    Y: =img_UUser_New_ACGRA.Y
+                    ZIndex: =4
+
+                img_UUser_New_ACGRA As image:
+                    Height: =html_NewUser_ACGRA.Height
+                    Image: |-
+                        =If(
+                            !IsBlank(combo_NewUser_ACGRA.Selected.DisplayName),
+                            If(
+                                !IsError(Office365Users.UserPhotoMetadata(combo_NewUser_ACGRA.Selected.UserPrincipalName)) 
+                                    && Office365Users.UserPhotoMetadata(combo_NewUser_ACGRA.Selected.UserPrincipalName).HasPhoto,
+                                Office365Users.UserPhotoV2(combo_NewUser_ACGRA.Selected.Id)
+                            )
+                        )
+                    RadiusBottomLeft: =10
+                    RadiusBottomRight: =10
+                    RadiusTopLeft: =10
+                    RadiusTopRight: =10
+                    Visible: |-
+                        =If(
+                            !IsBlank(combo_NewUser_ACGRA.Selected.DisplayName),
+                            If(
+                                IsError(Office365Users.UserPhotoMetadata(combo_NewUser_ACGRA.Selected.UserPrincipalName)),
+                                false,
+                                If(
+                                    Office365Users.UserPhotoMetadata(combo_NewUser_ACGRA.Selected.UserPrincipalName).HasPhoto,
+                                    true,
+                                    false
+                                )
+                            ),
+                            false
+                        )
+                    Width: =80
+                    X: =15
+                    Y: |
+                        =combo_NewUser_ACGRA.Y + combo_NewUser_ACGRA.Height + 15
+                    ZIndex: =7
+
+                lbl_UUser_NoPhoto_New_ACGRA As label:
+                    Align: =Align.Center
+                    BorderColor: =GrayBorderDark
+                    BorderThickness: =2
+                    Color: =RGBA(0, 121, 187, 1)
+                    Font: =FontStyle
+                    FontWeight: =FontWeight.Semibold
+                    Height: =img_UUser_New_ACGRA.Height
+                    Size: =30
+                    Text: |-
+                        =If(
+                            IsBlankOrError(combo_NewUser_ACGRA.Selected.UserPrincipalName),
+                            "",
+                            Left(Office365Users.UserProfileV2(combo_NewUser_ACGRA.Selected.UserPrincipalName).givenName, 1) & Left(Office365Users.UserProfileV2(combo_NewUser_ACGRA.Selected.UserPrincipalName).surname, 1)
+                        )
+                    Visible: |-
+                        =If(
+                            IsBlankOrError(combo_NewUser_ACGRA.Selected.UserPrincipalName),
+                            false,
+                            If(
+                                !IsError(!Office365Users.UserPhotoMetadata(combo_NewUser_ACGRA.Selected.UserPrincipalName).HasPhoto),
+                                !Office365Users.UserPhotoMetadata(combo_NewUser_ACGRA.Selected.UserPrincipalName).HasPhoto,
+                                true
+                            )
+                        )
+                    Width: =img_UUser_New_ACGRA.Width
+                    X: =img_UUser_New_ACGRA.X
+                    Y: =img_UUser_New_ACGRA.Y
+                    ZIndex: =8
+
+                combo_NewUser_ACGRA As combobox:
+                    BorderColor: =RGBA(0, 0, 0, 1)
+                    BorderThickness: =1
+                    ChevronBackground: =Self.Fill
+                    ChevronDisabledFill: =RGBA(0, 0, 0, 0)
+                    ChevronFill: =RGBA(0, 0, 0, 1)
+                    ChevronHoverBackground: =
+                    DefaultSelectedItems: =
+                    DisplayFields: =["DisplayName","UserPrincipalName","Picture"]
+                    Font: =FontStyle
+                    Height: =30
+                    HoverBorderColor: =
+                    HoverFill: =ColorFade(BlueNaviHightLightBackground, 85%)
+                    InputTextPlaceholder: ="Search by name or principal email alias"
+                    Items: |-
+                        =Office365Users.SearchUserV2({searchTerm: Trim(Self.SearchText)}).value
+                    OnChange: |-
+                        =If(
+                            IsBlankOrError(combo_NewUser_ACGRA.Selected.UserPrincipalName ),
+                            Clear(clln_MyAppsWithEditAccess),
+                            ClearCollect(
+                                clln_MyAppsWithEditAccess,
+                                SortByColumns(
+                                    AddColumns(
+                                        GroupBy(
+                                            AddColumns(
+                                                ShowColumns(
+                                                    Filter(
+                                                        ReviewHub_Stakeholders,
+                                                        combo_NewUser_ACGRA.Selected.UserPrincipalName in ProductStakeholderEmails
+                                                    ),
+                                                    "craf2_title", "craf2_productstakeholders", "craf2_stakeholdernames", "craf2_Product", "craf2_BoardType"
+                                                ),
+                                                "craf2_ProductName", craf2_Product.ProductName, "craf2_ProductID", craf2_Product.ProductID, "craf2_BoardTypeName", craf2_BoardType.BoardTypeName, "craf2_BoardTypeID", craf2_BoardType.BoardTypeID
+                                            ),
+                                            "craf2_ProductID", "craf2_BoardTypeID", "PRD_Group"
+                                        ),
+                                        "ProductName",
+                                        First(PRD_Group).craf2_ProductName,
+                                        "BoardTypeName",
+                                        First(PRD_Group).craf2_BoardTypeName
+                                    ),
+                                    "BoardTypeName", SortOrder.Ascending, "ProductName", SortOrder.Ascending
+                                )
+                            )
+                        )
+                    PaddingBottom: =0
+                    PaddingLeft: =8
+                    PaddingTop: =0
+                    PressedColor: =BlueControlDarkBackground
+                    PressedFill: =BlueControlLightBackground
+                    SearchFields: =["UserPrincipalName", "DisplayName"]
+                    SearchItems: |-
+                        =Search(Office365Users.SearchUserV2({searchTerm: Trim(Self.SearchText)}).value,combo_NewUser_ACGRA.SearchText,"UserPrincipalName","DisplayName")
+                    SelectionFill: =BlueNaviHightLightBackground
+                    SelectMultiple: =false
+                    Size: =11
+                    Template: =ListItemTemplate.Double
+                    Tooltip: =
+                    Width: =Parent.Width - 30
+                    X: =15
+                    Y: =Back_NewUser_Header_ACGRA.Y + Back_NewUser_Header_ACGRA.Height + 15
+                    ZIndex: =9
+
+                Back_NewUser_Header_ACGRA As button:
+                    Align: =Align.Left
+                    BorderColor: =Self.Fill
+                    BorderStyle: =BorderStyle.None
+                    BorderThickness: =0
+                    DisabledBorderColor: =Self.BorderColor
+                    DisabledColor: =Color.Black
+                    DisabledFill: =Self.Fill
+                    DisplayMode: =DisplayMode.Disabled
+                    Fill: =SUBGROUPCOLOR
+                    Font: =FontStyle
+                    FontWeight: =FontWeight.Bold
+                    PaddingLeft: =20
+                    RadiusBottomLeft: |
+                        =0
+                    RadiusBottomRight: =0
+                    RadiusTopLeft: |
+                        =25
+                    RadiusTopRight: |
+                        =25
+                    Size: =11
+                    Text: ="Add a new user"
+                    Width: =Parent.Width
+                    ZIndex: =10
+
+            ctn_UserCurrAccess_ACGRA As groupContainer.manualLayoutContainer:
+                AlignInContainer: =AlignInContainer.SetByContainer
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Height: =Parent.Height - ctn_NewUser_ACGRA.Height - 10 //910
+                LayoutMinHeight: =100
+                LayoutMinWidth: =250
+                Width: =Parent.Width
+                Y: =60
+                ZIndex: =3
+
+                glry_UserCurrAccess_ACGRA As gallery.variableTemplateHeightGallery:
+                    BorderColor: =SUBGROUPCOLOR
+                    BorderThickness: =2
+                    Height: =Parent.Height - Self.Y - 20 //Min(Parent.Height - Self.Y, 240) - 2
+                    Items: |-
+                        =Ungroup(//Ungroup function to add a Row Number column.
+                            ForAll(
+                                Sequence(CountRows(clln_MyAppsWithEditAccess)),
+                                {
+                                    Record:Table(Last(FirstN(clln_MyAppsWithEditAccess,Value))),
+                                    RowNumber:Value
+                                }
+                            ),
+                            "Record"
+                        )
+                    Layout: =Layout.Vertical
+                    TemplateFill: =If(Mod(ThisItem.RowNumber, 2) = 0, GrayCanvasBackground, RGBA(0, 0, 0, 0))
+                    TemplatePadding: =1
+                    TemplateSize: =35
+                    Width: =Parent.Width - 2
+                    X: =1
+                    Y: =lbl_UserCurrAccess_ACGRA.Y + lbl_UserCurrAccess_ACGRA.Height - 1
+                    ZIndex: =1
+
+                    Label_UserCurrAccess_ACGRA As htmlViewer:
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        Fill: =RGBA(0, 0, 0, 0)
+                        Font: =FontStyle
+                        Height: =35
+                        HtmlText: |-
+                            =ThisItem.BoardTypeName & ": " & ThisItem.ProductName
+                        OnSelect: =Select(Parent)
+                        PaddingLeft: =15
+                        Size: =10
+                        Width: =Parent.Width
+                        ZIndex: =1
+
+                lbl_UserCurrAccess_ACGRA As button:
+                    Align: =Align.Left
+                    BorderColor: =Self.Fill
+                    BorderStyle: =BorderStyle.None
+                    BorderThickness: =0
+                    Color: =RGBA(0, 0, 0, 1)
+                    DisabledBorderColor: =Self.BorderColor
+                    DisabledColor: =Self.Color
+                    DisabledFill: =Self.Fill
+                    DisplayMode: =DisplayMode.Disabled
+                    Fill: =SUBGROUPCOLOR
+                    Font: =FontStyle
+                    FontWeight: =FontWeight.Bold
+                    PaddingLeft: =15
+                    RadiusBottomLeft: |
+                        =0
+                    RadiusBottomRight: =0
+                    RadiusTopLeft: =20
+                    RadiusTopRight: =20
+                    Size: =11
+                    Text: ="Apps the user have access to"
+                    Width: =Parent.Width
+                    ZIndex: =3
+
+        vctn_UserSelection_ACGRA As groupContainer.verticalAutoLayoutContainer:
+            AlignInContainer: =AlignInContainer.SetByContainer
+            FillPortions: =2
+            Height: =Parent.Height//App.Height - Self.Y - 20
+            LayoutAlignItems: =LayoutAlignItems.Stretch
+            LayoutDirection: =LayoutDirection.Vertical
+            LayoutGap: =10
+            LayoutMinHeight: =100
+            LayoutMinWidth: =250
+            LayoutMode: =LayoutMode.Auto
+            LayoutOverflowY: =LayoutOverflow.Scroll
+            Width: =Parent.Width - Self.X - 15 //App.Width - ctn_Left_NM_1.Width - 50
+            X: =15
+            ZIndex: =2
+
+            hctn_UserSelection_ACGRA As groupContainer.horizontalAutoLayoutContainer:
+                AlignInContainer: =AlignInContainer.SetByContainer
+                FillPortions: =0
+                Height: =Parent.Height - ctn_UserReqJustification_ACGRA.Height - 20//Max(ctn_ExecSummary_HL_ES_1.Height, ctn_ExecSummary_LL_ES_1.Height)
+                LayoutJustifyContent: =LayoutJustifyContent.Center
+                LayoutMinHeight: =100
+                LayoutMinWidth: =250
+                LayoutMode: =LayoutMode.Auto
+                LayoutOverflowY: =LayoutOverflow.Scroll
+                Width: =Parent.Width//500
+                ZIndex: =1
+
+                ctn_UserReqAccess_ACGRA As groupContainer:
+                    AlignInContainer: =AlignInContainer.SetByContainer
+                    ContentLanguage: =0
+                    Height: |
+                        =ctn_UserSelectedAccess_ACGRA.Height
+                    LayoutMinHeight: =100
+                    LayoutMinWidth: =250
+                    Width: =(Parent.Width - divider_BetweenContainers_ACGRA.Width) * 0.5
+                    ZIndex: =1
+
+                    Back_glry_UserReqAccess_ACGRA As button:
+                        BorderColor: =Self.Fill
+                        BorderStyle: =BorderStyle.None
+                        BorderThickness: =0
+                        DisplayMode: =DisplayMode.View
+                        Fill: =SUBGROUPCOLOR
+                        Height: =Label_glry_UserReqAccess_ACGRA.Height
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =15
+                        RadiusTopRight: =15
+                        Text: =""
+                        Width: =Parent.Width
+                        ZIndex: =1
+
+                    Label_glry_UserReqAccess_ACGRA As label:
+                        Color: =RGBA(55, 118, 29, 1)
+                        Font: =FontStyle
+                        FontWeight: =FontWeight.Bold
+                        PaddingLeft: =15
+                        Size: =11
+                        Text: ="Select the services you want the user to access"
+                        Width: =Parent.Width
+                        X: |
+                            =0
+                        ZIndex: =2
+
+                    Back_UserReqAccess_ACGRA As label:
+                        BorderColor: =SUBGROUPCOLOR
+                        BorderThickness: =3
+                        Color: =RGBA(255, 255, 255, 1)
+                        Fill: =RGBA(255, 255, 255, 1)
+                        Height: =Parent.Height - Self.Y
+                        Size: =10
+                        Text: =//for the white background
+                        Width: =Parent.Width
+                        Y: =37.999999999999545
+                        ZIndex: =3
+
+                    glry_UserReqAccess_ACGRA As gallery.variableTemplateHeightGallery:
+                        BorderColor: =SUBGROUPCOLOR
+                        BorderStyle: =BorderStyle.None
+                        BorderThickness: =2
+                        Height: =Parent.Height - Self.Y - 2
+                        Items: |-
+                            =
+                            Ungroup(//Ungroup function to add a Row Number column.
+                                ForAll(
+                                    Sequence(CountRows(Filter(clln_AllApps, fmb_MetricBoardTypeID = dpdn_Scorecard_ACGRA.Selected.filter_BoardTypeID))),
+                                    {
+                                        Record:Table(Last(FirstN(Filter(clln_AllApps, fmb_MetricBoardTypeID = dpdn_Scorecard_ACGRA.Selected.filter_BoardTypeID),Value))),
+                                        RowNumber:Value
+                                    }
+                                ),
+                                "Record"
+                            )
+                        Layout: =Layout.Vertical
+                        TemplateFill: =If(Mod(ThisItem.RowNumber, 2) = 0, GrayCanvasBackground, RGBA(0, 0, 0, 0))
+                        TemplatePadding: =1
+                        TemplateSize: =35
+                        Width: =Parent.Width - 2
+                        X: =1
+                        Y: =Label_Scorecard_ACGRA.Y + Label_Scorecard_ACGRA.Height + 10
+                        ZIndex: =4
+
+                        Label_UserReqAccess_ACGRA As htmlViewer:
+                            BorderColor: =RGBA(0, 0, 0, 0)
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Font: =FontStyle
+                            Height: =35
+                            HtmlText: |-
+                                =ThisItem.ProductName //craf2_BoardType.craf2_boardtypeid & ": " & ThisItem.craf2_Product.craf2_productid
+                            OnSelect: =Select(Parent)
+                            PaddingLeft: =15
+                            Size: =10
+                            Width: =Parent.Width
+                            ZIndex: =1
+
+                        icon_AddService_ACGRA As icon.BackArrow:
+                            BorderColor: =RGBA(0, 0, 0, 0)
+                            BorderStyle: =BorderStyle.None
+                            Color: =BlueControlDarkBackground
+                            DisplayMode: =If(CountRows(Filter(clln_SelectedApps, FirstID = ThisItem.FirstID))>0 || CountRows(Filter(clln_MyAppsWithEditAccess, craf2_BoardTypeID = ThisItem.fmb_MetricBoardTypeID && craf2_ProductID = ThisItem.fmb_ProductID))>0, DisplayMode.Disabled, DisplayMode.Edit)
+                            Height: =30
+                            HoverBorderColor: =Self.BorderColor
+                            HoverColor: =Color.Purple
+                            Icon: =Icon.Add
+                            OnSelect: |
+                                =Collect(clln_SelectedApps1, LookUp(clln_AllApps, FirstID = ThisItem.FirstID));
+                                ClearCollect(clln__SelectedApps,
+                                    SortByColumns(
+                                        clln_SelectedApps1,
+                                        "BoardTypeName", SortOrder.Ascending, "ProductName", SortOrder.Ascending
+                                    )
+                                );
+                                Clear(clln_SelectedApps);
+                                Collect(clln_SelectedApps, 
+                                    Ungroup(//Ungroup function to add a Row Number column.
+                                        ForAll(
+                                            Sequence(CountRows(clln__SelectedApps)),
+                                            {
+                                                Record:Table(Last(FirstN(clln__SelectedApps,Value))),
+                                                RowNumber:Value
+                                            }
+                                        ),
+                                        "Record"
+                                    )
+                                );
+                            PaddingBottom: =5
+                            PaddingLeft: =5
+                            PaddingRight: =10
+                            PaddingTop: =5
+                            Tooltip: ="Back"
+                            Width: =Self.Height
+                            X: =Parent.Width - Self.Width - 10
+                            Y: =Label_UserReqAccess_ACGRA.Y + (Label_UserReqAccess_ACGRA.Height - Self.Height) * 0.50
+                            ZIndex: =2
+
+                    dpdn_Scorecard_ACGRA As dropdown:
+                        BorderColor: =
+                        BorderStyle: =BorderStyle.None
+                        BorderThickness: =0
+                        ChevronBackground: =Self.Fill
+                        ChevronDisabledFill: =RGBA(0, 0, 0, 0)
+                        ChevronFill: =RGBA(0, 0, 0, 1)
+                        ChevronHoverBackground: =BlueControlLightBackground
+                        ChevronHoverFill: =RGBA(0, 0, 0, 1)
+                        Default: ="Product Review"
+                        Fill: =GrayControlBackground
+                        Font: =FontStyle
+                        FontWeight: =FontWeight.Semibold
+                        Height: |
+                            =30
+                        HoverFill: =Self.ChevronHoverBackground
+                        Items: |-
+                            =RenameColumns(
+                                AddColumns(
+                                    ForAll(Distinct(clln_factMetricBoard, fmb_MetricBoardTypeID), {Result: ThisRecord.Value}).Result, 
+                                    "filter_BoardTypeName", LookUp(ReviewHub_BoardTypes, ThisRecord.BoardTypeID = Result).BoardTypeName
+                                ),
+                                "Result", "filter_BoardTypeID"
+                            )
+                        OnChange: =
+                        PressedColor: =BlueControlDarkBackground
+                        PressedFill: =BlueControlLightBackground
+                        SelectionFill: =BlueNaviHightLightBackground
+                        Size: =11
+                        Width: =190
+                        X: =Label_Scorecard_ACGRA.X + Label_Scorecard_ACGRA.Width
+                        Y: =Label_glry_UserReqAccess_ACGRA.Y + Label_glry_UserReqAccess_ACGRA.Height + 10
+                        ZIndex: =5
+
+                    Label_Scorecard_ACGRA As label:
+                        DisplayMode: =DisplayMode.View
+                        Font: =FontStyle
+                        Height: =30
+                        PaddingLeft: =15
+                        PaddingRight: =10
+                        Size: =11
+                        Text: |-
+                            ="Scorecard:"
+                        Width: =100
+                        Y: =Label_glry_UserReqAccess_ACGRA.Y + Label_glry_UserReqAccess_ACGRA.Height + 10
+                        ZIndex: =6
+
+                divider_BetweenContainers_ACGRA As rectangle:
+                    BorderColor: =RGBA(0, 0, 0, 0)
+                    BorderStyle: =BorderStyle.None
+                    DisplayMode: =DisplayMode.View
+                    Fill: =RGBA(0, 0, 0, 0)
+                    Height: =Parent.Height
+                    Width: =10
+                    ZIndex: =2
+
+                ctn_UserSelectedAccess_ACGRA As groupContainer:
+                    AlignInContainer: =AlignInContainer.SetByContainer
+                    ContentLanguage: =0
+                    Height: |
+                        =Parent.Height//Label_glry_LL_ES_1.Height + GalleryLogs_3.Height
+                    LayoutMinHeight: =100
+                    LayoutMinWidth: =250
+                    Width: =(Parent.Width - divider_BetweenContainers_ACGRA.Width) * 0.5
+                    ZIndex: =3
+
+                    Back_glry_UserSelectAccess_ACGRA As button:
+                        BorderColor: =Self.Fill
+                        BorderStyle: =BorderStyle.None
+                        BorderThickness: =0
+                        DisplayMode: =DisplayMode.View
+                        Fill: =SUBGROUPCOLOR
+                        Height: =Label_glry_UserReqAccess_ACGRA.Height
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =15
+                        RadiusTopRight: =15
+                        Text: =""
+                        Width: =Parent.Width
+                        ZIndex: =7
+
+                    Label_glry_UserSelectAccess_ACGRA As label:
+                        Color: =RGBA(210, 64, 39, 1)
+                        Font: =FontStyle
+                        FontWeight: =FontWeight.Bold
+                        PaddingLeft: =15
+                        Size: =11
+                        Text: ="Services you have selected"
+                        Width: =Parent.Width
+                        X: |
+                            =0
+                        ZIndex: =8
+
+                    glry_UserSelectAccess_ACGRA As gallery.variableTemplateHeightGallery:
+                        BorderColor: =SUBGROUPCOLOR
+                        BorderThickness: =2
+                        Height: =Parent.Height - Self.Y - 1//Min(Parent.Height - Self.Y, 240) - 2
+                        Items: |-
+                            =clln_SelectedApps/*Ungroup(//Ungroup function to add a Row Number column.
+                                ForAll(
+                                    Sequence(CountRows(clln_SelectedApps)),
+                                    {
+                                        Record:Table(Last(FirstN(clln_SelectedApps,Value))),
+                                        RowNumber:Value
+                                    }
+                                ),
+                                "Record"
+                            )*/
+                        Layout: =Layout.Vertical
+                        TemplateFill: =If(Mod(ThisItem.RowNumber, 2) = 0, GrayCanvasBackground, RGBA(0, 0, 0, 0))
+                        TemplatePadding: =1
+                        TemplateSize: =35
+                        Width: =Parent.Width - 3
+                        X: =2
+                        Y: =Back_glry_UserReqAccess_ACGRA.Y + Back_glry_UserReqAccess_ACGRA.Height - 1
+                        ZIndex: =9
+
+                        Label_NR_LogMsg_6 As htmlViewer:
+                            BorderColor: =RGBA(0, 0, 0, 0)
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Font: =FontStyle
+                            Height: =35
+                            HtmlText: |-
+                                =ThisItem.BoardTypeName & ": " & ThisItem.ProductName
+                            OnSelect: =Select(Parent)
+                            PaddingLeft: =15
+                            Size: =10
+                            Width: =Parent.Width
+                            ZIndex: =1
+
+                        icon_Back_NM_6 As icon.BackArrow:
+                            BorderColor: =RGBA(0, 0, 0, 0)
+                            BorderStyle: =BorderStyle.None
+                            Color: =BlueControlDarkBackground
+                            Height: =30
+                            HoverBorderColor: =Self.BorderColor
+                            HoverColor: =Color.Purple
+                            Icon: =Icon.Cancel
+                            OnSelect: |-
+                                =Remove(clln_SelectedApps, ThisItem);
+                                ClearCollect(clln_SelectedApps1, DropColumns(clln_SelectedApps, "RowNumber"));
+                                ClearCollect(clln__SelectedApps,
+                                    SortByColumns(
+                                        clln_SelectedApps1,
+                                        "BoardTypeName", SortOrder.Ascending, "ProductName", SortOrder.Ascending
+                                    )
+                                );
+                                Clear(clln_SelectedApps);
+                                Collect(clln_SelectedApps, 
+                                    Ungroup(//Ungroup function to add a Row Number column.
+                                        ForAll(
+                                            Sequence(CountRows(clln__SelectedApps)),
+                                            {
+                                                Record:Table(Last(FirstN(clln__SelectedApps,Value))),
+                                                RowNumber:Value
+                                            }
+                                        ),
+                                        "Record"
+                                    )
+                                );
+                            PaddingBottom: =5
+                            PaddingLeft: =5
+                            PaddingRight: =10
+                            PaddingTop: =5
+                            Tooltip: ="Back"
+                            Width: =Self.Height
+                            X: =Parent.Width - Self.Width - 10
+                            Y: =Label_NR_LogMsg_6.Y + (Label_NR_LogMsg_6.Height - Self.Height) * 0.50
+                            ZIndex: =2
+
+            ctn_UserReqJustification_ACGRA As groupContainer:
+                AlignInContainer: =AlignInContainer.SetByContainer
+                FillPortions: =0
+                Height: ='DataValue-UserComment_ACGRA'.Height + bttn_SaveUserReq_ACGRA.Height + 20
+                LayoutMinHeight: =100
+                LayoutMinWidth: =250
+                PaddingBottom: =5
+                PaddingTop: =5
+                ZIndex: =2
+
+                bttn_SaveUserReq_ACGRA As button:
+                    BorderColor: =Self.Fill
+                    DisabledBorderColor: =GrayBorderLight
+                    DisabledFill: =RGBA(0, 0, 0, 0)
+                    DisplayMode: =If(CountRows(clln_SelectedApps) = 0 || IsBlankOrError('DataValue-UserComment_ACGRA'.Text), DisplayMode.Disabled, DisplayMode.Edit)//lbl_Warn_CharacterLimit_1.Visible
+                    Fill: =BlueControlDarkBackground
+                    Font: =FontStyle
+                    FontWeight: =FontWeight.Bold
+                    Height: |
+                        =25
+                    HoverColor: =Self.Fill
+                    HoverFill: =Self.Color
+                    OnSelect: |-
+                        =UpdateContext({ctx_IfGalleryLoaded: true, ctx_savingData: true});
+                        Set(
+                            var_AccessRequests_GA,
+                            Patch(
+                                ReviewHub_AccessRequests,
+                                Defaults(ReviewHub_AccessRequests),
+                                {
+                                    craf2_requesteremail: combo_NewUser_ACGRA.Selected.UserPrincipalName,
+                                    craf2_requestdate: Now(),
+                                    craf2_justification: Trim('DataValue-UserComment_ACGRA'.Text)
+                                }
+                            )
+                        );
+                        ForAll(
+                            clln_SelectedApps,
+                            Patch(
+                                ReviewHub_RequestedProducts,
+                                Defaults(ReviewHub_RequestedProducts),
+                                {
+                                    craf2_AccessRequest: var_AccessRequests_GA,
+                                    craf2_Product: LookUp(ReviewHub_Products, ProductID = fmb_ProductID),
+                                    craf2_BoardType: LookUp(ReviewHub_BoardTypes, BoardTypeID = fmb_MetricBoardTypeID),
+                                    craf2_decision: 'Decision (ReviewHub_RequestedProducts)'.Approved,
+                                    craf2_decisiondate: Now(),
+                                    craf2_approveremail: User().Email,
+                                    craf2_approvercomment: "Read-write access given by the administrator",
+                                    craf2_proposedaccessrevokeddate: DateAdd(Today(), 14, TimeUnit.Days)
+                                }
+                            );
+                            If(
+                                IsBlankOrError(LookUp(ReviewHub_Stakeholders, ThisRecord.craf2_Product.craf2_productid = fmb_ProductID && ThisRecord.craf2_BoardType.craf2_boardtypeid = fmb_MetricBoardTypeID)),
+                                Patch(
+                                    ReviewHub_Stakeholders,
+                                    Defaults(ReviewHub_Stakeholders),
+                                    {
+                                        craf2_title: LookUp(ReviewHub_BoardTypes, ThisRecord.craf2_boardtypeid=fmb_MetricBoardTypeID).craf2_boardtypeshortname & ": " & LookUp(ReviewHub_Products, ThisRecord.craf2_productid = fmb_ProductID).craf2_productname,
+                                        craf2_BoardType: LookUp(ReviewHub_BoardTypes, ThisRecord.craf2_boardtypeid=fmb_MetricBoardTypeID),
+                                        craf2_Product: LookUp(ReviewHub_Products, ThisRecord.craf2_productid = fmb_ProductID),
+                                        ProductStakeholderEmails: 
+                                            If(
+                                                IsBlankOrError(combo_NewUser_ACGRA.Selected.UserPrincipalName),
+                                                "",
+                                                combo_NewUser_ACGRA.Selected.UserPrincipalName
+                                            ),
+                                        StakeholderNames:
+                                            If(
+                                                IsBlankOrError(combo_NewUser_ACGRA.Selected.UserPrincipalName),
+                                                "",
+                                                Office365Users.UserProfile(combo_NewUser_ACGRA.Selected.UserPrincipalName).DisplayName
+                                            )
+                                    }
+                                ),
+                                Patch(
+                                    ReviewHub_Stakeholders,
+                                    LookUp(
+                                        ReviewHub_Stakeholders,
+                                        ThisRecord.craf2_Product.craf2_productid = fmb_ProductID && ThisRecord.craf2_BoardType.craf2_boardtypeid = fmb_MetricBoardTypeID
+                                    ),
+                                    {
+                                        ProductStakeholderEmails: 
+                                            If(
+                                                IsBlankOrError(combo_NewUser_ACGRA.Selected.UserPrincipalName),
+                                                "",
+                                                LookUp(
+                                        ReviewHub_Stakeholders,
+                                        ThisRecord.craf2_Product.craf2_productid = fmb_ProductID && ThisRecord.craf2_BoardType.craf2_boardtypeid = fmb_MetricBoardTypeID
+                                    ).ProductStakeholderEmails & "|" & combo_NewUser_ACGRA.Selected.UserPrincipalName
+                                            ),
+                                        StakeholderNames:
+                                            If(
+                                                IsBlankOrError(combo_NewUser_ACGRA.Selected.UserPrincipalName),
+                                                "",
+                                                LookUp(
+                                        ReviewHub_Stakeholders,
+                                        ThisRecord.craf2_Product.craf2_productid = fmb_ProductID && ThisRecord.craf2_BoardType.craf2_boardtypeid = fmb_MetricBoardTypeID
+                                    ).StakeholderNames & "|" & Office365Users.UserProfile(combo_NewUser_ACGRA.Selected.UserPrincipalName).DisplayName
+                                            )
+                                    }
+                                )
+                            )
+                        );
+                        Select(bttn_CancelUserReq_ACGRA);
+                        Notify("The access request has been granted", NotificationType.Success);
+                        UpdateContext({ctx_IfGalleryLoaded: false, ctx_savingData: false});
+                    PaddingBottom: =0
+                    PaddingTop: =0
+                    RadiusBottomLeft: =15
+                    RadiusBottomRight: =15
+                    RadiusTopLeft: =15
+                    RadiusTopRight: =15
+                    Size: =10
+                    Text: ="Submit"
+                    Width: =90
+                    X: =1
+                    Y: ='DataValue-UserComment_ACGRA'.Y + 'DataValue-UserComment_ACGRA'.Height + 10
+                    ZIndex: =5
+
+                bttn_CancelUserReq_ACGRA As button:
+                    BorderColor: =Self.Fill
+                    Fill: =GRAYCOLOR
+                    Font: =FontStyle
+                    FontWeight: =FontWeight.Bold
+                    Height: |
+                        =25
+                    HoverColor: =Self.Fill
+                    HoverFill: =Self.Color
+                    OnSelect: |-
+                        =Concurrent(
+                            Clear(clln_SelectedApps),
+                            Reset('DataValue-UserComment_ACGRA'),
+                            Reset(combo_NewUser_ACGRA)
+                        )
+                    PaddingBottom: =0
+                    PaddingTop: =0
+                    RadiusBottomLeft: =15
+                    RadiusBottomRight: =15
+                    RadiusTopLeft: =15
+                    RadiusTopRight: =15
+                    Size: =10
+                    Text: ="Cancel"
+                    Width: =90
+                    X: =101
+                    Y: ='DataValue-UserComment_ACGRA'.Y + 'DataValue-UserComment_ACGRA'.Height + 10
+                    ZIndex: =6
+
+                lbl_Warn_CharacterLimit_ACGRA As label:
+                    Align: =Align.Right
+                    Color: =RGBA(255, 0, 0, 1)
+                    Font: =FontStyle
+                    FontWeight: =FontWeight.Semibold
+                    PaddingRight: =10
+                    Size: =10
+                    Text: |-
+                        =false//"Current characters: " & Len('DataValue-UserComment_ACGRA'.Text) & ", exceeded maximum 4000 characters!"
+                    Visible: =Len('DataValue-UserComment_ACGRA'.Text) > 4000
+                    Width: =420
+                    X: =bttn_SaveUserReq_ACGRA.X - Self.Width
+                    Y: =bttn_SaveUserReq_ACGRA.Y + bttn_SaveUserReq_ACGRA.Height - Self.Height
+                    ZIndex: =7
+
+                "'DataValue-UserComment_ACGRA' As text":
+                    BorderColor: =If(IsBlank(Self.Text), GrayBorderLight, IsError(Self.Text), Color.Red)
+                    BorderThickness: =1
+                    Default: =""
+                    DelayOutput: =true
+                    DisplayMode: =Parent.DisplayMode
+                    Font: =FontStyle
+                    Height: =100
+                    HintText: =If(IsBlank(Self.Text), "Provide business justification here (required)")
+                    HoverBorderColor: =Self.BorderColor
+                    HoverFill: =ColorFade(BlueControlLightBackground, 75%)
+                    Mode: =TextMode.MultiLine
+                    PaddingBottom: =0
+                    PaddingLeft: =5
+                    PaddingRight: =0
+                    RadiusBottomLeft: =0
+                    RadiusBottomRight: =0
+                    RadiusTopLeft: =0
+                    RadiusTopRight: =0
+                    Size: =10
+                    Tooltip: ="Provide business justification here (required)"
+                    Width: =Parent.Width - 2
+                    X: =1
+                    Y: =1
+                    ZIndex: =8
+
+    lbl_ScreenTitle_ACGRA As label:
+        DisabledColor: =BlueControlDarkBackground
+        DisabledFill: =Self.Fill
+        DisplayMode: =DisplayMode.Disabled
+        Fill: =GrayCanvasBackground
+        Font: =FontStyle
+        FontWeight: =FontWeight.Bold
+        Height: =55
+        PaddingLeft: =60
+        Size: =18
+        Text: ="Grant Access"
+        Width: =App.Width - Self.X
+        Y: =SS_AppHeader_ACGRA.Height
+        ZIndex: =2
+
+    icon_Back_ACGRA As icon.BackArrow:
+        BorderColor: =RGBA(0, 0, 0, 0)
+        BorderStyle: =BorderStyle.None
+        Color: =BlueControlDarkBackground
+        Height: =30
+        HoverBorderColor: =Self.BorderColor
+        HoverColor: =Color.Purple
+        Icon: =Icon.BackArrow
+        OnSelect: |-
+            =Back();//Navigate(scn_SelfService);
+            
+            Concurrent(
+                Set(Toggle_Btn_CreateMetrics_Check, false),
+                Set(Toggle_Btn_CreateMetrics_Loading, false),
+                Set(Toggle_Btn_CreateBoard_Check, false),
+                Set(Toggle_Btn_CreateBoard_Loading, false)
+            );
+        Tooltip: ="Back"
+        Width: =Self.Height
+        X: =15
+        Y: =lbl_ScreenTitle_ACGRA.Y + (lbl_ScreenTitle_ACGRA.Height - Self.Height) * 0.50
+        ZIndex: =3
+
+    SS_AppHeader_ACGRA As AppHeader:
+        DropDownSelection: =TrackRequestComponent_ACGRA.HideTrackRequest
+        FeatureRequestUrl: =var_FeatureRequestURL
+        FeedbackButtonUrl: =var_SendFeedback_URL
+        inputAppDisplayName: =varAppHeaderText
+        ScorecardOnboardingFeatureUrl: =var_ScorecardOnboardingRequestURL
+        ShowSurveyButton: =false
+        Y: =0
+        ZIndex: =4
+
+    TrackRequestComponent_ACGRA As TrackRequestComponent:
+        BlueControlDarkBackground: =BlueControlDarkBackground
+        BlueControlLightBackground: =BlueControlLightBackground
+        BlueNaviHightLightBackground: =BlueNaviHightLightBackground
+        DevOpsBaseUrl: =var_DevOpsBaseURL
+        DevOpsQueryID: =var_DevOpsQueryID
+        FontStyle: =FontStyle
+        GrayCanvasBackground: =GrayCanvasBackground
+        GRAYCOLOR: =GRAYCOLOR
+        GrayControlBackground: =GrayControlBackground
+        IsAdmin: =IsAdmin
+        Reset: =Self.Visible
+        Visible: =SS_AppHeader_ACGRA.DisplayTrackRequest
+        X: =App.Width - Self.Width
+        Y: =SS_AppHeader_ACGRA.Height
+        ZIndex: =5
+
+    ctn_IfGalleryLoaded_ACGRA As groupContainer:
+        BorderColor: =RGBA(0, 0, 0, 0)
+        BorderStyle: =BorderStyle.None
+        Fill: =RGBA(255, 255, 255, 0.9)
+        Height: =Parent.Height - Self.Y
+        Visible: =ctx_IfGalleryLoaded
+        Width: =App.Width
+        ZIndex: =6
+
+        Label_BoardSrn_Loading_3 As label:
+            Align: =Align.Center
+            Color: =LEFTNAVHIGLIGHTCOLOR
+            Font: =FONTNAME
+            Size: =18
+            Text: =If(ctx_savingData, "Saving data...", "Getting data...")
+            Width: =Image_BoardSrn_Loading_3.Width
+            X: =Image_BoardSrn_Loading_3.X
+            Y: =Image_BoardSrn_Loading_3.Y + Image_BoardSrn_Loading_3.Height - 10
+            ZIndex: =1
+
+        Image_BoardSrn_Loading_3 As image:
+            Image: =boardsrn_loading
+            PaddingBottom: =20
+            PaddingRight: =10
+            PaddingTop: =10
+            Width: =300
+            X: =Parent.Width * 0.5 - Self.Width * 0.5
+            Y: =Parent.Height * 0.5 - Self.Height * 0.5 - 50
+            ZIndex: =2
+

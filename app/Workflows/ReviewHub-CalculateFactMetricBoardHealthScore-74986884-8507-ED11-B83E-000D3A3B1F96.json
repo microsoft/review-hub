@@ -1,0 +1,1023 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_commondataserviceforapps": {
+        "impersonation": {},
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "chub_sharedcommondataserviceforapps_72f86"
+        },
+        "api": {
+          "name": "shared_commondataserviceforapps"
+        }
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        },
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        }
+      },
+      "triggers": {
+        "Recurrence": {
+          "recurrence": {
+            "frequency": "Day",
+            "interval": 1,
+            "startTime": "2022-07-19T07:00:00Z"
+          },
+          "metadata": {
+            "operationMetadataId": "3d0e5e16-184a-4de2-9f12-bd266ed6ffae"
+          },
+          "type": "Recurrence"
+        }
+      },
+      "actions": {
+        "Fetch_FactMetricBoards": {
+          "runAfter": {
+            "Initialize_DefaultMetricHealth": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "ab8957c7-2bf7-41df-94cd-01e26cb6b502"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+              "connectionName": "shared_commondataserviceforapps",
+              "operationId": "ListRecords"
+            },
+            "parameters": {
+              "entityName": "craf2_reviewhub_factmetricboards",
+              "$select": "craf2_factmetricboardid, craf2_fmb_Product, craf2_fmb_Template, craf2_fmb_reviewlockdate",
+              "$filter": "craf2_fmb_reviewlockdate eq @{variables('CurrentMonthEndDate')} ",
+              "$orderby": "craf2_factmetricboardid desc",
+              "$expand": "craf2_fmb_Template($select=craf2_templateid), craf2_fmb_BoardType($select=craf2_boardtypeid), craf2_fmb_Product($select=craf2_productid)"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Initialize_CurrentMonthEndDate": {
+          "runAfter": {},
+          "metadata": {
+            "operationMetadataId": "541d0112-b08e-4612-addb-b1883ff1a0de"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "CurrentMonthEndDate",
+                "type": "string",
+                "value": "@{formatDateTime(addDays(startOfMonth(addToTime(convertFromUtc(utcNow(), 'Pacific Standard Time'), 1, 'month')), -1), 'yyyy-MM-dd')}"
+              }
+            ]
+          }
+        },
+        "Initialize_PMID": {
+          "runAfter": {
+            "Initialize_CurrentMonthEndDate": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "a9008a74-eb44-4643-a923-6c6ef76cf483"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "PMID",
+                "type": "integer",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "Initialize_FactMetric": {
+          "runAfter": {
+            "Initialize_PMID": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "498c3f7c-9e3d-48c3-99ce-00de4343657b"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "FactMetric",
+                "type": "object"
+              }
+            ]
+          }
+        },
+        "Initialize_AqcuiredMetricHealth": {
+          "runAfter": {
+            "Initialize_FactMetric": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "42bb1d81-ae10-42b3-b0ba-d98a5a6eaf59"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "AqcuiredMetricHealth",
+                "type": "float",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "Initialize_DefaultMetricHealth": {
+          "runAfter": {
+            "Initialize_AqcuiredMetricHealth": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "318ce281-7a98-495b-b07c-899f6d96e139"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "DefaultMetricHealth",
+                "type": "float"
+              }
+            ]
+          }
+        },
+        "Each_Fact_Metric_Board": {
+          "foreach": "@outputs('Fetch_FactMetricBoards')?['body/value']",
+          "actions": {
+            "LookUp_MetricType_Details": {
+              "runAfter": {},
+              "metadata": {
+                "operationMetadataId": "c387f81a-2592-4b8f-9106-a420fb4f85f9"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "connectionName": "shared_commondataserviceforapps",
+                  "operationId": "ListRecords"
+                },
+                "parameters": {
+                  "entityName": "craf2_reviewhub_metrictypedetails",
+                  "$select": "craf2_MetricType",
+                  "$filter": " craf2_mtd_BoardType/craf2_boardtypeid eq  @{items('Each_Fact_Metric_Board')?['craf2_fmb_boardtype/craf2_boardtypeid']} \n and craf2_MetricTypeDetailTemplate/craf2_templateid eq @{items('Each_Fact_Metric_Board')?['craf2_fmb_template/craf2_templateid']} and craf2_MetricType/craf2_metrictypedeprecateddate eq null  and craf2_MetricType/craf2_metrictypeeffectivedate lt @{items('Each_Fact_Metric_Board')?['craf2_fmb_reviewlockdate']}",
+                  "$orderby": "createdon desc",
+                  "$expand": "craf2_MetricType($select=craf2_valuetype,craf2_metrictypeistrenddown, craf2_metrictypehealthweight, craf2_metrictypeid)"
+                },
+                "retryPolicy": {
+                  "type": "none"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "Each_Metric_Type": {
+              "foreach": "@outputs('LookUp_MetricType_Details')?['body/value']",
+              "actions": {
+                "GetProductMetricUID": {
+                  "runAfter": {},
+                  "metadata": {
+                    "operationMetadataId": "f828dfba-827a-45c6-85e9-7a4e16e5e2a3"
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                      "connectionName": "shared_commondataserviceforapps",
+                      "operationId": "ListRecords"
+                    },
+                    "parameters": {
+                      "entityName": "craf2_reviewhub_productmetrics",
+                      "$select": "craf2_productmetricid,\ncraf2_reviewhub_productmetricid,\ncraf2_pm_ismetricactive",
+                      "$filter": "craf2_pm_Product/craf2_productid eq @{items('Each_Fact_Metric_Board')?['craf2_fmb_product/craf2_productid']}  and craf2_pm_MetricType/craf2_metrictypeid eq @{items('Each_Metric_Type')?['craf2_metrictype/craf2_metrictypeid']}",
+                      "$top": 1
+                    },
+                    "retryPolicy": {
+                      "type": "none"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                },
+                "GetFactMetricData": {
+                  "runAfter": {
+                    "Does_Product_Metric_Exists": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "5515fd8f-1737-4d41-a377-4795bdb2f717"
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                      "connectionName": "shared_commondataserviceforapps",
+                      "operationId": "ListRecords"
+                    },
+                    "parameters": {
+                      "entityName": "craf2_reviewhub_factmetrics",
+                      "$select": "craf2_fm_reviewlockdate, craf2_fm_valuetext, craf2_fm_valuenumber, craf2_fm_valueyesno, craf2_fm_targettext, craf2_fm_targetnumber, craf2_fm_targetyesno, craf2_fm_isnotapplicable, craf2_fm_yellowtargetstart, craf2_fm_greentargetstart",
+                      "$filter": "craf2_fm_ProductMetric/craf2_productmetricid eq @{variables('PMID')} and craf2_fm_reviewlockdate eq @{items('Each_Fact_Metric_Board')?['craf2_fmb_reviewlockdate']}",
+                      "$top": 1
+                    },
+                    "retryPolicy": {
+                      "type": "none"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                },
+                "Is_Metric_Applicable": {
+                  "actions": {
+                    "Is_Metric_One_Dimensional": {
+                      "actions": {
+                        "Does_Target_Equal_Value": {
+                          "actions": {
+                            "Increment_DefaultMetricHealth": {
+                              "runAfter": {},
+                              "metadata": {
+                                "operationMetadataId": "1796e82b-bfa6-4efb-b733-cdeb326508ec"
+                              },
+                              "type": "IncrementVariable",
+                              "inputs": {
+                                "name": "DefaultMetricHealth",
+                                "value": "@items('Each_Metric_Type')?['craf2_metrictype/craf2_metrictypehealthweight']"
+                              }
+                            },
+                            "Increment_AcquiredMetricHealth_Green": {
+                              "runAfter": {
+                                "Increment_DefaultMetricHealth": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "metadata": {
+                                "operationMetadataId": "b6796e21-606a-4d38-90c8-cf84f5aea1ad"
+                              },
+                              "type": "IncrementVariable",
+                              "inputs": {
+                                "name": "AqcuiredMetricHealth",
+                                "value": "@items('Each_Metric_Type')?['craf2_metrictype/craf2_metrictypehealthweight']"
+                              }
+                            }
+                          },
+                          "runAfter": {},
+                          "else": {
+                            "actions": {
+                              "Increment_DefaultMetricHealth_Fail": {
+                                "runAfter": {},
+                                "metadata": {
+                                  "operationMetadataId": "1136a87d-0a48-4df8-9dba-3974c82a9166"
+                                },
+                                "type": "IncrementVariable",
+                                "inputs": {
+                                  "name": "DefaultMetricHealth",
+                                  "value": "@items('Each_Metric_Type')?['craf2_metrictype/craf2_metrictypehealthweight']"
+                                }
+                              }
+                            }
+                          },
+                          "expression": {
+                            "or": [
+                              {
+                                "equals": [
+                                  "@first(body('GetFactMetricData')?['value'])?['craf2_fm_targettext']",
+                                  "@first(body('GetFactMetricData')?['value'])?['craf2_fm_valuetext']"
+                                ]
+                              },
+                              {
+                                "equals": [
+                                  "@first(body('GetFactMetricData')?['value'])?['craf2_fm_targetyesno']",
+                                  "@first(body('GetFactMetricData')?['value'])?['craf2_fm_valueyesno']"
+                                ]
+                              }
+                            ]
+                          },
+                          "metadata": {
+                            "operationMetadataId": "26163125-3566-49c8-bf0a-e4541042150d"
+                          },
+                          "type": "If"
+                        }
+                      },
+                      "runAfter": {},
+                      "else": {
+                        "actions": {
+                          "Is_Target_Set": {
+                            "actions": {
+                              "IsMetricDown": {
+                                "actions": {
+                                  "Is_Metric_Green": {
+                                    "actions": {
+                                      "Increment_DefaultMetricHealth_2": {
+                                        "runAfter": {},
+                                        "metadata": {
+                                          "operationMetadataId": "e07a998f-e4ed-4810-9485-c535365fb6f8"
+                                        },
+                                        "type": "IncrementVariable",
+                                        "inputs": {
+                                          "name": "DefaultMetricHealth",
+                                          "value": "@items('Each_Metric_Type')?['craf2_metrictype/craf2_metrictypehealthweight']"
+                                        }
+                                      },
+                                      "Increment_AcquiredMetricHealth_Green_2": {
+                                        "runAfter": {
+                                          "Increment_DefaultMetricHealth_2": [
+                                            "Succeeded"
+                                          ]
+                                        },
+                                        "metadata": {
+                                          "operationMetadataId": "0dc731ad-0988-4af2-9a1e-6620d2fdd112"
+                                        },
+                                        "type": "IncrementVariable",
+                                        "inputs": {
+                                          "name": "AqcuiredMetricHealth",
+                                          "value": "@items('Each_Metric_Type')?['craf2_metrictype/craf2_metrictypehealthweight']"
+                                        }
+                                      }
+                                    },
+                                    "runAfter": {},
+                                    "else": {
+                                      "actions": {
+                                        "Is_Metric_Yellow": {
+                                          "actions": {
+                                            "Increment_DefaultMetricHealth_3": {
+                                              "runAfter": {
+                                                "Increment_AcquiredMetricHealth_Yellow": [
+                                                  "Succeeded"
+                                                ]
+                                              },
+                                              "metadata": {
+                                                "operationMetadataId": "0e7b2731-356d-4537-adb3-23e30cec40a3"
+                                              },
+                                              "type": "IncrementVariable",
+                                              "inputs": {
+                                                "name": "DefaultMetricHealth",
+                                                "value": "@items('Each_Metric_Type')?['craf2_metrictype/craf2_metrictypehealthweight']"
+                                              }
+                                            },
+                                            "Increment_AcquiredMetricHealth_Yellow": {
+                                              "runAfter": {},
+                                              "metadata": {
+                                                "operationMetadataId": "48790f12-cb40-42c0-8ab5-4df97a55c382"
+                                              },
+                                              "type": "IncrementVariable",
+                                              "inputs": {
+                                                "name": "AqcuiredMetricHealth",
+                                                "value": "@mul(items('Each_Metric_Type')?['craf2_metrictype/craf2_metrictypehealthweight'], 0.8)"
+                                              }
+                                            }
+                                          },
+                                          "runAfter": {},
+                                          "else": {
+                                            "actions": {
+                                              "Increment_DefaultMetricHealth_4": {
+                                                "runAfter": {},
+                                                "metadata": {
+                                                  "operationMetadataId": "2179efc1-df89-411e-8d14-7f6263896a7d"
+                                                },
+                                                "type": "IncrementVariable",
+                                                "inputs": {
+                                                  "name": "DefaultMetricHealth",
+                                                  "value": "@items('Each_Metric_Type')?['craf2_metrictype/craf2_metrictypehealthweight']"
+                                                }
+                                              }
+                                            }
+                                          },
+                                          "expression": {
+                                            "and": [
+                                              {
+                                                "not": {
+                                                  "equals": [
+                                                    "@first(body('GetFactMetricData')?['value'])?['craf2_fm_yellowtargetstart']",
+                                                    ""
+                                                  ]
+                                                }
+                                              },
+                                              {
+                                                "not": {
+                                                  "equals": [
+                                                    "@first(body('GetFactMetricData')?['value'])?['craf2_fm_yellowtargetstart']",
+                                                    "@null"
+                                                  ]
+                                                }
+                                              },
+                                              {
+                                                "lessOrEquals": [
+                                                  "@first(body('GetFactMetricData')?['value'])?['craf2_fm_valuenumber']",
+                                                  "@if(equals(first(body('GetFactMetricData')?['value'])?['craf2_fm_valuenumber'], null), -1, first(body('GetFactMetricData')?['value'])?['craf2_fm_yellowtargetstart'])"
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          "metadata": {
+                                            "operationMetadataId": "1ad724e6-4413-4dae-bd55-2ecb6d81ee33"
+                                          },
+                                          "type": "If"
+                                        }
+                                      }
+                                    },
+                                    "expression": {
+                                      "or": [
+                                        {
+                                          "greaterOrEquals": [
+                                            "@first(body('GetFactMetricData')?['value'])?['craf2_fm_targetnumber']",
+                                            "@first(body('GetFactMetricData')?['value'])?['craf2_fm_valuenumber']"
+                                          ]
+                                        },
+                                        {
+                                          "and": [
+                                            {
+                                              "not": {
+                                                "equals": [
+                                                  "@first(body('GetFactMetricData')?['value'])?['craf2_fm_greentargetstart']",
+                                                  ""
+                                                ]
+                                              }
+                                            },
+                                            {
+                                              "not": {
+                                                "equals": [
+                                                  "@first(body('GetFactMetricData')?['value'])?['craf2_fm_greentargetstart']",
+                                                  "@null"
+                                                ]
+                                              }
+                                            },
+                                            {
+                                              "lessOrEquals": [
+                                                "@first(body('GetFactMetricData')?['value'])?['craf2_fm_valuenumber']",
+                                                "@if(equals(first(body('GetFactMetricData')?['value'])?['craf2_fm_valuenumber'], null), -1, first(body('GetFactMetricData')?['value'])?['craf2_fm_greentargetstart'])"
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    "metadata": {
+                                      "operationMetadataId": "e98fe6c1-403e-4f3b-99b8-52cf30ecc222"
+                                    },
+                                    "type": "If"
+                                  }
+                                },
+                                "runAfter": {},
+                                "else": {
+                                  "actions": {
+                                    "Is_Metric_Green_2": {
+                                      "actions": {
+                                        "Increment_DefaultMetricHealth_7": {
+                                          "runAfter": {},
+                                          "metadata": {
+                                            "operationMetadataId": "e07a998f-e4ed-4810-9485-c535365fb6f8"
+                                          },
+                                          "type": "IncrementVariable",
+                                          "inputs": {
+                                            "name": "DefaultMetricHealth",
+                                            "value": "@items('Each_Metric_Type')?['craf2_metrictype/craf2_metrictypehealthweight']"
+                                          }
+                                        },
+                                        "Increment_AcquiredMetricHealth_Green_3": {
+                                          "runAfter": {
+                                            "Increment_DefaultMetricHealth_7": [
+                                              "Succeeded"
+                                            ]
+                                          },
+                                          "metadata": {
+                                            "operationMetadataId": "0dc731ad-0988-4af2-9a1e-6620d2fdd112"
+                                          },
+                                          "type": "IncrementVariable",
+                                          "inputs": {
+                                            "name": "AqcuiredMetricHealth",
+                                            "value": "@items('Each_Metric_Type')?['craf2_metrictype/craf2_metrictypehealthweight']"
+                                          }
+                                        }
+                                      },
+                                      "runAfter": {},
+                                      "else": {
+                                        "actions": {
+                                          "Is_Metric_Yellow_2": {
+                                            "actions": {
+                                              "Increment_AcquiredMetricHealth_Yellow_2": {
+                                                "runAfter": {},
+                                                "metadata": {
+                                                  "operationMetadataId": "48790f12-cb40-42c0-8ab5-4df97a55c382"
+                                                },
+                                                "type": "IncrementVariable",
+                                                "inputs": {
+                                                  "name": "AqcuiredMetricHealth",
+                                                  "value": "@mul(items('Each_Metric_Type')?['craf2_metrictype/craf2_metrictypehealthweight'], 0.8)"
+                                                }
+                                              },
+                                              "Increment_DefaultMetricHealth_5": {
+                                                "runAfter": {
+                                                  "Increment_AcquiredMetricHealth_Yellow_2": [
+                                                    "Succeeded"
+                                                  ]
+                                                },
+                                                "metadata": {
+                                                  "operationMetadataId": "0e7b2731-356d-4537-adb3-23e30cec40a3"
+                                                },
+                                                "type": "IncrementVariable",
+                                                "inputs": {
+                                                  "name": "DefaultMetricHealth",
+                                                  "value": "@items('Each_Metric_Type')?['craf2_metrictype/craf2_metrictypehealthweight']"
+                                                }
+                                              }
+                                            },
+                                            "runAfter": {},
+                                            "else": {
+                                              "actions": {
+                                                "Increment_DefaultMetricHealth_6": {
+                                                  "runAfter": {},
+                                                  "metadata": {
+                                                    "operationMetadataId": "5eee1e48-e6ad-4a4b-8c10-5a312b8e9283"
+                                                  },
+                                                  "type": "IncrementVariable",
+                                                  "inputs": {
+                                                    "name": "DefaultMetricHealth",
+                                                    "value": "@items('Each_Metric_Type')?['craf2_metrictype/craf2_metrictypehealthweight']"
+                                                  }
+                                                }
+                                              }
+                                            },
+                                            "expression": {
+                                              "and": [
+                                                {
+                                                  "not": {
+                                                    "equals": [
+                                                      "@first(body('GetFactMetricData')?['value'])?['craf2_fm_yellowtargetstart']",
+                                                      ""
+                                                    ]
+                                                  }
+                                                },
+                                                {
+                                                  "not": {
+                                                    "equals": [
+                                                      "@first(body('GetFactMetricData')?['value'])?['craf2_fm_yellowtargetstart']",
+                                                      "@null"
+                                                    ]
+                                                  }
+                                                },
+                                                {
+                                                  "greaterOrEquals": [
+                                                    "@first(body('GetFactMetricData')?['value'])?['craf2_fm_valuenumber']",
+                                                    "@if(equals(first(body('GetFactMetricData')?['value'])?['craf2_fm_valuenumber'], null), 1000000000, first(body('GetFactMetricData')?['value'])?['craf2_fm_yellowtargetstart'])"
+                                                  ]
+                                                }
+                                              ]
+                                            },
+                                            "metadata": {
+                                              "operationMetadataId": "1ad724e6-4413-4dae-bd55-2ecb6d81ee33"
+                                            },
+                                            "type": "If"
+                                          }
+                                        }
+                                      },
+                                      "expression": {
+                                        "or": [
+                                          {
+                                            "lessOrEquals": [
+                                              "@first(body('GetFactMetricData')?['value'])?['craf2_fm_targetnumber']",
+                                              "@first(body('GetFactMetricData')?['value'])?['craf2_fm_valuenumber']"
+                                            ]
+                                          },
+                                          {
+                                            "and": [
+                                              {
+                                                "not": {
+                                                  "equals": [
+                                                    "@first(body('GetFactMetricData')?['value'])?['craf2_fm_greentargetstart']",
+                                                    ""
+                                                  ]
+                                                }
+                                              },
+                                              {
+                                                "not": {
+                                                  "equals": [
+                                                    "@first(body('GetFactMetricData')?['value'])?['craf2_fm_greentargetstart']",
+                                                    null
+                                                  ]
+                                                }
+                                              },
+                                              {
+                                                "greaterOrEquals": [
+                                                  "@first(body('GetFactMetricData')?['value'])?['craf2_fm_valuenumber']",
+                                                  "@if(equals(first(body('GetFactMetricData')?['value'])?['craf2_fm_valuenumber'], null), 1000000000, first(body('GetFactMetricData')?['value'])?['craf2_fm_greentargetstart'])"
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      "metadata": {
+                                        "operationMetadataId": "e98fe6c1-403e-4f3b-99b8-52cf30ecc222"
+                                      },
+                                      "type": "If"
+                                    }
+                                  }
+                                },
+                                "expression": {
+                                  "equals": [
+                                    "@items('Each_Metric_Type')?['craf2_metrictype/craf2_metrictypeistrenddown']",
+                                    "@true"
+                                  ]
+                                },
+                                "metadata": {
+                                  "operationMetadataId": "43ff0266-8b33-4087-9b03-c663f0b48982"
+                                },
+                                "type": "If"
+                              }
+                            },
+                            "runAfter": {},
+                            "expression": {
+                              "and": [
+                                {
+                                  "not": {
+                                    "equals": [
+                                      "@first(body('GetFactMetricData')?['value'])?['craf2_fm_targetnumber']",
+                                      -1
+                                    ]
+                                  }
+                                },
+                                {
+                                  "not": {
+                                    "equals": [
+                                      "@first(body('GetFactMetricData')?['value'])?['craf2_fm_targetnumber']",
+                                      "@null"
+                                    ]
+                                  }
+                                },
+                                {
+                                  "not": {
+                                    "equals": [
+                                      "@first(body('GetFactMetricData')?['value'])?['craf2_fm_valuenumber']",
+                                      "@null"
+                                    ]
+                                  }
+                                }
+                              ]
+                            },
+                            "metadata": {
+                              "operationMetadataId": "41f35e17-6756-4a32-91a6-ab9e2b472f61"
+                            },
+                            "type": "If"
+                          }
+                        }
+                      },
+                      "expression": {
+                        "or": [
+                          {
+                            "equals": [
+                              "@items('Each_Metric_Type')?['craf2_metrictype/craf2_valuetype']",
+                              "Boolean"
+                            ]
+                          },
+                          {
+                            "equals": [
+                              "@items('Each_Metric_Type')?['craf2_metrictype/craf2_valuetype']",
+                              "Text"
+                            ]
+                          }
+                        ]
+                      },
+                      "metadata": {
+                        "operationMetadataId": "5abc650b-64ac-4f4c-84b8-ac6af98ee026"
+                      },
+                      "type": "If"
+                    }
+                  },
+                  "runAfter": {
+                    "GetFactMetricData": [
+                      "Succeeded"
+                    ]
+                  },
+                  "else": {
+                    "actions": {
+                      "Target_Is_Set": {
+                        "actions": {
+                          "Increment_DefaultMetricHealth_Fail_2": {
+                            "runAfter": {},
+                            "metadata": {
+                              "operationMetadataId": "1136a87d-0a48-4df8-9dba-3974c82a9166"
+                            },
+                            "type": "IncrementVariable",
+                            "inputs": {
+                              "name": "DefaultMetricHealth",
+                              "value": "@items('Each_Metric_Type')?['craf2_metrictype/craf2_metrictypehealthweight']"
+                            }
+                          }
+                        },
+                        "runAfter": {},
+                        "expression": {
+                          "and": [
+                            {
+                              "greater": [
+                                "@length(outputs('GetFactMetricData')?['body/value'])",
+                                0
+                              ]
+                            },
+                            {
+                              "or": [
+                                {
+                                  "not": {
+                                    "equals": [
+                                      "@first(body('GetFactMetricData')?['value'])?['craf2_fm_targetnumber']",
+                                      "@null"
+                                    ]
+                                  }
+                                },
+                                {
+                                  "not": {
+                                    "equals": [
+                                      "@first(body('GetFactMetricData')?['value'])?['craf2_fm_targettext']",
+                                      "@null"
+                                    ]
+                                  }
+                                },
+                                {
+                                  "not": {
+                                    "equals": [
+                                      "@first(body('GetFactMetricData')?['value'])?['craf2_fm_targetyesno']",
+                                      "@null"
+                                    ]
+                                  }
+                                }
+                              ]
+                            },
+                            {
+                              "not": {
+                                "equals": [
+                                  "@first(body('GetFactMetricData')?['value'])?['craf2_fm_IsNotApplicable']",
+                                  "@true"
+                                ]
+                              }
+                            },
+                            {
+                              "not": {
+                                "equals": [
+                                  "@first(body('GetFactMetricData')?['value'])?['craf2_fm_targetnumber']",
+                                  -1
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        "metadata": {
+                          "operationMetadataId": "b25db0fe-6720-492d-917c-afc585d3a160"
+                        },
+                        "type": "If"
+                      }
+                    }
+                  },
+                  "expression": {
+                    "and": [
+                      {
+                        "greater": [
+                          "@length(outputs('GetFactMetricData')?['body/value'])",
+                          0
+                        ]
+                      },
+                      {
+                        "not": {
+                          "equals": [
+                            "@first(body('GetFactMetricData')?['value'])?['craf2_fm_IsNotApplicable']",
+                            "@true"
+                          ]
+                        }
+                      },
+                      {
+                        "or": [
+                          {
+                            "not": {
+                              "equals": [
+                                "@first(body('GetFactMetricData')?['value'])?['craf2_fm_targetnumber']",
+                                "@null"
+                              ]
+                            }
+                          },
+                          {
+                            "not": {
+                              "equals": [
+                                "@first(body('GetFactMetricData')?['value'])?['craf2_fm_targetyesno']",
+                                "@null"
+                              ]
+                            }
+                          },
+                          {
+                            "not": {
+                              "equals": [
+                                "@first(body('GetFactMetricData')?['value'])?['craf2_fm_targettext']",
+                                "@null"
+                              ]
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "or": [
+                          {
+                            "not": {
+                              "equals": [
+                                "@first(body('GetFactMetricData')?['value'])?['craf2_fm_valuenumber']",
+                                "@null"
+                              ]
+                            }
+                          },
+                          {
+                            "not": {
+                              "equals": [
+                                "@first(body('GetFactMetricData')?['value'])?['craf2_fm_valueyesno']",
+                                "@null"
+                              ]
+                            }
+                          },
+                          {
+                            "not": {
+                              "equals": [
+                                "@first(body('GetFactMetricData')?['value'])?['craf2_fm_valuetext']",
+                                "@null"
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "308ec265-fb16-49ca-897a-7276b363f9aa"
+                  },
+                  "type": "If"
+                },
+                "Does_Product_Metric_Exists": {
+                  "actions": {
+                    "Is_ProductMetric_Active": {
+                      "actions": {
+                        "Set_PMID": {
+                          "runAfter": {},
+                          "metadata": {
+                            "operationMetadataId": "a5758d4f-f8ef-403f-b76a-e5f09d2a1565"
+                          },
+                          "type": "SetVariable",
+                          "inputs": {
+                            "name": "PMID",
+                            "value": "@first(outputs('GetProductMetricUID')?['body/value'])?['craf2_productmetricid']"
+                          }
+                        }
+                      },
+                      "runAfter": {},
+                      "expression": {
+                        "equals": [
+                          "@first(outputs('GetProductMetricUID')?['body/value'])?['craf2_pm_ismetricactive']",
+                          "@true"
+                        ]
+                      },
+                      "metadata": {
+                        "operationMetadataId": "969d7f3f-1039-4aa5-8445-ec291fde49f3"
+                      },
+                      "type": "If"
+                    }
+                  },
+                  "runAfter": {
+                    "GetProductMetricUID": [
+                      "Succeeded"
+                    ]
+                  },
+                  "expression": {
+                    "greater": [
+                      "@length(outputs('GetProductMetricUID')?['body/value'])",
+                      0
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "80a51e0a-f30e-4af1-8307-4b74606c86d5"
+                  },
+                  "type": "If"
+                }
+              },
+              "runAfter": {
+                "LookUp_MetricType_Details": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "e91e507f-3b69-4add-8922-97540c6afa4f"
+              },
+              "type": "Foreach"
+            },
+            "Reset_Aqcuired_Metric_Health": {
+              "runAfter": {
+                "Avoid_Division_by_zero": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "427240f6-392d-4f05-89a8-91a20026c4b9"
+              },
+              "type": "SetVariable",
+              "inputs": {
+                "name": "AqcuiredMetricHealth",
+                "value": 0
+              }
+            },
+            "Reset_Default_Metric_Health": {
+              "runAfter": {
+                "Reset_Aqcuired_Metric_Health": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "483f7231-3334-43eb-ab35-11e013a11543"
+              },
+              "type": "SetVariable",
+              "inputs": {
+                "name": "DefaultMetricHealth",
+                "value": 0
+              }
+            },
+            "Avoid_Division_by_zero": {
+              "actions": {
+                "Update_Health_Score": {
+                  "runAfter": {},
+                  "metadata": {
+                    "operationMetadataId": "4777da3d-0e68-4f7e-97c5-5ffe508e0699"
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                      "connectionName": "shared_commondataserviceforapps",
+                      "operationId": "UpdateRecord"
+                    },
+                    "parameters": {
+                      "entityName": "craf2_reviewhub_factmetricboards",
+                      "recordId": "@items('Each_Fact_Metric_Board')?['craf2_reviewhub_factmetricboardid']",
+                      "item/craf2_factmetricboardid": "@items('Each_Fact_Metric_Board')?['craf2_factmetricboardid']",
+                      "item/craf2_fmb_healthscore": "@div(variables('AqcuiredMetricHealth'), variables('DefaultMetricHealth'))"
+                    },
+                    "retryPolicy": {
+                      "type": "none"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                }
+              },
+              "runAfter": {
+                "Each_Metric_Type": [
+                  "Succeeded"
+                ]
+              },
+              "expression": {
+                "greater": [
+                  "@variables('DefaultMetricHealth')",
+                  0
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "dc1c3aec-0323-4bff-b35f-955f90cc35a2"
+              },
+              "type": "If"
+            },
+            "Reset_PMID": {
+              "runAfter": {
+                "Reset_Default_Metric_Health": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "3d94589e-556d-46d0-a690-8aae411b0bad"
+              },
+              "type": "SetVariable",
+              "inputs": {
+                "name": "PMID",
+                "value": 0
+              }
+            }
+          },
+          "runAfter": {
+            "Fetch_FactMetricBoards": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "13571cb8-15c2-4adc-87ba-cd32a2b3a3aa"
+          },
+          "type": "Foreach"
+        }
+      }
+    },
+    "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+}

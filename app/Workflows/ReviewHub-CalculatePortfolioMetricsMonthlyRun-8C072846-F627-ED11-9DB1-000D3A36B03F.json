@@ -1,0 +1,452 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_commondataserviceforapps_1": {
+        "impersonation": {},
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "chub_sharedcommondataserviceforapps_72f86"
+        },
+        "api": {
+          "name": "shared_commondataserviceforapps"
+        }
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        },
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        }
+      },
+      "triggers": {
+        "Recurrence": {
+          "recurrence": {
+            "frequency": "Day",
+            "interval": 1,
+            "timeZone": "Pacific Standard Time",
+            "schedule": {
+              "hours": [
+                "0"
+              ]
+            }
+          },
+          "metadata": {
+            "operationMetadataId": "15a943d8-e168-4b07-a825-b5331288e852"
+          },
+          "type": "Recurrence"
+        }
+      },
+      "actions": {
+        "Terminate": {
+          "runAfter": {
+            "Apply_to_each_fact_metric": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "d3e90d83-1244-40f4-9876-f9685febde61"
+          },
+          "type": "Terminate",
+          "inputs": {
+            "runStatus": "Succeeded"
+          }
+        },
+        "This_Month_Review_Lock_Date": {
+          "runAfter": {},
+          "metadata": {
+            "operationMetadataId": "94c27cad-ed61-4dda-8ef8-809421eea41a"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "Current Review Month Lock Date",
+                "type": "string",
+                "value": "@{formatDateTime(addDays(startOfMonth(addToTime(convertFromUtc(utcNow(), 'Pacific Standard Time'), 1, 'month')), -1), 'yyyy-MM-dd')}"
+              }
+            ]
+          }
+        },
+        "Last_Month_Review_Lock_Date": {
+          "runAfter": {
+            "This_Month_Review_Lock_Date": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "f2cab519-02e2-4a4f-907f-3bd507ce7766"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "Last months review lock date",
+                "type": "string",
+                "value": "@{formatDateTime(addDays(startOfMonth(convertFromUtc(utcNow(), 'Pacific Standard Time')), -1), 'yyyy-MM-dd')}"
+              }
+            ]
+          }
+        },
+        "Last_12_Months_Review_Lock_Date": {
+          "runAfter": {
+            "Last_Month_Review_Lock_Date": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "0bbe14fa-0cd8-49bd-8b30-daa6f6a275d5"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "Last 12 months review lock date",
+                "type": "string",
+                "value": "@{formatDateTime(addDays(startOfMonth(addToTime(convertFromUtc(utcNow(), 'Pacific Standard Time'), -11, 'month')), -1), 'yyyy-MM-dd')}"
+              }
+            ]
+          }
+        },
+        "Get_all_fact_metric": {
+          "runAfter": {
+            "Last_Month": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "12af74ee-16ee-4b67-a9de-5e5dc84588f4"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+              "connectionName": "shared_commondataserviceforapps_1",
+              "operationId": "ListRecords"
+            },
+            "parameters": {
+              "entityName": "craf2_reviewhub_factmetrics",
+              "$filter": "craf2_fm_targetnumber ne null and craf2_fm_valuenumber ne null and craf2_fm_reviewlockdate eq @{variables('Current Review Month Lock Date')}",
+              "$orderby": "createdon desc",
+              "$expand": "craf2_fm_ProductMetric($select=craf2_productmetricid, craf2_productmetrictitle)"
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "runtimeConfiguration": {
+            "paginationPolicy": {
+              "minimumItemCount": 50000
+            }
+          }
+        },
+        "12_Months_Ago": {
+          "runAfter": {
+            "Last_12_Months_Review_Lock_Date": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "12af74ee-16ee-4b67-a9de-5e5dc84588f4"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+              "connectionName": "shared_commondataserviceforapps_1",
+              "operationId": "ListRecords"
+            },
+            "parameters": {
+              "entityName": "craf2_reviewhub_factmetrics",
+              "$filter": "craf2_fm_valuenumber ne null and craf2_fm_reviewlockdate eq @{variables('Last 12 months review lock date')}",
+              "$orderby": "createdon desc",
+              "$expand": "craf2_fm_ProductMetric($select=craf2_productmetricid, craf2_productmetrictitle)"
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "runtimeConfiguration": {
+            "paginationPolicy": {
+              "minimumItemCount": 50000
+            }
+          }
+        },
+        "Last_Month": {
+          "runAfter": {
+            "12_Months_Ago": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "24de40fb-c31d-43c8-bba8-1f079ebbba27"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+              "connectionName": "shared_commondataserviceforapps_1",
+              "operationId": "ListRecords"
+            },
+            "parameters": {
+              "entityName": "craf2_reviewhub_factmetrics",
+              "$filter": "craf2_fm_valuenumber ne null and craf2_fm_reviewlockdate eq @{variables('Last months review lock date')}",
+              "$orderby": "createdon desc",
+              "$expand": "craf2_fm_ProductMetric($select=craf2_productmetricid, craf2_productmetrictitle)"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Apply_to_each_fact_metric": {
+          "foreach": "@outputs('Get_all_fact_metric')?['body/value']",
+          "actions": {
+            "MetricValue": {
+              "runAfter": {},
+              "metadata": {
+                "operationMetadataId": "f994cb56-4af8-49cf-a96d-073ab6373bd1"
+              },
+              "type": "Compose",
+              "inputs": "@items('Apply_to_each_fact_metric')?['craf2_fm_valuenumber']"
+            },
+            "Target": {
+              "runAfter": {
+                "MetricValue": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "9832f816-b6e8-4cee-b0d9-a27412f18534"
+              },
+              "type": "Compose",
+              "inputs": "@items('Apply_to_each_fact_metric')?['craf2_fm_targetnumber']"
+            },
+            "Get_fact_metrics_to_last_12_months": {
+              "runAfter": {
+                "Get_fact_metrics_to_last_1_month": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "2ca9c1c7-fab9-4497-a273-646c5d8f1190"
+              },
+              "type": "Query",
+              "inputs": {
+                "from": "@outputs('12_Months_Ago')?['body/value']",
+                "where": "@equals(items('Apply_to_each_fact_metric')?['craf2_fm_productmetric/craf2_productmetricid'], item()?['craf2_fm_productmetric/craf2_productmetricid'])"
+              }
+            },
+            "PreviousMonthMetricValue": {
+              "runAfter": {
+                "Get_fact_metrics_to_last_12_months": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "9ca2b6e5-2705-4c79-a26f-d7fccceccba9"
+              },
+              "type": "Compose",
+              "inputs": "@body('Get_fact_metrics_to_last_1_month')?[0]?['craf2_fm_valuenumber']"
+            },
+            "Last12MonthMetricValue": {
+              "runAfter": {
+                "PreviousMonthMetricValue": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "a6d90897-d315-431a-8fda-5054cd166bf8"
+              },
+              "type": "Compose",
+              "inputs": "@body('Get_fact_metrics_to_last_12_months')?[0]?['craf2_fm_valuenumber']"
+            },
+            "Check_If_MoM_Can_Be_Calculated": {
+              "actions": {
+                "MoM": {
+                  "runAfter": {},
+                  "metadata": {
+                    "operationMetadataId": "1a09d602-e68a-4b8c-9676-e5a2c0025ceb"
+                  },
+                  "type": "Compose",
+                  "inputs": "@mul(div(sub(outputs('MetricValue'), outputs('PreviousMonthMetricValue')), outputs('PreviousMonthMetricValue')), 100)",
+                  "description": "(Month 2 â€“ Month 1) / Month 1 * 100 "
+                }
+              },
+              "runAfter": {
+                "Last12MonthMetricValue": [
+                  "Succeeded"
+                ]
+              },
+              "expression": {
+                "and": [
+                  {
+                    "not": {
+                      "equals": [
+                        "@outputs('PreviousMonthMetricValue')",
+                        0
+                      ]
+                    }
+                  },
+                  {
+                    "not": {
+                      "equals": [
+                        "@outputs('PreviousMonthMetricValue')",
+                        "@null"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "c2fddf0d-abd7-4d7d-b7b0-352d81e0d4af"
+              },
+              "type": "If"
+            },
+            "Check_If_YoY_Can_Be_Calculated": {
+              "actions": {
+                "YoY": {
+                  "runAfter": {},
+                  "metadata": {
+                    "operationMetadataId": "9e395528-6e54-480a-bff9-5cc19f5e841d"
+                  },
+                  "type": "Compose",
+                  "inputs": "@mul(div(sub(outputs('MetricValue'), outputs('Last12MonthMetricValue')), outputs('Last12MonthMetricValue')), 100)",
+                  "description": "[(Current year â€“ Previous year) / Previous year] x 100 "
+                }
+              },
+              "runAfter": {
+                "Check_If_MoM_Can_Be_Calculated": [
+                  "Succeeded"
+                ]
+              },
+              "expression": {
+                "and": [
+                  {
+                    "not": {
+                      "equals": [
+                        "@outputs('Last12MonthMetricValue')",
+                        0
+                      ]
+                    }
+                  },
+                  {
+                    "not": {
+                      "equals": [
+                        "@outputs('Last12MonthMetricValue')",
+                        "@null"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "97796960-26c9-40d9-92f9-067500f05f90"
+              },
+              "type": "If"
+            },
+            "Update_factmetric_record": {
+              "runAfter": {
+                "Check_If_YoY_Can_Be_Calculated": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "ada57e9a-3f05-451a-bb2a-c631752179ba"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "connectionName": "shared_commondataserviceforapps_1",
+                  "operationId": "UpdateRecord"
+                },
+                "parameters": {
+                  "entityName": "craf2_reviewhub_factmetrics",
+                  "recordId": "@items('Apply_to_each_fact_metric')?['craf2_reviewhub_factmetricid']",
+                  "item/craf2_mom": "@if(or(equals(outputs('MoM'), 0), equals(outputs('MoM'), null)), null, outputs('MoM'))",
+                  "item/craf2_variancetotarget": "@if(or(equals(outputs('VarianceToTarget'), 0), equals(outputs('VarianceToTarget'), null)), null, outputs('VarianceToTarget'))",
+                  "item/craf2_yoy": "@if(or(equals(outputs('YoY'), 0), equals(outputs('YoY'), null)), null, outputs('YoY'))"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "Get_fact_metrics_to_last_1_month": {
+              "runAfter": {
+                "Check_If_Variance_Can_Be_Calculated": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "1bee38e5-a91a-462d-b202-6e1902f18d0b"
+              },
+              "type": "Query",
+              "inputs": {
+                "from": "@outputs('Last_Month')?['body/value']",
+                "where": "@equals(items('Apply_to_each_fact_metric')?['craf2_fm_productmetric/craf2_productmetricid'], item()?['craf2_fm_productmetric/craf2_productmetricid'])"
+              }
+            },
+            "Check_If_Variance_Can_Be_Calculated": {
+              "actions": {
+                "VarianceToTarget": {
+                  "runAfter": {},
+                  "metadata": {
+                    "operationMetadataId": "34f78278-0a41-4f8c-bece-80883d18136a"
+                  },
+                  "type": "Compose",
+                  "inputs": "@mul(div(sub(outputs('MetricValue'), outputs('Target')), outputs('Target')), 100)",
+                  "description": "(Latest value â€“ target)/ target * 100 "
+                }
+              },
+              "runAfter": {
+                "Target": [
+                  "Succeeded"
+                ]
+              },
+              "expression": {
+                "and": [
+                  {
+                    "not": {
+                      "equals": [
+                        "@outputs('Target')",
+                        0
+                      ]
+                    }
+                  },
+                  {
+                    "not": {
+                      "equals": [
+                        "@outputs('Target')",
+                        "@null"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "c2fddf0d-abd7-4d7d-b7b0-352d81e0d4af"
+              },
+              "type": "If"
+            }
+          },
+          "runAfter": {
+            "Get_all_fact_metric": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "f23bde8f-750f-4347-9ee7-d020524a80ff"
+          },
+          "type": "Foreach",
+          "runtimeConfiguration": {
+            "concurrency": {
+              "repetitions": 50
+            }
+          }
+        }
+      }
+    },
+    "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+}

@@ -1,0 +1,1426 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_azuread_1": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "chub_sharedazuread_edb08"
+        },
+        "api": {
+          "name": "shared_azuread"
+        }
+      },
+      "shared_office365users_1": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "chub_sharedoffice365users_3cce7"
+        },
+        "api": {
+          "name": "shared_office365users"
+        }
+      },
+      "shared_commondataserviceforapps_1": {
+        "impersonation": {},
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "chub_sharedcommondataserviceforapps_72f86"
+        },
+        "api": {
+          "name": "shared_commondataserviceforapps"
+        }
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        },
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        }
+      },
+      "triggers": {
+        "Recurrence": {
+          "recurrence": {
+            "frequency": "Day",
+            "interval": 1,
+            "schedule": {
+              "hours": [
+                "8"
+              ]
+            }
+          },
+          "metadata": {
+            "operationMetadataId": "0c0e67b9-9163-40f3-b736-d92a2120c511"
+          },
+          "type": "Recurrence"
+        }
+      },
+      "actions": {
+        "ReviewHubAccess-ReadOnlyGroup": {
+          "runAfter": {},
+          "metadata": {
+            "operationMetadataId": "8da86aee-5503-4b49-aa97-1ca1fd54a3c1"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "ReviewHubAccess-ReadOnlyGroup",
+                "type": "string",
+                "value": "fc1ad010-85b0-44e8-b8c3-1d487f7421f7"
+              }
+            ]
+          }
+        },
+        "ReviewHubAccess-ReadOnly-Source_Groups": {
+          "runAfter": {
+            "ReviewHubAccess-ReadWriteGroup": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "a5b27ba0-8098-465d-8289-b45fc8d20002"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "ReviewHubAccess-ReadOnly-Source-Groups",
+                "type": "array",
+                "value": [
+                  "101be9d9-8feb-418b-9d22-be0ddd930a3f",
+                  "7c1e443c-ce15-4548-bfe3-d92f1a690579"
+                ]
+              }
+            ]
+          }
+        },
+        "Loop_Through_Read_Only_Source_Group": {
+          "foreach": "@variables('ReviewHubAccess-ReadOnly-Source-Groups')",
+          "actions": {
+            "Copy_ReviewHubAccess-ReadOnly-abfe_to_ReviewHubAccess-ReadOnlyGroup": {
+              "actions": {
+                "Get_ReadOnly-Source_Members": {
+                  "runAfter": {},
+                  "metadata": {
+                    "operationMetadataId": "38cdd238-6bae-4858-ac8f-7fc8c1dca385"
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_azuread",
+                      "connectionName": "shared_azuread_1",
+                      "operationId": "GetGroupMembers"
+                    },
+                    "parameters": {
+                      "id": "@items('Loop_Through_Read_Only_Source_Group')",
+                      "$top": 999
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                },
+                "Loop_Through_ReadOnly-abfe": {
+                  "foreach": "@outputs('Get_ReadOnly-Source_Members')?['body/value']",
+                  "actions": {
+                    "CheckIf_Is_User": {
+                      "actions": {
+                        "Get_user_profile_for_ReadOnly-Source": {
+                          "runAfter": {},
+                          "metadata": {
+                            "operationMetadataId": "d97ecd3e-16bf-4fda-bc24-0dbbc3be7956"
+                          },
+                          "type": "OpenApiConnection",
+                          "inputs": {
+                            "host": {
+                              "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365users",
+                              "connectionName": "shared_office365users_1",
+                              "operationId": "UserProfile_V2"
+                            },
+                            "parameters": {
+                              "id": "@items('Loop_Through_ReadOnly-abfe')?['mail']"
+                            },
+                            "authentication": "@parameters('$authentication')"
+                          }
+                        },
+                        "Check_If_Is_Already_A_Member_ReadOnly": {
+                          "runAfter": {
+                            "Get_user_profile_for_ReadOnly-Source": [
+                              "Succeeded"
+                            ]
+                          },
+                          "metadata": {
+                            "operationMetadataId": "af35b826-a469-4833-947f-46ebe60a61c6"
+                          },
+                          "type": "OpenApiConnection",
+                          "inputs": {
+                            "host": {
+                              "apiId": "/providers/Microsoft.PowerApps/apis/shared_azuread",
+                              "connectionName": "shared_azuread_1",
+                              "operationId": "CheckMemberGroupsV2"
+                            },
+                            "parameters": {
+                              "id": "@outputs('Get_user_profile_for_ReadOnly-Source')?['body/id']",
+                              "body/groupIds": [
+                                "@variables('ReviewHubAccess-ReadOnlyGroup')"
+                              ]
+                            },
+                            "authentication": "@parameters('$authentication')"
+                          }
+                        },
+                        "If_Is_A_member_ReadOnly": {
+                          "actions": {},
+                          "runAfter": {
+                            "Check_If_User_is_part_of_Product_Review": [
+                              "Succeeded"
+                            ]
+                          },
+                          "else": {
+                            "actions": {
+                              "Add_user_from_ReadOnly-Source_to_ReadOnlyGroup": {
+                                "runAfter": {},
+                                "metadata": {
+                                  "operationMetadataId": "641ef02c-b1cf-45dc-bd21-d92c01280df1"
+                                },
+                                "type": "OpenApiConnection",
+                                "inputs": {
+                                  "host": {
+                                    "apiId": "/providers/Microsoft.PowerApps/apis/shared_azuread",
+                                    "connectionName": "shared_azuread_1",
+                                    "operationId": "AddUserToGroup"
+                                  },
+                                  "parameters": {
+                                    "id": "@variables('ReviewHubAccess-ReadOnlyGroup')",
+                                    "body/@odata.id": "@outputs('Get_user_profile_for_ReadOnly-Source')?['body/id']"
+                                  },
+                                  "authentication": "@parameters('$authentication')"
+                                }
+                              }
+                            }
+                          },
+                          "expression": {
+                            "or": [
+                              {
+                                "greater": [
+                                  "@length(outputs('Check_If_Is_Already_A_Member_ReadOnly')?['body/value'])",
+                                  0
+                                ]
+                              },
+                              {
+                                "greater": [
+                                  "@outputs('Sum_Length_of_results')",
+                                  0
+                                ]
+                              }
+                            ]
+                          },
+                          "metadata": {
+                            "operationMetadataId": "33c2731d-c5ec-4a3e-88ee-e05a2071f9c9"
+                          },
+                          "type": "If"
+                        },
+                        "Check_If_User_is_part_of_Product_Review": {
+                          "actions": {
+                            "Check_if_user_if_Product_Review_Stakeholder": {
+                              "runAfter": {},
+                              "metadata": {
+                                "operationMetadataId": "c3d7ea17-0609-432f-b63a-0bb05c250bb7"
+                              },
+                              "type": "OpenApiConnection",
+                              "inputs": {
+                                "host": {
+                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                  "connectionName": "shared_commondataserviceforapps_1",
+                                  "operationId": "ListRecords"
+                                },
+                                "parameters": {
+                                  "entityName": "craf2_reviewhub_stakeholders",
+                                  "$select": "craf2_productstakeholders",
+                                  "$filter": "contains(craf2_productstakeholders , '@{items('Loop_Through_ReadOnly-abfe')?['userPrincipalName']}')  and craf2_BoardType/craf2_boardtypeid eq 2",
+                                  "$top": 1
+                                },
+                                "authentication": "@parameters('$authentication')"
+                              }
+                            },
+                            "Check_if_user_if_Product_Review_Owner": {
+                              "runAfter": {
+                                "Check_if_user_if_Product_Review_Stakeholder": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "metadata": {
+                                "operationMetadataId": "d46ce8c9-ef15-40ab-985a-17de478bcf03"
+                              },
+                              "type": "OpenApiConnection",
+                              "inputs": {
+                                "host": {
+                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                  "connectionName": "shared_commondataserviceforapps_1",
+                                  "operationId": "ListRecords"
+                                },
+                                "parameters": {
+                                  "entityName": "craf2_reviewhub_factmetricboards",
+                                  "$select": "craf2_fmb_reviewownerprincipal",
+                                  "$filter": "craf2_fmb_reviewownerprincipal eq '@{items('Loop_Through_ReadOnly-abfe')?['userPrincipalName']}'  and craf2_fmb_BoardType/craf2_boardtypeid eq 2",
+                                  "$top": 1
+                                },
+                                "authentication": "@parameters('$authentication')"
+                              }
+                            },
+                            "Check_if_user_if_Product_Review_Coordinator": {
+                              "runAfter": {
+                                "Check_if_user_if_Product_Review_Owner": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "metadata": {
+                                "operationMetadataId": "cf1f9f47-9ff6-413d-906b-caff159a76ce"
+                              },
+                              "type": "OpenApiConnection",
+                              "inputs": {
+                                "host": {
+                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                  "connectionName": "shared_commondataserviceforapps_1",
+                                  "operationId": "ListRecords"
+                                },
+                                "parameters": {
+                                  "entityName": "craf2_reviewhub_boardtypes",
+                                  "$select": "craf2_coordinator",
+                                  "$filter": "contains(craf2_coordinator , '@{items('Loop_Through_ReadOnly-abfe')?['userPrincipalName']}')  and craf2_boardtypeid eq 2",
+                                  "$top": 1
+                                },
+                                "authentication": "@parameters('$authentication')"
+                              }
+                            },
+                            "Sum_Length_of_results": {
+                              "runAfter": {
+                                "Check_if_user_if_Product_Review_Coordinator": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "metadata": {
+                                "operationMetadataId": "6ca2462c-2153-481d-be9e-7c1edce83ee0"
+                              },
+                              "type": "Compose",
+                              "inputs": "@add(add(length(outputs('Check_if_user_if_Product_Review_Coordinator')?['body/value']), length(outputs('Check_if_user_if_Product_Review_Owner')?['body/value'])), length(outputs('Check_if_user_if_Product_Review_Stakeholder')?['body/value']))"
+                            }
+                          },
+                          "runAfter": {
+                            "Check_If_Is_Already_A_Member_ReadOnly": [
+                              "Succeeded"
+                            ]
+                          },
+                          "metadata": {
+                            "operationMetadataId": "34975b32-ddd6-4aa7-93a1-8aaeeb4a3369"
+                          },
+                          "type": "Scope"
+                        }
+                      },
+                      "runAfter": {},
+                      "else": {
+                        "actions": {
+                          "Get_group_members": {
+                            "runAfter": {},
+                            "metadata": {
+                              "operationMetadataId": "520f725e-648b-46cf-9c79-62bc2d8039e1"
+                            },
+                            "type": "OpenApiConnection",
+                            "inputs": {
+                              "host": {
+                                "apiId": "/providers/Microsoft.PowerApps/apis/shared_azuread",
+                                "connectionName": "shared_azuread_1",
+                                "operationId": "GetGroupMembers"
+                              },
+                              "parameters": {
+                                "id": "@items('Loop_Through_ReadOnly-abfe')?['id']",
+                                "$top": 999
+                              },
+                              "authentication": "@parameters('$authentication')"
+                            }
+                          },
+                          "Loop_Through_Sub_Group": {
+                            "foreach": "@outputs('Get_group_members')?['body/value']",
+                            "actions": {
+                              "Get_user_profile_for_ReadOnly_SubGroup": {
+                                "runAfter": {},
+                                "metadata": {
+                                  "operationMetadataId": "2e4b3174-8e62-476c-b4c8-c15f3f1fd320"
+                                },
+                                "type": "OpenApiConnection",
+                                "inputs": {
+                                  "host": {
+                                    "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365users",
+                                    "connectionName": "shared_office365users_1",
+                                    "operationId": "UserProfile_V2"
+                                  },
+                                  "parameters": {
+                                    "id": "@items('Loop_Through_Sub_Group')?['mail']"
+                                  },
+                                  "authentication": "@parameters('$authentication')"
+                                }
+                              },
+                              "Check_If_Is_Already_A_Member_ReadOnly_2": {
+                                "runAfter": {
+                                  "Get_user_profile_for_ReadOnly_SubGroup": [
+                                    "Succeeded"
+                                  ]
+                                },
+                                "metadata": {
+                                  "operationMetadataId": "3dc6037e-f431-40f0-8aca-c896882395fa"
+                                },
+                                "type": "OpenApiConnection",
+                                "inputs": {
+                                  "host": {
+                                    "apiId": "/providers/Microsoft.PowerApps/apis/shared_azuread",
+                                    "connectionName": "shared_azuread_1",
+                                    "operationId": "CheckMemberGroupsV2"
+                                  },
+                                  "parameters": {
+                                    "id": "@outputs('Get_user_profile_for_ReadOnly_SubGroup')?['body/id']",
+                                    "body/groupIds": [
+                                      "@variables('ReviewHubAccess-ReadOnlyGroup')"
+                                    ]
+                                  },
+                                  "authentication": "@parameters('$authentication')"
+                                }
+                              },
+                              "If_Is_A_member_Read_Only": {
+                                "actions": {},
+                                "runAfter": {
+                                  "Check_If_User_is_part_of_Product_Review_2": [
+                                    "Succeeded"
+                                  ]
+                                },
+                                "else": {
+                                  "actions": {
+                                    "Add_user_from_ReadOnly_Subgroup_to_ReadOnlyGroup": {
+                                      "runAfter": {},
+                                      "metadata": {
+                                        "operationMetadataId": "800c091d-e3fb-476e-8420-79e045409f74"
+                                      },
+                                      "type": "OpenApiConnection",
+                                      "inputs": {
+                                        "host": {
+                                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_azuread",
+                                          "connectionName": "shared_azuread_1",
+                                          "operationId": "AddUserToGroup"
+                                        },
+                                        "parameters": {
+                                          "id": "@variables('ReviewHubAccess-ReadOnlyGroup')",
+                                          "body/@odata.id": "@outputs('Get_user_profile_for_ReadOnly_SubGroup')?['body/id']"
+                                        },
+                                        "authentication": "@parameters('$authentication')"
+                                      }
+                                    }
+                                  }
+                                },
+                                "expression": {
+                                  "or": [
+                                    {
+                                      "greater": [
+                                        "@length(outputs('Check_If_Is_Already_A_Member_ReadOnly_2')?['body/value'])",
+                                        0
+                                      ]
+                                    },
+                                    {
+                                      "greater": [
+                                        "@outputs('Sum_Length_of_results_2')",
+                                        0
+                                      ]
+                                    }
+                                  ]
+                                },
+                                "metadata": {
+                                  "operationMetadataId": "dd088a1d-8a94-4518-a10d-afd7a87c4641"
+                                },
+                                "type": "If"
+                              },
+                              "Check_If_User_is_part_of_Product_Review_2": {
+                                "actions": {
+                                  "Check_if_user_if_Product_Review_Stakeholder_2": {
+                                    "runAfter": {},
+                                    "metadata": {
+                                      "operationMetadataId": "0deef852-0909-467f-8314-ced268ff32fc"
+                                    },
+                                    "type": "OpenApiConnection",
+                                    "inputs": {
+                                      "host": {
+                                        "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                        "connectionName": "shared_commondataserviceforapps_1",
+                                        "operationId": "ListRecords"
+                                      },
+                                      "parameters": {
+                                        "entityName": "craf2_reviewhub_stakeholders",
+                                        "$select": "craf2_productstakeholders",
+                                        "$filter": "contains(craf2_productstakeholders , '@{items('Loop_Through_Sub_Group')?['userPrincipalName']}')  and craf2_BoardType/craf2_boardtypeid eq 2",
+                                        "$top": 1
+                                      },
+                                      "authentication": "@parameters('$authentication')"
+                                    }
+                                  },
+                                  "Check_if_user_if_Product_Review_Owner_2": {
+                                    "runAfter": {
+                                      "Check_if_user_if_Product_Review_Stakeholder_2": [
+                                        "Succeeded"
+                                      ]
+                                    },
+                                    "metadata": {
+                                      "operationMetadataId": "5aa1a3e8-fdc4-4136-bdf0-6e96bdde9fb4"
+                                    },
+                                    "type": "OpenApiConnection",
+                                    "inputs": {
+                                      "host": {
+                                        "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                        "connectionName": "shared_commondataserviceforapps_1",
+                                        "operationId": "ListRecords"
+                                      },
+                                      "parameters": {
+                                        "entityName": "craf2_reviewhub_factmetricboards",
+                                        "$select": "craf2_fmb_reviewownerprincipal",
+                                        "$filter": "craf2_fmb_reviewownerprincipal eq '@{items('Loop_Through_Sub_Group')?['userPrincipalName']}'  and craf2_fmb_BoardType/craf2_boardtypeid eq 2",
+                                        "$top": 1
+                                      },
+                                      "authentication": "@parameters('$authentication')"
+                                    }
+                                  },
+                                  "Check_if_user_if_Product_Review_Coordinator_2": {
+                                    "runAfter": {
+                                      "Check_if_user_if_Product_Review_Owner_2": [
+                                        "Succeeded"
+                                      ]
+                                    },
+                                    "metadata": {
+                                      "operationMetadataId": "c02af078-4f05-4fe9-8fcf-08e2788c9dd6"
+                                    },
+                                    "type": "OpenApiConnection",
+                                    "inputs": {
+                                      "host": {
+                                        "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                        "connectionName": "shared_commondataserviceforapps_1",
+                                        "operationId": "ListRecords"
+                                      },
+                                      "parameters": {
+                                        "entityName": "craf2_reviewhub_boardtypes",
+                                        "$select": "craf2_coordinator",
+                                        "$filter": "contains(craf2_coordinator , '@{items('Loop_Through_Sub_Group')?['userPrincipalName']}')  and craf2_boardtypeid eq 2",
+                                        "$top": 1
+                                      },
+                                      "authentication": "@parameters('$authentication')"
+                                    }
+                                  },
+                                  "Sum_Length_of_results_2": {
+                                    "runAfter": {
+                                      "Check_if_user_if_Product_Review_Coordinator_2": [
+                                        "Succeeded"
+                                      ]
+                                    },
+                                    "metadata": {
+                                      "operationMetadataId": "8b138306-ae62-4528-adce-169a9e58e95f"
+                                    },
+                                    "type": "Compose",
+                                    "inputs": "@add(add(length(outputs('Check_if_user_if_Product_Review_Coordinator_2')?['body/value']), length(outputs('Check_if_user_if_Product_Review_Owner_2')?['body/value'])), length(outputs('Check_if_user_if_Product_Review_Stakeholder_2')?['body/value']))"
+                                  }
+                                },
+                                "runAfter": {
+                                  "Check_If_Is_Already_A_Member_ReadOnly_2": [
+                                    "Succeeded"
+                                  ]
+                                },
+                                "metadata": {
+                                  "operationMetadataId": "a8000b8d-7fce-4135-bee3-568f1fe8e791"
+                                },
+                                "type": "Scope"
+                              }
+                            },
+                            "runAfter": {
+                              "Get_group_members": [
+                                "Succeeded"
+                              ]
+                            },
+                            "metadata": {
+                              "operationMetadataId": "6e488279-18ea-4d42-9c58-a8513e1d1fc4"
+                            },
+                            "type": "Foreach"
+                          }
+                        }
+                      },
+                      "expression": {
+                        "equals": [
+                          "@items('Loop_Through_ReadOnly-abfe')?['type']",
+                          "#microsoft.graph.user"
+                        ]
+                      },
+                      "metadata": {
+                        "operationMetadataId": "5a13307a-4b78-44db-9118-3e21ec1a59f0"
+                      },
+                      "type": "If"
+                    }
+                  },
+                  "runAfter": {
+                    "Get_ReadOnly-Source_Members": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "bf175864-9233-452a-ad6a-4895a5c20201"
+                  },
+                  "type": "Foreach"
+                }
+              },
+              "runAfter": {},
+              "metadata": {
+                "operationMetadataId": "16fb3ea8-779e-40e9-93f5-37882f541b17"
+              },
+              "type": "Scope"
+            }
+          },
+          "runAfter": {
+            "CurrentMontheEndDate": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "82a32484-fa7f-4c6b-b77e-4d9e3afabd30"
+          },
+          "type": "Foreach"
+        },
+        "ReviewHubAccess-ReadWrite-Source-Groups": {
+          "runAfter": {
+            "ReviewHubAccess-ReadOnly-Source_Groups": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "56b5860d-4712-49ef-9918-a23b8813986b"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "ReviewHubAccess-ReadWrite-Source-Groups",
+                "type": "array",
+                "value": [
+                  "6b8e7a8e-d52a-4fd8-ae18-3a51eb415f02",
+                  "e3ccbf8a-46a9-4a13-8bd2-0a730b3e1501"
+                ]
+              }
+            ]
+          }
+        },
+        "ReviewHubAccess-ReadWriteGroup": {
+          "runAfter": {
+            "ReviewHubAccess-ReadOnlyGroup": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "8da86aee-5503-4b49-aa97-1ca1fd54a3c1"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "ReviewHubAccess-ReadWriteGroup",
+                "type": "string",
+                "value": "4d2c1c28-ad21-4bb5-a8b9-b7d33c105b39"
+              }
+            ]
+          }
+        },
+        "Loop_Through_Read_Write_Source_Group_2": {
+          "foreach": "@variables('ReviewHubAccess-ReadWrite-Source-Groups')",
+          "actions": {
+            "Copy_ReviewHubAccess-ReadWrite_Groups_to_ReviewHubAccess-ReadWriteGroup_2": {
+              "actions": {
+                "Get_ReadWrite-Source_Members_2": {
+                  "runAfter": {},
+                  "metadata": {
+                    "operationMetadataId": "38cdd238-6bae-4858-ac8f-7fc8c1dca385"
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_azuread",
+                      "connectionName": "shared_azuread_1",
+                      "operationId": "GetGroupMembers"
+                    },
+                    "parameters": {
+                      "id": "@items('Loop_Through_Read_Write_Source_Group_2')",
+                      "$top": 999
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                },
+                "Loop_Through_ReadWrite_Members_2": {
+                  "foreach": "@outputs('Get_ReadWrite-Source_Members_2')?['body/value']",
+                  "actions": {
+                    "CheckIf_Is_User_Type_2": {
+                      "actions": {
+                        "Get_user_profile_for_ReadWrite-Source_2": {
+                          "runAfter": {},
+                          "metadata": {
+                            "operationMetadataId": "d97ecd3e-16bf-4fda-bc24-0dbbc3be7956"
+                          },
+                          "type": "OpenApiConnection",
+                          "inputs": {
+                            "host": {
+                              "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365users",
+                              "connectionName": "shared_office365users_1",
+                              "operationId": "UserProfile_V2"
+                            },
+                            "parameters": {
+                              "id": "@items('Loop_Through_ReadWrite_Members_2')?['mail']"
+                            },
+                            "authentication": "@parameters('$authentication')"
+                          }
+                        },
+                        "Check_If_Is_Already_A_Member_2": {
+                          "runAfter": {
+                            "Get_user_profile_for_ReadWrite-Source_2": [
+                              "Succeeded"
+                            ]
+                          },
+                          "metadata": {
+                            "operationMetadataId": "df7b6649-1275-4bc9-baca-a2c198375d06"
+                          },
+                          "type": "OpenApiConnection",
+                          "inputs": {
+                            "host": {
+                              "apiId": "/providers/Microsoft.PowerApps/apis/shared_azuread",
+                              "connectionName": "shared_azuread_1",
+                              "operationId": "CheckMemberGroupsV2"
+                            },
+                            "parameters": {
+                              "id": "@outputs('Get_user_profile_for_ReadWrite-Source_2')?['body/id']",
+                              "body/groupIds": [
+                                "@variables('ReviewHubAccess-ReadWriteGroup')"
+                              ]
+                            },
+                            "authentication": "@parameters('$authentication')"
+                          }
+                        },
+                        "If_Is_A_member_2": {
+                          "actions": {},
+                          "runAfter": {
+                            "Check_If_User_Belongs_to_Administrative_Persona_2": [
+                              "Succeeded"
+                            ]
+                          },
+                          "else": {
+                            "actions": {
+                              "Add_user_from_ReadWrite-Source_to_ReadWriteGroup_2": {
+                                "runAfter": {},
+                                "metadata": {
+                                  "operationMetadataId": "641ef02c-b1cf-45dc-bd21-d92c01280df1"
+                                },
+                                "type": "OpenApiConnection",
+                                "inputs": {
+                                  "host": {
+                                    "apiId": "/providers/Microsoft.PowerApps/apis/shared_azuread",
+                                    "connectionName": "shared_azuread_1",
+                                    "operationId": "AddUserToGroup"
+                                  },
+                                  "parameters": {
+                                    "id": "@variables('ReviewHubAccess-ReadWriteGroup')",
+                                    "body/@odata.id": "@outputs('Get_user_profile_for_ReadWrite-Source_2')?['body/id']"
+                                  },
+                                  "authentication": "@parameters('$authentication')"
+                                }
+                              }
+                            }
+                          },
+                          "expression": {
+                            "or": [
+                              {
+                                "or": [
+                                  {
+                                    "greater": [
+                                      "@length(outputs('Check_If_Is_Already_A_Member_2')?['body/value'])",
+                                      0
+                                    ]
+                                  },
+                                  {
+                                    "greater": [
+                                      "@outputs('Sum_Length_of_results_3')",
+                                      0
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "equals": [
+                                  "@outputs('Sum_Result_Length_2')",
+                                  0
+                                ]
+                              }
+                            ]
+                          },
+                          "metadata": {
+                            "operationMetadataId": "3778a41c-73b5-422e-ae95-80d018d513d6"
+                          },
+                          "type": "If"
+                        },
+                        "Check_If_User_is_part_of_Product_Review_3": {
+                          "actions": {
+                            "Check_if_user_if_Product_Review_Stakeholder_3": {
+                              "runAfter": {},
+                              "metadata": {
+                                "operationMetadataId": "d95f1b28-7bbc-4e0c-a2a2-ca249f4487a6"
+                              },
+                              "type": "OpenApiConnection",
+                              "inputs": {
+                                "host": {
+                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                  "connectionName": "shared_commondataserviceforapps_1",
+                                  "operationId": "ListRecords"
+                                },
+                                "parameters": {
+                                  "entityName": "craf2_reviewhub_stakeholders",
+                                  "$select": "craf2_productstakeholders",
+                                  "$filter": "contains(craf2_productstakeholders , '@{items('Loop_Through_ReadWrite_Members_2')?['userPrincipalName']}')  and craf2_BoardType/craf2_boardtypeid eq 2",
+                                  "$top": 1
+                                },
+                                "authentication": "@parameters('$authentication')"
+                              }
+                            },
+                            "Check_if_user_if_Product_Review_Owner_3": {
+                              "runAfter": {
+                                "Check_if_user_if_Product_Review_Stakeholder_3": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "metadata": {
+                                "operationMetadataId": "52a15e3e-85ee-467c-9d88-310335b1d987"
+                              },
+                              "type": "OpenApiConnection",
+                              "inputs": {
+                                "host": {
+                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                  "connectionName": "shared_commondataserviceforapps_1",
+                                  "operationId": "ListRecords"
+                                },
+                                "parameters": {
+                                  "entityName": "craf2_reviewhub_factmetricboards",
+                                  "$select": "craf2_fmb_reviewownerprincipal",
+                                  "$filter": "craf2_fmb_reviewownerprincipal eq '@{items('Loop_Through_ReadWrite_Members_2')?['userPrincipalName']}'  and craf2_fmb_BoardType/craf2_boardtypeid eq 2",
+                                  "$top": 1
+                                },
+                                "authentication": "@parameters('$authentication')"
+                              }
+                            },
+                            "Check_if_user_if_Product_Review_Coordinator_3": {
+                              "runAfter": {
+                                "Check_if_user_if_Product_Review_Owner_3": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "metadata": {
+                                "operationMetadataId": "d8bdafc7-a611-4274-980a-8854b249796a"
+                              },
+                              "type": "OpenApiConnection",
+                              "inputs": {
+                                "host": {
+                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                  "connectionName": "shared_commondataserviceforapps_1",
+                                  "operationId": "ListRecords"
+                                },
+                                "parameters": {
+                                  "entityName": "craf2_reviewhub_boardtypes",
+                                  "$select": "craf2_coordinator",
+                                  "$filter": "contains(craf2_coordinator , '@{items('Loop_Through_ReadWrite_Members_2')?['userPrincipalName']}')  and craf2_boardtypeid eq 2",
+                                  "$top": 1
+                                },
+                                "authentication": "@parameters('$authentication')"
+                              }
+                            },
+                            "Sum_Length_of_results_3": {
+                              "runAfter": {
+                                "Check_if_user_if_Product_Review_Coordinator_3": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "metadata": {
+                                "operationMetadataId": "9ca57275-2c63-4dc4-8359-2f4fa85303d8"
+                              },
+                              "type": "Compose",
+                              "inputs": "@add(add(length(outputs('Check_if_user_if_Product_Review_Coordinator_3')?['body/value']), length(outputs('Check_if_user_if_Product_Review_Owner_3')?['body/value'])), length(outputs('Check_if_user_if_Product_Review_Stakeholder_3')?['body/value']))"
+                            }
+                          },
+                          "runAfter": {
+                            "Check_If_Is_Already_A_Member_2": [
+                              "Succeeded"
+                            ]
+                          },
+                          "metadata": {
+                            "operationMetadataId": "e9a16633-48bd-4ae2-8213-c5eccaf1822b"
+                          },
+                          "type": "Scope"
+                        },
+                        "Check_If_User_Belongs_to_Administrative_Persona_2": {
+                          "actions": {
+                            "Check_If_User_Is_Operator_or_Admin_2": {
+                              "runAfter": {},
+                              "metadata": {
+                                "operationMetadataId": "bac5595e-5050-4ff8-8cae-0574904d6f20"
+                              },
+                              "type": "OpenApiConnection",
+                              "inputs": {
+                                "host": {
+                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                  "connectionName": "shared_commondataserviceforapps_1",
+                                  "operationId": "ListRecords"
+                                },
+                                "parameters": {
+                                  "entityName": "craf2_reviewhub_userses",
+                                  "$select": "craf2_userprincipalemail",
+                                  "$filter": "craf2_userprincipalemail eq '@{items('Loop_Through_ReadWrite_Members_2')?['userPrincipalName']}'",
+                                  "$top": 1
+                                },
+                                "authentication": "@parameters('$authentication')"
+                              }
+                            },
+                            "Check_If_User_Is_StakeHolder_2": {
+                              "runAfter": {
+                                "Check_If_User_Is_Operator_or_Admin_2": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "metadata": {
+                                "operationMetadataId": "35286d34-8357-411e-97c8-720d78b1e734"
+                              },
+                              "type": "OpenApiConnection",
+                              "inputs": {
+                                "host": {
+                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                  "connectionName": "shared_commondataserviceforapps_1",
+                                  "operationId": "ListRecords"
+                                },
+                                "parameters": {
+                                  "entityName": "craf2_reviewhub_stakeholders",
+                                  "$select": "craf2_productstakeholders",
+                                  "$filter": "contains( craf2_productstakeholders, '@{items('Loop_Through_ReadWrite_Members_2')?['userPrincipalName']}')",
+                                  "$top": 1
+                                },
+                                "authentication": "@parameters('$authentication')"
+                              }
+                            },
+                            "Check_If_User_Is_ReviewOwner_2": {
+                              "runAfter": {
+                                "Check_If_User_Is_StakeHolder_2": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "metadata": {
+                                "operationMetadataId": "f45ea015-36e9-4953-95c7-434c6039a2f3"
+                              },
+                              "type": "OpenApiConnection",
+                              "inputs": {
+                                "host": {
+                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                  "connectionName": "shared_commondataserviceforapps_1",
+                                  "operationId": "ListRecords"
+                                },
+                                "parameters": {
+                                  "entityName": "craf2_reviewhub_factmetricboards",
+                                  "$select": "craf2_fmb_reviewownerprincipal",
+                                  "$filter": "craf2_fmb_reviewownerprincipal eq '@{items('Loop_Through_ReadWrite_Members_2')?['userPrincipalName']}'  and craf2_fmb_reviewlockdate eq  @{variables('CurrentMontheEndDate')}",
+                                  "$top": 1
+                                },
+                                "authentication": "@parameters('$authentication')"
+                              }
+                            },
+                            "Check_If_User_Is_Coordinator_2": {
+                              "runAfter": {
+                                "Check_If_User_Is_ReviewOwner_2": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "metadata": {
+                                "operationMetadataId": "da74be89-8133-4bdb-9955-b69934555001"
+                              },
+                              "type": "OpenApiConnection",
+                              "inputs": {
+                                "host": {
+                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                  "connectionName": "shared_commondataserviceforapps_1",
+                                  "operationId": "ListRecords"
+                                },
+                                "parameters": {
+                                  "entityName": "craf2_reviewhub_boardtypes",
+                                  "$select": "craf2_coordinator",
+                                  "$filter": "contains(craf2_coordinator, '@{items('Loop_Through_ReadWrite_Members_2')?['userPrincipalName']}')",
+                                  "$top": 1
+                                },
+                                "authentication": "@parameters('$authentication')"
+                              }
+                            },
+                            "Sum_Result_Length_2": {
+                              "runAfter": {
+                                "Check_If_User_Is_Coordinator_2": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "metadata": {
+                                "operationMetadataId": "dbc59dba-5498-47be-849f-000e3d5e29b4"
+                              },
+                              "type": "Compose",
+                              "inputs": "@add(add(add(length(outputs('Check_If_User_Is_Operator_or_Admin_2')?['body/value']), length(outputs('Check_If_User_Is_StakeHolder_2')?['body/value'])), length(outputs('Check_If_User_Is_ReviewOwner_2')?['body/value'])), length(outputs('Check_If_User_Is_Coordinator_2')?['body/value']))"
+                            }
+                          },
+                          "runAfter": {
+                            "Check_If_User_is_part_of_Product_Review_3": [
+                              "Succeeded"
+                            ]
+                          },
+                          "metadata": {
+                            "operationMetadataId": "a37ac970-40f5-42d7-836e-f522bfa45de3"
+                          },
+                          "type": "Scope"
+                        }
+                      },
+                      "runAfter": {},
+                      "else": {
+                        "actions": {
+                          "Get_group_members_ReadWrite_2": {
+                            "runAfter": {},
+                            "metadata": {
+                              "operationMetadataId": "520f725e-648b-46cf-9c79-62bc2d8039e1"
+                            },
+                            "type": "OpenApiConnection",
+                            "inputs": {
+                              "host": {
+                                "apiId": "/providers/Microsoft.PowerApps/apis/shared_azuread",
+                                "connectionName": "shared_azuread_1",
+                                "operationId": "GetGroupMembers"
+                              },
+                              "parameters": {
+                                "id": "@items('Loop_Through_ReadWrite_Members_2')?['id']",
+                                "$top": 999
+                              },
+                              "authentication": "@parameters('$authentication')"
+                            }
+                          },
+                          "Loop_Through_SubGroup__ReadWrite_2": {
+                            "foreach": "@outputs('Get_group_members_ReadWrite_2')?['body/value']",
+                            "actions": {
+                              "Get_user_profile_for_ReadWrite_SubGroup_2": {
+                                "runAfter": {},
+                                "metadata": {
+                                  "operationMetadataId": "2e4b3174-8e62-476c-b4c8-c15f3f1fd320"
+                                },
+                                "type": "OpenApiConnection",
+                                "inputs": {
+                                  "host": {
+                                    "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365users",
+                                    "connectionName": "shared_office365users_1",
+                                    "operationId": "UserProfile_V2"
+                                  },
+                                  "parameters": {
+                                    "id": "@items('Loop_Through_SubGroup__ReadWrite_2')?['mail']"
+                                  },
+                                  "authentication": "@parameters('$authentication')"
+                                }
+                              },
+                              "Check_If_Is_Already_A_Member_Of_ReadWrite_Group_2": {
+                                "runAfter": {
+                                  "Get_user_profile_for_ReadWrite_SubGroup_2": [
+                                    "Succeeded"
+                                  ]
+                                },
+                                "metadata": {
+                                  "operationMetadataId": "238e7616-35af-418d-97c2-fb5e663a71bd"
+                                },
+                                "type": "OpenApiConnection",
+                                "inputs": {
+                                  "host": {
+                                    "apiId": "/providers/Microsoft.PowerApps/apis/shared_azuread",
+                                    "connectionName": "shared_azuread_1",
+                                    "operationId": "CheckMemberGroupsV2"
+                                  },
+                                  "parameters": {
+                                    "id": "@outputs('Get_user_profile_for_ReadWrite_SubGroup_2')?['body/id']",
+                                    "body/groupIds": [
+                                      "@variables('ReviewHubAccess-ReadWriteGroup')"
+                                    ]
+                                  },
+                                  "authentication": "@parameters('$authentication')"
+                                }
+                              },
+                              "If_Is_A_member_Of_Group_2": {
+                                "actions": {},
+                                "runAfter": {
+                                  "Check_If_User_Belongs_to_Administrative_Persona": [
+                                    "Succeeded"
+                                  ]
+                                },
+                                "else": {
+                                  "actions": {
+                                    "Add_user_from_ReadWrite_Subgroup_to_ReadWriteGroup_2": {
+                                      "runAfter": {},
+                                      "metadata": {
+                                        "operationMetadataId": "800c091d-e3fb-476e-8420-79e045409f74"
+                                      },
+                                      "type": "OpenApiConnection",
+                                      "inputs": {
+                                        "host": {
+                                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_azuread",
+                                          "connectionName": "shared_azuread_1",
+                                          "operationId": "AddUserToGroup"
+                                        },
+                                        "parameters": {
+                                          "id": "@variables('ReviewHubAccess-ReadWriteGroup')",
+                                          "body/@odata.id": "@outputs('Get_user_profile_for_ReadWrite_SubGroup_2')?['body/id']"
+                                        },
+                                        "authentication": "@parameters('$authentication')"
+                                      }
+                                    }
+                                  }
+                                },
+                                "expression": {
+                                  "or": [
+                                    {
+                                      "or": [
+                                        {
+                                          "greater": [
+                                            "@length(outputs('Check_If_Is_Already_A_Member_Of_ReadWrite_Group_2')?['body/value'])",
+                                            0
+                                          ]
+                                        },
+                                        {
+                                          "greater": [
+                                            "@outputs('Sum_Length_of_results_4')",
+                                            0
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "equals": [
+                                        "@outputs('Sum_Result_Length')",
+                                        0
+                                      ]
+                                    }
+                                  ]
+                                },
+                                "metadata": {
+                                  "operationMetadataId": "3ba99aef-a688-41a5-b33c-31436f3c0fc2"
+                                },
+                                "type": "If"
+                              },
+                              "Check_If_User_is_part_of_Product_Review_4": {
+                                "actions": {
+                                  "Check_if_user_if_Product_Review_Stakeholder_4": {
+                                    "runAfter": {},
+                                    "metadata": {
+                                      "operationMetadataId": "a0695ce9-8cb8-4592-b569-c5b1b2ff9334"
+                                    },
+                                    "type": "OpenApiConnection",
+                                    "inputs": {
+                                      "host": {
+                                        "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                        "connectionName": "shared_commondataserviceforapps_1",
+                                        "operationId": "ListRecords"
+                                      },
+                                      "parameters": {
+                                        "entityName": "craf2_reviewhub_stakeholders",
+                                        "$select": "craf2_productstakeholders",
+                                        "$filter": "contains(craf2_productstakeholders , '@{items('Loop_Through_SubGroup__ReadWrite_2')?['userPrincipalName']}')  and craf2_BoardType/craf2_boardtypeid eq 2",
+                                        "$top": 1
+                                      },
+                                      "authentication": "@parameters('$authentication')"
+                                    }
+                                  },
+                                  "Check_if_user_if_Product_Review_Owner_4": {
+                                    "runAfter": {
+                                      "Check_if_user_if_Product_Review_Stakeholder_4": [
+                                        "Succeeded"
+                                      ]
+                                    },
+                                    "metadata": {
+                                      "operationMetadataId": "cc77ec3f-e5e5-4543-8a8f-c6da75f8aeaf"
+                                    },
+                                    "type": "OpenApiConnection",
+                                    "inputs": {
+                                      "host": {
+                                        "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                        "connectionName": "shared_commondataserviceforapps_1",
+                                        "operationId": "ListRecords"
+                                      },
+                                      "parameters": {
+                                        "entityName": "craf2_reviewhub_factmetricboards",
+                                        "$select": "craf2_fmb_reviewownerprincipal",
+                                        "$filter": "craf2_fmb_reviewownerprincipal eq '@{items('Loop_Through_SubGroup__ReadWrite_2')?['userPrincipalName']}' and craf2_fmb_BoardType/craf2_boardtypeid eq 2",
+                                        "$top": 1
+                                      },
+                                      "authentication": "@parameters('$authentication')"
+                                    }
+                                  },
+                                  "Check_if_user_if_Product_Review_Coordinator_4": {
+                                    "runAfter": {
+                                      "Check_if_user_if_Product_Review_Owner_4": [
+                                        "Succeeded"
+                                      ]
+                                    },
+                                    "metadata": {
+                                      "operationMetadataId": "922654f4-880b-4e1c-b90b-6d12a8869350"
+                                    },
+                                    "type": "OpenApiConnection",
+                                    "inputs": {
+                                      "host": {
+                                        "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                        "connectionName": "shared_commondataserviceforapps_1",
+                                        "operationId": "ListRecords"
+                                      },
+                                      "parameters": {
+                                        "entityName": "craf2_reviewhub_boardtypes",
+                                        "$select": "craf2_coordinator",
+                                        "$filter": "contains(craf2_coordinator , '@{items('Loop_Through_SubGroup__ReadWrite_2')?['userPrincipalName']}')  and craf2_boardtypeid eq 2",
+                                        "$top": 1
+                                      },
+                                      "authentication": "@parameters('$authentication')"
+                                    }
+                                  },
+                                  "Sum_Length_of_results_4": {
+                                    "runAfter": {
+                                      "Check_if_user_if_Product_Review_Coordinator_4": [
+                                        "Succeeded"
+                                      ]
+                                    },
+                                    "metadata": {
+                                      "operationMetadataId": "dbc59dba-5498-47be-849f-000e3d5e29b4"
+                                    },
+                                    "type": "Compose",
+                                    "inputs": "@add(add(length(outputs('Check_if_user_if_Product_Review_Coordinator_4')?['body/value']), length(outputs('Check_if_user_if_Product_Review_Owner_4')?['body/value'])), length(outputs('Check_if_user_if_Product_Review_Stakeholder_4')?['body/value']))"
+                                  }
+                                },
+                                "runAfter": {
+                                  "Check_If_Is_Already_A_Member_Of_ReadWrite_Group_2": [
+                                    "Succeeded"
+                                  ]
+                                },
+                                "metadata": {
+                                  "operationMetadataId": "35f1ad3f-52ef-4a62-8b5b-065f2390b9d6"
+                                },
+                                "type": "Scope"
+                              },
+                              "Check_If_User_Belongs_to_Administrative_Persona": {
+                                "actions": {
+                                  "Check_If_User_Is_Operator_or_Admin": {
+                                    "runAfter": {},
+                                    "metadata": {
+                                      "operationMetadataId": "bac5595e-5050-4ff8-8cae-0574904d6f20"
+                                    },
+                                    "type": "OpenApiConnection",
+                                    "inputs": {
+                                      "host": {
+                                        "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                        "connectionName": "shared_commondataserviceforapps_1",
+                                        "operationId": "ListRecords"
+                                      },
+                                      "parameters": {
+                                        "entityName": "craf2_reviewhub_userses",
+                                        "$select": "craf2_userprincipalemail",
+                                        "$filter": "craf2_userprincipalemail eq '@{items('Loop_Through_SubGroup__ReadWrite_2')?['userPrincipalName']}'",
+                                        "$top": 1
+                                      },
+                                      "authentication": "@parameters('$authentication')"
+                                    }
+                                  },
+                                  "Check_If_User_Is_StakeHolder": {
+                                    "runAfter": {
+                                      "Check_If_User_Is_Operator_or_Admin": [
+                                        "Succeeded"
+                                      ]
+                                    },
+                                    "metadata": {
+                                      "operationMetadataId": "35286d34-8357-411e-97c8-720d78b1e734"
+                                    },
+                                    "type": "OpenApiConnection",
+                                    "inputs": {
+                                      "host": {
+                                        "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                        "connectionName": "shared_commondataserviceforapps_1",
+                                        "operationId": "ListRecords"
+                                      },
+                                      "parameters": {
+                                        "entityName": "craf2_reviewhub_stakeholders",
+                                        "$select": "craf2_productstakeholders",
+                                        "$filter": "contains( craf2_productstakeholders, '@{items('Loop_Through_SubGroup__ReadWrite_2')?['userPrincipalName']}')",
+                                        "$top": 1
+                                      },
+                                      "authentication": "@parameters('$authentication')"
+                                    }
+                                  },
+                                  "Check_If_User_Is_ReviewOwner": {
+                                    "runAfter": {
+                                      "Check_If_User_Is_StakeHolder": [
+                                        "Succeeded"
+                                      ]
+                                    },
+                                    "metadata": {
+                                      "operationMetadataId": "f45ea015-36e9-4953-95c7-434c6039a2f3"
+                                    },
+                                    "type": "OpenApiConnection",
+                                    "inputs": {
+                                      "host": {
+                                        "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                        "connectionName": "shared_commondataserviceforapps_1",
+                                        "operationId": "ListRecords"
+                                      },
+                                      "parameters": {
+                                        "entityName": "craf2_reviewhub_factmetricboards",
+                                        "$select": "craf2_fmb_reviewownerprincipal",
+                                        "$filter": "craf2_fmb_reviewownerprincipal eq '@{items('Loop_Through_SubGroup__ReadWrite_2')?['userPrincipalName']}'  and craf2_fmb_reviewlockdate eq  @{variables('CurrentMontheEndDate')}",
+                                        "$top": 1
+                                      },
+                                      "authentication": "@parameters('$authentication')"
+                                    }
+                                  },
+                                  "Check_If_User_Is_Coordinator": {
+                                    "runAfter": {
+                                      "Check_If_User_Is_ReviewOwner": [
+                                        "Succeeded"
+                                      ]
+                                    },
+                                    "metadata": {
+                                      "operationMetadataId": "da74be89-8133-4bdb-9955-b69934555001"
+                                    },
+                                    "type": "OpenApiConnection",
+                                    "inputs": {
+                                      "host": {
+                                        "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                        "connectionName": "shared_commondataserviceforapps_1",
+                                        "operationId": "ListRecords"
+                                      },
+                                      "parameters": {
+                                        "entityName": "craf2_reviewhub_boardtypes",
+                                        "$select": "craf2_coordinator",
+                                        "$filter": "contains(craf2_coordinator, '@{items('Loop_Through_SubGroup__ReadWrite_2')?['userPrincipalName']}')",
+                                        "$top": 1
+                                      },
+                                      "authentication": "@parameters('$authentication')"
+                                    }
+                                  },
+                                  "Sum_Result_Length": {
+                                    "runAfter": {
+                                      "Check_If_User_Is_Coordinator": [
+                                        "Succeeded"
+                                      ]
+                                    },
+                                    "metadata": {
+                                      "operationMetadataId": "dbc59dba-5498-47be-849f-000e3d5e29b4"
+                                    },
+                                    "type": "Compose",
+                                    "inputs": "@add(add(add(length(outputs('Check_If_User_Is_Operator_or_Admin')?['body/value']), length(outputs('Check_If_User_Is_StakeHolder')?['body/value'])), length(outputs('Check_If_User_Is_ReviewOwner')?['body/value'])), length(outputs('Check_If_User_Is_Coordinator')?['body/value']))"
+                                  }
+                                },
+                                "runAfter": {
+                                  "Check_If_User_is_part_of_Product_Review_4": [
+                                    "Succeeded"
+                                  ]
+                                },
+                                "metadata": {
+                                  "operationMetadataId": "39978f27-ff6f-4581-8280-8c15b40c4926"
+                                },
+                                "type": "Scope"
+                              }
+                            },
+                            "runAfter": {
+                              "Get_group_members_ReadWrite_2": [
+                                "Succeeded"
+                              ]
+                            },
+                            "metadata": {
+                              "operationMetadataId": "6e488279-18ea-4d42-9c58-a8513e1d1fc4"
+                            },
+                            "type": "Foreach"
+                          }
+                        }
+                      },
+                      "expression": {
+                        "equals": [
+                          "@items('Loop_Through_ReadWrite_Members_2')?['@odata.type']",
+                          "#microsoft.graph.user"
+                        ]
+                      },
+                      "metadata": {
+                        "operationMetadataId": "5a13307a-4b78-44db-9118-3e21ec1a59f0"
+                      },
+                      "type": "If"
+                    }
+                  },
+                  "runAfter": {
+                    "Get_ReadWrite-Source_Members_2": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "bf175864-9233-452a-ad6a-4895a5c20201"
+                  },
+                  "type": "Foreach"
+                }
+              },
+              "runAfter": {},
+              "metadata": {
+                "operationMetadataId": "16fb3ea8-779e-40e9-93f5-37882f541b17"
+              },
+              "type": "Scope"
+            }
+          },
+          "runAfter": {
+            "CurrentMontheEndDate": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "82a32484-fa7f-4c6b-b77e-4d9e3afabd30"
+          },
+          "type": "Foreach"
+        },
+        "Terminate": {
+          "runAfter": {
+            "Loop_Through_Read_Only_Source_Group": [
+              "Succeeded"
+            ],
+            "Loop_Through_Read_Write_Source_Group_2": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "3a653e4b-1ceb-47cb-8daf-30630394cd7f"
+          },
+          "type": "Terminate",
+          "inputs": {
+            "runStatus": "Succeeded"
+          }
+        },
+        "CurrentMontheEndDate": {
+          "runAfter": {
+            "ReviewHubAccess-ReadWrite-Source-Groups": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "fee716b5-530f-4e09-af08-a5714a58ec38"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "CurrentMontheEndDate",
+                "type": "string",
+                "value": "@{formatDateTime(addDays(startOfMonth(addToTime(convertFromUtc(utcNow(), 'Pacific Standard Time'), 1, 'month')), -1), 'yyyy-MM-dd')}"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+}

@@ -1,0 +1,100 @@
+[
+  {
+    "CdsFCBContext": "{\"FileType\":true,\"ImageExternalStorage\":true}",
+    "EntitySetName": "craf2_reviewhub_metrictypeobjectives",
+    "IsHidden": false,
+    "IsSampleData": false,
+    "IsWritable": true,
+    "LogicalName": "craf2_reviewhub_metrictypeobjective",
+    "MaxGetRowsCount": 2000,
+    "Name": "ReviewHub_MetricTypeObjectives",
+    "NativeCDSDataSourceInfoNameMapping": {
+      "_ownerid_value": "Owner",
+      "craf2_mto_boardtypeid": "mto_BoardTypeID",
+      "craf2_objectiveid": "mto_ObjectiveID",
+      "craf2_objectivename": "mto_ObjectiveName",
+      "craf2_reviewhub_metrictypeobjective_AsyncOperations": "System Jobs",
+      "craf2_reviewhub_metrictypeobjective_BulkDeleteFailures": "Bulk Delete Failures",
+      "craf2_reviewhub_metrictypeobjective_DuplicateBaseRecord": "Duplicate Records (craf2_reviewhub_metrictypeobjective_DuplicateBaseRecord)",
+      "craf2_reviewhub_metrictypeobjective_DuplicateMatchingRecord": "Duplicate Records (craf2_reviewhub_metrictypeobjective_DuplicateMatchingRecord)",
+      "craf2_reviewhub_metrictypeobjective_MailboxTrackingFolders": "Mailbox Auto Tracking Folders",
+      "craf2_reviewhub_metrictypeobjective_PrincipalObjectAttributeAccesses": "Field Sharing",
+      "craf2_reviewhub_metrictypeobjective_ProcessSession": "Process Sessions",
+      "craf2_reviewhub_metrictypeobjective_SyncErrors": "Sync Errors",
+      "craf2_reviewhub_metrictypeobjectiveid": "ReviewHub_MetricTypeObjective",
+      "craf2_reviewhub_mtd_Objective": "ReviewHub_MetricTypeDetails",
+      "createdby": "Created By",
+      "createdon": "Created On",
+      "createdonbehalfby": "Created By (Delegate)",
+      "importsequencenumber": "Import Sequence Number",
+      "modifiedby": "Modified By",
+      "modifiedon": "Modified On",
+      "modifiedonbehalfby": "Modified By (Delegate)",
+      "overriddencreatedon": "Record Created On",
+      "owningbusinessunit": "Owning Business Unit",
+      "owningteam": "Owning Team",
+      "owninguser": "Owning User",
+      "statecode": "Status",
+      "statuscode": "Status Reason",
+      "timezoneruleversionnumber": "Time Zone Rule Version Number",
+      "utcconversiontimezonecode": "UTC Conversion Time Zone Code",
+      "versionnumber": "Version Number"
+    },
+    "PreferredName": "ReviewHub_MetricTypeObjectives",
+    "Type": "NativeCDSDataSourceInfo"
+  },
+  {
+    "DisplayName": "ReviewHub_MetricTypeObjectives (Views)",
+    "Name": "_craf2_reviewhub_metrictypeobjective_views",
+    "RelatedEntityName": "ReviewHub_MetricTypeObjectives",
+    "TrimmedViewName": true,
+    "Type": "ViewInfo",
+    "ViewInfoNameMapping": {
+      "4f3456ba-b9e4-40e9-b6b8-5a5e134b8797": "ReviewHub_MetricTypeObjective Advanced Find View",
+      "6ff09543-7969-451e-9971-e350efbb0e08": "ReviewHub_MetricTypeObjective Associated View",
+      "7f56eb1a-247d-412f-aa1f-c85ba362c80d": "Inactive ReviewHub_MetricTypeObjectives",
+      "ce4ade87-b18e-419a-b09e-cc624c089015": "Active ReviewHub_MetricTypeObjectives",
+      "f0ac2a1a-41ca-43a5-a646-1004339f77cd": "ReviewHub_MetricTypeObjective Lookup View"
+    }
+  },
+  {
+    "DisplayName": "Status (ReviewHub_MetricTypeObjectives)",
+    "Name": "craf2_reviewhub_metrictypeobjective_statecode",
+    "OptionSetInfoNameMapping": {
+      "0": "Active",
+      "1": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statecode",
+        "OptionSetReferenceEntityName": "ReviewHub_MetricTypeObjectives"
+      }
+    },
+    "OptionSetTypeKey": "StateType",
+    "RelatedColumnInvariantName": "statecode",
+    "RelatedEntityName": "ReviewHub_MetricTypeObjectives",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Status Reason (ReviewHub_MetricTypeObjectives)",
+    "Name": "craf2_reviewhub_metrictypeobjective_statuscode",
+    "OptionSetInfoNameMapping": {
+      "1": "Active",
+      "2": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statuscode",
+        "OptionSetReferenceEntityName": "ReviewHub_MetricTypeObjectives"
+      }
+    },
+    "OptionSetTypeKey": "StatusType",
+    "RelatedColumnInvariantName": "statuscode",
+    "RelatedEntityName": "ReviewHub_MetricTypeObjectives",
+    "Type": "OptionSetInfo"
+  }
+]

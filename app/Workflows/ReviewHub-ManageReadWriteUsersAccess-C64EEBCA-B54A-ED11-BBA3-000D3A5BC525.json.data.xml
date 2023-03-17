@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Workflow WorkflowId="{c64eebca-b54a-ed11-bba3-000d3a5bc525}" Name="Review Hub - Manage Read Write Users Access" Description="This flow ensures users who no longer belong to an administrative role have their administrative access revoked.&#xA;&#xA;Flow Failure will result in a breach of access policy." xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <JsonFileName>/Workflows/ReviewHub-ManageReadWriteUsersAccess-C64EEBCA-B54A-ED11-BBA3-000D3A5BC525.json</JsonFileName>
+  <Type>1</Type>
+  <Subprocess>0</Subprocess>
+  <Category>5</Category>
+  <Mode>0</Mode>
+  <Scope>4</Scope>
+  <OnDemand>0</OnDemand>
+  <TriggerOnCreate>0</TriggerOnCreate>
+  <TriggerOnDelete>0</TriggerOnDelete>
+  <AsyncAutodelete>0</AsyncAutodelete>
+  <SyncWorkflowLogOnFailure>0</SyncWorkflowLogOnFailure>
+  <StateCode>0</StateCode>
+  <StatusCode>1</StatusCode>
+  <RunAs>1</RunAs>
+  <IsTransacted>1</IsTransacted>
+  <IntroducedVersion>1.8.0.09282022</IntroducedVersion>
+  <IsCustomizable>1</IsCustomizable>
+  <IsCustomProcessingStepAllowedForOtherPublishers>1</IsCustomProcessingStepAllowedForOtherPublishers>
+  <PrimaryEntity>none</PrimaryEntity>
+  <LocalizedNames>
+    <LocalizedName languagecode="1033" description="Review Hub - Manage Read Write Users Access" />
+  </LocalizedNames>
+  <Descriptions>
+    <Description languagecode="1033" description="This flow ensures users who no longer belong to an administrative role have their administrative access revoked.&#xA;&#xA;Flow Failure will result in a breach of access policy." />
+  </Descriptions>
+</Workflow>

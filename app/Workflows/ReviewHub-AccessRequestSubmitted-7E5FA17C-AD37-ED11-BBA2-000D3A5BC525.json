@@ -1,0 +1,272 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_commondataserviceforapps": {
+        "impersonation": {},
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "chub_sharedcommondataserviceforapps_72f86"
+        },
+        "api": {
+          "name": "shared_commondataserviceforapps"
+        }
+      },
+      "shared_office365_1": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "chub_sharedoffice365_aaf4a"
+        },
+        "api": {
+          "name": "shared_office365"
+        }
+      },
+      "shared_office365users_1": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "chub_sharedoffice365users_3cce7"
+        },
+        "api": {
+          "name": "shared_office365users"
+        }
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        },
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        },
+        "EnvVar - ReviewHub - Notification Email (chub_EnvVarReviewHubNotificationEmail)": {
+          "defaultValue": "reviewhub-noreply@microsoft.com",
+          "type": "String",
+          "metadata": {
+            "schemaName": "chub_EnvVarReviewHubNotificationEmail"
+          }
+        },
+        "EnvVar - ReviewHub - Team Email (chub_EnvVarReviewHubTeamEmail)": {
+          "defaultValue": "dtpreviewhub@microsoft.com",
+          "type": "String",
+          "metadata": {
+            "schemaName": "chub_EnvVarReviewHubTeamEmail"
+          }
+        }
+      },
+      "triggers": {
+        "When_a_row_is_added,_modified_or_deleted": {
+          "metadata": {
+            "operationMetadataId": "89baaa43-c7ff-4ff9-b252-0523de56de98"
+          },
+          "type": "OpenApiConnectionWebhook",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+              "connectionName": "shared_commondataserviceforapps",
+              "operationId": "SubscribeWebhookTrigger"
+            },
+            "parameters": {
+              "subscriptionRequest/message": 1,
+              "subscriptionRequest/entityname": "craf2_reviewhub_accessrequest",
+              "subscriptionRequest/scope": 4,
+              "subscriptionRequest/name": "7e5fa17c-ad37-ed11-bba2-000d3a5bc525"
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "conditions": [
+            {
+              "expression": "@equals(triggerOutputs()?['body/createdon'], triggerOutputs()?['body/modifiedon'])"
+            }
+          ]
+        }
+      },
+      "actions": {
+        "List_products": {
+          "runAfter": {
+            "Get_requester_profile": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "92b49f40-7582-4178-b92c-2fe15c6cb4ca"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+              "connectionName": "shared_commondataserviceforapps",
+              "operationId": "ListRecords"
+            },
+            "parameters": {
+              "entityName": "craf2_reviewhub_requestedproducts",
+              "$filter": "_craf2_accessrequest_value eq '@{triggerOutputs()?['body/craf2_reviewhub_accessrequestid']}'",
+              "$expand": "craf2_AccessRequest($select=craf2_name,craf2_reviewhub_accessrequestid), craf2_Product($select=craf2_productid,craf2_productname), craf2_BoardType($select=craf2_boardtypeid,craf2_boardtypename)"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Send_an_email_to_requester": {
+          "runAfter": {
+            "Apply_to_each_products": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "46ee5068-4a1e-4077-9f57-e9684d83eb7e"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
+              "connectionName": "shared_office365_1",
+              "operationId": "SendEmailV2"
+            },
+            "parameters": {
+              "emailMessage/To": "@parameters('EnvVar - ReviewHub - Team Email (chub_EnvVarReviewHubTeamEmail)')",
+              "emailMessage/Subject": "ReviewHub - Access Request Submitted",
+              "emailMessage/Body": "<style>\ntable.message td, table.message th {\nborder:1px solid #d3d3d3;\nborder-collapse: collapse;\npadding: 5px\n}\ntable.message tbody tr:nth-child(even) {\nbackground-color: #e8e7e1;\n}\nbody {\n font-family: 'Lato';\n font-style: normal;\n}\n</style>\n\nDear All,<br><br>\n<b>@{outputs('Get_requester_profile')?['body/displayName']}</b> is requesting edit access to the following products.<br>\n<br>\n@{variables('htmlTable')}</tbody></table><br>\n<br>\nBest regards,<br>\n<b>Review Hub Team</b>",
+              "emailMessage/From": "@parameters('EnvVar - ReviewHub - Notification Email (chub_EnvVarReviewHubNotificationEmail)')",
+              "emailMessage/Cc": "@triggerOutputs()?['body/craf2_requesteremail']",
+              "emailMessage/Importance": "Normal"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Get_requester_profile": {
+          "runAfter": {
+            "Initialize_htmlTable_message": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "09e14d2a-e981-4b3f-a9fa-2d04a0f47210"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365users",
+              "connectionName": "shared_office365users_1",
+              "operationId": "UserProfile_V2"
+            },
+            "parameters": {
+              "id": "@triggerOutputs()?['body/craf2_requesteremail']"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Initialize_htmlTable_message": {
+          "runAfter": {
+            "Initialize_counter": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "a490d354-1b44-46fd-af7c-6cf30ae7fc3a"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "htmlTable",
+                "type": "string",
+                "value": "<table class=\"message\">\n   <thead>\n        <tr style=\"background-color: #d3d3d3;\" >\n            <th style=\"width:35%\">Product</th>\n            <th style=\"width:20%\">Board Type</th>\n            <th>Justification</th>\n       </tr>\n   </thead>   \n   <tbody>"
+              }
+            ]
+          }
+        },
+        "Apply_to_each_products": {
+          "foreach": "@outputs('List_products')?['body/value']",
+          "actions": {
+            "Condition": {
+              "actions": {
+                "Append_to_htmlTable": {
+                  "runAfter": {},
+                  "metadata": {
+                    "operationMetadataId": "060143f3-947a-44f5-afca-28d8a9a2974a"
+                  },
+                  "type": "AppendToStringVariable",
+                  "inputs": {
+                    "name": "htmlTable",
+                    "value": "<tr>\n    <td>@{items('Apply_to_each_products')?['craf2_product/craf2_productname']}</td>\n    <td>@{items('Apply_to_each_products')?['craf2_boardtype/craf2_boardtypename']}</td>\n    <td rowspan=@{length(outputs('List_products')?['body/value'])}>@{triggerOutputs()?['body/craf2_justification']}</td>\n</tr>"
+                  }
+                }
+              },
+              "runAfter": {},
+              "else": {
+                "actions": {
+                  "Append_to_htmlTable2": {
+                    "runAfter": {},
+                    "metadata": {
+                      "operationMetadataId": "35ba3a6c-018e-48bb-a3a2-1a9395069fc5"
+                    },
+                    "type": "AppendToStringVariable",
+                    "inputs": {
+                      "name": "htmlTable",
+                      "value": "<tr>\n    <td>@{items('Apply_to_each_products')?['craf2_product/craf2_productname']}</td>\n    <td>@{items('Apply_to_each_products')?['craf2_boardtype/craf2_boardtypename']}</td>\n</tr>"
+                    }
+                  }
+                }
+              },
+              "expression": {
+                "equals": [
+                  "@variables('intCounter')",
+                  0
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "04d20212-a7b0-486d-a23a-378228356734"
+              },
+              "type": "If"
+            },
+            "Increment_counter": {
+              "runAfter": {
+                "Condition": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "8c504df4-9fe7-434b-92a1-a001ba5d4c1b"
+              },
+              "type": "IncrementVariable",
+              "inputs": {
+                "name": "intCounter",
+                "value": 1
+              }
+            }
+          },
+          "runAfter": {
+            "List_products": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "5035b082-e97a-4516-92ab-55313281c948"
+          },
+          "type": "Foreach"
+        },
+        "Initialize_counter": {
+          "runAfter": {},
+          "metadata": {
+            "operationMetadataId": "503e31f7-3f53-4b34-b177-8238269cca37"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "intCounter",
+                "type": "integer",
+                "value": 0
+              }
+            ]
+          }
+        }
+      }
+    },
+    "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+}

@@ -1,0 +1,132 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <systemform>
+    <formid>{3f5aec23-6335-4089-8bcf-45596c2ec628}</formid>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <FormPresentation>1</FormPresentation>
+    <FormActivationState>1</FormActivationState>
+    <form headerdensity="HighWithControls">
+      <tabs>
+        <tab verticallayout="true" id="{565d9a6a-9131-4fd6-a9c3-733b00b35b53}" IsUserDefined="1">
+          <labels>
+            <label description="General" languagecode="1033" />
+          </labels>
+          <columns>
+            <column width="100%">
+              <sections>
+                <section showlabel="false" showbar="false" IsUserDefined="0" id="{3ffff39b-b101-450c-9e02-3127e3e4c70a}">
+                  <labels>
+                    <label description="General" languagecode="1033" />
+                  </labels>
+                  <rows>
+                    <row>
+                      <cell id="{c2977de9-aaa1-4a57-9b06-6b4647ff4827}" visible="false">
+                        <labels>
+                          <label description="Owner" languagecode="1033" />
+                        </labels>
+                        <control id="ownerid" classid="{270BD3DB-D9AF-4782-9025-509E298DEC0A}" datafieldname="ownerid" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{e9549be9-7f3b-4e73-847c-d5014525e99e}" locklevel="0" colspan="1" rowspan="1">
+                        <labels>
+                          <label description="Product ID" languagecode="1033" />
+                        </labels>
+                        <control id="craf2_productid" classid="{C6D124CA-7EDA-4A60-AEA9-7FB8D318B68F}" datafieldname="craf2_productid" disabled="false" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{4c389fca-abb6-4bd8-b406-c323f72f7411}" colspan="1" rowspan="1">
+                        <labels>
+                          <label description="Product Name" languagecode="1033" />
+                        </labels>
+                        <control id="craf2_productname" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="craf2_productname" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{1800e864-6448-4fa7-a4a6-24b5b443e101}" locklevel="0" colspan="1" rowspan="1">
+                        <labels>
+                          <label description="Internal Product ID" languagecode="1033" />
+                        </labels>
+                        <control id="craf2_internalproductid" classid="{C6D124CA-7EDA-4A60-AEA9-7FB8D318B68F}" datafieldname="craf2_internalproductid" disabled="false" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{1a4844a1-4675-4d9c-9051-27c68b8ba917}" locklevel="0" colspan="1" rowspan="1">
+                        <labels>
+                          <label description="Product Category" languagecode="1033" />
+                        </labels>
+                        <control id="craf2_productcategory" classid="{3EF39988-22BB-4F0B-BBBE-64B5A3748AEE}" datafieldname="craf2_productcategory" disabled="false" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{f3c7cadc-169a-40d8-84a2-e707b665c938}" locklevel="0" colspan="1" rowspan="1">
+                        <labels>
+                          <label description="Logo Image (Less than 50 KB, 80 x 80 Pixels)" languagecode="1033" />
+                        </labels>
+                        <control id="craf2_logoimage" classid="{7E548B0D-209C-477B-9DCD-F0F44472381D}" datafieldname="craf2_logoimage" disabled="false" />
+                      </cell>
+                    </row>
+                  </rows>
+                </section>
+              </sections>
+            </column>
+          </columns>
+        </tab>
+      </tabs>
+      <header id="{6a4dfc73-91f6-4f50-b097-c84fa11a2a65}" celllabelposition="Top" columns="111" labelwidth="115" celllabelalignment="Left">
+        <rows>
+          <row>
+            <cell id="{b9b6c5ca-4a20-4564-8089-d53812a1ebd4}" showlabel="false">
+              <labels>
+                <label description="" languagecode="1033" />
+              </labels>
+            </cell>
+            <cell id="{d0533df2-e994-4835-8e13-aa7b913d505d}" showlabel="false">
+              <labels>
+                <label description="" languagecode="1033" />
+              </labels>
+            </cell>
+            <cell id="{ab15088c-4109-4490-a78c-3350fc27349e}" showlabel="false">
+              <labels>
+                <label description="" languagecode="1033" />
+              </labels>
+            </cell>
+          </row>
+        </rows>
+      </header>
+      <footer id="{aabdfe2f-0e79-4339-b46c-0309e9c017e8}" celllabelposition="Top" columns="111" labelwidth="115" celllabelalignment="Left">
+        <rows>
+          <row>
+            <cell id="{de417ff8-2ece-4cd6-8694-08bf72515b59}" showlabel="false">
+              <labels>
+                <label description="" languagecode="1033" />
+              </labels>
+            </cell>
+            <cell id="{8a69aaed-95f9-4ca8-bfef-cfeba76a1776}" showlabel="false">
+              <labels>
+                <label description="" languagecode="1033" />
+              </labels>
+            </cell>
+            <cell id="{3646cba1-50ec-456a-aa57-b66aa657182c}" showlabel="false">
+              <labels>
+                <label description="" languagecode="1033" />
+              </labels>
+            </cell>
+          </row>
+        </rows>
+      </footer>
+      <DisplayConditions Order="0" FallbackForm="true">
+        <Everyone />
+      </DisplayConditions>
+    </form>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>1</CanBeDeleted>
+    <LocalizedNames>
+      <LocalizedName description="Information" languagecode="1033" />
+    </LocalizedNames>
+    <Descriptions>
+      <Description description="A form for this entity." languagecode="1033" />
+    </Descriptions>
+  </systemform>
+</forms>

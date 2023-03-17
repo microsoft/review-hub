@@ -1,0 +1,1123 @@
+scn_SS_AdminUsers As screen:
+
+    lbl_UUser_GlryRowCount As label:
+        Align: =Align.Right
+        Font: =FontStyle
+        FontWeight: =FontWeight.Semibold
+        Height: =35
+        PaddingRight: =15
+        Size: =10
+        Text: |-
+            ="Records Count: " & CountRows(glry_Search_Users.AllItems)
+        Width: =140
+        X: =ctn_Search_Users.X + ctn_Search_Users.Width - Self.Width
+        Y: =ctn_Search_Users.Y - Self.Height
+        ZIndex: =1
+
+    ctn_Edit_User As groupContainer:
+        BorderColor: =
+        BorderStyle: =BorderStyle.None
+        Height: =btn_UUser_Save.Y + btn_UUser_Save.Height + 30 //App.Height - Self.Y - 25
+        Visible: =!IsBlankOrError(record_Edit_This_User)
+        Width: =App.Width - Self.X - 15
+        X: =ctn_Search_Users.X + ctn_Search_Users.Width + 20
+        Y: =ctn_Search_Users.Y
+        ZIndex: =2
+
+        Back_EditUser_Btm As button:
+            BorderColor: =Back_EditUser_Header.Fill
+            DisabledBorderColor: =Self.BorderColor
+            DisabledFill: =RGBA(0, 0, 0, 0)
+            DisplayMode: =DisplayMode.Disabled
+            Font: =FontStyle
+            Height: =Parent.Height - Self.Y - 1
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Text: =""
+            Width: =Parent.Width - 2
+            X: =1
+            Y: =Back_EditUser_Header.Height - 1
+            ZIndex: =1
+
+        btn_UUser_Cancel As button:
+            BorderColor: =Self.Fill
+            Fill: =GRAYCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =25
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Self.Fill
+            HoverFill: =Self.Color
+            OnSelect: |-
+                =Set(record_Edit_This_User, Blank());
+                Reset(combo_NewUser);
+                Reset(combo_NewUser_Role);
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Size: =10
+            Text: ="Cancel"
+            Width: =90
+            X: =btn_UUser_Save.X + btn_UUser_Save.Width + 30
+            Y: =combo_UUser_Role.Y + combo_UUser_Role.Height + 25
+            ZIndex: =2
+
+        label_UUserName As label:
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =30
+            PaddingLeft: =0
+            Size: =12
+            Text: ="User Name"
+            X: =15
+            Y: =img_UUser.Y + img_UUser.Height + 10
+            ZIndex: =3
+
+        label_UUser_Role As label:
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =30
+            PaddingLeft: =0
+            Size: =12
+            Text: ="User Role"
+            X: =img_UUser.X
+            Y: =ti_UUser_Principal.Y + ti_UUser_Principal.Height + 15
+            ZIndex: =4
+
+        label_UUser_Principal As label:
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =30
+            PaddingLeft: =0
+            Size: =12
+            Text: ="Principal Email"
+            X: =label_UUserName.X
+            Y: =ti_UUserName.Y + ti_UUserName.Height + 15
+            ZIndex: =5
+
+        btn_UUser_Save As button:
+            BorderColor: =Self.Fill
+            Fill: =BlueControlDarkBackground
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =25
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Self.Fill
+            HoverFill: =Self.Color
+            OnSelect: |
+                =Patch(
+                    ReviewHub_Users,
+                    LookUp(
+                        ReviewHub_Users, 
+                        ThisRecord.UserPrincipalEmail = record_Edit_This_User.craf2_userprincipalemail 
+                    ),
+                    {
+                        UserDisplayName: Trim(ti_UUserName.Text),
+                        UserPrincipalEmail: Trim(ti_UUser_Principal.Text),
+                        UserRole: combo_UUser_Role.Selected.Value
+                    }
+                );
+                
+                Set(record_Edit_This_User, Blank());
+                Reset(combo_NewUser);
+                Reset(combo_NewUser_Role);
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Size: =10
+            Text: ="Save"
+            Width: =90
+            X: =combo_UUser_Role.X
+            Y: =combo_UUser_Role.Y + combo_UUser_Role.Height + 25
+            ZIndex: =6
+
+        ti_UUser_Principal As text:
+            BorderColor: =GRAYCOLOR
+            BorderThickness: =1
+            Default: =record_Edit_This_User.craf2_userprincipalemail
+            DisplayMode: =DisplayMode.Disabled
+            FocusedBorderThickness: =Self.BorderThickness
+            Font: =FontStyle
+            Height: =label_UUser_Principal.Height
+            HoverBorderColor: =Self.BorderColor
+            HoverFill: =Self.Fill
+            PaddingLeft: =5
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Size: =12
+            Width: =ti_UUserName.Width
+            X: =ti_UUserName.X
+            Y: =label_UUser_Principal.Y + label_UUser_Principal.Height
+            ZIndex: =7
+
+        combo_UUser_Role As combobox:
+            BorderColor: =RGBA(0, 0, 0, 1)
+            BorderThickness: =1
+            ChevronBackground: =Self.Fill
+            ChevronDisabledFill: =RGBA(0, 0, 0, 0)
+            ChevronFill: =Color.Black
+            ChevronHoverBackground: =
+            ChevronHoverFill: =Self.ChevronFill
+            DefaultSelectedItems: =LookUp(Choices(ReviewHub_UserRole), Text(ThisRecord.Value) = Text(record_Edit_This_User.craf2_userrole))
+            DisplayFields: =["Value"]
+            FocusedBorderThickness: =Self.BorderThickness
+            Font: =FontStyle
+            Height: =label_UUser_Role.Height
+            HoverFill: =ColorFade(BlueNaviHightLightBackground, 85%)
+            IsSearchable: =false
+            Items: =Choices(ReviewHub_Users.UserRole)
+            PaddingBottom: =0
+            PaddingTop: =0
+            PressedColor: =BlueNaviHightLightBackground
+            PressedFill: =BlueControlLightBackground
+            SearchFields: =["Value"]
+            SearchItems: =[]
+            SelectionFill: =BlueNaviHightLightBackground
+            SelectMultiple: =false
+            Size: =11
+            Width: =170
+            X: =ti_UUserName.X
+            Y: =label_UUser_Role.Y + label_UUser_Role.Height
+            ZIndex: =8
+
+        ti_UUserName As text:
+            BorderColor: =GRAYCOLOR
+            BorderThickness: =1
+            Default: =record_Edit_This_User.craf2_userdisplayname
+            DisplayMode: =DisplayMode.Disabled
+            FocusedBorderThickness: =Self.BorderThickness
+            Font: =FontStyle
+            Height: =label_UUserName.Height
+            HoverBorderColor: =Self.BorderColor
+            HoverFill: =Self.Fill
+            PaddingLeft: =5
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Size: =12
+            Width: =Parent.Width - Self.X - 15
+            X: =label_UUserName.X
+            Y: =label_UUserName.Y + label_UUserName.Height
+            ZIndex: =9
+
+        lbl_UUser_NoPhoto As label:
+            Align: =Align.Center
+            BorderColor: =lbl_UUser_NoPhoto_New.BorderColor
+            BorderThickness: =2
+            Color: =RGBA(0, 121, 187, 1)
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =img_UUser.Height
+            PaddingLeft: =0
+            Size: =30
+            Text: |-
+                =If(
+                    IsBlankOrError(record_Edit_This_User.craf2_userprincipalemail),
+                    "",
+                    Left(Office365Users.UserProfileV2(record_Edit_This_User.craf2_userprincipalemail).givenName, 1) & Left(Office365Users.UserProfileV2(record_Edit_This_User.craf2_userprincipalemail).surname, 1)
+                )
+            Visible: |-
+                =If(
+                    IsBlankOrError(record_Edit_This_User),
+                    Blank(),
+                    !Office365Users.UserPhotoMetadata(record_Edit_This_User.craf2_userprincipalemail).HasPhoto
+                )
+            Width: =img_UUser.Width
+            X: =15
+            Y: =img_UUser.Y
+            ZIndex: =10
+
+        img_UUser As image:
+            BorderStyle: =BorderStyle.None
+            Height: =img_UUser_New.Height
+            Image: |-
+                =If(
+                    !IsBlankOrError(record_Edit_This_User.craf2_userprincipalemail)
+                        && Office365Users.UserPhotoMetadata(record_Edit_This_User.craf2_userprincipalemail).HasPhoto, 
+                    Office365Users.UserPhotoV2(record_Edit_This_User.craf2_userprincipalemail)
+                )
+            RadiusBottomLeft: =10
+            RadiusBottomRight: =10
+            RadiusTopLeft: =10
+            RadiusTopRight: =10
+            Width: =img_UUser_New.Width
+            X: =15
+            Y: =Back_EditUser_Header.Y + Back_EditUser_Header.Height + 20
+            ZIndex: =11
+
+        Back_EditUser_Header As button:
+            Align: =Align.Left
+            BorderColor: =Self.Fill
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =0
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =Color.Black
+            DisabledFill: =Self.Fill
+            DisplayMode: =DisplayMode.Disabled
+            Fill: =SUBGROUPCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =60
+            PaddingLeft: =20
+            RadiusBottomLeft: |
+                =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: |
+                =25
+            RadiusTopRight: |
+                =25
+            Size: =14
+            Text: ="Edit User Role"
+            Width: =Parent.Width
+            ZIndex: =12
+
+        btn_UUsers_Reset As button:
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =0
+            Color: =BlueControlDarkBackground
+            Fill: =RGBA(0, 0, 0, 0)
+            Font: =FontStyle
+            HoverColor: =Color.Purple
+            HoverFill: =Self.Fill
+            OnSelect: |-
+                =Concurrent(
+                    Reset(ti_UUserName), Reset(combo_UUser_Role), Reset(ti_UUser_Principal),
+                
+                    Reset(combo_NewUser), Reset(combo_NewUser_Role)
+                )
+            PaddingBottom: =0
+            PaddingTop: =0
+            PressedColor: =Self.Color
+            PressedFill: =Self.Fill
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Size: =12
+            Text: ="Reset"
+            Underline: =true
+            Width: =55
+            X: =Parent.Width - Self.Width - 10
+            Y: =(Back_EditUser_Header.Height - Self.Height) * 0.50
+            ZIndex: =14
+
+    ctn_NewUser As groupContainer:
+        Height: |-
+            =If(
+                IsBlankOrError(combo_NewUser.Selected.DisplayName),
+                combo_NewUser.Y + combo_NewUser.Height + 150,
+                btn_NewUser_Add.Y +btn_NewUser_Add.Height + 25 //App.Height - Self.Y - 25
+            )
+        Visible: =IsBlankOrError(record_Edit_This_User)
+        Width: =If (IsBlankOrError(record_Edit_This_User), (App.Width - Self.X - 15), 0)
+        X: |-
+            =If (
+                ctn_Edit_User.Visible,
+                ctn_Edit_User.X + ctn_Edit_User.Width + 20,
+                ctn_Search_Users.X + ctn_Search_Users.Width + 20
+            )
+        Y: =ctn_Search_Users.Y
+        ZIndex: =3
+
+        Back_NewUser_Btm As button:
+            BorderColor: =Back_NewUser_Header.Fill
+            DisabledBorderColor: =Self.BorderColor
+            DisabledFill: =RGBA(0, 0, 0, 0)
+            DisplayMode: =DisplayMode.Disabled
+            Font: =FontStyle
+            Height: =Parent.Height - Self.Y - 1
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Text: =""
+            Width: =Parent.Width - 2
+            X: =1
+            Y: =Back_NewUser_Header.Height - 1
+            ZIndex: =1
+
+        btn_NewUser_Cancel As button:
+            BorderColor: =Self.Fill
+            Fill: =GRAYCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =25
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Self.Fill
+            HoverFill: =Self.Color
+            OnSelect: =Select(btn_UUsers_Reset);
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Size: =10
+            Text: ="Cancel"
+            Width: =90
+            X: =btn_NewUser_Add.X + btn_NewUser_Add.Width + 30
+            Y: =btn_NewUser_Add.Y 
+            ZIndex: =2
+
+        btn_NewUser_Add As button:
+            BorderColor: =Self.Fill
+            DisplayMode: |-
+                =If(
+                    "user already exists!" in html_NewUser.HtmlText || IsBlankOrError(combo_NewUser.Selected.UserPrincipalName),
+                    DisplayMode.Disabled,
+                    DisplayMode.Edit
+                )
+            Fill: =BlueControlDarkBackground
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =25
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Self.Fill
+            HoverFill: =Self.Color
+            OnSelect: |+
+                =Patch(
+                    ReviewHub_Users,
+                    Defaults(ReviewHub_Users),
+                    {
+                        UserDisplayName: combo_NewUser.Selected.DisplayName,
+                        UserPrincipalEmail: combo_NewUser.Selected.UserPrincipalName,
+                        UserRole: combo_NewUser_Role.Selected.Value
+                    }
+                );
+                
+                Concurrent(
+                    Select(btn_UUsers_Reset),
+                    Set(record_Edit_This_User, Blank())
+                ); 
+                
+                
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Size: =10
+            Text: ="Add"
+            Visible: =combo_NewUser_Role.Visible
+            Width: =90
+            X: =label_NewUser_Role.X
+            Y: =combo_NewUser_Role.Y + combo_NewUser_Role.Height + 20
+            ZIndex: =3
+
+        html_NewUser As htmlViewer:
+            AutoHeight: =true
+            Font: =FontStyle
+            Height: =50
+            HtmlText: |-
+                =If(
+                    !IsBlankOrError(LookUp(ReviewHub_Users, ThisRecord.UserPrincipalEmail = combo_NewUser.Selected.UserPrincipalName)),
+                    "<b><font color=red>This user already exists!</font></b><br>"
+                )
+                &
+                "<b>User Name:</b><br>" & combo_NewUser.Selected.DisplayName 
+                & "<br><br><b>Principal Email:<br></b>" & combo_NewUser.Selected.UserPrincipalName 
+                & "<br><br><b>Department:<br></b>" & combo_NewUser.Selected.Department 
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingTop: =0
+            Visible: =!IsBlankOrError(combo_NewUser.Selected.UserPrincipalName)
+            Width: =combo_NewUser.Width
+            X: =combo_NewUser.X
+            Y: |
+                =img_UUser_New.Y + img_UUser_New.Height + 10
+            ZIndex: =4
+
+        combo_NewUser_Role As combobox:
+            BorderColor: =RGBA(0, 0, 0, 1)
+            BorderThickness: =1
+            ChevronBackground: =Self.Fill
+            ChevronFill: =Color.Black
+            ChevronHoverBackground: =Self.ChevronBackground
+            ChevronHoverFill: =Self.ChevronFill
+            DefaultSelectedItems: =
+            DisplayFields: =["Value"]
+            Font: =FontStyle
+            Height: =label_NewUser_Role.Height
+            HoverFill: =ColorFade(BlueNaviHightLightBackground, 85%)
+            IsSearchable: =false
+            Items: =Choices(ReviewHub_Users.UserRole)
+            PaddingBottom: =0
+            PaddingTop: =0
+            PressedColor: =Self.ChevronFill
+            PressedFill: =Self.ChevronBackground
+            SearchFields: =["Value"]
+            SearchItems: =[]
+            SelectionFill: =BlueNaviHightLightBackground
+            SelectMultiple: =false
+            Size: =11
+            Visible: =html_NewUser.Visible
+            Width: =220
+            X: =15
+            Y: =label_NewUser_Role.Y + label_NewUser_Role.Height
+            ZIndex: =5
+
+        label_NewUser_Role As label:
+            FocusedBorderThickness: =2
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =30
+            PaddingLeft: =0
+            Size: =12
+            Text: |-
+                ="Assign a role:"
+            Visible: =html_NewUser.Visible
+            Width: =130
+            X: =15
+            Y: =html_NewUser.Y + html_NewUser.Height + 10
+            ZIndex: =6
+
+        img_UUser_New As image:
+            Height: =80
+            Image: |-
+                =If(
+                    !IsBlank(combo_NewUser.Selected.DisplayName),
+                    If(
+                        !IsError(Office365Users.UserPhotoMetadata(combo_NewUser.Selected.UserPrincipalName)) 
+                            && Office365Users.UserPhotoMetadata(combo_NewUser.Selected.UserPrincipalName).HasPhoto,
+                        Office365Users.UserPhotoV2(combo_NewUser.Selected.Id)
+                    )
+                )
+            RadiusBottomLeft: =10
+            RadiusBottomRight: =10
+            RadiusTopLeft: =10
+            RadiusTopRight: =10
+            Visible: |-
+                =If(
+                    !IsBlank(combo_NewUser.Selected.DisplayName),
+                    If(
+                        IsError(Office365Users.UserPhotoMetadata(combo_NewUser.Selected.UserPrincipalName)),
+                        false,
+                        If(
+                            Office365Users.UserPhotoMetadata(combo_NewUser.Selected.UserPrincipalName).HasPhoto,
+                            true,
+                            false
+                        )
+                    ),
+                    false
+                )
+            Width: =80
+            X: =15
+            Y: |
+                =combo_NewUser.Y + combo_NewUser.Height + 15
+            ZIndex: =7
+
+        lbl_UUser_NoPhoto_New As label:
+            Align: =Align.Center
+            BorderColor: =GrayBorderDark
+            BorderThickness: =2
+            Color: =RGBA(0, 121, 187, 1)
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =img_UUser_New.Height
+            Size: =30
+            Text: |-
+                =If(
+                    IsBlankOrError(combo_NewUser.Selected.UserPrincipalName),
+                    "",
+                    Left(Office365Users.UserProfileV2(combo_NewUser.Selected.UserPrincipalName).givenName, 1) & Left(Office365Users.UserProfileV2(combo_NewUser.Selected.UserPrincipalName).surname, 1)
+                )
+            Visible: |-
+                =If(
+                    IsBlankOrError(combo_NewUser.Selected.UserPrincipalName),
+                    false,
+                    If(
+                        !IsError(!Office365Users.UserPhotoMetadata(combo_NewUser.Selected.UserPrincipalName).HasPhoto),
+                        !Office365Users.UserPhotoMetadata(combo_NewUser.Selected.UserPrincipalName).HasPhoto,
+                        true
+                    )
+                )
+            Width: =img_UUser_New.Width
+            X: =img_UUser_New.X
+            Y: =img_UUser_New.Y
+            ZIndex: =8
+
+        combo_NewUser As combobox:
+            BorderColor: =RGBA(0, 0, 0, 1)
+            BorderThickness: =1
+            ChevronBackground: =Self.Fill
+            ChevronDisabledFill: =RGBA(0, 0, 0, 0)
+            ChevronFill: =RGBA(0, 0, 0, 1)
+            ChevronHoverBackground: =
+            DefaultSelectedItems: =
+            DisplayFields: =["DisplayName","UserPrincipalName","Picture"]
+            Font: =FontStyle
+            Height: =30
+            HoverBorderColor: =
+            HoverFill: =ColorFade(BlueNaviHightLightBackground, 85%)
+            InputTextPlaceholder: ="Search by name or principal email alias"
+            Items: |-
+                =Office365Users.SearchUserV2({searchTerm: Trim(Self.SearchText)}).value
+            PaddingBottom: =0
+            PaddingLeft: =8
+            PaddingTop: =0
+            PressedColor: =BlueControlDarkBackground
+            PressedFill: =BlueControlLightBackground
+            SearchFields: =["UserPrincipalName", "DisplayName"]
+            SearchItems: |-
+                =Search(Office365Users.SearchUserV2({searchTerm: Trim(Self.SearchText)}).value,combo_NewUser.SearchText,"UserPrincipalName","DisplayName")
+            SelectionFill: =BlueNaviHightLightBackground
+            SelectMultiple: =false
+            Size: =11
+            Template: =ListItemTemplate.Double
+            Tooltip: =
+            Width: =Parent.Width - 30
+            X: =15
+            Y: =Back_NewUser_Header.Y + Back_NewUser_Header.Height + 15
+            ZIndex: =9
+
+        Back_NewUser_Header As button:
+            Align: =Align.Left
+            BorderColor: =Self.Fill
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =0
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =Color.Black
+            DisabledFill: =Self.Fill
+            DisplayMode: =DisplayMode.Disabled
+            Fill: =SUBGROUPCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =60
+            PaddingLeft: =20
+            RadiusBottomLeft: |
+                =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: |
+                =25
+            RadiusTopRight: |
+                =25
+            Size: =14
+            Text: ="Add a new user"
+            Width: =Parent.Width
+            ZIndex: =10
+
+    ctn_Search_Users As groupContainer:
+        Height: =App.Height - Self.Y - 15
+        Width: =(App.Width) * 0.70
+        X: =icon_Search_Users_SS.X
+        Y: =icon_Search_Users_SS.Y + icon_Search_Users_SS.Height + 5
+        ZIndex: =4
+
+        glry_Search_Users As gallery.variableTemplateHeightGallery:
+            BorderColor: =Back_Header_UUsers.Fill
+            BorderThickness: =2
+            Height: =Parent.Height - Self.Y - 1
+            Items: |-
+                =Ungroup( //Ungroup function to add a Row Number column.
+                        ForAll(
+                            Sequence(CountRows(Search(
+                    SortByColumns(
+                        ShowColumns(
+                            ReviewHub_Users,
+                            "craf2_userdisplayname",
+                            "craf2_userprincipalemail",
+                            "craf2_userrole",
+                            "modifiedon"
+                        )
+                        , "modifiedon", SortOrder.Descending
+                    ),
+                    Trim(ti_Search_Users.Text),
+                    "craf2_userdisplayname",
+                    "craf2_userprincipalemail"
+                ))),
+                            {
+                                Record: Table(Last(FirstN(Search(
+                    SortByColumns(
+                        ShowColumns(
+                            ReviewHub_Users,
+                            "craf2_userdisplayname",
+                            "craf2_userprincipalemail",
+                            "craf2_userrole",
+                            "modifiedon"
+                        )
+                        , "modifiedon", SortOrder.Descending
+                    ),
+                    Trim(ti_Search_Users.Text),
+                    "craf2_userdisplayname",
+                    "craf2_userprincipalemail"
+                ), Value))),
+                                RowNumber: Value
+                            }
+                        ),
+                        "Record"
+                    )
+            Layout: =Layout.Vertical
+            TemplateFill: |-
+                =If(
+                    Mod(ThisItem.RowNumber, 2) > 0,
+                    If(ThisItem.IsSelected, ColorFade(BlueNaviHightLightBackground, 85%), RGBA(0, 0, 0, 0)),
+                    If(ThisItem.IsSelected, ColorFade(BlueNaviHightLightBackground, 85%), GrayCanvasBackground)
+                )
+            TemplatePadding: =0
+            TemplateSize: =100
+            Visible: =true 
+            Width: =Parent.Width - 2
+            X: =1
+            Y: =Back_Header_UUsers.Height - 1
+            ZIndex: =1
+
+            btn_Delete_UUser As icon.Edit:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Color: =REDWARNINGCOLOR
+                Height: =btn_Edit_UUser.Height + 5
+                HoverColor: =Color.White
+                HoverFill: =REDWARNINGCOLOR
+                Icon: =Icon.Trash
+                OnSelect: |-
+                    =Set(record_Delete_This_User, ThisItem);
+                    Set(var_Confirm_Delete_This_User, true);
+                Tooltip: ="Delete"
+                Width: |
+                    =btn_Edit_UUser.Width + 5
+                X: |
+                    =btn_Edit_UUser.X + btn_Edit_UUser.Width + 15
+                Y: =btn_Edit_UUser.Y - 2
+                ZIndex: =2
+
+            btn_Edit_UUser As icon.Edit:
+                BorderColor: =Self.Color
+                BorderThickness: =2
+                Color: =BlueControlDarkBackground
+                Height: =25
+                HoverBorderColor: =Self.Color
+                HoverColor: =Color.White
+                HoverFill: =Self.Color
+                Icon: =Icon.Edit
+                OnSelect: =Set(record_Edit_This_User, ThisItem)
+                PaddingBottom: =3
+                PaddingLeft: =3
+                PaddingRight: =3
+                PaddingTop: =3
+                Tooltip: ="Edit"
+                Width: =25
+                X: |-
+                    =Header_Conrol_Users.X + (Header_Conrol_Users.Width - btn_Edit_UUser.Width - btn_Delete_UUser.Width - 15
+                    ) * 0.50
+                Y: =(lbl_NoPhoto_UUser.Height - Self.Height) * 0.50
+                ZIndex: =3
+
+            txt_LUpdatedOn_Users As label:
+                Fill: =Parent.Fill
+                Font: =FontStyle
+                FontWeight: =If(ThisItem.IsSelected, FontWeight.Bold, FontWeight.Normal)
+                Height: =lbl_NoPhoto_UUser.Height
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =10
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: =ThisItem.modifiedon
+                Width: =Header_LUpdatedOn_Users.Width
+                X: =Header_LUpdatedOn_Users.X
+                ZIndex: =4
+
+            txt_Role_Users As label:
+                Fill: =Parent.Fill
+                Font: =FontStyle
+                FontWeight: =If(ThisItem.IsSelected, FontWeight.Bold, FontWeight.Normal)
+                Height: =lbl_NoPhoto_UUser.Height
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =10
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: =If(IsBlankOrError(ThisItem.craf2_userrole), "(No Value)", Text(ThisItem.craf2_userrole))
+                Width: =Header_Role_Users.Width
+                X: =Header_Role_Users.X
+                ZIndex: =5
+
+            html_Name_Email_UUser As htmlViewer:
+                AutoHeight: =true
+                DisplayMode: =DisplayMode.View
+                Font: =FontStyle
+                HtmlText: |-
+                    =If(ThisItem.IsSelected, "<strong>", "") &
+                    ThisItem.craf2_userdisplayname 
+                    & "<br>E: " & ThisItem.craf2_userprincipalemail
+                    & If(ThisItem.IsSelected, "</strong>", "")
+                OnSelect: =Select(Parent)
+                Size: =10
+                Width: =Header_Username_Users.Width
+                X: =Header_Username_Users.X
+                Y: =(lbl_NoPhoto_UUser.Height - Self.Height) * 0.50
+                ZIndex: =6
+
+            lbl_NoPhoto_UUser As label:
+                Align: =Align.Center
+                Color: =RGBA(0, 134, 208, 1)
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: |
+                    =100
+                OnSelect: =Select(Parent)
+                Size: =18
+                Text: |-
+                    =If(
+                        !IsBlankOrError(ThisItem.craf2_userprincipalemail),
+                        Left(
+                            Office365Users.UserProfileV2(ThisItem.craf2_userprincipalemail).givenName,
+                            1
+                        ) & Left(
+                            Office365Users.UserProfileV2(ThisItem.craf2_userprincipalemail).surname,
+                            1
+                        )
+                    )
+                Visible: |-
+                    =true
+                    /*
+                    If(
+                        IsBlankOrError(ThisItem.craf2_userprincipalemail),
+                        false,
+                        !Office365Users.UserPhotoMetadata(ThisItem.craf2_userprincipalemail).HasPhoto
+                    ) */
+                Width: |
+                    =100
+                X: =(Header_Username_Users.X - Self.Width) * 0.50
+                ZIndex: =7
+
+            img_glry_Users As image:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Height: =lbl_NoPhoto_UUser.Height - 15
+                Image: |-
+                    =If(
+                        !IsBlankOrError(ThisItem.craf2_userprincipalemail),
+                        If(
+                            Office365Users.UserPhotoMetadata(ThisItem.craf2_userprincipalemail).HasPhoto,
+                            Office365Users.UserPhotoV2(ThisItem.craf2_userprincipalemail)
+                        )
+                    )
+                OnSelect: =Select(Parent)
+                RadiusBottomLeft: =10
+                RadiusBottomRight: =10
+                RadiusTopLeft: =10
+                RadiusTopRight: =10
+                Visible: |-
+                    =If(
+                        !IsBlankOrError(ThisItem.craf2_userprincipalemail),
+                        Office365Users.UserPhotoMetadata(ThisItem.craf2_userprincipalemail).HasPhoto,
+                        false
+                    )
+                Width: =Self.Height
+                X: =22
+                Y: =(lbl_NoPhoto_UUser.Height - Self.Height) * 0.50
+                ZIndex: =8
+
+        Back_Header_UUsers As button:
+            BorderColor: =Self.Fill
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =0
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =Self.Color
+            DisabledFill: =Self.Fill
+            DisplayMode: =DisplayMode.Disabled
+            Fill: =ColorFade(BlueNaviHightLightBackground, 50%)
+            Font: =FontStyle
+            RadiusBottomLeft: |
+                =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =20
+            RadiusTopRight: =20
+            Text: =""
+            Width: =Parent.Width
+            ZIndex: =2
+
+        Header_Conrol_Users As label:
+            Align: =Align.Center
+            DisplayMode: =DisplayMode.View
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =Back_Header_UUsers.Height
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =10
+            Text: ="Edit / Delete"
+            Width: =140
+            X: =Header_LUpdatedOn_Users.X + Header_LUpdatedOn_Users.Width
+            Y: =Back_Header_UUsers.Y
+            ZIndex: =3
+
+        Header_LUpdatedOn_Users As label:
+            DisplayMode: =DisplayMode.View
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =Back_Header_UUsers.Height
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =10
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =10
+            Text: ="Last Updated On"
+            Width: =160
+            X: =Header_Role_Users.X + Header_Role_Users.Width
+            Y: =Back_Header_UUsers.Y
+            ZIndex: =4
+
+        Header_Role_Users As label:
+            DisplayMode: =DisplayMode.View
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =Back_Header_UUsers.Height
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =12
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =10
+            Text: ="Role"
+            Width: =140
+            X: =Header_Username_Users.X + Header_Username_Users.Width + 2
+            Y: =Back_Header_UUsers.Y
+            ZIndex: =5
+
+        Header_Username_Users As label:
+            DisplayMode: =DisplayMode.View
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =Back_Header_UUsers.Height
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =10
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =10
+            Text: ="User Name, Principal Email"
+            Width: =Parent.Width - Self.X - Header_Role_Users.Width - Header_LUpdatedOn_Users.Width - Header_Conrol_Users.Width
+            X: |
+                =120
+            Y: =Back_Header_UUsers.Y
+            ZIndex: =6
+
+    ti_Search_Users As text:
+        BorderColor: =GRAYCOLOR
+        BorderThickness: =1
+        Clear: =true
+        Default: =""
+        FocusedBorderThickness: =2
+        Font: =FontStyle
+        Height: =25
+        HintText: ="Search by Name or Principal Email Alias"
+        HoverBorderColor: =Self.BorderColor
+        HoverFill: =GrayControlBackground
+        PaddingBottom: =0
+        PaddingTop: =0
+        RadiusBottomLeft: =20
+        RadiusBottomRight: =20
+        RadiusTopLeft: =20
+        RadiusTopRight: =20
+        Size: =9
+        Width: =450
+        X: =icon_Search_Users_SS.X + icon_Search_Users_SS.Width + 5
+        Y: =Label_UUsers_Header.Y + Label_UUsers_Header.Height + 5
+        ZIndex: =5
+
+    icon_Search_Users_SS As icon.Search:
+        DisabledBorderColor: =RGBA(0, 0, 0, 0)
+        DisabledColor: =RGBA(0, 0, 0, 1)
+        DisplayMode: =DisplayMode.Disabled
+        Height: =ti_Search_Users.Height
+        Icon: =Icon.Search
+        PaddingBottom: =2
+        PaddingLeft: =2
+        PaddingRight: =2
+        PaddingTop: =2
+        Width: =ti_Search_Users.Height
+        X: =icon_Back_UpdateUsers.X
+        Y: =ti_Search_Users.Y
+        ZIndex: =6
+
+    Label_UUsers_Header As label:
+        DisabledColor: =BlueControlDarkBackground
+        DisabledFill: =Self.Fill
+        DisplayMode: =DisplayMode.Disabled
+        Fill: =GrayCanvasBackground
+        Font: =FontStyle
+        FontWeight: =FontWeight.Bold
+        Height: =55
+        PaddingLeft: =60
+        Size: =18
+        Text: ="Manage Admin and Operator User Roles"
+        Width: =App.Width - Self.X
+        Y: =SS_AppHeader_UUser.Height
+        ZIndex: =7
+
+    icon_Back_UpdateUsers As icon.BackArrow:
+        BorderColor: =RGBA(0, 0, 0, 0)
+        BorderStyle: =BorderStyle.None
+        Color: =BlueControlDarkBackground
+        Height: =30
+        HoverBorderColor: =Self.BorderColor
+        HoverColor: =Color.Purple
+        Icon: =Icon.BackArrow
+        OnSelect: =Navigate(scn_SelfService);
+        Tooltip: ="Back"
+        Width: =Self.Height
+        X: =15
+        Y: =Label_UUsers_Header.Y + (Label_UUsers_Header.Height - Self.Height) * 0.50
+        ZIndex: =8
+
+    SS_AppHeader_UUser As AppHeader:
+        DropDownSelection: =TrackRequestComponent_UUser.HideTrackRequest
+        FeedbackButtonUrl: =var_SendFeedback_URL
+        inputAppDisplayName: =varAppHeaderText
+        ShowSurveyButton: =false
+        Y: =0
+        ZIndex: =9
+
+    TrackRequestComponent_UUser As TrackRequestComponent:
+        BlueControlDarkBackground: =BlueControlDarkBackground
+        BlueControlLightBackground: =BlueControlLightBackground
+        BlueNaviHightLightBackground: =BlueNaviHightLightBackground
+        DevOpsBaseUrl: =var_DevOpsBaseURL
+        DevOpsQueryID: =var_DevOpsQueryID
+        FontStyle: =FontStyle
+        GrayCanvasBackground: =GrayCanvasBackground
+        GRAYCOLOR: =GRAYCOLOR
+        GrayControlBackground: =GrayControlBackground
+        IsAdmin: =IsAdmin
+        Reset: =Self.Visible
+        Visible: =SS_AppHeader_UUser.DisplayTrackRequest
+        X: =App.Width - Self.Width
+        Y: =SS_AppHeader_UUser.Height
+        ZIndex: =10
+
+    ctn_Confirm_Delete_User As groupContainer:
+        Fill: =RGBA(255, 255, 255, 0.95)
+        Height: =App.Height
+        Visible: =var_Confirm_Delete_This_User
+        Width: =App.Width
+        ZIndex: =11
+
+        Card_SS_User As button:
+            BorderColor: =Header_ConfirmDelete_UUser.Fill
+            Color: =RGBA(0, 0, 0, 0)
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =RGBA(0, 0, 0, 0)
+            DisabledFill: =RGBA(0, 0, 0, 0)
+            DisplayMode: =DisplayMode.Disabled
+            Fill: =RGBA(0, 0, 0, 0)
+            Font: =FontStyle
+            Height: =Header_ConfirmDelete_UUser.Height + html_ConfirmDeleteUser.Height + 10 + btn_ConfirmDeleteUser.Height + 20
+            HoverBorderColor: =
+            HoverColor: =RGBA(0, 0, 0, 0)
+            HoverFill: =
+            OnSelect: =
+            PressedBorderColor: =
+            PressedColor: =
+            PressedFill: =
+            RadiusBottomLeft: =Header_ConfirmDelete_UUser.RadiusTopRight
+            RadiusBottomRight: =Header_ConfirmDelete_UUser.RadiusTopRight
+            RadiusTopLeft: =Header_ConfirmDelete_UUser.RadiusTopLeft
+            RadiusTopRight: =Header_ConfirmDelete_UUser.RadiusTopRight
+            Text: =""
+            Width: =App.Width * 0.35
+            X: =App.Width * 0.5 - Self.Width*0.5
+            Y: =App.Height*0.5 - Self.Height*0.5 - 60
+            ZIndex: =1
+
+        btn_CancelDeleteUser As button:
+            BorderColor: =Self.Fill
+            Fill: =RGBA(166, 166, 166, 1)
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =25
+            HoverColor: =Self.Fill
+            HoverFill: =Self.Color
+            OnSelect: =Set(var_Confirm_Delete_This_User, false)
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Size: =10
+            Text: ="Cancel"
+            Width: =90
+            X: =btn_ConfirmDeleteUser.X + btn_ConfirmDeleteUser.Width + 50
+            Y: =btn_ConfirmDeleteUser.Y
+            ZIndex: =2
+
+        btn_ConfirmDeleteUser As button:
+            BorderColor: =Self.Fill
+            Fill: =REDWARNINGCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =25
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Self.Fill
+            HoverFill: =Self.Color
+            OnSelect: |-
+                =RemoveIf(
+                    ReviewHub_Users,
+                    ThisRecord.UserPrincipalEmail = record_Delete_This_User.craf2_userprincipalemail
+                );
+                Set(var_Confirm_Delete_This_User, false);
+                Set(record_Edit_This_User, Blank());
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Size: =10
+            Text: ="Yes, Delete"
+            Width: =90
+            X: =html_ConfirmDeleteUser.X + html_ConfirmDeleteUser.Width * 0.5 - Self.Width - 25
+            Y: =html_ConfirmDeleteUser.Y + html_ConfirmDeleteUser.Height + 15
+            ZIndex: =3
+
+        html_ConfirmDeleteUser As htmlViewer:
+            AutoHeight: =true
+            Font: =FontStyle
+            HtmlText: |
+                ="<span style=''><b>Display Name</b></span><span style='margin-left:21px'>: " & record_Delete_This_User.craf2_userdisplayname & "</span><br>"&
+                "<b>Principal Email</b> <span style='margin-left: 10px'>: " & record_Delete_This_User.craf2_userprincipalemail 
+                & "</span><br><b>User Role</b> <span style='margin-left: 50px'>: " & 
+                If(IsBlankOrError(record_Delete_This_User.craf2_userrole), "(No Value)", record_Delete_This_User.craf2_userrole)
+                & "</span>"
+            PaddingLeft: =25
+            PaddingTop: =15
+            Size: =12
+            Width: =Card_SS_User.Width
+            X: =Card_SS_User.X
+            Y: =Header_ConfirmDelete_UUser.Y + Header_ConfirmDelete_UUser.Height
+            ZIndex: =4
+
+        Header_ConfirmDelete_UUser As button:
+            BorderColor: =Self.Fill
+            BorderThickness: =0
+            Color: =RGBA(0, 0, 0, 1)
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =Self.Color
+            DisabledFill: =Self.Fill
+            DisplayMode: =DisplayMode.Disabled
+            Fill: =SUBGROUPCOLOR
+            FocusedBorderThickness: =0
+            Font: =FontStyle
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Self.Color
+            HoverFill: =Self.Fill
+            PressedBorderColor: =Self.BorderColor
+            PressedColor: =Self.Color
+            PressedFill: =Self.Fill
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            Size: =14
+            Text: ="Confirm delete this user"
+            Width: =Card_SS_User.Width
+            X: =Card_SS_User.X
+            Y: =Card_SS_User.Y
+            ZIndex: =5
+

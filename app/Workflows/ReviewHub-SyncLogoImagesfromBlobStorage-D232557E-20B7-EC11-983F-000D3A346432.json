@@ -1,0 +1,335 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_azureblob_3": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "chub_sharedazureblob_5e966"
+        },
+        "api": {
+          "name": "shared_azureblob"
+        }
+      },
+      "shared_commondataserviceforapps": {
+        "impersonation": {},
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "chub_sharedcommondataserviceforapps_72f86"
+        },
+        "api": {
+          "name": "shared_commondataserviceforapps"
+        }
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        },
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        }
+      },
+      "triggers": {
+        "manual": {
+          "metadata": {
+            "operationMetadataId": "672af5e9-b1c8-437c-bc7e-30cf6ada1539"
+          },
+          "type": "Request",
+          "kind": "Button",
+          "inputs": {
+            "schema": {
+              "type": "object",
+              "properties": {},
+              "required": []
+            }
+          }
+        }
+      },
+      "actions": {
+        "Lists_blobs_(V2)": {
+          "runAfter": {},
+          "metadata": {
+            "operationMetadataId": "0197872d-e080-4dfd-950b-3a9aa98740e5"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_azureblob",
+              "connectionName": "shared_azureblob_3",
+              "operationId": "ListFolder_V4"
+            },
+            "parameters": {
+              "dataset": "bagiahealthhub1",
+              "id": "/bagiaimages/ProductLogos",
+              "nextPageMarker": "",
+              "useFlatListing": false
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Initialize_variable": {
+          "runAfter": {
+            "Initialize_variable_3": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "7bbef872-b29c-437f-8e27-c589fcf670da"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "Var_String",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "Each": {
+          "foreach": "@outputs('Lists_blobs_(V2)')?['body/value']",
+          "actions": {
+            "Set_Int": {
+              "runAfter": {},
+              "metadata": {
+                "operationMetadataId": "2b7f56d1-e0b6-4f0b-a537-b1e5a86d5c0a"
+              },
+              "type": "SetVariable",
+              "inputs": {
+                "name": "Var_Int",
+                "value": "@int(replace(items('Each')?['Name'], '.png', ''))"
+              }
+            },
+            "Set_String": {
+              "runAfter": {
+                "Set_Int": [
+                  "Failed"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "d031d1d4-fbf1-4b98-9534-c36dda249441"
+              },
+              "type": "SetVariable",
+              "inputs": {
+                "name": "Var_String",
+                "value": "@{replace(items('Each')?['Name'], '.png', '')}"
+              }
+            },
+            "GetProductID": {
+              "runAfter": {
+                "Set_Int": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "8d6ed556-4ed5-4eed-9405-242f7c243e38"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "connectionName": "shared_commondataserviceforapps",
+                  "operationId": "ListRecords"
+                },
+                "parameters": {
+                  "entityName": "craf2_reviewhub_products",
+                  "$select": "craf2_reviewhub_productid",
+                  "$filter": "craf2_productid eq @{variables('Var_Int')}",
+                  "$top": 1
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "Download_a_file_or_an_image": {
+              "runAfter": {
+                "GetProductID": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "6c268cb0-2e15-453d-a597-9e0551f77777"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "connectionName": "shared_commondataserviceforapps",
+                  "operationId": "GetEntityFileImageFieldContent"
+                },
+                "parameters": {
+                  "entityName": "craf2_reviewhub_products",
+                  "recordId": "@first(outputs('GetProductID')?['body/value'])?['craf2_reviewhub_productid']",
+                  "fileImageFieldName": "craf2_logoimage"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "If_there_is_no_logo_image_for_this_product": {
+              "actions": {
+                "Get_blob_content_using_path_(V2)": {
+                  "runAfter": {},
+                  "metadata": {
+                    "operationMetadataId": "02b64adb-f541-466e-b9d1-516e9dc330d4"
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_azureblob",
+                      "connectionName": "shared_azureblob_3",
+                      "operationId": "GetFileContentByPath_V2"
+                    },
+                    "parameters": {
+                      "dataset": "AccountNameFromSettings",
+                      "path": "@items('Each')?['Path']",
+                      "inferContentType": true
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                },
+                "Upload_a_file_or_an_image": {
+                  "runAfter": {
+                    "Get_blob_content_using_path_(V2)": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "2758d5d1-7f9f-4f78-9029-a662ef120cfa"
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                      "connectionName": "shared_commondataserviceforapps",
+                      "operationId": "UpdateEntityFileImageFieldContent"
+                    },
+                    "parameters": {
+                      "entityName": "craf2_reviewhub_products",
+                      "recordId": "@first(outputs('GetProductID')?['body/value'])?['craf2_reviewhub_productid']",
+                      "fileImageFieldName": "craf2_logoimage",
+                      "item": "@body('Get_blob_content_using_path_(V2)')",
+                      "x-ms-file-name": "Untitled"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                },
+                "Increment_variable_-_ImpactedRowCount": {
+                  "runAfter": {
+                    "Upload_a_file_or_an_image": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "f91a5a5d-4cf9-45db-b197-260213e01b9e"
+                  },
+                  "type": "IncrementVariable",
+                  "inputs": {
+                    "name": "ImpactedRowCount",
+                    "value": 1
+                  }
+                }
+              },
+              "runAfter": {
+                "Download_a_file_or_an_image": [
+                  "Succeeded"
+                ]
+              },
+              "expression": {
+                "equals": [
+                  "@body('Download_a_file_or_an_image')",
+                  "@null"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "4686c623-ac5b-477b-8d56-e696c73f7627"
+              },
+              "type": "If"
+            }
+          },
+          "runAfter": {
+            "Initialize_variable_2": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "d363699b-317f-44f7-a7b3-38c4ca0f1069"
+          },
+          "type": "Foreach"
+        },
+        "Initialize_variable_2": {
+          "runAfter": {
+            "Initialize_variable": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "b2bd9aa9-71af-4d77-b65e-b6ebb6f3cc21"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "Var_Int",
+                "type": "integer"
+              }
+            ]
+          }
+        },
+        "Respond_to_a_PowerApp_or_flow": {
+          "runAfter": {
+            "Each": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "92f5f350-911d-4da5-b43a-3112c3e70657"
+          },
+          "type": "Response",
+          "kind": "PowerApp",
+          "inputs": {
+            "statusCode": 200,
+            "body": {
+              "rowcount": "@variables('ImpactedRowCount')"
+            },
+            "schema": {
+              "type": "object",
+              "properties": {
+                "rowcount": {
+                  "title": "RowCount",
+                  "x-ms-dynamically-added": true,
+                  "type": "number"
+                }
+              }
+            }
+          }
+        },
+        "Initialize_variable_3": {
+          "runAfter": {
+            "Lists_blobs_(V2)": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "fbd10b57-e673-4740-8396-d22ce6347be8"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "ImpactedRowCount",
+                "type": "integer",
+                "value": 0
+              }
+            ]
+          }
+        }
+      }
+    },
+    "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+}

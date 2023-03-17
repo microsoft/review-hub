@@ -1,0 +1,206 @@
+AccessScreen As screen:
+    BackgroundImage: ='Access Error Screen'
+    ImagePosition: =ImagePosition.Fill
+    OnVisible: =Set(var_ShowGetAccess, true);
+
+    moreInfo As htmlViewer:
+        Font: =FontStyle
+        Height: =74
+        HtmlText: |-
+            ="<center>For more information:</center>
+            </b>
+            </b>
+            Checkout the <a href='"& var_AccessControlWiki &"' target='_blank'>Review Hub Wiki</a> or email the Review Hub Feature Team at <a href='mailto:"& var_TeamEmail &"'>"& var_TeamEmail &"<a/>"
+        Width: =680
+        X: =(App.Width - Self.Width) /2
+        Y: =Note.Y + Note.Height + 20
+        ZIndex: =1
+
+    AccessPending As label:
+        Font: =FontStyle
+        FontWeight: =FontWeight.Semibold
+        Size: =11
+        Text: ="Your request has been submitted and is being reviewed"
+        Visible: =!btn_GetAccess.Visible
+        Width: =400
+        X: =(App.Width - Self.Width) /2
+        Y: =noAccessMessage.Y + noAccessMessage.Height + 5
+        ZIndex: =2
+
+    Note As label:
+        Font: =FontStyle
+        Size: =11
+        Text: |-
+            ="Note: You Must be connected to Microsoft VPN or Corpnet"
+        Width: =400
+        X: =(App.Width - Self.Width) /2
+        Y: =btn_GetAccess.Y + btn_GetAccess.Height
+        ZIndex: =3
+
+    btn_GetAccess As button:
+        BorderColor: =Self.Fill
+        DisplayMode: |
+            =DisplayMode.Edit
+        Fill: =BlueControlDarkBackground
+        Font: =FontStyle
+        FontWeight: =FontWeight.Bold
+        Height: =27
+        HoverBorderColor: =Self.Fill
+        HoverColor: =Self.Fill
+        HoverFill: =Self.Color
+        OnSelect: |
+            =Set(var_PopUpASCVisible, true);
+            Reset(ti_ASCJustification);
+        PaddingBottom: =0
+        PaddingLeft: =0
+        PaddingRight: =0
+        PaddingTop: =0
+        RadiusBottomLeft: =15
+        RadiusBottomRight: =15
+        RadiusTopLeft: =15
+        RadiusTopRight: =15
+        Size: =10
+        Text: ="Click Here to Get Access"
+        Visible: =(IsBlankOrError(var_UserGetAccess) || Text(var_UserGetAccess.Decision) <> "Pending") && var_ShowGetAccess
+        Width: =170
+        X: =(App.Width - Self.Width) /2
+        Y: =noAccessMessage.Y + noAccessMessage.Height + 15
+        ZIndex: =4
+
+    noAccessMessage As label:
+        Font: =FontStyle
+        FontWeight: =FontWeight.Semibold
+        Height: =34
+        Size: =12
+        Text: ="Looks like you currently don't have access to Review Hub."
+        Width: =430
+        X: =(App.Width - Self.Width) /2
+        Y: =AccessDenied.Y + AccessDenied.Height
+        ZIndex: =5
+
+    AccessDenied As label:
+        Align: =Align.Center
+        Color: =LEFTNAVHIGLIGHTCOLOR
+        Font: =FontStyle
+        FontWeight: =FontWeight.Bold
+        Height: =50
+        Size: =45
+        Text: ="Access Denied"
+        Width: =500
+        X: =(App.Width - Self.Width) /2
+        Y: =(App.Height / 2) + 20
+        ZIndex: =6
+
+    AccessRequestPopup As groupContainer.manualLayoutContainer:
+        Fill: =RGBA(211,211,211,0.5)
+        Height: =App.Height
+        Visible: =var_PopUpASCVisible
+        Width: =App.Width
+        ZIndex: =7
+
+        BackgroundASC As groupContainer.manualLayoutContainer:
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =btn_AccessRequest_Submit.Y + btn_AccessRequest_Submit.Height + 20
+            Width: =App.Width * 0.35
+            X: =(App.Width - Self.Width)/2
+            Y: =Access_Header.Y + Access_Header.Height
+            ZIndex: =2
+
+            btn_AccessRequest_Submit As button:
+                BorderColor: =Self.Fill
+                DisplayMode: =If(IsBlank(Trim(ti_ASCJustification.Text)), DisplayMode.Disabled, DisplayMode.Edit)
+                Fill: =BlueControlDarkBackground
+                Font: =FontStyle
+                FontWeight: =FontWeight.Bold
+                Height: =25
+                HoverBorderColor: =Self.BorderColor
+                HoverColor: =Self.Fill
+                HoverFill: =Self.Color
+                OnSelect: |-
+                    =
+                    Set(var_PopUpASCVisible, false);
+                    
+                    Patch(
+                        ReviewHub_UserRequests,
+                        Defaults(ReviewHub_UserRequests),
+                        {
+                            Email: User().Email,
+                            Justification: Trim(ti_ASCJustification.Text),
+                            Decision: 'Decision (ReviewHub_UserRequests)'.Pending
+                        }
+                    );
+                    
+                    Set(var_ShowGetAccess, false);
+                RadiusBottomLeft: =15
+                RadiusBottomRight: =15
+                RadiusTopLeft: =15
+                RadiusTopRight: =15
+                Size: =10
+                Text: ="Submit"
+                Width: =90
+                X: =Parent.Width - Self.Width -15
+                Y: =ti_ASCJustification.Y + ti_ASCJustification.Height + 20
+                ZIndex: =1
+
+            ti_ASCJustification As text:
+                BorderColor: =GRAYCOLOR
+                BorderThickness: =1
+                Default: =""
+                Font: =FontStyle
+                Height: =80
+                HintText: ="Enter reason you need to access Review Hub"
+                HoverBorderColor: =Self.BorderColor
+                HoverFill: =ColorFade(BlueControlLightBackground, 75%)
+                Mode: =TextMode.MultiLine
+                PaddingLeft: =10
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Size: =11
+                Width: =label_ASCJustification.Width
+                X: =label_ASCJustification.X
+                Y: =label_ASCJustification.Y + label_ASCJustification.Height
+                ZIndex: =2
+
+            label_ASCJustification As label:
+                Color: =Color.Black
+                Font: =FontStyle
+                FontWeight: =FontWeight.Bold
+                Height: =30
+                Size: =11
+                Text: |-
+                    ="Justification:"
+                Width: =Parent.Width - Self.X - 15
+                X: =15
+                Y: =10
+                ZIndex: =3
+
+        Access_Header As button:
+            Align: =Align.Left
+            BorderColor: =Self.Fill
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =0
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =Color.Black
+            DisabledFill: =Self.Fill
+            DisplayMode: =DisplayMode.Disabled
+            Fill: =SUBGROUPCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =60
+            PaddingLeft: =20
+            RadiusBottomLeft: |
+                =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: |
+                =25
+            RadiusTopRight: |
+                =25
+            Size: =14
+            Text: ="Access Request"
+            Width: =BackgroundASC.Width
+            X: =BackgroundASC.X
+            Y: =(App.Height - Self.Height - BackgroundASC.Height) / 2
+            ZIndex: =3
+

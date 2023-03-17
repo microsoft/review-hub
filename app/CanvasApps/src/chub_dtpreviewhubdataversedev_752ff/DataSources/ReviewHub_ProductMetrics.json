@@ -1,0 +1,130 @@
+[
+  {
+    "CdsFCBContext": "{\"FileType\":true,\"ImageExternalStorage\":true}",
+    "EntitySetName": "craf2_reviewhub_productmetrics",
+    "IsHidden": false,
+    "IsSampleData": false,
+    "IsWritable": true,
+    "LogicalName": "craf2_reviewhub_productmetric",
+    "MaxGetRowsCount": 2000,
+    "Name": "ReviewHub_ProductMetrics",
+    "NativeCDSDataSourceInfoNameMapping": {
+      "_ownerid_value": "Owner",
+      "chub_pm_metrictypeid": "pm_MetricTypeID",
+      "chub_pm_productid": "pm_ProductID",
+      "craf2_pm_boardtypeid": "pm_BoardTypeID",
+      "craf2_pm_ismetricactive": "pm_IsMetricActive",
+      "craf2_pm_latestgreentargetstart": "pm_LatestGreenTargetStart",
+      "craf2_pm_latesttargetnumber": "pm_LatestTargetNumber",
+      "craf2_pm_latesttargettext": "pm_LatestTargetText",
+      "craf2_pm_latesttargetyesno": "pm_LatestTargetYesNo",
+      "craf2_pm_latestyellowtargetstart": "pm_LatestYellowTargetStart",
+      "craf2_pm_MetricType": "pm_MetricType",
+      "craf2_pm_Product": "pm_Product",
+      "craf2_productmetricid": "ProductMetricID",
+      "craf2_productmetrictitle": "ProductMetricTitle",
+      "craf2_ReviewHub_FactMetric_fm_ProductMetr": "ReviewHub_FactMetrics",
+      "craf2_reviewhub_productmetric_AsyncOperations": "System Jobs",
+      "craf2_reviewhub_productmetric_BulkDeleteFailures": "Bulk Delete Failures",
+      "craf2_reviewhub_productmetric_DuplicateBaseRecord": "Duplicate Records (craf2_reviewhub_productmetric_DuplicateBaseRecord)",
+      "craf2_reviewhub_productmetric_DuplicateMatchingRecord": "Duplicate Records (craf2_reviewhub_productmetric_DuplicateMatchingRecord)",
+      "craf2_reviewhub_productmetric_MailboxTrackingFolders": "Mailbox Auto Tracking Folders",
+      "craf2_reviewhub_productmetric_PrincipalObjectAttributeAccesses": "Field Sharing",
+      "craf2_reviewhub_productmetric_ProcessSession": "Process Sessions",
+      "craf2_reviewhub_productmetric_SyncErrors": "Sync Errors",
+      "craf2_reviewhub_productmetricid": "ReviewHub_ProductMetric",
+      "createdby": "Created By",
+      "createdon": "Created On",
+      "createdonbehalfby": "Created By (Delegate)",
+      "importsequencenumber": "Import Sequence Number",
+      "modifiedby": "Modified By",
+      "modifiedon": "Modified On",
+      "modifiedonbehalfby": "Modified By (Delegate)",
+      "overriddencreatedon": "Record Created On",
+      "owningbusinessunit": "Owning Business Unit",
+      "owningteam": "Owning Team",
+      "owninguser": "Owning User",
+      "statecode": "Status",
+      "statuscode": "Status Reason",
+      "timezoneruleversionnumber": "Time Zone Rule Version Number",
+      "utcconversiontimezonecode": "UTC Conversion Time Zone Code",
+      "versionnumber": "Version Number"
+    },
+    "PreferredName": "ReviewHub_ProductMetrics",
+    "Type": "NativeCDSDataSourceInfo"
+  },
+  {
+    "DisplayName": "ReviewHub_ProductMetrics (Views)",
+    "Name": "_craf2_reviewhub_productmetric_views",
+    "RelatedEntityName": "ReviewHub_ProductMetrics",
+    "TrimmedViewName": true,
+    "Type": "ViewInfo",
+    "ViewInfoNameMapping": {
+      "17ed50f9-f381-4e18-8e37-67a6c45cb7c3": "ReviewHub_ProductMetric Associated View",
+      "3095513d-f1f7-4f46-a57d-8bc45700fcf9": "ReviewHub_ProductMetric Advanced Find View",
+      "56896135-87a5-492d-ba3d-e8e75d750a88": "ReviewHub_ProductMetric Lookup View",
+      "f8c68c77-2f82-4d86-be1b-423388cdd9d7": "Active ReviewHub_ProductMetrics",
+      "faa7a73a-b9f8-4bea-914b-63ddd8e7e350": "Inactive ReviewHub_ProductMetrics"
+    }
+  },
+  {
+    "DisplayName": "pm_IsMetricActive (ReviewHub_ProductMetrics)",
+    "Name": "craf2_craf2_reviewhub_productmetric_pm_ismetricactive",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "craf2_pm_ismetricactive",
+        "OptionSetReferenceEntityName": "ReviewHub_ProductMetrics"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "craf2_pm_ismetricactive",
+    "RelatedEntityName": "ReviewHub_ProductMetrics",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Status (ReviewHub_ProductMetrics)",
+    "Name": "craf2_reviewhub_productmetric_statecode",
+    "OptionSetInfoNameMapping": {
+      "0": "Active",
+      "1": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statecode",
+        "OptionSetReferenceEntityName": "ReviewHub_ProductMetrics"
+      }
+    },
+    "OptionSetTypeKey": "StateType",
+    "RelatedColumnInvariantName": "statecode",
+    "RelatedEntityName": "ReviewHub_ProductMetrics",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Status Reason (ReviewHub_ProductMetrics)",
+    "Name": "craf2_reviewhub_productmetric_statuscode",
+    "OptionSetInfoNameMapping": {
+      "1": "Active",
+      "2": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statuscode",
+        "OptionSetReferenceEntityName": "ReviewHub_ProductMetrics"
+      }
+    },
+    "OptionSetTypeKey": "StatusType",
+    "RelatedColumnInvariantName": "statuscode",
+    "RelatedEntityName": "ReviewHub_ProductMetrics",
+    "Type": "OptionSetInfo"
+  }
+]

@@ -1,0 +1,96 @@
+<application xmlns:xml="http://www.w3.org/XML/1998/namespace" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:service="https://msmanaged-na.azure-apim.net/apim/logicflows" xmlns:siena="http://schemas.microsoft.com/MicrosoftProjectSiena/WADL/2014/11" siena:serviceId="ReviewHub-ValidateExcelUpload" xmlns="http://wadl.dev.java.net/2009/02">
+  <doc title="Review Hub - Validate Excel Upload" />
+  <grammars>
+    <jsonTypes targetNamespace="https://msmanaged-na.azure-apim.net/apim/logicflows" xmlns="http://schemas.microsoft.com/MicrosoftProjectSiena/WADL/2014/11">
+      <string name="ManualTriggerInput_GetValueType_Content_def" />
+      <string name="ManualTriggerInput_Filename_Value_def" />
+      <integer name="ManualTriggerInput_ReviewType_Value_def" />
+      <string name="ManualTriggerInput_ActionType_Value_def" />
+      <string name="ManualTriggerInput_GetValueType_Content_1_def" />
+      <string name="ManualTriggerInput_GetUpdateMethod_Content_def" />
+      <string name="ManualTriggerInput_GetQuarterlyCalcMethod_Content_def" />
+      <object name="ManualTriggerInput">
+        <property name="GetValueType_Content" type="string" />
+        <property name="Filename_Value" type="string" />
+        <property name="ReviewType_Value" type="integer" />
+        <property name="ActionType_Value" type="string" />
+        <property name="GetValueType_Content_1" type="string" />
+        <property name="GetUpdateMethod_Content" type="string" />
+        <property name="GetQuarterlyCalcMethod_Content" type="string" />
+      </object>
+      <string name="ResponseActionOutput_items_def_ID_def" />
+      <string name="ResponseActionOutput_items_def_MetricName_def" />
+      <string name="ResponseActionOutput_items_def_ShortName_def" />
+      <string name="ResponseActionOutput_items_def_Stage_def" />
+      <string name="ResponseActionOutput_items_def_UpdateMethod_def" />
+      <string name="ResponseActionOutput_items_def_PowerBIUrl_def" />
+      <string name="ResponseActionOutput_items_def_ValueType_def" />
+      <string name="ResponseActionOutput_items_def_Objective_def" />
+      <string name="ResponseActionOutput_items_def_HealthWeight_def" />
+      <string name="ResponseActionOutput_items_def_EnumerateOptions_def" />
+      <string name="ResponseActionOutput_items_def_IsTrendDown_def" />
+      <string name="ResponseActionOutput_items_def_MetricDescription_def" />
+      <string name="ResponseActionOutput_items_def_EffectiveDate_def" />
+      <string name="ResponseActionOutput_items_def_QuarterlyCalculationMethod_def" />
+      <string name="ResponseActionOutput_items_def_DataSource_def" />
+      <string name="ResponseActionOutput_items_def_ValidationStatus_def" />
+      <string name="ResponseActionOutput_items_def_ValidationMessage_def" />
+      <string name="ResponseActionOutput_items_def_Template_def" />
+      <object name="ResponseActionOutput_items_def">
+        <property name="ID" type="string" />
+        <property name="MetricName" type="string" />
+        <property name="ShortName" type="string" />
+        <property name="Stage" type="string" />
+        <property name="UpdateMethod" type="string" />
+        <property name="PowerBIUrl" type="string" />
+        <property name="ValueType" type="string" />
+        <property name="Objective" type="string" />
+        <property name="HealthWeight" type="string" />
+        <property name="EnumerateOptions" type="string" />
+        <property name="IsTrendDown" type="string" />
+        <property name="MetricDescription" type="string" />
+        <property name="EffectiveDate" type="string" />
+        <property name="QuarterlyCalculationMethod" type="string" />
+        <property name="DataSource" type="string" />
+        <property name="ValidationStatus" type="string" />
+        <property name="ValidationMessage" type="string" />
+        <property name="Template" type="string" />
+      </object>
+      <array typeRef="ResponseActionOutput_items_def" name="ResponseActionOutput" />
+      <object name="Run_responses_default_def" />
+    </jsonTypes>
+  </grammars>
+  <resources siena:authenticationProviderHref="#PowerAppAuth" base="https://msmanaged-na.azure-apim.net/apim/logicflows">
+    <resource path="/{connectionId}/triggers/manual/run">
+      <param style="template" name="connectionId" type="xs:string" required="true" />
+      <method siena:requiresAuthentication="true" name="POST" id="Run">
+        <doc title="Runs a logic flow trigger." />
+        <request>
+          <param style="query" name="api-version" type="xs:string" required="true" fixed="2015-02-01-preview">
+            <doc title="The api version" />
+          </param>
+          <representation mediaType="application/json">
+            <param style="plain" name="GetValueType_Content" path="/GetValueType_Content" type="xs:string" required="true" />
+            <param style="plain" name="Filename_Value" path="/Filename_Value" type="xs:string" required="true" />
+            <param style="plain" name="ReviewType_Value" path="/ReviewType_Value" type="xs:long" required="true" />
+            <param style="plain" name="ActionType_Value" path="/ActionType_Value" type="xs:string" required="true" />
+            <param style="plain" name="GetValueType_Content_1" path="/GetValueType_Content_1" type="xs:string" required="true" />
+            <param style="plain" name="GetUpdateMethod_Content" path="/GetUpdateMethod_Content" type="xs:string" required="true" />
+            <param style="plain" name="GetQuarterlyCalcMethod_Content" path="/GetQuarterlyCalcMethod_Content" type="xs:string" required="true" />
+          </representation>
+        </request>
+        <response>
+          <representation mediaType="application/json" element="service:ResponseActionOutput" />
+        </response>
+      </method>
+    </resource>
+  </resources>
+  <authenticationProviders xmlns="http://schemas.microsoft.com/MicrosoftProjectSiena/WADL/2014/11">
+    <connectionProvider id="PowerAppAuth" siena:connectionProviderId="logicflows" />
+  </authenticationProviders>
+  <template xmlns="http://schemas.microsoft.com/MicrosoftProjectSiena/WADL/2014/11">
+    <variable name="connectionId">
+      <modifyParams style="template" name="connectionId" attribute="fixed" />
+    </variable>
+  </template>
+</application>

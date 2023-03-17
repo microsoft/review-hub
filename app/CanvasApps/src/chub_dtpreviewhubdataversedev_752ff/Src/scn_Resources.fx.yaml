@@ -1,0 +1,5 @@
+scn_Resources As screen:
+    OnVisible: |-
+        =Launch(var_Wiki);
+        Back();
+

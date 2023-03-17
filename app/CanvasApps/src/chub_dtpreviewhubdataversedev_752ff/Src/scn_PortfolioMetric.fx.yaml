@@ -1,0 +1,1219 @@
+scn_PortfolioMetric As screen:
+    OnVisible: |
+        =UpdateContext({varViewType_PM: "metric"});
+        ClearCollect(
+            clln_dpdn_PortfolioMetricsValueMthYr,
+            AddColumns(
+                SortByColumns(
+                    ForAll(
+                        Sequence(
+                            11,
+                            -1,
+                            -1
+                        ),
+                        DateAdd(
+                            var_CurrentMiddleMonthDate,
+                            Value,
+                            TimeUnit.Months
+                        )
+                    ),
+                    "Value",
+                    SortOrder.Descending
+                ),
+                "MonthNum",
+                Month(Value),
+                "Year",
+                Year(Value),
+                "Month_Year",
+                Text(
+                    Value,
+                    "[$-en-US]mmmm yyyy"
+                ),
+                "LastMonthStart",
+                Date(
+                    Year(
+                        DateAdd(
+                            Value,
+                            -1,
+                            TimeUnit.Months
+                        )
+                    ),
+                    Month(
+                        DateAdd(
+                            Value,
+                            -1,
+                            TimeUnit.Months
+                        )
+                    ),
+                    1
+                ),
+                "NextMonthStart",
+                Date(
+                    Year(
+                        DateAdd(
+                            Value,
+                            1,
+                            TimeUnit.Months
+                        )
+                    ),
+                    Month(
+                        DateAdd(
+                            Value,
+                            1,
+                            TimeUnit.Months
+                        )
+                    ),
+                    1
+                )
+            )
+        );
+        Select(btn_Refresh_PM);
+
+    Container_PM As groupContainer.verticalAutoLayoutContainer:
+        Height: =App.Height-Self.Y-html_ColorCode_PM.Height -10
+        LayoutDirection: =LayoutDirection.Vertical
+        LayoutMode: =LayoutMode.Auto
+        LayoutOverflowX: =LayoutOverflow.Scroll
+        Width: =App.Width-Self.X-10
+        X: =html_ColorCode_PM.X
+        Y: =btn_BackToHeatMap_PM.Y + btn_BackToHeatMap_PM.Height + 5
+        ZIndex: =1
+
+        Container_PM_PS_ColHeader As groupContainer.manualLayoutContainer:
+            AlignInContainer: =AlignInContainer.SetByContainer
+            FillPortions: =0
+            Height: =45
+            Width: =GlryTop_Background_PM.Width
+            ZIndex: =2
+
+            GlryTop_Background_PM As button:
+                Align: =Align.Left
+                BorderColor: =Self.Fill
+                Color: =RGBA(0, 0, 0, 1)
+                DisabledColor: =Self.Color
+                DisplayMode: =DisplayMode.View
+                Fill: =SUBGROUPCOLOR //ColorFade(BlueNaviHightLightBackground, 50%)
+                Font: =FontStyle
+                FontWeight: =FontWeight.Bold
+                Height: =45
+                PaddingLeft: =10
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: |
+                    =15
+                RadiusTopRight: =15
+                Size: =11
+                Text: ="Products"
+                Width: =If(varViewType_PM = "trend", lbl_ProductName_PM.Width + glry_PM_PS_TrendHeader.Width + 2, lbl_ProductName_PM.Width + glry_PM_PS_MetriclHeader.Width + 2)
+                Y: =1
+                ZIndex: =1
+
+            glry_PM_PS_MetriclHeader As gallery.galleryHorizontal:
+                BorderColor: =RGBA(255, 255, 255, 1)
+                Height: =Parent.Height
+                Items: |-
+                    =Table(
+                            {
+                                Id: 1,
+                                Value: "Value"
+                            },
+                            {
+                                Id: 2,
+                                Value: "Target"
+                            },
+                            {
+                                Id: 3,
+                                Value: "Variance to Target"
+                            },
+                            {
+                                Id: 4,
+                                Value: "MoM"
+                            },
+                            {
+                                Id: 5,
+                                Value: "YoY"
+                            }
+                        )
+                ShowScrollbar: =false
+                TemplatePadding: =0
+                TemplateSize: =100
+                Visible: =If(varViewType_PM = "trend", false, true)
+                Width: =CountRows(glry_PM_PS_MetriclHeader.AllItems)*Label_HeaderName_PM.Width
+                X: =lbl_ProductName_PM.X + lbl_ProductName_PM.Width
+                ZIndex: =2
+
+                Label_HeaderName_PM As label:
+                    Align: =Align.Center
+                    BorderColor: =RGBA(255, 255, 255, 1)
+                    Font: =FontStyle
+                    FontWeight: =FontWeight.Bold
+                    Height: =Parent.Height
+                    OnSelect: =Select(Parent)
+                    PaddingBottom: =0
+                    PaddingLeft: =0
+                    PaddingRight: =0
+                    PaddingTop: =2
+                    Size: =9
+                    Text: =ThisItem.Value
+                    Visible: =true//!Label_NoData_PM.Visible
+                    Width: =100
+                    ZIndex: =1
+
+            glry_PM_PS_TrendHeader As gallery.galleryHorizontal:
+                BorderColor: =RGBA(255, 255, 255, 1)
+                Height: =Parent.Height
+                Items: =FirstN(clln_dpdn_PortfolioMetricsValueMthYr, 12)
+                ShowScrollbar: =false
+                TemplatePadding: =0
+                TemplateSize: =100
+                Visible: =If(varViewType_PM = "trend", true, false)
+                Width: =CountRows(glry_PM_PS_TrendHeader.AllItems)*Label_HeaderName_PM_1.Width
+                X: =lbl_ProductName_PM.X + lbl_ProductName_PM.Width
+                ZIndex: =3
+
+                Label_HeaderName_PM_1 As label:
+                    Align: =Align.Center
+                    BorderColor: =RGBA(255, 255, 255, 1)
+                    Font: =FontStyle
+                    FontWeight: =FontWeight.Bold
+                    Height: =Parent.Height
+                    OnSelect: =Select(Parent)
+                    PaddingBottom: =0
+                    PaddingLeft: =0
+                    PaddingRight: =0
+                    PaddingTop: =2
+                    Size: =9
+                    Text: =Text(ThisItem.Value, "mm/yyyy")
+                    Visible: =true//!Label_NoData_PM.Visible
+                    Width: =100
+                    ZIndex: =1
+
+        Container_PM_PS_Main As groupContainer.verticalAutoLayoutContainer:
+            AlignInContainer: =AlignInContainer.SetByContainer
+            BorderColor: =GlryTop_Background_PM.Fill
+            BorderStyle: =BorderStyle.None
+            Height: =glry_PM_PS_Values.Height + 1
+            LayoutDirection: =LayoutDirection.Vertical
+            LayoutMinHeight: =100
+            LayoutMinWidth: =Container_PM_PS_ColHeader.Width
+            LayoutMode: =LayoutMode.Auto
+            LayoutOverflowY: =LayoutOverflow.Scroll
+            PaddingLeft: =1
+            Width: =Container_PM_PS_ColHeader.Width + 2
+            X: =40
+            Y: =40
+            ZIndex: =3
+
+            glry_PM_PS_Values As gallery.galleryVertical:
+                AlignInContainer: =AlignInContainer.SetByContainer
+                BorderColor: =GlryTop_Background_PM.Fill
+                BorderThickness: =2
+                FillPortions: =0
+                Height: =CountRows(Self.AllItems) * (lbl_ProductName_PM.Height + 1) + 2
+                Items: |-
+                    =Ungroup( //Ungroup function to add a Row Number column.
+                            ForAll(
+                                Sequence(CountRows(clln_factMetrics_filtered_Metrics_PM)),
+                                {
+                                    Record: Table(Last(FirstN(clln_factMetrics_filtered_Metrics_PM, Value))),
+                                    RowNumber: Value
+                                }
+                            ),
+                            "Record"
+                        )
+                Layout: =Layout.Vertical
+                LayoutMinHeight: =287
+                LayoutMinWidth: =320
+                ShowScrollbar: =false
+                TemplatePadding: =0
+                TemplateSize: =40
+                Width: =Container_PM_PS_ColHeader.Width - 2
+                X: =1
+                ZIndex: =1
+
+                lbl_ProductName_PM As label:
+                    BorderStyle: =BorderStyle.None
+                    Fill: |-
+                        =If(
+                            Mod(ThisItem.RowNumber, 2) = 1,
+                            RGBA(255,255,255,1),
+                            GrayCanvasBackground
+                        )
+                    Font: =FontStyle
+                    Height: =Parent.TemplateHeight - 1
+                    OnSelect: =Select(Parent)
+                    PaddingBottom: =0
+                    PaddingRight: =0
+                    PaddingTop: =0
+                    Size: =9
+                    Text: |
+                        =ThisItem.fmb_ProductName//Substitute(ThisItem.fm_MetricType.ProductMetricTitle, ": " & dpdn_Scorecard_HM_1.Selected.mtd_MetricTypeName, "") //First(Split(ThisItem.fm_MetricType.ProductMetricTitle, ": ")).Result 
+                    Width: =250
+                    Y: =1
+                    ZIndex: =2
+
+                glry_PM_PS_Rows As gallery.galleryHorizontal:
+                    BorderColor: =RGBA(0, 0, 0, 0)
+                    BorderStyle: =BorderStyle.None
+                    Height: =40
+                    Items: =SortByColumns(Filter(clln_factMetrics_Historical, fm_ProductMetricID = ThisItem.fm_ProductMetricID), "fm_ReviewLockDate", SortOrder.Descending)//ThisItem.fm_MetricType.ProductMetricTitle)
+                    ShowScrollbar: =false
+                    TemplatePadding: =0
+                    TemplateSize: =100
+                    Visible: =If(varViewType_PM = "trend", true, false)
+                    Width: =glry_PM_PS_TrendHeader.Width
+                    X: =lbl_ProductName_PM.X + lbl_ProductName_PM.Width
+                    ZIndex: =8
+
+                    ButtonHeatMapCell_2 As button:
+                        BorderThickness: =1
+                        Color: =If(Self.Text="Not Applicable", GRAYCOLOR, Color.Black)
+                        Fill: |-
+                            =If(
+                                        IsBlankOrError(Self.Text) || Self.Text = "Not Applicable",
+                                        GrayCanvasBackground,
+                                        If(
+                                            Value(Self.Text) > 0,
+                                            GREENCOLOR,
+                                            REDCOLOR
+                                        )
+                                    )
+                        Font: =FontStyle
+                        FontWeight: =FontWeight.Normal
+                        HoverColor: =RGBA(0, 0, 0, 1)
+                        HoverFill: =ColorFade(Self.Fill, -15%)
+                        OnSelect: =Select(Parent)
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        PressedFill: =ColorFade(Self.Fill, -25%)
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Size: =9
+                        Text: =If(IsBlankOrError(ThisItem.fm_ValueNumber), "Not Applicable", ThisItem.fm_ValueNumber)
+                        Visible: =false
+                        Width: =100
+                        ZIndex: =1
+
+                    Label_HMPS_Cell_1 As label:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(255, 255, 255, 1)
+                        BorderStyle: =BorderStyle.None
+                        Color: |-
+                            =If(
+                                Self.Text="Not Applicable", 
+                                GRAYCOLOR, 
+                                If(
+                                    Self.Text="...",
+                                    Color.Black,
+                                    Switch(
+                                        Self.Fill,
+                                        GREENCOLOR, GreenFontColor,
+                                        YellowTargetColor, YellowFontColor,
+                                        REDCOLOR, RedFontColor
+                                    )
+                                )
+                            )
+                        Fill: =ButtonHeatMapCell_2.Fill
+                        Font: =FontStyle
+                        FontWeight: =FontWeight.Semibold
+                        Height: =Parent.Height - 1
+                        OnSelect: =Select(Parent)
+                        Size: =ButtonHeatMapCell_2.Size
+                        Text: =ButtonHeatMapCell_2.Text // & "-" & ThisItem.FM_Record.fm_ProductMetricID & "-" & ThisItem.FM_Record.fm_ID
+                        Tooltip: =ButtonHeatMapCell_2.Tooltip
+                        Width: =Parent.TemplateWidth - 1
+                        X: =1
+                        ZIndex: =2
+
+                MetricGroup_PM As group:
+                    Height: =5
+                    Width: =5
+                    X: =40
+                    Y: =40
+                    ZIndex: =8
+
+                    Label_Value_Cell As label:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(255, 255, 255, 1)
+                        BorderThickness: =1
+                        Color: |-
+                            =If(
+                                Self.Text="Not Applicable", 
+                                GRAYCOLOR, 
+                                If(
+                                    Self.Text="...",
+                                    Color.Black,
+                                    Switch(
+                                        Self.Fill,
+                                        GREENCOLOR, GreenFontColor,
+                                        YellowTargetColor, YellowFontColor,
+                                        REDCOLOR, RedFontColor
+                                    )
+                                )
+                            )
+                        Fill: |-
+                            =If(
+                                        IsBlankOrError(Self.Text) || Self.Text = "Not Applicable",
+                                        GrayCanvasBackground,
+                                        If(
+                                            Value(Self.Text) > 0,
+                                            GREENCOLOR,
+                                            REDCOLOR
+                                        )
+                                    )
+                        Font: =FontStyle
+                        FontWeight: =FontWeight.Semibold
+                        OnSelect: =Select(Parent)
+                        Size: =10
+                        Text: =If(IsBlankOrError(ThisItem.fm_ValueNumber), "", ThisItem.fm_ValueNumber)
+                        Visible: =If(varViewType_PM = "trend", false, true)
+                        Width: =99
+                        X: =250
+                        ZIndex: =3
+
+                    Label_Target_Cell As label:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(255, 255, 255, 1)
+                        BorderThickness: =1
+                        Color: |-
+                            =If(
+                                Self.Text="Not Applicable", 
+                                GRAYCOLOR, 
+                                If(
+                                    Self.Text="...",
+                                    Color.Black,
+                                    Switch(
+                                        Self.Fill,
+                                        GREENCOLOR, GreenFontColor,
+                                        YellowTargetColor, YellowFontColor,
+                                        REDCOLOR, RedFontColor
+                                    )
+                                )
+                            )
+                        Fill: |-
+                            =If(
+                                        IsBlankOrError(Self.Text) || Self.Text = "Not Applicable",
+                                        GrayCanvasBackground,
+                                        If(
+                                            Value(Self.Text) > 0,
+                                            GREENCOLOR,
+                                            REDCOLOR
+                                        )
+                                    )
+                        Font: =FontStyle
+                        FontWeight: =FontWeight.Semibold
+                        OnSelect: =Select(Parent)
+                        Size: =10
+                        Text: =If(IsBlankOrError(ThisItem.fm_TargetNumber), "", ThisItem.fm_TargetNumber)
+                        Visible: =If(varViewType_PM = "trend", false, true)
+                        Width: =93
+                        X: =349
+                        ZIndex: =4
+
+                    Label_Variance_Cell As label:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(255, 255, 255, 1)
+                        BorderThickness: =1
+                        Color: |-
+                            =If(
+                                Self.Text="Not Applicable", 
+                                GRAYCOLOR, 
+                                If(
+                                    Self.Text="...",
+                                    Color.Black,
+                                    Switch(
+                                        Self.Fill,
+                                        GREENCOLOR, GreenFontColor,
+                                        YellowTargetColor, YellowFontColor,
+                                        REDCOLOR, RedFontColor
+                                    )
+                                )
+                            )
+                        Fill: |-
+                            =If(
+                                        IsBlankOrError(Self.Text) || Self.Text = "Not Applicable",
+                                        GrayCanvasBackground,
+                                        If(
+                                            Value(Self.Text) > 0,
+                                            GREENCOLOR,
+                                            REDCOLOR
+                                        )
+                                    )
+                        Font: =FontStyle
+                        FontWeight: =FontWeight.Semibold
+                        OnSelect: =Select(Parent)
+                        Size: =10
+                        Text: =If(IsBlankOrError(ThisItem.fm_VarianceToTarget), "", ThisItem.fm_VarianceToTarget)
+                        Visible: =If(varViewType_PM = "trend", false, true)
+                        Width: =123
+                        X: =442
+                        ZIndex: =5
+
+                    Label_MoM_Cell As label:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(255, 255, 255, 1)
+                        BorderThickness: =1
+                        Color: |-
+                            =If(
+                                Self.Text="Not Applicable", 
+                                GRAYCOLOR, 
+                                If(
+                                    Self.Text="...",
+                                    Color.Black,
+                                    Switch(
+                                        Self.Fill,
+                                        GREENCOLOR, GreenFontColor,
+                                        YellowTargetColor, YellowFontColor,
+                                        REDCOLOR, RedFontColor
+                                    )
+                                )
+                            )
+                        Fill: |-
+                            =If(
+                                        IsBlankOrError(Self.Text) || Self.Text = "Not Applicable",
+                                        GrayCanvasBackground,
+                                        If(
+                                            Value(Self.Text) > 0,
+                                            GREENCOLOR,
+                                            REDCOLOR
+                                        )
+                                    )
+                        Font: =FontStyle
+                        FontWeight: =FontWeight.Semibold
+                        OnSelect: =Select(Parent)
+                        Size: =10
+                        Text: =If(IsBlankOrError(ThisItem.fm_MoM), "", ThisItem.fm_MoM)
+                        Visible: =If(varViewType_PM = "trend", false, true)
+                        Width: =76
+                        X: =565
+                        ZIndex: =6
+
+                    Label_YoY_Cell As label:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(255, 255, 255, 1)
+                        BorderThickness: =1
+                        Color: |-
+                            =If(
+                                Self.Text="Not Applicable", 
+                                GRAYCOLOR, 
+                                If(
+                                    Self.Text="...",
+                                    Color.Black,
+                                    Switch(
+                                        Self.Fill,
+                                        GREENCOLOR, GreenFontColor,
+                                        YellowTargetColor, YellowFontColor,
+                                        REDCOLOR, RedFontColor
+                                    )
+                                )
+                            )
+                        Fill: |-
+                            =If(
+                                        IsBlankOrError(Self.Text) || Self.Text = "Not Applicable",
+                                        GrayCanvasBackground,
+                                        If(
+                                            Value(Self.Text) > 0,
+                                            GREENCOLOR,
+                                            REDCOLOR
+                                        )
+                                    )
+                        Font: =FontStyle
+                        FontWeight: =FontWeight.Semibold
+                        OnSelect: =Select(Parent)
+                        Size: =10
+                        Text: =If(IsBlankOrError(ThisItem.fm_YoY), "", ThisItem.fm_YoY)
+                        Visible: =If(varViewType_PM = "trend", false, true)
+                        Width: =109
+                        X: =641
+                        ZIndex: =7
+
+        lbl_glry_PM_Tip As label:
+            Color: =RGBA(116, 116, 116, 1)
+            DisplayMode: =DisplayMode.View
+            Font: =FontStyle
+            Height: =25
+            PaddingBottom: =0
+            PaddingRight: =0
+            PaddingTop: =3
+            Size: =9
+            Text: ="(Switch the view by clicking on the top-right toggle)"
+            VerticalAlign: =VerticalAlign.Top
+            Width: =400
+            Y: =glry_PM_PS_Values.Y + glry_PM_PS_Values.Height
+            ZIndex: =4
+
+    html_ColorCode_PM As htmlViewer:
+        AutoHeight: =true
+        DisplayMode: =DisplayMode.View
+        Font: =FontStyle
+        Height: =264
+        HtmlText: |-
+            ="<span style='background-color: #D7E2F8; color: #3256A0; display: inline-block; padding: 5px 15px; font-weight: 400; border-radius: 15px;'>"
+            & "<b>Excellent</b>"
+            & "</span>&ensp;"
+            & "<span style='background-color: #e5f5ec; color: #009e49; display: inline-block; padding: 5px 15px; font-weight: 400; border-radius: 15px;'>"
+            & "<b>Good</b>"
+            & "</span>&ensp;"
+            & "<span style='background-color: #F8F892; color: #CC7000; display: inline-block; padding: 5px 15px; font-weight: 400; border-radius: 15px;'>"
+            & "<b>Average</b>"
+            & "</span>&ensp;"
+            & "<span style='background-color: #fde6e8; color: #cc4125; display: inline-block; padding: 5px 15px; font-weight: 400; border-radius: 15px;'>"
+            & "<b>Needs Improvement</b>"
+            & "</span>&ensp;"
+        PaddingRight: =0
+        Size: =10
+        Width: =App.Width - Self.X
+        X: =LeftNavi_PM.Width + 15
+        Y: =Container_PM.Y + Container_PM.Height + 5
+        ZIndex: =2
+
+    Label_NoData_PM As label:
+        Align: =Align.Center
+        Fill: =RGBA(255, 255, 255, 1)
+        Font: =FONTNAME
+        FontWeight: =FontWeight.Semibold
+        Height: =35
+        Size: =9
+        Text: =If(CountRows(glry_PM_PS_Rows.AllItems)=0, "No information for the selected metric", IsBlankOrError(Label_Value_Cell.Text), "No metrics information for the selected month")
+        Visible: |-
+            =If(
+                var_ctn_IfGalleryLoaded_HMPS_Visible,
+                false,
+                If(
+                    CountRows(glry_PM_PS_MetriclHeader.AllItems) = 0 || CountRows(glry_PM_PS_Values.AllItems) = 0,
+                    true,
+                    false
+                )
+            )
+        Width: =Container_PM_PS_ColHeader.Width
+        X: |
+            =Container_PM.X//Container_PM.X + lbl_ProductName_PM.Width + 30
+        Y: =Container_PM.Y+200
+        ZIndex: =3
+
+    ctn_IfGalleryLoaded_PM As groupContainer:
+        Fill: =RGBA(255, 255, 255, 0.95)
+        Height: =Container_PM.Height 
+        Visible: =!Label_NoData_PM.Visible && var_ctn_IfGalleryLoaded_HMPS_Visible
+        Width: =Container_PM.Width
+        X: =Container_PM.X
+        Y: =Container_PM.Y
+        ZIndex: =4
+
+        Label_BoardSrn_Loading_HMPS_1 As label:
+            Align: =Align.Center
+            Color: =LEFTNAVHIGLIGHTCOLOR
+            Font: =FONTNAME
+            Size: =18
+            Text: ="Getting data..."
+            Width: =Image_BoardSrn_Loading_HMPS_1.Width
+            X: =Image_BoardSrn_Loading_HMPS_1.X
+            Y: =Image_BoardSrn_Loading_HMPS_1.Y + Image_BoardSrn_Loading_HMPS_1.Height - 10
+            ZIndex: =1
+
+        Image_BoardSrn_Loading_HMPS_1 As image:
+            BorderStyle: =BorderStyle.None
+            Image: =boardsrn_loading
+            PaddingBottom: =20
+            PaddingRight: =10
+            PaddingTop: =10
+            Width: =300
+            X: =Parent.Width * 0.5 - Self.Width * 0.5
+            Y: =Parent.Height * 0.5 - Self.Height * 0.5 - 50
+            ZIndex: =2
+
+    ctn_TopBanner_PM As groupContainer.manualLayoutContainer:
+        Height: =80
+        Width: =App.Width - Self.X
+        X: =LeftNavi_PM.Width 
+        Y: =BAGIAAppHeader_PM.Y + BAGIAAppHeader_PM.Height
+        ZIndex: =5
+
+        divider_TopBanner_HM_1 As rectangle:
+            Fill: =GrayBorderLight
+            Height: =2
+            Width: =Parent.Width
+            Y: =Parent.Height - Self.Height
+            ZIndex: =1
+
+        dpdn_Scorecard_HM_1 As dropdown:
+            BorderColor: =
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =0
+            ChevronBackground: =Self.Fill
+            ChevronDisabledFill: =RGBA(0, 0, 0, 0)
+            ChevronFill: =RGBA(0, 0, 0, 1)
+            ChevronHoverBackground: =BlueControlLightBackground
+            ChevronHoverFill: =RGBA(0, 0, 0, 1)
+            Default: =varSelectedMetricType_PM
+            Fill: =GrayControlBackground
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: |
+                =30
+            HoverFill: =Self.ChevronHoverBackground
+            Items: =SortByColumns(Filter(clln_MetricTypes_PM, mtd_MetricValueType = "Number" || mtd_MetricValueType = "Percentage"), "mtd_MetricShortName",SortOrder.Ascending)//SortByColumns(Filter(ReviewHub_MetricTypes, ValueType = ReviewHub_MetricValueType.Number || ValueType = ReviewHub_MetricValueType.Percentage), "craf2_metrictypeshortname", Ascending)//
+            OnChange: =Set(var_ctn_IfGalleryLoaded_HMPS_Visible, true); Set(var_Timer_Refresh_HM_Start, true);
+            PressedColor: =BlueControlDarkBackground
+            PressedFill: =BlueControlLightBackground
+            SelectionFill: =BlueNaviHightLightBackground
+            Size: =11
+            Width: =190
+            X: =Label_Scorecard_HM_1.X + Label_Scorecard_HM_1.Width
+            Y: =(Parent.Height - Self.Height) * 0.50
+            ZIndex: =2
+
+        Label_Scorecard_HM_1 As label:
+            Align: =Align.Right
+            Font: =FontStyle
+            Height: =Parent.Height
+            PaddingRight: =10
+            Size: =11
+            Text: |-
+                ="Metric:"
+            Width: =95
+            X: =dpdn_MetricsValueMthYr_PM.X + dpdn_MetricsValueMthYr_PM.Width + 10
+            Y: |
+                =Label_Title_HM_1.Y
+            ZIndex: =3
+
+        dpdn_MetricsValueMthYr_PM As dropdown:
+            BorderColor: =
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =0
+            ChevronBackground: =Self.Fill
+            ChevronDisabledFill: =RGBA(0, 0, 0, 0)
+            ChevronFill: =RGBA(0, 0, 0, 1)
+            ChevronHoverBackground: =BlueControlLightBackground
+            ChevronHoverFill: =RGBA(0, 0, 0, 1)
+            Default: =varSelectedMonthYear_PM//First(clln_dpdn_PortfolioMetricsValueMthYr).Month_Year
+            DisplayMode: =If(varViewType_PM = "trend", DisplayMode.Disabled, DisplayMode.Edit)
+            Fill: =GrayControlBackground
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: |
+                =30
+            HoverFill: =Self.ChevronHoverBackground
+            Items: |-
+                =//FirstN(clln_dpdn_PortfolioMetricsValueMthYr, 12)
+                FirstN(clln_dropdown_ReviewMthYr, 12)
+            OnChange: |-
+                =Set(var_ctn_IfGalleryLoaded_HMPS_Visible, true);
+                Set(var_Timer_Refresh_HM_Start, true);
+            PressedColor: =BlueControlDarkBackground
+            PressedFill: =BlueControlLightBackground
+            SelectionFill: =BlueNaviHightLightBackground
+            Size: =11
+            Width: =155
+            X: =Label_ReviewMonth_HM_1.X + Label_ReviewMonth_HM_1.Width
+            Y: =(Parent.Height - Self.Height) * 0.50
+            ZIndex: =4
+
+        Label_ReviewMonth_HM_1 As label:
+            Align: =Align.Right
+            Font: =FontStyle
+            Height: =Parent.Height
+            PaddingRight: =10
+            Size: =11
+            Text: |-
+                ="Month:"
+            Width: =135
+            X: =Label_Title_HM_1.X + Label_Title_HM_1.Width
+            Y: =Label_Title_HM_1.Y
+            ZIndex: =5
+
+        Label_Title_HM_1 As label:
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =Parent.Height
+            PaddingLeft: =15
+            Size: =14
+            Text: ="Portfolio Metric"
+            Width: =156
+            X: |
+                =0
+            ZIndex: =6
+
+        dpdn_Group_HM_1 As dropdown:
+            BorderColor: =
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =0
+            ChevronBackground: =Self.Fill
+            ChevronDisabledFill: =RGBA(0, 0, 0, 0)
+            ChevronFill: =RGBA(0, 0, 0, 1)
+            ChevronHoverBackground: =BlueControlLightBackground
+            ChevronHoverFill: =RGBA(0, 0, 0, 1)
+            Default: ="Monthly"
+            Fill: =GrayControlBackground
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: |
+                =30
+            HoverFill: =Self.ChevronHoverBackground
+            Items: |-
+                =Table({
+                    Id: 1,
+                    Value: "Monthly",
+                    View: "metric"
+                },{
+                    Id: 2,
+                    Value: "Historical",
+                    View: "trend"
+                })
+            OnChange: |-
+                =UpdateContext({varViewType_PM: Self.Selected.View});
+                Set(var_ctn_IfGalleryLoaded_HMPS_Visible, true); Set(var_Timer_Refresh_HM_Start, true);
+            OnSelect: |-
+                =UpdateContext({varViewType_PM: Self.Selected.View});
+            PressedColor: =BlueControlDarkBackground
+            PressedFill: =BlueControlLightBackground
+            Reset: =varViewType_PM = "metric"
+            SelectionFill: =BlueNaviHightLightBackground
+            Size: =11
+            Width: =180
+            X: =Label_Group_HM_1.X+Label_Group_HM_1.Width
+            Y: =(Parent.Height - Self.Height) * 0.50
+            ZIndex: =11
+
+        Label_Group_HM_1 As label:
+            Align: =Align.Right
+            Font: =FontStyle
+            Height: =Parent.Height
+            PaddingRight: =10
+            Size: =11
+            Text: |-
+                ="View:"
+            Width: =75
+            X: |
+                =dpdn_Scorecard_HM_1.X+ dpdn_Scorecard_HM_1.Width + 10
+            Y: |
+                =Label_Title_HM_1.Y
+            ZIndex: =12
+
+    LeftNavi_PM As groupContainer.manualLayoutContainer:
+        BorderStyle: =BorderStyle.None
+        Fill: =BlueControlDarkBackground
+        Height: =App.Height - Self.Y
+        Width: =var_LeftNavi_Width
+        Y: =BAGIAAppHeader_PM.Height
+        ZIndex: =6
+
+        glry_LeftNavi_8 As gallery.variableTemplateHeightGallery:
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            Height: =Parent.Height - Self.Y
+            Items: |-
+                =Sort(
+                    varLeftNavOptions,
+                    If(ThisRecord.ID < 0, ID),
+                    SortOrder.Descending
+                )
+            Layout: =Layout.Vertical
+            OnSelect: |
+                =Set(varSelectedBoardId, ThisItem.ID);
+                Navigate(ThisItem.Screen);
+            ShowScrollbar: =false
+            TemplateFill: |-
+                =If(
+                    ThisItem.ID = varSelectedBoardId,
+                    ColorFade(BlueControlDarkBackground, 20%), 
+                    RGBA(0,0,0,0)
+                )
+            TemplatePadding: =0
+            TemplateSize: =45
+            Width: =Parent.Width
+            Y: =icon_CollapseExpand_8.Y + icon_CollapseExpand_8.Height
+            ZIndex: =1
+
+            imgCircle_LN_8 As circle:
+                DisplayMode: =DisplayMode.View
+                Fill: =RGBA(255, 255, 255, 0.90)
+                Height: =img_LN_8.Height - 5
+                OnSelect: =Select(Parent)
+                Visible: =If(IsBlank(ThisItem.BoardTypeID), false, true)
+                Width: =Self.Height
+                X: =img_LN_8.X + (img_LN_8.Width - Self.Width) * 0.5 
+                Y: =(Parent.TemplateHeight - Self.Height) * 0.5
+                ZIndex: =1
+
+            NoImage_LN_8 As label:
+                Align: =Align.Center
+                Color: =BlueControlDarkBackground
+                FocusedBorderThickness: =1
+                Font: =Font.'Segoe UI'
+                FontWeight: =FontWeight.Semibold
+                Height: =img_LN_8.Height
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Text: =Upper(Left(ThisItem.Title, 2))
+                Tooltip: =ThisItem.Title
+                Visible: |-
+                    =If(
+                        IsBlankOrError(ThisItem.PID), //It means this is not a scorecard tab and should always have a logo.
+                        false, 
+                        If(
+                            IsBlankOrError(LookUp(ReviewHub_Products, ThisRecord.ProductID = ThisItem.PID).LogoImage), //When on scorecard tab, the product logo is missing, 
+                            true,
+                            false
+                        )
+                    )
+                Width: =img_LN_8.Width
+                X: =rect_LN_8.X + rect_LN_8.Width
+                ZIndex: =2
+
+            img_LN_8 As image:
+                AutoDisableOnSelect: =false
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Height: =Self.Width
+                Image: |-
+                    =If(
+                        NoImage_LN_8.Visible,
+                        Blank(),
+                        If(IsBlankOrError(ThisItem.PID), 
+                        ThisItem.ImagePath , LookUp(ReviewHub_Products, ThisRecord.ProductID = ThisItem.PID).LogoImage.Value)
+                    )
+                OnSelect: =Select(Parent)
+                PaddingBottom: =If(IsBlank(ThisItem.BoardTypeID), 3, 9)
+                PaddingLeft: =If(IsBlank(ThisItem.BoardTypeID), 3, 8)
+                PaddingRight: =If(IsBlank(ThisItem.BoardTypeID), 3, 8)
+                PaddingTop: =If(IsBlank(ThisItem.BoardTypeID), 3, 9)
+                Tooltip: =ThisItem.Title
+                Width: =Parent.TemplateHeight
+                X: =rect_LN_8.X + rect_LN_8.Width
+                ZIndex: =3
+
+            html_LN_8 As htmlViewer:
+                Color: =RGBA(255, 255, 255, 1)
+                DisplayMode: =DisplayMode.View
+                Fill: =RGBA(0, 0, 0, 0)
+                Font: =FontStyle
+                Height: =45
+                HtmlText: |-
+                    ="<span style='background-color: " 
+                    & If(
+                        Parent.Width = var_LeftNavi_ExpandWidth, 
+                        "#79b5de; color: #FFFFFF;  display: inline-block; padding: 1px 6px; font-weight: ", 
+                        "rgba(121, 181, 222, 0.75); color: #FFFFFF;  display: inline-block; padding: 1px 3px; font-weight: "
+                    ) 
+                    & If(ThisItem.ID = varSelectedBoardId, "600", "400") & "; border-radius: 5px;'>"
+                    & If(
+                        Parent.Width = var_LeftNavi_ExpandWidth, 
+                        LookUp(clln_BoardTypes, ThisRecord.bt_BoardTypeID = ThisItem.BoardTypeID).bt_BoardTypeShortName,
+                        Upper(Left(LookUp(clln_BoardTypes, ThisRecord.bt_BoardTypeID = ThisItem.BoardTypeID).bt_BoardTypeShortName,2))
+                    )
+                    & "</span></font>"
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =Title_LN_8.PaddingLeft
+                PaddingRight: =Title_LN_8.PaddingRight
+                PaddingTop: =If(Parent.Width = var_LeftNavi_ExpandWidth, 6, 0)
+                Size: =Title_LN_8.Size
+                Visible: =If(IsBlank(ThisItem.BoardTypeID), false, true)
+                Width: =If(Parent.Width = var_LeftNavi_ExpandWidth, Title_LN_8.Width, img_LN_8.Width)
+                X: =If(Parent.Width = var_LeftNavi_ExpandWidth, Title_LN_8.X, img_LN_8.X)
+                ZIndex: =4
+
+            Title_LN_8 As label:
+                BorderColor: =RGBA(32, 54, 71, 1)
+                BorderStyle: =BorderStyle.None
+                Color: =RGBA(255, 255, 255, 1)
+                DisplayMode: =DisplayMode.View
+                FocusedBorderColor: =Title_LN_8.BorderColor
+                Font: =FontStyle
+                FontWeight: =If(ThisItem.ID = varSelectedBoardId, FontWeight.Semibold, FontWeight.Normal)
+                Height: =Parent.TemplateHeight
+                HoverBorderColor: =Title_LN_8.BorderColor
+                HoverColor: =Title_LN_8.Color
+                HoverFill: =Title_LN_8.Fill
+                LineHeight: =1
+                OnSelect: =Select(Parent)
+                PaddingBottom: =If(IsBlank(ThisItem.BoardTypeID), 0, 5)
+                PaddingLeft: =2
+                PaddingTop: =0
+                PressedBorderColor: =Title_LN_8.BorderColor
+                PressedColor: =Title_LN_8.Color
+                PressedFill: =Title_LN_8.Fill
+                Size: =9
+                Text: =ThisItem.Title
+                Tooltip: =ThisItem.Title
+                VerticalAlign: =If(IsBlank(ThisItem.BoardTypeID), VerticalAlign.Middle, VerticalAlign.Bottom)
+                Width: =Parent.Width - Self.X
+                Wrap: =false
+                X: =img_LN_8.X + img_LN_8.Width
+                ZIndex: =5
+
+            TopDivider_LN_8 As rectangle:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Fill: =RGBA(0, 91, 159, 0.30)
+                Height: =1
+                OnSelect: =Select(Parent)
+                Width: =Parent.Width
+                ZIndex: =6
+
+            rect_LN_8 As rectangle:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Fill: =If(ThisItem.ID = varSelectedBoardId, BlueNaviHightLightBackground, TABLEHEADERCOLOR)
+                FocusedBorderColor: =rect_LN_8.BorderColor
+                Height: =Parent.TemplateHeight - Self.Y
+                HoverFill: =rect_LN_8.Fill
+                OnSelect: =Select(Parent)
+                Tooltip: =
+                Width: =6
+                Y: =1
+                ZIndex: =7
+
+            btn_LN_Top_8 As button:
+                AutoDisableOnSelect: =false
+                BorderColor: =
+                BorderStyle: =BorderStyle.None
+                BorderThickness: =0
+                Color: =RGBA(0, 0, 0, 0)
+                DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                DisabledColor: =RGBA(0, 0, 0, 0)
+                DisabledFill: =RGBA(0, 0, 0, 0)
+                Fill: =RGBA(0, 0, 0, 0)
+                Font: =FontStyle
+                Height: =Parent.TemplateHeight
+                HoverBorderColor: =
+                HoverColor: =RGBA(0, 0, 0, 0)
+                HoverFill: =
+                OnSelect: =Select(Parent)
+                PressedBorderColor: =
+                PressedColor: =
+                Text: =//Need this button for the hover-over hand cursor.
+                Tooltip: |
+                    =If(
+                        IsBlankOrError(ThisItem.BoardTypeID),
+                        ThisItem.Title,
+                        Text(ThisItem.ReviewDate, "mmmm yyyy") &
+                            " - (" & LookUp(clln_BoardTypes, ThisRecord.bt_BoardTypeID = ThisItem.BoardTypeID).bt_BoardTypeShortName & ") " 
+                            & ThisItem.Title
+                    )
+                Width: =Parent.TemplateWidth
+                ZIndex: =8
+
+            close_LN_8 As icon.CancelBadge:
+                AutoDisableOnSelect: =false
+                BorderStyle: =BorderStyle.None
+                Color: =RGBA(255, 255, 255, 1)
+                Height: =25
+                HoverColor: =RedFontColor
+                HoverFill: =BlueNaviHightLightBackground
+                Icon: =Icon.Cancel
+                OnSelect: |-
+                    =If(
+                        App.ActiveScreen.Name = "BoardScreen", //When user is currently staying on a Board Screen, navigate to Home Screen.
+                        Navigate(HomeScreen)
+                    );
+                    
+                    RemoveIf(varLeftNavOptions, ThisRecord.ID = ThisItem.ID)
+                    /*
+                    Concurrent(
+                        RemoveIf(varLeftNavOptions, ThisRecord.ID = ThisItem.ID),
+                        RemoveIf(clln_ProductMetrics_BS, ThisRecord.pm_ProductID = ThisItem.PID),
+                        RemoveIf(clln_factMetrics_BS, ThisRecord.fm_ProductID = ThisItem.PID)
+                    );
+                    */
+                PaddingBottom: =5
+                PaddingLeft: =5
+                PaddingRight: =5
+                PaddingTop: =5
+                Tooltip: ="Close this tab"
+                Visible: =!IsBlankOrError(ThisItem.BoardTypeID) && Parent.Width = var_LeftNavi_ExpandWidth //When collapsed, not showing close button.
+                Width: =25
+                X: =Title_LN_8.X + Title_LN_8.Width - Self.Width
+                ZIndex: =9
+
+        icon_CollapseExpand_8 As icon.Add:
+            BorderColor: =RGBA(32, 54, 71, 1)
+            Color: =RGBA(255, 255, 255, 1)
+            DisabledFill: =icon_CollapseExpand_8.Fill
+            FocusedBorderColor: =icon_CollapseExpand_8.BorderColor
+            Height: |
+                =45
+            HoverBorderColor: =ColorFade(icon_CollapseExpand_8.BorderColor, 20%)
+            HoverColor: =ColorFade(icon_CollapseExpand_8.Color, 20%)
+            HoverFill: =icon_CollapseExpand_8.Fill
+            Icon: =If(Parent.Width = var_LeftNavi_ExpandWidth, Icon.DockLeft, Icon.DockRight)
+            OnSelect: =Set(var_LeftNavi_Width, If(Parent.Width = var_LeftNavi_CollapseWidth, var_LeftNavi_ExpandWidth, var_LeftNavi_CollapseWidth))
+            PaddingBottom: =10
+            PaddingLeft: =10
+            PaddingRight: =10
+            PaddingTop: =10
+            PressedBorderColor: =ColorFade(icon_CollapseExpand_8.BorderColor, -20%)
+            PressedColor: =ColorFade(icon_CollapseExpand_8.Color, -20%)
+            PressedFill: =icon_CollapseExpand_8.Fill
+            Tooltip: ="Collapse/Expand"
+            Width: =var_LeftNavi_CollapseWidth
+            X: =Parent.Width - Self.Width
+            ZIndex: =2
+
+    btn_BackToHeatMap_PM As button:
+        BorderColor: =Self.Fill
+        Fill: =BlueControlDarkBackground
+        Font: =FontStyle
+        FontWeight: =FontWeight.Bold
+        Height: =25
+        HoverBorderColor: =Self.Fill
+        HoverColor: =Self.Fill
+        HoverFill: =Self.Color
+        OnSelect: =Back()
+        PaddingBottom: =0
+        PaddingLeft: =0
+        PaddingRight: =0
+        PaddingTop: =0
+        RadiusBottomLeft: =30
+        RadiusBottomRight: =30
+        RadiusTopLeft: =30
+        RadiusTopRight: =30
+        Size: =10
+        Text: ="<<  Back"
+        Width: =90
+        X: =LeftNavi_PM.Width + 15
+        Y: =ctn_TopBanner_PM.Y + ctn_TopBanner_PM.Height + 5
+        ZIndex: =8
+
+    Timer_IfGalleryLoaded_PM As timer:
+        AutoStart: =true
+        Duration: =500
+        OnTimerEnd: =Set(var_ctn_IfGalleryLoaded_HMPS_Visible, false)
+        Start: =var_ctn_IfGalleryLoaded_HMPS_Visible
+        Visible: =false
+        X: =1163
+        Y: =87
+        ZIndex: =9
+
+    Timer_RefreshData_PM As timer:
+        Duration: =Timer_IfGalleryLoaded_PM.Duration
+        OnTimerEnd: =Select(btn_Refresh_PM);
+        OnTimerStart: =Set(var_ctn_IfGalleryLoaded_HMPS_Visible, true);
+        Start: =var_Timer_Refresh_HM_Start
+        Visible: =false
+        X: =1206
+        Y: =728
+        ZIndex: =10
+
+    btn_Refresh_PM As button:
+        BorderThickness: =0
+        Fill: =LEFTNAVBKGDCOLOR
+        HoverFill: =ColorFade(Self.Fill, -30%)
+        OnSelect: |
+            =Set(
+                var_HMPS_ReviewLockDate,
+                Date(
+                    dpdn_MetricsValueMthYr_PM.Selected.Year,
+                    dpdn_MetricsValueMthYr_PM.Selected.MonthNum + 1,
+                    0
+                )
+            );
+            If(
+                varViewType_PM = "trend",
+                If(
+                    !(dpdn_Scorecard_HM_1.Selected.mtd_MetricTypeId in clln_factMetrics_Historical.fm_MetricTypeID),
+                    Collect(
+                        clln_factMetrics_Historical,
+                        RenameColumns(
+                            ShowColumns(
+                                Filter(
+                                    ReviewHub_FactMetrics,
+                                    dpdn_Scorecard_HM_1.Selected.mtd_MetricTypeId = fm_MetricTypeID
+                                ),
+                                "chub_fm_productmetricid",
+                                "chub_fm_metrictypeid",
+                                "craf2_fm_valuenumber",
+                                "craf2_fm_reviewlockdate"
+                            ),
+                            "chub_fm_metrictypeid",
+                            "fm_MetricTypeID",
+                            "chub_fm_productmetricid",
+                            "fm_ProductMetricID",
+                            "craf2_fm_valuenumber",
+                            "fm_ValueNumber",
+                            "craf2_fm_reviewlockdate",
+                            "fm_ReviewLockDate"
+                        )
+                    )
+                ),
+                If(
+                    !(dpdn_Scorecard_HM_1.Selected.mtd_MetricTypeId in clln_factMetrics_filtered_Metrics_PM.fm_MetricTypeID),
+                    ClearCollect(
+                        clln_factMetrics_filtered_Metrics_PM,
+                        SortByColumns(
+                            AddColumns(
+                                Filter(
+                                    clln_factMetrics_HM,
+                                    dpdn_Scorecard_HM_1.Selected.mtd_MetricTypeId = fm_MetricTypeID && fm_ReviewLockDate = var_HMPS_ReviewLockDate && !IsBlank(fm_ValueNumber)
+                                ),
+                                "fmb_ProductName",
+                                LookUp(
+                                    clln_factMetricBoard,
+                                    fm_ProductID = fmb_ProductID,
+                                    fmb_ProductName
+                                )
+                            ),
+                            "fmb_ProductName",
+                            SortOrder.Ascending
+                        )
+                    )
+                )
+            );
+            Set(
+                var_Timer_Refresh_HM_Start,
+                false
+            );
+        RadiusBottomLeft: =0
+        RadiusBottomRight: =0
+        RadiusTopLeft: =0
+        RadiusTopRight: =0
+        Size: =11
+        Text: ="Refresh"
+        Visible: =false
+        Width: =100
+        X: =1266
+        Y: =85
+        ZIndex: =11
+
+    BAGIAAppHeader_PM As AppHeader:
+        DropDownSelection: =TrackRequestComponent_PM.HideTrackRequest
+        FeatureRequestUrl: =var_FeatureRequestURL
+        FeedbackButtonUrl: =var_SendFeedback_URL
+        inputAppDisplayName: =varAppHeaderText
+        Reset: =SurveyComponent_PM.HideSurvey
+        ScorecardOnboardingFeatureUrl: =var_ScorecardOnboardingRequestURL
+        Y: =0
+        ZIndex: =12
+
+    TrackRequestComponent_PM As TrackRequestComponent:
+        BlueControlDarkBackground: =BlueControlDarkBackground
+        BlueControlLightBackground: =BlueControlLightBackground
+        BlueNaviHightLightBackground: =BlueNaviHightLightBackground
+        DevOpsBaseUrl: =var_DevOpsBaseURL
+        DevOpsQueryID: =var_DevOpsQueryID
+        FontStyle: =FontStyle
+        GrayCanvasBackground: =GrayCanvasBackground
+        GRAYCOLOR: =GRAYCOLOR
+        GrayControlBackground: =GrayControlBackground
+        IsAdmin: =IsAdmin
+        Reset: =Self.Visible
+        Visible: =BAGIAAppHeader_PM.DisplayTrackRequest
+        Y: =BAGIAAppHeader_PM.Height
+        ZIndex: =13
+
+    SurveyComponent_PM As SurveyComponent:
+        Reset: =BAGIAAppHeader_PM.ShowSurvey
+        Survey: =var_ReviewHubSurvey
+        Visible: =BAGIAAppHeader_PM.ShowSurvey
+        Y: =BAGIAAppHeader_PM.Height
+        ZIndex: =14
+

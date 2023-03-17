@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<savedqueries xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <savedquery>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>0</CanBeDeleted>
+    <isquickfindquery>0</isquickfindquery>
+    <isprivate>0</isprivate>
+    <isdefault>1</isdefault>
+    <savedqueryid>{8a0ccbab-c83e-4788-accb-6f45dda530ab}</savedqueryid>
+    <layoutxml>
+      <grid name="resultset" jump="craf2_healthrating" select="1" icon="1" preview="1">
+        <row name="result" id="craf2_reviewhub_boardhealthid">
+          <cell name="craf2_healthrating" width="144" />
+          <cell name="craf2_lowerboundscore" width="144" />
+          <cell name="craf2_upperboundscore" width="138" />
+          <cell name="craf2_displayorder" width="123" />
+          <cell name="craf2_comment" width="300" />
+          <cell name="createdby" width="100" />
+        </row>
+      </grid>
+    </layoutxml>
+    <querytype>0</querytype>
+    <fetchxml>
+      <fetch version="1.0" mapping="logical">
+        <entity name="craf2_reviewhub_boardhealth">
+          <attribute name="craf2_reviewhub_boardhealthid" />
+          <attribute name="craf2_healthrating" />
+          <filter type="and">
+            <condition attribute="statecode" operator="eq" value="0" />
+          </filter>
+          <attribute name="craf2_lowerboundscore" />
+          <attribute name="craf2_upperboundscore" />
+          <attribute name="craf2_displayorder" />
+          <attribute name="craf2_comment" />
+          <order attribute="craf2_displayorder" descending="false" />
+          <attribute name="createdby" />
+        </entity>
+      </fetch>
+    </fetchxml>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <LocalizedNames>
+      <LocalizedName description="Active ReviewHub_BoardHealths" languagecode="1033" />
+    </LocalizedNames>
+  </savedquery>
+</savedqueries>

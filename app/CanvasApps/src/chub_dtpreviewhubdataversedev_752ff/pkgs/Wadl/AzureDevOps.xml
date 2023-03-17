@@ -1,0 +1,2099 @@
+<application xmlns:xml="http://www.w3.org/XML/1998/namespace" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:service="https://msmanaged-na.azure-apim.net/apim/visualstudioteamservices" xmlns:siena="http://schemas.microsoft.com/MicrosoftProjectSiena/WADL/2014/11" siena:serviceId="AzureDevOps" xmlns="http://wadl.dev.java.net/2009/02">
+  <doc title="Azure DevOps">Azure DevOps provides services for teams to share code, track work, and ship software - for any language, all in a single package. It's the perfect complement to your IDE.</doc>
+  <grammars>
+    <jsonTypes targetNamespace="https://msmanaged-na.azure-apim.net/apim/visualstudioteamservices" xmlns="http://schemas.microsoft.com/MicrosoftProjectSiena/WADL/2014/11">
+      <array typeRef="Account" name="VstsList_ux5B_Account_ux5D__value_def" />
+      <object name="VstsList_ux5B_Account_ux5D_">
+        <property name="value" typeRef="VstsList_ux5B_Account_ux5D__value_def" />
+      </object>
+      <string name="Account_accountId_def" />
+      <string name="Account_accountUri_def" />
+      <string name="Account_accountName_def" />
+      <string name="Account_accountOwner_def" />
+      <string name="Account_organizationName_def" />
+      <string name="Account_accountType_def" />
+      <object name="Account">
+        <property name="accountId" type="string" />
+        <property name="accountUri" type="string" />
+        <property name="accountName" type="string" />
+        <property name="accountOwner" type="string" />
+        <property name="organizationName" type="string" />
+        <property name="accountType" type="string" />
+      </object>
+      <array typeRef="TeamSettingsIteration" name="VstsList_ux5B_TeamSettingsIteration_ux5D__value_def" />
+      <object name="VstsList_ux5B_TeamSettingsIteration_ux5D_">
+        <property name="value" typeRef="VstsList_ux5B_TeamSettingsIteration_ux5D__value_def" />
+      </object>
+      <string name="TeamSettingsIteration_Id_def" />
+      <string name="TeamSettingsIteration_Name_def" />
+      <string name="TeamSettingsIteration_Path_def" />
+      <mapObject name="TeamSettingsIteration__links_def">
+        <values typeRef="GenericLink" />
+      </mapObject>
+      <string name="TeamSettingsIteration_Url_def" />
+      <object name="TeamSettingsIteration">
+        <property name="Attributes" typeRef="TeamIterationAttributes" />
+        <property name="Id" type="string" />
+        <property name="Name" type="string" />
+        <property name="Path" type="string" />
+        <property name="_links" typeRef="TeamSettingsIteration__links_def" />
+        <property name="Url" type="string" />
+      </object>
+      <dateTimeString name="TeamIterationAttributes_FinishDate_def" />
+      <dateTimeString name="TeamIterationAttributes_StartDate_def" />
+      <object name="TeamIterationAttributes">
+        <property name="FinishDate" typeRef="TeamIterationAttributes_FinishDate_def" />
+        <property name="StartDate" typeRef="TeamIterationAttributes_StartDate_def" />
+      </object>
+      <string name="GenericLink_href_def" />
+      <object name="GenericLink">
+        <property name="href" type="string" />
+      </object>
+      <array typeRef="BuildDefinition" name="VstsList_ux5B_BuildDefinition_ux5D__value_def" />
+      <object name="VstsList_ux5B_BuildDefinition_ux5D_">
+        <property name="value" typeRef="VstsList_ux5B_BuildDefinition_ux5D__value_def" />
+      </object>
+      <integer name="BuildDefinition_id_def" />
+      <string name="BuildDefinition_type_def" />
+      <integer name="BuildDefinition_revision_def" />
+      <string name="BuildDefinition_name_def" />
+      <object name="BuildDefinition">
+        <property name="id" type="integer" />
+        <property name="type" type="string" />
+        <property name="revision" type="integer" />
+        <property name="name" type="string" />
+        <property name="_links" typeRef="Links" />
+      </object>
+      <object name="Links">
+        <property name="web" typeRef="WebLinks" />
+      </object>
+      <string name="WebLinks_href_def" />
+      <object name="WebLinks">
+        <property name="href" type="string" />
+      </object>
+      <string name="QueueBuildRequest_sourceBranch_def" />
+      <string name="QueueBuildRequest_parameters_def" />
+      <object name="QueueBuildRequest">
+        <property name="sourceBranch" type="string" />
+        <property name="parameters" type="string" />
+      </object>
+      <integer name="BuildResult_id_def" />
+      <string name="BuildResult_buildNumber_def" />
+      <string name="BuildResult_sourceBranch_def" />
+      <string name="BuildResult_sourceVersion_def" />
+      <string name="BuildResult_status_def" />
+      <string name="BuildResult_priority_def" />
+      <dateTimeString name="BuildResult_queueTime_def" />
+      <dateTimeString name="BuildResult_startTime_def" />
+      <dateTimeString name="BuildResult_finishTime_def" />
+      <string name="BuildResult_reason_def" />
+      <string name="BuildResult_result_def" />
+      <string name="BuildResult_parameters_def" />
+      <object name="BuildResult">
+        <property name="id" type="integer" />
+        <property name="buildNumber" type="string" />
+        <property name="sourceBranch" type="string" />
+        <property name="sourceVersion" type="string" />
+        <property name="status" type="string" />
+        <property name="priority" type="string" />
+        <property name="queueTime" typeRef="BuildResult_queueTime_def" />
+        <property name="startTime" typeRef="BuildResult_startTime_def" />
+        <property name="finishTime" typeRef="BuildResult_finishTime_def" />
+        <property name="reason" type="string" />
+        <property name="result" type="string" />
+        <property name="requestedFor" typeRef="BuildRequestUser" />
+        <property name="parameters" type="string" />
+        <property name="definition" typeRef="BuildResultDefinition" />
+        <property name="_links" typeRef="Links" />
+      </object>
+      <string name="BuildRequestUser_uniqueName_def" />
+      <object name="BuildRequestUser">
+        <property name="uniqueName" type="string" />
+      </object>
+      <integer name="BuildResultDefinition_id_def" />
+      <string name="BuildResultDefinition_name_def" />
+      <object name="BuildResultDefinition">
+        <property name="id" type="integer" />
+        <property name="name" type="string" />
+      </object>
+      <array typeRef="BuildResult" name="VstsList_ux5B_BuildResult_ux5D__value_def" />
+      <object name="VstsList_ux5B_BuildResult_ux5D_">
+        <property name="value" typeRef="VstsList_ux5B_BuildResult_ux5D__value_def" />
+      </object>
+      <string name="ClientSubscription_NotificationUrl_def" />
+      <object isDynamicSchema="true" name="ClientSubscription_DynamicProperties_def" />
+      <object name="ClientSubscription">
+        <property name="NotificationUrl" type="string" />
+        <property name="DynamicProperties" typeRef="ClientSubscription_DynamicProperties_def" />
+      </object>
+      <string name="WorkItemsClientSubscription_NotificationUrl_def" />
+      <object isDynamicSchema="true" name="WorkItemsClientSubscription_DynamicProperties_def" />
+      <object name="WorkItemsClientSubscription">
+        <property name="NotificationUrl" type="string" />
+        <property name="DynamicProperties" typeRef="WorkItemsClientSubscription_DynamicProperties_def" />
+      </object>
+      <string name="SubscriptionResponse_id_def" />
+      <string name="SubscriptionResponse_resource_def" />
+      <string name="SubscriptionResponse_notificationType_def" />
+      <string name="SubscriptionResponse_notificationUrl_def" />
+      <object name="SubscriptionResponse">
+        <property name="id" type="string" />
+        <property name="resource" type="string" />
+        <property name="notificationType" type="string" />
+        <property name="notificationUrl" type="string" />
+      </object>
+      <array typeRef="BuildResult" name="TriggerBatchResponse_ux5B_BuildResult_ux5D__value_def" />
+      <object name="TriggerBatchResponse_ux5B_BuildResult_ux5D_">
+        <property name="value" typeRef="TriggerBatchResponse_ux5B_BuildResult_ux5D__value_def" />
+      </object>
+      <array typeRef="GitRepository" name="VstsList_ux5B_GitRepository_ux5D__value_def" />
+      <object name="VstsList_ux5B_GitRepository_ux5D_">
+        <property name="value" typeRef="VstsList_ux5B_GitRepository_ux5D__value_def" />
+      </object>
+      <string name="GitRepository_id_def" />
+      <string name="GitRepository_name_def" />
+      <string name="GitRepository_url_def" />
+      <string name="GitRepository_remoteUrl_def" />
+      <object name="GitRepository">
+        <property name="id" type="string" />
+        <property name="name" type="string" />
+        <property name="url" type="string" />
+        <property name="remoteUrl" type="string" />
+      </object>
+      <array typeRef="GitRef" name="VstsList_ux5B_GitRef_ux5D__value_def" />
+      <object name="VstsList_ux5B_GitRef_ux5D_">
+        <property name="value" typeRef="VstsList_ux5B_GitRef_ux5D__value_def" />
+      </object>
+      <string name="GitRef_objectId_def" />
+      <string name="GitRef_name_def" />
+      <object name="GitRef">
+        <property name="objectId" type="string" />
+        <property name="name" type="string" />
+      </object>
+      <array typeRef="GitPush" name="VstsList_ux5B_GitPush_ux5D__value_def" />
+      <object name="VstsList_ux5B_GitPush_ux5D_">
+        <property name="value" typeRef="VstsList_ux5B_GitPush_ux5D__value_def" />
+      </object>
+      <array typeRef="GitRefUpdate" name="GitPush_refUpdates_def" />
+      <integer name="GitPush_pushId_def" />
+      <dateTimeString name="GitPush_date_def" />
+      <object name="GitPush">
+        <property name="repository" typeRef="GitRepository" />
+        <property name="pushedBy" typeRef="GitPushUser" />
+        <property name="refUpdates" typeRef="GitPush_refUpdates_def" />
+        <property name="pushId" type="integer" />
+        <property name="date" typeRef="GitPush_date_def" />
+      </object>
+      <string name="GitPushUser_id_def" />
+      <string name="GitPushUser_displayName_def" />
+      <string name="GitPushUser_uniqueName_def" />
+      <string name="GitPushUser_imageUrl_def" />
+      <object name="GitPushUser">
+        <property name="id" type="string" />
+        <property name="displayName" type="string" />
+        <property name="uniqueName" type="string" />
+        <property name="imageUrl" type="string" />
+      </object>
+      <array typeRef="GitPullRequest" name="VstsList_ux5B_GitPullRequest_ux5D__value_def" />
+      <object name="VstsList_ux5B_GitPullRequest_ux5D_">
+        <property name="value" typeRef="VstsList_ux5B_GitPullRequest_ux5D__value_def" />
+      </object>
+      <integer name="GitPullRequest_pullRequestId_def" />
+      <dateTimeString name="GitPullRequest_creationDate_def" />
+      <dateTimeString name="GitPullRequest_closedDate_def" />
+      <string name="GitPullRequest_title_def" />
+      <string name="GitPullRequest_description_def" />
+      <string name="GitPullRequest_sourceRefName_def" />
+      <string name="GitPullRequest_targetRefName_def" />
+      <boolean name="GitPullRequest_isDraft_def" />
+      <array typeRef="PullRequestReviewer" name="GitPullRequest_reviewers_def" />
+      <string name="GitPullRequest_reviewerList_def" />
+      <string name="GitPullRequest_requiredReviewerList_def" />
+      <array typeRef="GitCommitRef" name="GitPullRequest_commits_def" />
+      <string name="GitPullRequest_mergeFailureMessage_def" />
+      <string name="GitPullRequest_url_def" />
+      <string name="GitPullRequest_remoteUrl_def" />
+      <string name="GitPullRequest_artifactId_def" />
+      <string name="GitPullRequest_mergeId_def" />
+      <integer name="GitPullRequest_codeReviewId_def" />
+      <string name="GitPullRequest_completionQueueTime_def" />
+      <boolean name="GitPullRequest_supportsIterations_def" />
+      <object name="GitPullRequest">
+        <property name="repository" typeRef="GitRepository" />
+        <property name="pullRequestId" type="integer" />
+        <property name="createdBy" typeRef="PullRequestCreatedBy" />
+        <property name="creationDate" typeRef="GitPullRequest_creationDate_def" />
+        <property name="closedDate" typeRef="GitPullRequest_closedDate_def" />
+        <property name="title" type="string" />
+        <property name="description" type="string" />
+        <property name="sourceRefName" type="string" />
+        <property name="targetRefName" type="string" />
+        <property name="isDraft" type="boolean" />
+        <property name="reviewers" typeRef="GitPullRequest_reviewers_def" />
+        <property name="reviewerList" type="string" />
+        <property name="requiredReviewerList" type="string" />
+        <property name="commits" typeRef="GitPullRequest_commits_def" />
+        <property name="completionOptions" typeRef="PullRequestCompletionOptions" />
+        <property name="mergeOptions" typeRef="PullRequestMergeOptions" />
+        <property name="mergeFailureMessage" type="string" />
+        <property name="closedBy" typeRef="PullRequestClosedBy" />
+        <property name="autoCompleteSetBy" typeRef="PullRequestAutoCompleteSetBy" />
+        <property name="url" type="string" />
+        <property name="remoteUrl" type="string" />
+        <property name="artifactId" type="string" />
+        <property name="mergeId" type="string" />
+        <property name="codeReviewId" type="integer" />
+        <property name="completionQueueTime" type="string" />
+        <property name="supportsIterations" type="boolean" />
+      </object>
+      <string name="PullRequestCreatedBy_displayName_def" />
+      <string name="PullRequestCreatedBy_uniqueName_def" />
+      <string name="PullRequestCreatedBy_id_def" />
+      <string name="PullRequestCreatedBy_imageUrl_def" />
+      <string name="PullRequestCreatedBy_url_def" />
+      <object name="PullRequestCreatedBy">
+        <property name="displayName" type="string" />
+        <property name="uniqueName" type="string" />
+        <property name="id" type="string" />
+        <property name="imageUrl" type="string" />
+        <property name="url" type="string" />
+      </object>
+      <string name="PullRequestClosedBy_displayName_def" />
+      <string name="PullRequestClosedBy_uniqueName_def" />
+      <string name="PullRequestClosedBy_id_def" />
+      <string name="PullRequestClosedBy_imageUrl_def" />
+      <string name="PullRequestClosedBy_url_def" />
+      <object name="PullRequestClosedBy">
+        <property name="displayName" type="string" />
+        <property name="uniqueName" type="string" />
+        <property name="id" type="string" />
+        <property name="imageUrl" type="string" />
+        <property name="url" type="string" />
+      </object>
+      <string name="PullRequestAutoCompleteSetBy_displayName_def" />
+      <string name="PullRequestAutoCompleteSetBy_uniqueName_def" />
+      <string name="PullRequestAutoCompleteSetBy_id_def" />
+      <string name="PullRequestAutoCompleteSetBy_imageUrl_def" />
+      <string name="PullRequestAutoCompleteSetBy_url_def" />
+      <object name="PullRequestAutoCompleteSetBy">
+        <property name="displayName" type="string" />
+        <property name="uniqueName" type="string" />
+        <property name="id" type="string" />
+        <property name="imageUrl" type="string" />
+        <property name="url" type="string" />
+      </object>
+      <string name="PullRequestReviewer_displayName_def" />
+      <string name="PullRequestReviewer_uniqueName_def" />
+      <string name="PullRequestReviewer_id_def" />
+      <string name="PullRequestReviewer_url_def" />
+      <boolean name="PullRequestReviewer_hasDeclined_def" />
+      <boolean name="PullRequestReviewer_isFlagged_def" />
+      <boolean name="PullRequestReviewer_isRequired_def" />
+      <integer name="PullRequestReviewer_vote_def" />
+      <array typeRef="PullRequestReviewer" name="PullRequestReviewer_votedFor_def" />
+      <object name="PullRequestReviewer">
+        <property name="displayName" type="string" />
+        <property name="uniqueName" type="string" />
+        <property name="id" type="string" />
+        <property name="url" type="string" />
+        <property name="hasDeclined" type="boolean" />
+        <property name="isFlagged" type="boolean" />
+        <property name="isRequired" type="boolean" />
+        <property name="vote" type="integer" />
+        <property name="votedFor" typeRef="PullRequestReviewer_votedFor_def" />
+      </object>
+      <string name="LastMergeCommitGitUserDate_date_def" />
+      <string name="LastMergeCommitGitUserDate_email_def" />
+      <string name="LastMergeCommitGitUserDate_imageUrl_def" />
+      <string name="LastMergeCommitGitUserDate_name_def" />
+      <object name="LastMergeCommitGitUserDate">
+        <property name="date" type="string" />
+        <property name="email" type="string" />
+        <property name="imageUrl" type="string" />
+        <property name="name" type="string" />
+      </object>
+      <string name="LastMergeSourceCommitGitUserDate_date_def" />
+      <string name="LastMergeSourceCommitGitUserDate_email_def" />
+      <string name="LastMergeSourceCommitGitUserDate_imageUrl_def" />
+      <string name="LastMergeSourceCommitGitUserDate_name_def" />
+      <object name="LastMergeSourceCommitGitUserDate">
+        <property name="date" type="string" />
+        <property name="email" type="string" />
+        <property name="imageUrl" type="string" />
+        <property name="name" type="string" />
+      </object>
+      <string name="LastMergeTargetCommitGitUserDate_date_def" />
+      <string name="LastMergeTargetCommitGitUserDate_email_def" />
+      <string name="LastMergeTargetCommitGitUserDate_imageUrl_def" />
+      <string name="LastMergeTargetCommitGitUserDate_name_def" />
+      <object name="LastMergeTargetCommitGitUserDate">
+        <property name="date" type="string" />
+        <property name="email" type="string" />
+        <property name="imageUrl" type="string" />
+        <property name="name" type="string" />
+      </object>
+      <string name="PullRequestLastMergeCommitRef_comment_def" />
+      <string name="PullRequestLastMergeCommitRef_commentTruncated_def" />
+      <string name="PullRequestLastMergeCommitRef_commitId_def" />
+      <string name="PullRequestLastMergeCommitRef_parents_def_items_def" />
+      <array type="string" name="PullRequestLastMergeCommitRef_parents_def" />
+      <string name="PullRequestLastMergeCommitRef_remoteUrl_def" />
+      <string name="PullRequestLastMergeCommitRef_url_def" />
+      <object name="PullRequestLastMergeCommitRef">
+        <property name="author" typeRef="LastMergeCommitGitUserDate" />
+        <property name="comment" type="string" />
+        <property name="commentTruncated" type="string" />
+        <property name="commitId" type="string" />
+        <property name="committer" typeRef="LastMergeCommitGitUserDate" />
+        <property name="parents" typeRef="PullRequestLastMergeCommitRef_parents_def" />
+        <property name="remoteUrl" type="string" />
+        <property name="url" type="string" />
+      </object>
+      <string name="PullRequestLastMergeSourceCommitRef_comment_def" />
+      <string name="PullRequestLastMergeSourceCommitRef_commentTruncated_def" />
+      <string name="PullRequestLastMergeSourceCommitRef_commitId_def" />
+      <string name="PullRequestLastMergeSourceCommitRef_parents_def_items_def" />
+      <array type="string" name="PullRequestLastMergeSourceCommitRef_parents_def" />
+      <string name="PullRequestLastMergeSourceCommitRef_remoteUrl_def" />
+      <string name="PullRequestLastMergeSourceCommitRef_url_def" />
+      <object name="PullRequestLastMergeSourceCommitRef">
+        <property name="author" typeRef="LastMergeSourceCommitGitUserDate" />
+        <property name="comment" type="string" />
+        <property name="commentTruncated" type="string" />
+        <property name="commitId" type="string" />
+        <property name="committer" typeRef="LastMergeSourceCommitGitUserDate" />
+        <property name="parents" typeRef="PullRequestLastMergeSourceCommitRef_parents_def" />
+        <property name="remoteUrl" type="string" />
+        <property name="url" type="string" />
+      </object>
+      <string name="PullRequestLastMergeTargetCommitRef_comment_def" />
+      <string name="PullRequestLastMergeTargetCommitRef_commentTruncated_def" />
+      <string name="PullRequestLastMergeTargetCommitRef_commitId_def" />
+      <string name="PullRequestLastMergeTargetCommitRef_parents_def_items_def" />
+      <array type="string" name="PullRequestLastMergeTargetCommitRef_parents_def" />
+      <string name="PullRequestLastMergeTargetCommitRef_remoteUrl_def" />
+      <string name="PullRequestLastMergeTargetCommitRef_url_def" />
+      <object name="PullRequestLastMergeTargetCommitRef">
+        <property name="author" typeRef="LastMergeTargetCommitGitUserDate" />
+        <property name="comment" type="string" />
+        <property name="commentTruncated" type="string" />
+        <property name="commitId" type="string" />
+        <property name="committer" typeRef="LastMergeTargetCommitGitUserDate" />
+        <property name="parents" typeRef="PullRequestLastMergeTargetCommitRef_parents_def" />
+        <property name="remoteUrl" type="string" />
+        <property name="url" type="string" />
+      </object>
+      <string name="PullRequestMergeOptions_noFastForward_def" />
+      <string name="PullRequestMergeOptions_rebase_def" />
+      <string name="PullRequestMergeOptions_rebaseMerge_def" />
+      <string name="PullRequestMergeOptions_squash_def" />
+      <object name="PullRequestMergeOptions">
+        <property name="noFastForward" type="string" />
+        <property name="rebase" type="string" />
+        <property name="rebaseMerge" type="string" />
+        <property name="squash" type="string" />
+      </object>
+      <boolean name="PullRequestMergeStrategy_conflictAuthorshipCommits_def" />
+      <boolean name="PullRequestMergeStrategy_detectRenameFalsePositives_def" />
+      <boolean name="PullRequestMergeStrategy_disableRenames_def" />
+      <object name="PullRequestMergeStrategy">
+        <property name="conflictAuthorshipCommits" type="boolean" />
+        <property name="detectRenameFalsePositives" type="boolean" />
+        <property name="disableRenames" type="boolean" />
+      </object>
+      <integer name="PullRequestCompletionOptions_autoCompleteIgnoreConfigIds_def_items_def" />
+      <array type="integer" name="PullRequestCompletionOptions_autoCompleteIgnoreConfigIds_def" />
+      <boolean name="PullRequestCompletionOptions_bypassPolicy_def" />
+      <string name="PullRequestCompletionOptions_bypassReason_def" />
+      <boolean name="PullRequestCompletionOptions_deleteSourceBranch_def" />
+      <string name="PullRequestCompletionOptions_mergeCommitMessage_def" />
+      <boolean name="PullRequestCompletionOptions_squashMerge_def" />
+      <boolean name="PullRequestCompletionOptions_transitionWorkItems_def" />
+      <object name="PullRequestCompletionOptions">
+        <property name="autoCompleteIgnoreConfigIds" typeRef="PullRequestCompletionOptions_autoCompleteIgnoreConfigIds_def" />
+        <property name="bypassPolicy" type="boolean" />
+        <property name="bypassReason" type="string" />
+        <property name="deleteSourceBranch" type="boolean" />
+        <property name="mergeCommitMessage" type="string" />
+        <property name="mergeStrategy" typeRef="PullRequestMergeStrategy" />
+        <property name="squashMerge" type="boolean" />
+        <property name="transitionWorkItems" type="boolean" />
+      </object>
+      <string name="CommitGitUserDate_date_def" />
+      <string name="CommitGitUserDate_email_def" />
+      <string name="CommitGitUserDate_imageUrl_def" />
+      <string name="CommitGitUserDate_name_def" />
+      <object name="CommitGitUserDate">
+        <property name="date" type="string" />
+        <property name="email" type="string" />
+        <property name="imageUrl" type="string" />
+        <property name="name" type="string" />
+      </object>
+      <string name="GitCommitRef_comment_def" />
+      <string name="GitCommitRef_commentTruncated_def" />
+      <string name="GitCommitRef_commitId_def" />
+      <string name="GitCommitRef_parents_def_items_def" />
+      <array type="string" name="GitCommitRef_parents_def" />
+      <string name="GitCommitRef_remoteUrl_def" />
+      <string name="GitCommitRef_url_def" />
+      <object name="GitCommitRef">
+        <property name="author" typeRef="CommitGitUserDate" />
+        <property name="comment" type="string" />
+        <property name="commentTruncated" type="string" />
+        <property name="commitId" type="string" />
+        <property name="committer" typeRef="CommitGitUserDate" />
+        <property name="parents" typeRef="GitCommitRef_parents_def" />
+        <property name="remoteUrl" type="string" />
+        <property name="url" type="string" />
+      </object>
+      <string name="GitRefUpdate_name_def" />
+      <string name="GitRefUpdate_repositoryId_def" />
+      <string name="GitRefUpdate_oldObjectId_def" />
+      <string name="GitRefUpdate_newObjectId_def" />
+      <object name="GitRefUpdate">
+        <property name="name" type="string" />
+        <property name="repositoryId" type="string" />
+        <property name="oldObjectId" type="string" />
+        <property name="newObjectId" type="string" />
+      </object>
+      <array typeRef="Project" name="VstsList_ux5B_Project_ux5D__value_def" />
+      <object name="VstsList_ux5B_Project_ux5D_">
+        <property name="value" typeRef="VstsList_ux5B_Project_ux5D__value_def" />
+      </object>
+      <string name="Project_id_def" />
+      <string name="Project_name_def" />
+      <string name="Project_url_def" />
+      <object name="Project">
+        <property name="id" type="string" />
+        <property name="name" type="string" />
+        <property name="url" type="string" />
+      </object>
+      <array typeRef="Team" name="VstsList_ux5B_Team_ux5D__value_def" />
+      <object name="VstsList_ux5B_Team_ux5D_">
+        <property name="value" typeRef="VstsList_ux5B_Team_ux5D__value_def" />
+      </object>
+      <string name="Team_id_def" />
+      <string name="Team_name_def" />
+      <string name="Team_url_def" />
+      <string name="Team_description_def" />
+      <string name="Team_identityUrl_def" />
+      <object name="Team">
+        <property name="id" type="string" />
+        <property name="name" type="string" />
+        <property name="url" type="string" />
+        <property name="description" type="string" />
+        <property name="identityUrl" type="string" />
+      </object>
+      <array typeRef="TeamMember" name="VstsList_ux5B_TeamMember_ux5D__value_def" />
+      <object name="VstsList_ux5B_TeamMember_ux5D_">
+        <property name="value" typeRef="VstsList_ux5B_TeamMember_ux5D__value_def" />
+      </object>
+      <string name="TeamMember_id_def" />
+      <string name="TeamMember_displayName_def" />
+      <string name="TeamMember_uniqueName_def" />
+      <string name="TeamMember_url_def" />
+      <string name="TeamMember_imageUrl_def" />
+      <object name="TeamMember">
+        <property name="id" type="string" />
+        <property name="displayName" type="string" />
+        <property name="uniqueName" type="string" />
+        <property name="url" type="string" />
+        <property name="imageUrl" type="string" />
+      </object>
+      <array typeRef="ReleaseDefinition" name="VstsList_ux5B_ReleaseDefinition_ux5D__value_def" />
+      <object name="VstsList_ux5B_ReleaseDefinition_ux5D_">
+        <property name="value" typeRef="VstsList_ux5B_ReleaseDefinition_ux5D__value_def" />
+      </object>
+      <string name="ReleaseDefinition_Comment_def" />
+      <dateTimeString name="ReleaseDefinition_CreatedOn_def" />
+      <string name="ReleaseDefinition_Description_def" />
+      <integer name="ReleaseDefinition_Id_def" />
+      <dateTimeString name="ReleaseDefinition_ModifiedOn_def" />
+      <string name="ReleaseDefinition_Name_def" />
+      <string name="ReleaseDefinition_Path_def" />
+      <string name="ReleaseDefinition_ReleaseNameFormat_def" />
+      <integer name="ReleaseDefinition_Revision_def" />
+      <string name="ReleaseDefinition_Source_def" />
+      <string name="ReleaseDefinition_Tags_def_items_def" />
+      <array type="string" name="ReleaseDefinition_Tags_def" />
+      <string name="ReleaseDefinition_Url_def" />
+      <object name="ReleaseDefinition">
+        <property name="Comment" type="string" />
+        <property name="CreatedOn" typeRef="ReleaseDefinition_CreatedOn_def" />
+        <property name="Description" type="string" />
+        <property name="Id" type="integer" />
+        <property name="ModifiedBy" typeRef="IdentityRef" />
+        <property name="ModifiedOn" typeRef="ReleaseDefinition_ModifiedOn_def" />
+        <property name="Name" type="string" />
+        <property name="Path" type="string" />
+        <property name="ReleaseNameFormat" type="string" />
+        <property name="Revision" type="integer" />
+        <property name="Source" type="string" />
+        <property name="Tags" typeRef="ReleaseDefinition_Tags_def" />
+        <property name="Url" type="string" />
+      </object>
+      <mapObject name="ReleaseReference__links_def">
+        <values typeRef="GenericLink" />
+      </mapObject>
+      <array typeRef="Artifact" name="ReleaseReference_Artifacts_def" />
+      <dateTimeString name="ReleaseReference_CreatedOn_def" />
+      <string name="ReleaseReference_Description_def" />
+      <integer name="ReleaseReference_Id_def" />
+      <string name="ReleaseReference_Name_def" />
+      <string name="ReleaseReference_Reason_def" />
+      <string name="ReleaseReference_Url_def" />
+      <string name="ReleaseReference_WebAccessUrl_def" />
+      <object name="ReleaseReference">
+        <property name="_links" typeRef="ReleaseReference__links_def" />
+        <property name="Artifacts" typeRef="ReleaseReference_Artifacts_def" />
+        <property name="CreatedBy" typeRef="IdentityRef" />
+        <property name="CreatedOn" typeRef="ReleaseReference_CreatedOn_def" />
+        <property name="Description" type="string" />
+        <property name="Id" type="integer" />
+        <property name="ModifiedBy" typeRef="IdentityRef" />
+        <property name="Name" type="string" />
+        <property name="Reason" type="string" />
+        <property name="ReleaseDefinition" typeRef="ReleaseDefinitionShallowReference" />
+        <property name="Url" type="string" />
+        <property name="WebAccessUrl" type="string" />
+      </object>
+      <string name="IdentityRef_DirectoryAlias_def" />
+      <string name="IdentityRef_DisplayName_def" />
+      <string name="IdentityRef_UniqueName_def" />
+      <string name="IdentityRef_Url_def" />
+      <string name="IdentityRef_Id_def" />
+      <object name="IdentityRef">
+        <property name="DirectoryAlias" type="string" />
+        <property name="DisplayName" type="string" />
+        <property name="UniqueName" type="string" />
+        <property name="Url" type="string" />
+        <property name="Id" type="string" />
+      </object>
+      <integer name="PropertiesCollection_Count_def" />
+      <string name="PropertiesCollection_Keys_def_items_def" />
+      <array type="string" name="PropertiesCollection_Keys_def" />
+      <string name="PropertiesCollection_Values_def_items_def" />
+      <array type="string" name="PropertiesCollection_Values_def" />
+      <object name="PropertiesCollection">
+        <property name="Count" type="integer" />
+        <property name="Item" typeRef="Object" />
+        <property name="Keys" typeRef="PropertiesCollection_Keys_def" />
+        <property name="Values" typeRef="PropertiesCollection_Values_def" />
+      </object>
+      <integer name="RetentionPolicy_DaysToKeep_def" />
+      <object name="RetentionPolicy">
+        <property name="DaysToKeep" type="integer" />
+      </object>
+      <string name="ReleaseTriggerBase_TriggerType_def" />
+      <object name="ReleaseTriggerBase">
+        <property name="TriggerType" type="string" />
+      </object>
+      <boolean name="ConfigurationVariableValue_IsSecret_def" />
+      <string name="ConfigurationVariableValue_Value_def" />
+      <object name="ConfigurationVariableValue">
+        <property name="IsSecret" type="boolean" />
+        <property name="Value" type="string" />
+      </object>
+      <string name="Artifact_Alias_def" />
+      <boolean name="Artifact_IsPrimary_def" />
+      <string name="Artifact_SourceId_def" />
+      <string name="Artifact_Type_def" />
+      <mapObject name="Artifact_DefinitionReference_def">
+        <values typeRef="ArtifactSourceReference" />
+      </mapObject>
+      <object name="Artifact">
+        <property name="Alias" type="string" />
+        <property name="IsPrimary" type="boolean" />
+        <property name="SourceId" type="string" />
+        <property name="Type" type="string" />
+        <property name="DefinitionReference" typeRef="Artifact_DefinitionReference_def" />
+      </object>
+      <integer name="ReleaseDefinitionShallowReference_Id_def" />
+      <string name="ReleaseDefinitionShallowReference_Name_def" />
+      <string name="ReleaseDefinitionShallowReference_Url_def" />
+      <object name="ReleaseDefinitionShallowReference">
+        <property name="Id" type="integer" />
+        <property name="Name" type="string" />
+        <property name="Url" type="string" />
+      </object>
+      <object name="Object" />
+      <string name="ArtifactSourceReference_Id_def" />
+      <string name="ArtifactSourceReference_Name_def" />
+      <object name="ArtifactSourceReference">
+        <property name="Id" type="string" />
+        <property name="Name" type="string" />
+      </object>
+      <string name="ReleaseStartMetadata_Description_def" />
+      <boolean name="ReleaseStartMetadata_IsDraft_def" />
+      <string name="ReleaseStartMetadata_Reason_def" />
+      <array typeRef="ConfigurationVariable" name="ReleaseStartMetadata_Variables_def" />
+      <object name="ReleaseStartMetadata">
+        <property name="Description" type="string" />
+        <property name="IsDraft" type="boolean" />
+        <property name="Reason" type="string" />
+        <property name="Variables" typeRef="ReleaseStartMetadata_Variables_def" />
+      </object>
+      <string name="ArtifactMetadata_Alias_def" />
+      <object name="ArtifactMetadata">
+        <property name="Alias" type="string" />
+        <property name="InstanceReference" typeRef="BuildVersion" />
+      </object>
+      <string name="ConfigurationVariable_Name_def" />
+      <string name="ConfigurationVariable_Value_def" />
+      <object name="ConfigurationVariable">
+        <property name="Name" type="string" />
+        <property name="Value" type="string" />
+      </object>
+      <string name="BuildVersion_Id_def" />
+      <string name="BuildVersion_Name_def" />
+      <string name="BuildVersion_SourceBranch_def" />
+      <string name="BuildVersion_SourceRepositoryId_def" />
+      <string name="BuildVersion_SourceRepositoryType_def" />
+      <string name="BuildVersion_SourceVersion_def" />
+      <object name="BuildVersion">
+        <property name="Id" type="string" />
+        <property name="Name" type="string" />
+        <property name="SourceBranch" type="string" />
+        <property name="SourceRepositoryId" type="string" />
+        <property name="SourceRepositoryType" type="string" />
+        <property name="SourceVersion" type="string" />
+      </object>
+      <string name="Release_Comment_def" />
+      <dateTimeString name="Release_CreatedOn_def" />
+      <string name="Release_Description_def" />
+      <integer name="Release_Id_def" />
+      <boolean name="Release_KeepForever_def" />
+      <string name="Release_LogsContainerUrl_def" />
+      <dateTimeString name="Release_ModifiedOn_def" />
+      <string name="Release_Name_def" />
+      <string name="Release_Reason_def" />
+      <string name="Release_Status_def" />
+      <string name="Release_Url_def" />
+      <object name="Release">
+        <property name="Comment" type="string" />
+        <property name="CreatedBy" typeRef="IdentityRef" />
+        <property name="CreatedOn" typeRef="Release_CreatedOn_def" />
+        <property name="Description" type="string" />
+        <property name="Id" type="integer" />
+        <property name="KeepForever" type="boolean" />
+        <property name="LogsContainerUrl" type="string" />
+        <property name="ModifiedBy" typeRef="IdentityRef" />
+        <property name="ModifiedOn" typeRef="Release_ModifiedOn_def" />
+        <property name="Name" type="string" />
+        <property name="Reason" type="string" />
+        <property name="ReleaseDefinition" typeRef="ReleaseDefinitionShallowReference" />
+        <property name="Status" type="string" />
+        <property name="Url" type="string" />
+      </object>
+      <string name="ProjectReference_Id_def" />
+      <string name="ProjectReference_Name_def" />
+      <object name="ProjectReference">
+        <property name="Id" type="string" />
+        <property name="Name" type="string" />
+      </object>
+      <dateTimeString name="VariableGroup_CreatedOn_def" />
+      <string name="VariableGroup_Description_def" />
+      <integer name="VariableGroup_Id_def" />
+      <dateTimeString name="VariableGroup_ModifiedOn_def" />
+      <string name="VariableGroup_Name_def" />
+      <string name="VariableGroup_Type_def" />
+      <mapObject name="VariableGroup_Variables_def">
+        <values typeRef="VariableValue" />
+      </mapObject>
+      <object name="VariableGroup">
+        <property name="CreatedBy" typeRef="IdentityRef" />
+        <property name="CreatedOn" typeRef="VariableGroup_CreatedOn_def" />
+        <property name="Description" type="string" />
+        <property name="Id" type="integer" />
+        <property name="ModifiedBy" typeRef="IdentityRef" />
+        <property name="ModifiedOn" typeRef="VariableGroup_ModifiedOn_def" />
+        <property name="Name" type="string" />
+        <property name="ProviderData" typeRef="VariableGroupProviderData" />
+        <property name="Type" type="string" />
+        <property name="Variables" typeRef="VariableGroup_Variables_def" />
+      </object>
+      <boolean name="ReleaseCondition_Result_def" />
+      <string name="ReleaseCondition_ConditionType_def" />
+      <string name="ReleaseCondition_Name_def" />
+      <string name="ReleaseCondition_Value_def" />
+      <object name="ReleaseCondition">
+        <property name="Result" type="boolean" />
+        <property name="ConditionType" type="string" />
+        <property name="Name" type="string" />
+        <property name="Value" type="string" />
+      </object>
+      <string name="Demand_Name_def" />
+      <string name="Demand_Value_def" />
+      <object name="Demand">
+        <property name="Name" type="string" />
+        <property name="Value" type="string" />
+      </object>
+      <string name="DeployPhase_Name_def" />
+      <string name="DeployPhase_PhaseType_def" />
+      <integer name="DeployPhase_Rank_def" />
+      <array typeRef="WorkflowTask" name="DeployPhase_WorkflowTasks_def" />
+      <object name="DeployPhase">
+        <property name="Name" type="string" />
+        <property name="PhaseType" type="string" />
+        <property name="Rank" type="integer" />
+        <property name="WorkflowTasks" typeRef="DeployPhase_WorkflowTasks_def" />
+      </object>
+      <integer name="DeploymentAttempt_Attempt_def" />
+      <integer name="DeploymentAttempt_DeploymentId_def" />
+      <string name="DeploymentAttempt_ErrorLog_def" />
+      <boolean name="DeploymentAttempt_HasStarted_def" />
+      <integer name="DeploymentAttempt_Id_def" />
+      <dateTimeString name="DeploymentAttempt_LastModifiedOn_def" />
+      <string name="DeploymentAttempt_OperationStatus_def" />
+      <dateTimeString name="DeploymentAttempt_QueuedOn_def" />
+      <string name="DeploymentAttempt_Reason_def" />
+      <array typeRef="ReleaseDeployPhase" name="DeploymentAttempt_ReleaseDeployPhases_def" />
+      <string name="DeploymentAttempt_RunPlanId_def" />
+      <string name="DeploymentAttempt_Status_def" />
+      <array typeRef="ReleaseTask" name="DeploymentAttempt_Tasks_def" />
+      <object name="DeploymentAttempt">
+        <property name="Attempt" type="integer" />
+        <property name="DeploymentId" type="integer" />
+        <property name="ErrorLog" type="string" />
+        <property name="HasStarted" type="boolean" />
+        <property name="Id" type="integer" />
+        <property name="Job" typeRef="ReleaseTask" />
+        <property name="LastModifiedBy" typeRef="IdentityRef" />
+        <property name="LastModifiedOn" typeRef="DeploymentAttempt_LastModifiedOn_def" />
+        <property name="OperationStatus" type="string" />
+        <property name="QueuedOn" typeRef="DeploymentAttempt_QueuedOn_def" />
+        <property name="Reason" type="string" />
+        <property name="ReleaseDeployPhases" typeRef="DeploymentAttempt_ReleaseDeployPhases_def" />
+        <property name="RequestedBy" typeRef="IdentityRef" />
+        <property name="RequestedFor" typeRef="IdentityRef" />
+        <property name="RunPlanId" type="string" />
+        <property name="Status" type="string" />
+        <property name="Tasks" typeRef="DeploymentAttempt_Tasks_def" />
+      </object>
+      <string name="EnvironmentOptions_EmailNotificationType_def" />
+      <string name="EnvironmentOptions_EmailRecipients_def" />
+      <boolean name="EnvironmentOptions_EnableAccessToken_def" />
+      <boolean name="EnvironmentOptions_PublishDeploymentStatus_def" />
+      <boolean name="EnvironmentOptions_SkipArtifactsDownload_def" />
+      <integer name="EnvironmentOptions_TimeoutInMinutes_def" />
+      <object name="EnvironmentOptions">
+        <property name="EmailNotificationType" type="string" />
+        <property name="EmailRecipients" type="string" />
+        <property name="EnableAccessToken" type="boolean" />
+        <property name="PublishDeploymentStatus" type="boolean" />
+        <property name="SkipArtifactsDownload" type="boolean" />
+        <property name="TimeoutInMinutes" type="integer" />
+      </object>
+      <array typeRef="ReleaseDefinitionApprovalStep" name="ReleaseDefinitionApprovals_Approvals_def" />
+      <object name="ReleaseDefinitionApprovals">
+        <property name="ApprovalOptions" typeRef="ApprovalOptions" />
+        <property name="Approvals" typeRef="ReleaseDefinitionApprovals_Approvals_def" />
+      </object>
+      <string name="ReleaseApproval_ApprovalType_def" />
+      <integer name="ReleaseApproval_Attempt_def" />
+      <string name="ReleaseApproval_Comments_def" />
+      <dateTimeString name="ReleaseApproval_CreatedOn_def" />
+      <array typeRef="ReleaseApprovalHistory" name="ReleaseApproval_History_def" />
+      <integer name="ReleaseApproval_Id_def" />
+      <boolean name="ReleaseApproval_IsAutomated_def" />
+      <boolean name="ReleaseApproval_IsNotificationOn_def" />
+      <dateTimeString name="ReleaseApproval_ModifiedOn_def" />
+      <integer name="ReleaseApproval_Rank_def" />
+      <integer name="ReleaseApproval_Revision_def" />
+      <string name="ReleaseApproval_Status_def" />
+      <integer name="ReleaseApproval_TrialNumber_def" />
+      <string name="ReleaseApproval_Url_def" />
+      <object name="ReleaseApproval">
+        <property name="ApprovalType" type="string" />
+        <property name="ApprovedBy" typeRef="IdentityRef" />
+        <property name="Approver" typeRef="IdentityRef" />
+        <property name="Attempt" type="integer" />
+        <property name="Comments" type="string" />
+        <property name="CreatedOn" typeRef="ReleaseApproval_CreatedOn_def" />
+        <property name="History" typeRef="ReleaseApproval_History_def" />
+        <property name="Id" type="integer" />
+        <property name="IsAutomated" type="boolean" />
+        <property name="IsNotificationOn" type="boolean" />
+        <property name="ModifiedOn" typeRef="ReleaseApproval_ModifiedOn_def" />
+        <property name="Rank" type="integer" />
+        <property name="Release" typeRef="ReleaseShallowReference" />
+        <property name="ReleaseDefinition" typeRef="ReleaseDefinitionShallowReference" />
+        <property name="ReleaseEnvironment" typeRef="ReleaseEnvironmentShallowReference" />
+        <property name="Revision" type="integer" />
+        <property name="Status" type="string" />
+        <property name="TrialNumber" type="integer" />
+        <property name="Url" type="string" />
+      </object>
+      <array typeRef="DataSourceBindingBase" name="ProcessParameters_DataSourceBindings_def" />
+      <array typeRef="TaskInputDefinitionBase" name="ProcessParameters_Inputs_def" />
+      <array typeRef="TaskSourceDefinitionBase" name="ProcessParameters_SourceDefinitions_def" />
+      <object name="ProcessParameters">
+        <property name="DataSourceBindings" typeRef="ProcessParameters_DataSourceBindings_def" />
+        <property name="Inputs" typeRef="ProcessParameters_Inputs_def" />
+        <property name="SourceDefinitions" typeRef="ProcessParameters_SourceDefinitions_def" />
+      </object>
+      <mapObject name="ReleaseShallowReference__links_def">
+        <values typeRef="GenericLink" />
+      </mapObject>
+      <integer name="ReleaseShallowReference_Id_def" />
+      <string name="ReleaseShallowReference_Name_def" />
+      <string name="ReleaseShallowReference_Url_def" />
+      <object name="ReleaseShallowReference">
+        <property name="_links" typeRef="ReleaseShallowReference__links_def" />
+        <property name="Id" type="integer" />
+        <property name="Name" type="string" />
+        <property name="Url" type="string" />
+      </object>
+      <string name="ReleaseSchedule_DaysToRelease_def" />
+      <string name="ReleaseSchedule_JobId_def" />
+      <integer name="ReleaseSchedule_StartHours_def" />
+      <integer name="ReleaseSchedule_StartMinutes_def" />
+      <string name="ReleaseSchedule_TimeZoneId_def" />
+      <object name="ReleaseSchedule">
+        <property name="DaysToRelease" type="string" />
+        <property name="JobId" type="string" />
+        <property name="StartHours" type="integer" />
+        <property name="StartMinutes" type="integer" />
+        <property name="TimeZoneId" type="string" />
+      </object>
+      <boolean name="WorkflowTask_AlwaysRun_def" />
+      <string name="WorkflowTask_Condition_def" />
+      <boolean name="WorkflowTask_ContinueOnError_def" />
+      <string name="WorkflowTask_DefinitionType_def" />
+      <boolean name="WorkflowTask_Enabled_def" />
+      <string name="WorkflowTask_Inputs_def_mapValues_def" />
+      <mapObject name="WorkflowTask_Inputs_def">
+        <values type="string" />
+      </mapObject>
+      <string name="WorkflowTask_Name_def" />
+      <string name="WorkflowTask_OverrideInputs_def_mapValues_def" />
+      <mapObject name="WorkflowTask_OverrideInputs_def">
+        <values type="string" />
+      </mapObject>
+      <string name="WorkflowTask_RefName_def" />
+      <string name="WorkflowTask_TaskId_def" />
+      <integer name="WorkflowTask_TimeoutInMinutes_def" />
+      <string name="WorkflowTask_Version_def" />
+      <object name="WorkflowTask">
+        <property name="AlwaysRun" type="boolean" />
+        <property name="Condition" type="string" />
+        <property name="ContinueOnError" type="boolean" />
+        <property name="DefinitionType" type="string" />
+        <property name="Enabled" type="boolean" />
+        <property name="Inputs" typeRef="WorkflowTask_Inputs_def" />
+        <property name="Name" type="string" />
+        <property name="OverrideInputs" typeRef="WorkflowTask_OverrideInputs_def" />
+        <property name="RefName" type="string" />
+        <property name="TaskId" type="string" />
+        <property name="TimeoutInMinutes" type="integer" />
+        <property name="Version" type="string" />
+      </object>
+      <object name="VariableGroupProviderData" />
+      <boolean name="VariableValue_IsSecret_def" />
+      <string name="VariableValue_Value_def" />
+      <object name="VariableValue">
+        <property name="IsSecret" type="boolean" />
+        <property name="Value" type="string" />
+      </object>
+      <string name="ReleaseTask_AgentName_def" />
+      <dateTimeString name="ReleaseTask_DateEnded_def" />
+      <dateTimeString name="ReleaseTask_DateStarted_def" />
+      <dateTimeString name="ReleaseTask_FinishTime_def" />
+      <integer name="ReleaseTask_Id_def" />
+      <array typeRef="Issue" name="ReleaseTask_Issues_def" />
+      <integer name="ReleaseTask_LineCount_def" />
+      <string name="ReleaseTask_LogUrl_def" />
+      <string name="ReleaseTask_Name_def" />
+      <integer name="ReleaseTask_PercentComplete_def" />
+      <integer name="ReleaseTask_Rank_def" />
+      <dateTimeString name="ReleaseTask_StartTime_def" />
+      <string name="ReleaseTask_Status_def" />
+      <string name="ReleaseTask_TimelineRecordId_def" />
+      <object name="ReleaseTask">
+        <property name="AgentName" type="string" />
+        <property name="DateEnded" typeRef="ReleaseTask_DateEnded_def" />
+        <property name="DateStarted" typeRef="ReleaseTask_DateStarted_def" />
+        <property name="FinishTime" typeRef="ReleaseTask_FinishTime_def" />
+        <property name="Id" type="integer" />
+        <property name="Issues" typeRef="ReleaseTask_Issues_def" />
+        <property name="LineCount" type="integer" />
+        <property name="LogUrl" type="string" />
+        <property name="Name" type="string" />
+        <property name="PercentComplete" type="integer" />
+        <property name="Rank" type="integer" />
+        <property name="StartTime" typeRef="ReleaseTask_StartTime_def" />
+        <property name="Status" type="string" />
+        <property name="Task" typeRef="WorkflowTaskReference" />
+        <property name="TimelineRecordId" type="string" />
+      </object>
+      <array typeRef="DeploymentJob" name="ReleaseDeployPhase_DeploymentJobs_def" />
+      <string name="ReleaseDeployPhase_ErrorLog_def" />
+      <integer name="ReleaseDeployPhase_Id_def" />
+      <array typeRef="ManualIntervention" name="ReleaseDeployPhase_ManualInterventions_def" />
+      <string name="ReleaseDeployPhase_PhaseType_def" />
+      <integer name="ReleaseDeployPhase_Rank_def" />
+      <string name="ReleaseDeployPhase_RunPlanId_def" />
+      <string name="ReleaseDeployPhase_Status_def" />
+      <object name="ReleaseDeployPhase">
+        <property name="DeploymentJobs" typeRef="ReleaseDeployPhase_DeploymentJobs_def" />
+        <property name="ErrorLog" type="string" />
+        <property name="Id" type="integer" />
+        <property name="ManualInterventions" typeRef="ReleaseDeployPhase_ManualInterventions_def" />
+        <property name="PhaseType" type="string" />
+        <property name="Rank" type="integer" />
+        <property name="RunPlanId" type="string" />
+        <property name="Status" type="string" />
+      </object>
+      <boolean name="ApprovalOptions_AutoTriggeredAndPreviousEnvironmentApprovedCanBeSkipped_def" />
+      <boolean name="ApprovalOptions_EnforceIdentityRevalidation_def" />
+      <boolean name="ApprovalOptions_ReleaseCreatorCanBeApprover_def" />
+      <integer name="ApprovalOptions_RequiredApproverCount_def" />
+      <integer name="ApprovalOptions_TimeoutInMinutes_def" />
+      <object name="ApprovalOptions">
+        <property name="AutoTriggeredAndPreviousEnvironmentApprovedCanBeSkipped" type="boolean" />
+        <property name="EnforceIdentityRevalidation" type="boolean" />
+        <property name="ReleaseCreatorCanBeApprover" type="boolean" />
+        <property name="RequiredApproverCount" type="integer" />
+        <property name="TimeoutInMinutes" type="integer" />
+      </object>
+      <boolean name="ReleaseDefinitionApprovalStep_IsAutomated_def" />
+      <boolean name="ReleaseDefinitionApprovalStep_IsNotificationOn_def" />
+      <integer name="ReleaseDefinitionApprovalStep_Rank_def" />
+      <integer name="ReleaseDefinitionApprovalStep_Id_def" />
+      <object name="ReleaseDefinitionApprovalStep">
+        <property name="Approver" typeRef="IdentityRef" />
+        <property name="IsAutomated" type="boolean" />
+        <property name="IsNotificationOn" type="boolean" />
+        <property name="Rank" type="integer" />
+        <property name="Id" type="integer" />
+      </object>
+      <string name="ReleaseApprovalHistory_Comments_def" />
+      <dateTimeString name="ReleaseApprovalHistory_CreatedOn_def" />
+      <dateTimeString name="ReleaseApprovalHistory_ModifiedOn_def" />
+      <integer name="ReleaseApprovalHistory_Revision_def" />
+      <object name="ReleaseApprovalHistory">
+        <property name="Approver" typeRef="IdentityRef" />
+        <property name="ChangedBy" typeRef="IdentityRef" />
+        <property name="Comments" type="string" />
+        <property name="CreatedOn" typeRef="ReleaseApprovalHistory_CreatedOn_def" />
+        <property name="ModifiedOn" typeRef="ReleaseApprovalHistory_ModifiedOn_def" />
+        <property name="Revision" type="integer" />
+      </object>
+      <mapObject name="ReleaseEnvironmentShallowReference__links_def">
+        <values typeRef="GenericLink" />
+      </mapObject>
+      <integer name="ReleaseEnvironmentShallowReference_Id_def" />
+      <string name="ReleaseEnvironmentShallowReference_Name_def" />
+      <string name="ReleaseEnvironmentShallowReference_Url_def" />
+      <object name="ReleaseEnvironmentShallowReference">
+        <property name="_links" typeRef="ReleaseEnvironmentShallowReference__links_def" />
+        <property name="Id" type="integer" />
+        <property name="Name" type="string" />
+        <property name="Url" type="string" />
+      </object>
+      <string name="DataSourceBindingBase_DataSourceName_def" />
+      <string name="DataSourceBindingBase_EndpointId_def" />
+      <string name="DataSourceBindingBase_EndpointUrl_def" />
+      <string name="DataSourceBindingBase_Parameters_def_mapValues_def" />
+      <mapObject name="DataSourceBindingBase_Parameters_def">
+        <values type="string" />
+      </mapObject>
+      <string name="DataSourceBindingBase_ResultSelector_def" />
+      <string name="DataSourceBindingBase_ResultTemplate_def" />
+      <string name="DataSourceBindingBase_Target_def" />
+      <object name="DataSourceBindingBase">
+        <property name="DataSourceName" type="string" />
+        <property name="EndpointId" type="string" />
+        <property name="EndpointUrl" type="string" />
+        <property name="Parameters" typeRef="DataSourceBindingBase_Parameters_def" />
+        <property name="ResultSelector" type="string" />
+        <property name="ResultTemplate" type="string" />
+        <property name="Target" type="string" />
+      </object>
+      <string name="TaskInputDefinitionBase_DefaultValue_def" />
+      <string name="TaskInputDefinitionBase_GroupName_def" />
+      <string name="TaskInputDefinitionBase_HelpMarkDown_def" />
+      <string name="TaskInputDefinitionBase_Label_def" />
+      <string name="TaskInputDefinitionBase_Name_def" />
+      <string name="TaskInputDefinitionBase_Options_def_mapValues_def" />
+      <mapObject name="TaskInputDefinitionBase_Options_def">
+        <values type="string" />
+      </mapObject>
+      <string name="TaskInputDefinitionBase_Properties_def_mapValues_def" />
+      <mapObject name="TaskInputDefinitionBase_Properties_def">
+        <values type="string" />
+      </mapObject>
+      <boolean name="TaskInputDefinitionBase_Required_def" />
+      <string name="TaskInputDefinitionBase_Type_def" />
+      <string name="TaskInputDefinitionBase_VisibleRule_def" />
+      <object name="TaskInputDefinitionBase">
+        <property name="DefaultValue" type="string" />
+        <property name="GroupName" type="string" />
+        <property name="HelpMarkDown" type="string" />
+        <property name="Label" type="string" />
+        <property name="Name" type="string" />
+        <property name="Options" typeRef="TaskInputDefinitionBase_Options_def" />
+        <property name="Properties" typeRef="TaskInputDefinitionBase_Properties_def" />
+        <property name="Required" type="boolean" />
+        <property name="Type" type="string" />
+        <property name="VisibleRule" type="string" />
+      </object>
+      <string name="TaskSourceDefinitionBase_AuthKey_def" />
+      <string name="TaskSourceDefinitionBase_Endpoint_def" />
+      <string name="TaskSourceDefinitionBase_KeySelector_def" />
+      <string name="TaskSourceDefinitionBase_Selector_def" />
+      <string name="TaskSourceDefinitionBase_Target_def" />
+      <object name="TaskSourceDefinitionBase">
+        <property name="AuthKey" type="string" />
+        <property name="Endpoint" type="string" />
+        <property name="KeySelector" type="string" />
+        <property name="Selector" type="string" />
+        <property name="Target" type="string" />
+      </object>
+      <string name="Issue_IssueType_def" />
+      <string name="Issue_Message_def" />
+      <object name="Issue">
+        <property name="IssueType" type="string" />
+        <property name="Message" type="string" />
+      </object>
+      <string name="WorkflowTaskReference_Id_def" />
+      <string name="WorkflowTaskReference_Name_def" />
+      <string name="WorkflowTaskReference_Version_def" />
+      <object name="WorkflowTaskReference">
+        <property name="Id" type="string" />
+        <property name="Name" type="string" />
+        <property name="Version" type="string" />
+      </object>
+      <array typeRef="ReleaseTask" name="DeploymentJob_Tasks_def" />
+      <object name="DeploymentJob">
+        <property name="Job" typeRef="ReleaseTask" />
+        <property name="Tasks" typeRef="DeploymentJob_Tasks_def" />
+      </object>
+      <string name="ManualIntervention_Comments_def" />
+      <dateTimeString name="ManualIntervention_CreatedOn_def" />
+      <integer name="ManualIntervention_Id_def" />
+      <string name="ManualIntervention_Instructions_def" />
+      <dateTimeString name="ManualIntervention_ModifiedOn_def" />
+      <string name="ManualIntervention_Name_def" />
+      <string name="ManualIntervention_Status_def" />
+      <string name="ManualIntervention_TaskInstanceId_def" />
+      <string name="ManualIntervention_Url_def" />
+      <object name="ManualIntervention">
+        <property name="Approver" typeRef="IdentityRef" />
+        <property name="Comments" type="string" />
+        <property name="CreatedOn" typeRef="ManualIntervention_CreatedOn_def" />
+        <property name="Id" type="integer" />
+        <property name="Instructions" type="string" />
+        <property name="ModifiedOn" typeRef="ManualIntervention_ModifiedOn_def" />
+        <property name="Name" type="string" />
+        <property name="Release" typeRef="ReleaseShallowReference" />
+        <property name="ReleaseDefinition" typeRef="ReleaseDefinitionShallowReference" />
+        <property name="ReleaseEnvironment" typeRef="ReleaseEnvironmentShallowReference" />
+        <property name="Status" type="string" />
+        <property name="TaskInstanceId" type="string" />
+        <property name="Url" type="string" />
+      </object>
+      <array typeRef="TfvcChangeset" name="VstsList_ux5B_TfvcChangeset_ux5D__value_def" />
+      <object name="VstsList_ux5B_TfvcChangeset_ux5D_">
+        <property name="value" typeRef="VstsList_ux5B_TfvcChangeset_ux5D__value_def" />
+      </object>
+      <integer name="TfvcChangeset_changesetId_def" />
+      <dateTimeString name="TfvcChangeset_createdDate_def" />
+      <string name="TfvcChangeset_comment_def" />
+      <object name="TfvcChangeset">
+        <property name="changesetId" type="integer" />
+        <property name="author" typeRef="ChangesetAuthor" />
+        <property name="checkedInBy" typeRef="ChangesetCheckedInBy" />
+        <property name="createdDate" typeRef="TfvcChangeset_createdDate_def" />
+        <property name="comment" type="string" />
+      </object>
+      <string name="ChangesetAuthor_displayName_def" />
+      <string name="ChangesetAuthor_uniqueName_def" />
+      <object name="ChangesetAuthor">
+        <property name="displayName" type="string" />
+        <property name="uniqueName" type="string" />
+      </object>
+      <string name="ChangesetCheckedInBy_displayName_def" />
+      <string name="ChangesetCheckedInBy_uniqueName_def" />
+      <object name="ChangesetCheckedInBy">
+        <property name="displayName" type="string" />
+        <property name="uniqueName" type="string" />
+      </object>
+      <string name="VstsHttpRequestBodyParameters_Method_def" />
+      <string name="VstsHttpRequestBodyParameters_Uri_def" />
+      <string name="VstsHttpRequestBodyParameters_Headers_def_mapValues_def" />
+      <mapObject name="VstsHttpRequestBodyParameters_Headers_def">
+        <values type="string" />
+      </mapObject>
+      <string name="VstsHttpRequestBodyParameters_Body_def" />
+      <boolean name="VstsHttpRequestBodyParameters_IsBase64_def" />
+      <object name="VstsHttpRequestBodyParameters">
+        <property name="Method" type="string" />
+        <property name="Uri" type="string" />
+        <property name="Headers" typeRef="VstsHttpRequestBodyParameters_Headers_def" />
+        <property name="Body" type="string" />
+        <property name="IsBase64" type="boolean" />
+      </object>
+      <array typeRef="WorkItemType" name="VstsList_ux5B_WorkItemType_ux5D__value_def" />
+      <object name="VstsList_ux5B_WorkItemType_ux5D_">
+        <property name="value" typeRef="VstsList_ux5B_WorkItemType_ux5D__value_def" />
+      </object>
+      <string name="WorkItemType_Description_def" />
+      <string name="WorkItemType_Name_def" />
+      <string name="WorkItemType_XmlForm_def" />
+      <array typeRef="WorkItemTypeFieldInstance" name="WorkItemType_FieldInstances_def" />
+      <object name="WorkItemType">
+        <property name="Description" type="string" />
+        <property name="Name" type="string" />
+        <property name="XmlForm" type="string" />
+        <property name="FieldInstances" typeRef="WorkItemType_FieldInstances_def" />
+      </object>
+      <boolean name="WorkItemTypeFieldInstance_AlwaysRequired_def" />
+      <string name="WorkItemTypeFieldInstance_ReferenceName_def" />
+      <string name="WorkItemTypeFieldInstance_Name_def" />
+      <string name="WorkItemTypeFieldInstance_Url_def" />
+      <object name="WorkItemTypeFieldInstance">
+        <property name="AlwaysRequired" type="boolean" />
+        <property name="ReferenceName" type="string" />
+        <property name="Name" type="string" />
+        <property name="Url" type="string" />
+      </object>
+      <string name="UpdateWorkItemRequest_title_def" />
+      <string name="UpdateWorkItemRequest_description_def" />
+      <integer name="UpdateWorkItemRequest_priority_def" />
+      <string name="UpdateWorkItemRequest_iteration_def" />
+      <string name="UpdateWorkItemRequest_area_def" />
+      <string name="UpdateWorkItemRequest_linkUrl_def" />
+      <string name="UpdateWorkItemRequest_linkType_def" />
+      <string name="UpdateWorkItemRequest_linkComment_def" />
+      <object isDynamicSchema="true" name="UpdateWorkItemRequest_dynamicFields_def" />
+      <string name="UpdateWorkItemRequest_userEnteredFields_def_mapValues_def" />
+      <mapObject name="UpdateWorkItemRequest_userEnteredFields_def">
+        <values type="string" />
+      </mapObject>
+      <object name="UpdateWorkItemRequest">
+        <property name="title" type="string" />
+        <property name="description" type="string" />
+        <property name="priority" type="integer" />
+        <property name="iteration" type="string" />
+        <property name="area" type="string" />
+        <property name="linkUrl" type="string" />
+        <property name="linkType" type="string" />
+        <property name="linkComment" type="string" />
+        <property name="dynamicFields" typeRef="UpdateWorkItemRequest_dynamicFields_def" />
+        <property name="userEnteredFields" typeRef="UpdateWorkItemRequest_userEnteredFields_def" />
+      </object>
+      <integer name="DynamicWorkItemResponse_id_def" />
+      <integer name="DynamicWorkItemResponse_rev_def" />
+      <string name="DynamicWorkItemResponse_url_def" />
+      <integer name="DynamicWorkItemResponse_fields_def_System_Id_def" />
+      <string name="DynamicWorkItemResponse_fields_def_System_AreaPath_def" />
+      <string name="DynamicWorkItemResponse_fields_def_System_TeamProject_def" />
+      <string name="DynamicWorkItemResponse_fields_def_System_IterationPath_def" />
+      <string name="DynamicWorkItemResponse_fields_def_System_WorkItemType_def" />
+      <string name="DynamicWorkItemResponse_fields_def_System_State_def" />
+      <string name="DynamicWorkItemResponse_fields_def_System_Reason_def" />
+      <string name="DynamicWorkItemResponse_fields_def_System_CreatedDate_def" />
+      <string name="DynamicWorkItemResponse_fields_def_System_CreatedBy_def" />
+      <string name="DynamicWorkItemResponse_fields_def_System_ChangedDate_def" />
+      <string name="DynamicWorkItemResponse_fields_def_System_ChangedBy_def" />
+      <string name="DynamicWorkItemResponse_fields_def_System_Title_def" />
+      <string name="DynamicWorkItemResponse_fields_def_System_Description_def" />
+      <string name="DynamicWorkItemResponse_fields_def_System_Tags_def" />
+      <string name="DynamicWorkItemResponse_fields_def_System_AssignedTo_def" />
+      <object isDynamicSchema="true" name="DynamicWorkItemResponse_fields_def">
+        <property name="System_Id" type="integer" />
+        <property name="System_AreaPath" type="string" />
+        <property name="System_TeamProject" type="string" />
+        <property name="System_IterationPath" type="string" />
+        <property name="System_WorkItemType" type="string" />
+        <property name="System_State" type="string" />
+        <property name="System_Reason" type="string" />
+        <property name="System_CreatedDate" type="string" />
+        <property name="System_CreatedBy" type="string" />
+        <property name="System_ChangedDate" type="string" />
+        <property name="System_ChangedBy" type="string" />
+        <property name="System_Title" type="string" />
+        <property name="System_Description" type="string" />
+        <property name="System_Tags" type="string" />
+        <property name="System_AssignedTo" type="string" />
+      </object>
+      <object name="DynamicWorkItemResponse">
+        <property name="id" type="integer" />
+        <property name="rev" type="integer" />
+        <property name="url" type="string" />
+        <property name="fields" typeRef="DynamicWorkItemResponse_fields_def" />
+      </object>
+      <integer name="PatchWorkItemResponse_id_def" />
+      <integer name="PatchWorkItemResponse_rev_def" />
+      <string name="PatchWorkItemResponse_url_def" />
+      <integer name="PatchWorkItemResponse_fields_def_System_Id_def" />
+      <string name="PatchWorkItemResponse_fields_def_System_AreaPath_def" />
+      <string name="PatchWorkItemResponse_fields_def_System_TeamProject_def" />
+      <string name="PatchWorkItemResponse_fields_def_System_IterationPath_def" />
+      <string name="PatchWorkItemResponse_fields_def_System_WorkItemType_def" />
+      <string name="PatchWorkItemResponse_fields_def_System_State_def" />
+      <string name="PatchWorkItemResponse_fields_def_System_Reason_def" />
+      <string name="PatchWorkItemResponse_fields_def_System_CreatedDate_def" />
+      <string name="PatchWorkItemResponse_fields_def_System_CreatedBy_def" />
+      <string name="PatchWorkItemResponse_fields_def_System_ChangedDate_def" />
+      <string name="PatchWorkItemResponse_fields_def_System_ChangedBy_def" />
+      <string name="PatchWorkItemResponse_fields_def_System_Title_def" />
+      <string name="PatchWorkItemResponse_fields_def_System_Description_def" />
+      <string name="PatchWorkItemResponse_fields_def_System_Tags_def" />
+      <string name="PatchWorkItemResponse_fields_def_System_AssignedTo_def" />
+      <object isDynamicSchema="true" name="PatchWorkItemResponse_fields_def">
+        <property name="System_Id" type="integer" />
+        <property name="System_AreaPath" type="string" />
+        <property name="System_TeamProject" type="string" />
+        <property name="System_IterationPath" type="string" />
+        <property name="System_WorkItemType" type="string" />
+        <property name="System_State" type="string" />
+        <property name="System_Reason" type="string" />
+        <property name="System_CreatedDate" type="string" />
+        <property name="System_CreatedBy" type="string" />
+        <property name="System_ChangedDate" type="string" />
+        <property name="System_ChangedBy" type="string" />
+        <property name="System_Title" type="string" />
+        <property name="System_Description" type="string" />
+        <property name="System_Tags" type="string" />
+        <property name="System_AssignedTo" type="string" />
+      </object>
+      <object name="PatchWorkItemResponse">
+        <property name="id" type="integer" />
+        <property name="rev" type="integer" />
+        <property name="url" type="string" />
+        <property name="fields" typeRef="PatchWorkItemResponse_fields_def" />
+      </object>
+      <integer name="QueryResultWorkItemResponse_System_Id_def" />
+      <string name="QueryResultWorkItemResponse_System_AreaPath_def" />
+      <string name="QueryResultWorkItemResponse_System_TeamProject_def" />
+      <string name="QueryResultWorkItemResponse_System_IterationPath_def" />
+      <string name="QueryResultWorkItemResponse_System_WorkItemType_def" />
+      <string name="QueryResultWorkItemResponse_System_State_def" />
+      <string name="QueryResultWorkItemResponse_System_Reason_def" />
+      <string name="QueryResultWorkItemResponse_System_CreatedDate_def" />
+      <string name="QueryResultWorkItemResponse_System_CreatedBy_def" />
+      <string name="QueryResultWorkItemResponse_System_ChangedDate_def" />
+      <string name="QueryResultWorkItemResponse_System_ChangedBy_def" />
+      <string name="QueryResultWorkItemResponse_System_Title_def" />
+      <string name="QueryResultWorkItemResponse_System_Description_def" />
+      <string name="QueryResultWorkItemResponse_System_Tags_def" />
+      <string name="QueryResultWorkItemResponse_System_AssignedTo_def" />
+      <object isDynamicSchema="true" name="QueryResultWorkItemResponse">
+        <property name="System.Id" type="integer" />
+        <property name="System.AreaPath" type="string" />
+        <property name="System.TeamProject" type="string" />
+        <property name="System.IterationPath" type="string" />
+        <property name="System.WorkItemType" type="string" />
+        <property name="System.State" type="string" />
+        <property name="System.Reason" type="string" />
+        <property name="System.CreatedDate" type="string" />
+        <property name="System.CreatedBy" type="string" />
+        <property name="System.ChangedDate" type="string" />
+        <property name="System.ChangedBy" type="string" />
+        <property name="System.Title" type="string" />
+        <property name="System.Description" type="string" />
+        <property name="System.Tags" type="string" />
+        <property name="System.AssignedTo" type="string" />
+      </object>
+      <integer name="ListWorkItemResponse_System_Id_def" />
+      <string name="ListWorkItemResponse_System_AreaPath_def" />
+      <string name="ListWorkItemResponse_System_TeamProject_def" />
+      <string name="ListWorkItemResponse_System_IterationPath_def" />
+      <string name="ListWorkItemResponse_System_WorkItemType_def" />
+      <string name="ListWorkItemResponse_System_State_def" />
+      <string name="ListWorkItemResponse_System_Reason_def" />
+      <string name="ListWorkItemResponse_System_CreatedDate_def" />
+      <string name="ListWorkItemResponse_System_CreatedBy_def" />
+      <string name="ListWorkItemResponse_System_ChangedDate_def" />
+      <string name="ListWorkItemResponse_System_ChangedBy_def" />
+      <string name="ListWorkItemResponse_System_Title_def" />
+      <string name="ListWorkItemResponse_System_Description_def" />
+      <string name="ListWorkItemResponse_System_Tags_def" />
+      <string name="ListWorkItemResponse_System_AssignedTo_def" />
+      <object isDynamicSchema="true" name="ListWorkItemResponse">
+        <property name="System.Id" type="integer" />
+        <property name="System.AreaPath" type="string" />
+        <property name="System.TeamProject" type="string" />
+        <property name="System.IterationPath" type="string" />
+        <property name="System.WorkItemType" type="string" />
+        <property name="System.State" type="string" />
+        <property name="System.Reason" type="string" />
+        <property name="System.CreatedDate" type="string" />
+        <property name="System.CreatedBy" type="string" />
+        <property name="System.ChangedDate" type="string" />
+        <property name="System.ChangedBy" type="string" />
+        <property name="System.Title" type="string" />
+        <property name="System.Description" type="string" />
+        <property name="System.Tags" type="string" />
+        <property name="System.AssignedTo" type="string" />
+      </object>
+      <integer name="TriggerWorkItemResponse_id_def" />
+      <integer name="TriggerWorkItemResponse_rev_def" />
+      <string name="TriggerWorkItemResponse_url_def" />
+      <object isDynamicSchema="true" name="TriggerWorkItemResponse_fields_def" />
+      <object name="TriggerWorkItemResponse">
+        <property name="id" type="integer" />
+        <property name="rev" type="integer" />
+        <property name="url" type="string" />
+        <property name="fields" typeRef="TriggerWorkItemResponse_fields_def" />
+      </object>
+      <object isDynamicSchema="true" name="WebhookTriggerWorkItemResponse" />
+      <array typeRef="TriggerWorkItemResponse" name="VstsList_ux5B_TriggerWorkItemResponse_ux5D__value_def" />
+      <object name="VstsList_ux5B_TriggerWorkItemResponse_ux5D_">
+        <property name="value" typeRef="VstsList_ux5B_TriggerWorkItemResponse_ux5D__value_def" />
+      </object>
+      <array typeRef="WebhookTriggerWorkItemResponse" name="VstsList_ux5B_WebhookTriggerWorkItemResponse_ux5D__value_def" />
+      <object name="VstsList_ux5B_WebhookTriggerWorkItemResponse_ux5D_">
+        <property name="value" typeRef="VstsList_ux5B_WebhookTriggerWorkItemResponse_ux5D__value_def" />
+      </object>
+      <integer name="WorkItemResponse_id_def" />
+      <integer name="WorkItemResponse_rev_def" />
+      <string name="WorkItemResponse_url_def" />
+      <object name="WorkItemResponse">
+        <property name="id" type="integer" />
+        <property name="rev" type="integer" />
+        <property name="url" type="string" />
+        <property name="fields" typeRef="WorkItemFields" />
+      </object>
+      <array typeRef="WorkItemResponse" name="VstsList_ux5B_WorkItemResponse_ux5D__value_def" />
+      <object name="VstsList_ux5B_WorkItemResponse_ux5D_">
+        <property name="value" typeRef="VstsList_ux5B_WorkItemResponse_ux5D__value_def" />
+      </object>
+      <array typeRef="QueryResultWorkItemResponse" name="VstsList_ux5B_QueryResultWorkItemResponse_ux5D__value_def" />
+      <string name="VstsList_ux5B_QueryResultWorkItemResponse_ux5D___ux40_odata_nextLink_def" />
+      <object name="VstsList_ux5B_QueryResultWorkItemResponse_ux5D_">
+        <property name="value" typeRef="VstsList_ux5B_QueryResultWorkItemResponse_ux5D__value_def" />
+        <property name="@odata.nextLink" type="string" />
+      </object>
+      <array typeRef="ListWorkItemResponse" name="VstsList_ux5B_ListWorkItemResponse_ux5D__value_def" />
+      <object name="VstsList_ux5B_ListWorkItemResponse_ux5D_">
+        <property name="value" typeRef="VstsList_ux5B_ListWorkItemResponse_ux5D__value_def" />
+      </object>
+      <array typeRef="Object" name="VstsList_ux5B_JObject_ux5D__value_def" />
+      <object name="VstsList_ux5B_JObject_ux5D_">
+        <property name="value" typeRef="VstsList_ux5B_JObject_ux5D__value_def" />
+      </object>
+      <array typeRef="QueryHierarchyItem" name="VstsList_ux5B_QueryHierarchyItem_ux5D__value_def" />
+      <object name="VstsList_ux5B_QueryHierarchyItem_ux5D_">
+        <property name="value" typeRef="VstsList_ux5B_QueryHierarchyItem_ux5D__value_def" />
+      </object>
+      <array typeRef="QueryHierarchyItem" name="QueryHierarchyItem_Children_def" />
+      <array typeRef="WorkItemFieldReference" name="QueryHierarchyItem_Columns_def" />
+      <string name="QueryHierarchyItem_FilterOptions_def" />
+      <boolean name="QueryHierarchyItem_HasChildren_def" />
+      <string name="QueryHierarchyItem_Id_def" />
+      <boolean name="QueryHierarchyItem_IsDeleted_def" />
+      <boolean name="QueryHierarchyItem_IsFolder_def" />
+      <boolean name="QueryHierarchyItem_IsInvalidSyntax_def" />
+      <boolean name="QueryHierarchyItem_IsPublic_def" />
+      <string name="QueryHierarchyItem_Name_def" />
+      <string name="QueryHierarchyItem_Path_def" />
+      <string name="QueryHierarchyItem_QueryType_def" />
+      <array typeRef="WorkItemQuerySortColumn" name="QueryHierarchyItem_SortColumns_def" />
+      <string name="QueryHierarchyItem_Wiql_def" />
+      <mapObject name="QueryHierarchyItem__links_def">
+        <values typeRef="GenericLink" />
+      </mapObject>
+      <string name="QueryHierarchyItem_Url_def" />
+      <object name="QueryHierarchyItem">
+        <property name="Children" typeRef="QueryHierarchyItem_Children_def" />
+        <property name="Clauses" typeRef="WorkItemQueryClause" />
+        <property name="Columns" typeRef="QueryHierarchyItem_Columns_def" />
+        <property name="FilterOptions" type="string" />
+        <property name="HasChildren" type="boolean" />
+        <property name="Id" type="string" />
+        <property name="IsDeleted" type="boolean" />
+        <property name="IsFolder" type="boolean" />
+        <property name="IsInvalidSyntax" type="boolean" />
+        <property name="IsPublic" type="boolean" />
+        <property name="LinkClauses" typeRef="WorkItemQueryClause" />
+        <property name="Name" type="string" />
+        <property name="Path" type="string" />
+        <property name="QueryType" type="string" />
+        <property name="SortColumns" typeRef="QueryHierarchyItem_SortColumns_def" />
+        <property name="SourceClauses" typeRef="WorkItemQueryClause" />
+        <property name="TargetClauses" typeRef="WorkItemQueryClause" />
+        <property name="Wiql" type="string" />
+        <property name="_links" typeRef="QueryHierarchyItem__links_def" />
+        <property name="Url" type="string" />
+      </object>
+      <boolean name="WorkItemQueryClause_IsFieldValue_def" />
+      <string name="WorkItemQueryClause_LogicalOperator_def" />
+      <string name="WorkItemQueryClause_Value_def" />
+      <object name="WorkItemQueryClause">
+        <property name="Clauses" typeRef="WorkItemQueryClause" />
+        <property name="Field" typeRef="WorkItemFieldReference" />
+        <property name="FieldValue" typeRef="WorkItemFieldReference" />
+        <property name="IsFieldValue" type="boolean" />
+        <property name="LogicalOperator" type="string" />
+        <property name="Operator" typeRef="WorkItemFieldOperation" />
+        <property name="Value" type="string" />
+      </object>
+      <string name="WorkItemFieldReference_Name_def" />
+      <string name="WorkItemFieldReference_ReferenceName_def" />
+      <string name="WorkItemFieldReference_Url_def" />
+      <object name="WorkItemFieldReference">
+        <property name="Name" type="string" />
+        <property name="ReferenceName" type="string" />
+        <property name="Url" type="string" />
+      </object>
+      <boolean name="WorkItemQuerySortColumn_Descending_def" />
+      <object name="WorkItemQuerySortColumn">
+        <property name="Descending" type="boolean" />
+        <property name="Field" typeRef="WorkItemFieldReference" />
+      </object>
+      <string name="WorkItemFieldOperation_Name_def" />
+      <string name="WorkItemFieldOperation_ReferenceName_def" />
+      <object name="WorkItemFieldOperation">
+        <property name="Name" type="string" />
+        <property name="ReferenceName" type="string" />
+      </object>
+      <string name="CreateWorkItemRequest_title_def" />
+      <string name="CreateWorkItemRequest_description_def" />
+      <integer name="CreateWorkItemRequest_priority_def" />
+      <string name="CreateWorkItemRequest_iteration_def" />
+      <string name="CreateWorkItemRequest_area_def" />
+      <string name="CreateWorkItemRequest_linkUrl_def" />
+      <string name="CreateWorkItemRequest_linkType_def" />
+      <string name="CreateWorkItemRequest_linkComment_def" />
+      <object isDynamicSchema="true" name="CreateWorkItemRequest_dynamicFields_def" />
+      <string name="CreateWorkItemRequest_userEnteredFields_def_mapValues_def" />
+      <mapObject name="CreateWorkItemRequest_userEnteredFields_def">
+        <values type="string" />
+      </mapObject>
+      <object name="CreateWorkItemRequest">
+        <property name="title" type="string" />
+        <property name="description" type="string" />
+        <property name="priority" type="integer" />
+        <property name="iteration" type="string" />
+        <property name="area" type="string" />
+        <property name="linkUrl" type="string" />
+        <property name="linkType" type="string" />
+        <property name="linkComment" type="string" />
+        <property name="dynamicFields" typeRef="CreateWorkItemRequest_dynamicFields_def" />
+        <property name="userEnteredFields" typeRef="CreateWorkItemRequest_userEnteredFields_def" />
+      </object>
+      <string name="WorkItemFields_System_AreaPath_def" />
+      <string name="WorkItemFields_System_TeamProject_def" />
+      <string name="WorkItemFields_System_IterationPath_def" />
+      <string name="WorkItemFields_System_WorkItemType_def" />
+      <string name="WorkItemFields_System_State_def" />
+      <string name="WorkItemFields_System_Reason_def" />
+      <string name="WorkItemFields_System_CreatedDate_def" />
+      <string name="WorkItemFields_System_CreatedBy_def" />
+      <string name="WorkItemFields_System_ChangedDate_def" />
+      <string name="WorkItemFields_System_ChangedBy_def" />
+      <string name="WorkItemFields_System_Title_def" />
+      <string name="WorkItemFields_Microsoft_VSTS_Common_StateChangeDate_def" />
+      <integer name="WorkItemFields_Microsoft_VSTS_Common_Priority_def" />
+      <string name="WorkItemFields_Microsoft_VSTS_Common_Severity_def" />
+      <string name="WorkItemFields_Microsoft_VSTS_Common_ValueArea_def" />
+      <string name="WorkItemFields_System_Description_def" />
+      <object name="WorkItemFields">
+        <property name="System_AreaPath" type="string" />
+        <property name="System_TeamProject" type="string" />
+        <property name="System_IterationPath" type="string" />
+        <property name="System_WorkItemType" type="string" />
+        <property name="System_State" type="string" />
+        <property name="System_Reason" type="string" />
+        <property name="System_CreatedDate" type="string" />
+        <property name="System_CreatedBy" type="string" />
+        <property name="System_ChangedDate" type="string" />
+        <property name="System_ChangedBy" type="string" />
+        <property name="System_Title" type="string" />
+        <property name="Microsoft_VSTS_Common_StateChangeDate" type="string" />
+        <property name="Microsoft_VSTS_Common_Priority" type="integer" />
+        <property name="Microsoft_VSTS_Common_Severity" type="string" />
+        <property name="Microsoft_VSTS_Common_ValueArea" type="string" />
+        <property name="System_Description" type="string" />
+      </object>
+      <string name="WiqlQuery_Query_def" />
+      <object name="WiqlQuery">
+        <property name="Query" type="string" />
+      </object>
+      <array typeRef="WorkItemResponse" name="TriggerBatchResponse_ux5B_WorkItemResponse_ux5D__value_def" />
+      <object name="TriggerBatchResponse_ux5B_WorkItemResponse_ux5D_">
+        <property name="value" typeRef="TriggerBatchResponse_ux5B_WorkItemResponse_ux5D__value_def" />
+      </object>
+      <array typeRef="Pipeline" name="PipelinesList_value_def" />
+      <object name="PipelinesList">
+        <property name="value" typeRef="PipelinesList_value_def" />
+      </object>
+      <integer name="Pipeline_count_def" />
+      <string name="Pipeline_value_def_items_def__links_def_self_def_href_def" />
+      <object name="Pipeline_value_def_items_def__links_def_self_def">
+        <property name="href" type="string" />
+      </object>
+      <string name="Pipeline_value_def_items_def__links_def_web_def_href_def" />
+      <object name="Pipeline_value_def_items_def__links_def_web_def">
+        <property name="href" type="string" />
+      </object>
+      <object name="Pipeline_value_def_items_def__links_def">
+        <property name="self" typeRef="Pipeline_value_def_items_def__links_def_self_def" />
+        <property name="web" typeRef="Pipeline_value_def_items_def__links_def_web_def" />
+      </object>
+      <string name="Pipeline_value_def_items_def_folder_def" />
+      <integer name="Pipeline_value_def_items_def_id_def" />
+      <string name="Pipeline_value_def_items_def_name_def" />
+      <integer name="Pipeline_value_def_items_def_revision_def" />
+      <string name="Pipeline_value_def_items_def_url_def" />
+      <object name="Pipeline_value_def_items_def">
+        <property name="_links" typeRef="Pipeline_value_def_items_def__links_def" />
+        <property name="folder" type="string" />
+        <property name="id" type="integer" />
+        <property name="name" type="string" />
+        <property name="revision" type="integer" />
+        <property name="url" type="string" />
+      </object>
+      <array typeRef="Pipeline_value_def_items_def" name="Pipeline_value_def" />
+      <object name="Pipeline">
+        <property name="count" type="integer" />
+        <property name="value" typeRef="Pipeline_value_def" />
+      </object>
+      <boolean name="CodelessVariableValue_IsSecret_def" />
+      <string name="CodelessVariableValue_Value_def" />
+      <object name="CodelessVariableValue">
+        <property name="IsSecret" type="boolean" />
+        <property name="Value" type="string" />
+      </object>
+      <integer name="Run_count_def" />
+      <string name="Run_value_def_items_def__links_def_self_def_href_def" />
+      <object name="Run_value_def_items_def__links_def_self_def">
+        <property name="href" type="string" />
+      </object>
+      <string name="Run_value_def_items_def__links_def_web_def_href_def" />
+      <object name="Run_value_def_items_def__links_def_web_def">
+        <property name="href" type="string" />
+      </object>
+      <string name="Run_value_def_items_def__links_def_pipeline_web_def_href_def" />
+      <object name="Run_value_def_items_def__links_def_pipeline_web_def">
+        <property name="href" type="string" />
+      </object>
+      <string name="Run_value_def_items_def__links_def_pipeline_def_href_def" />
+      <object name="Run_value_def_items_def__links_def_pipeline_def">
+        <property name="href" type="string" />
+      </object>
+      <object name="Run_value_def_items_def__links_def">
+        <property name="self" typeRef="Run_value_def_items_def__links_def_self_def" />
+        <property name="web" typeRef="Run_value_def_items_def__links_def_web_def" />
+        <property name="pipeline.web" typeRef="Run_value_def_items_def__links_def_pipeline_web_def" />
+        <property name="pipeline" typeRef="Run_value_def_items_def__links_def_pipeline_def" />
+      </object>
+      <string name="Run_value_def_items_def_pipeline_def_url_def" />
+      <integer name="Run_value_def_items_def_pipeline_def_id_def" />
+      <integer name="Run_value_def_items_def_pipeline_def_revision_def" />
+      <string name="Run_value_def_items_def_pipeline_def_name_def" />
+      <string name="Run_value_def_items_def_pipeline_def_folder_def" />
+      <object name="Run_value_def_items_def_pipeline_def">
+        <property name="url" type="string" />
+        <property name="id" type="integer" />
+        <property name="revision" type="integer" />
+        <property name="name" type="string" />
+        <property name="folder" type="string" />
+      </object>
+      <string name="Run_value_def_items_def_createdDate_def" />
+      <string name="Run_value_def_items_def_url_def" />
+      <integer name="Run_value_def_items_def_id_def" />
+      <string name="Run_value_def_items_def_name_def" />
+      <string name="Run_value_def_items_def_finishedDate_def" />
+      <object name="Run_value_def_items_def">
+        <property name="_links" typeRef="Run_value_def_items_def__links_def" />
+        <property name="pipeline" typeRef="Run_value_def_items_def_pipeline_def" />
+        <property name="state" type="string" />
+        <property name="createdDate" type="string" />
+        <property name="url" type="string" />
+        <property name="id" type="integer" />
+        <property name="name" type="string" />
+        <property name="result" type="string" />
+        <property name="finishedDate" type="string" />
+      </object>
+      <array typeRef="Run_value_def_items_def" name="Run_value_def" />
+      <object name="Run">
+        <property name="count" type="integer" />
+        <property name="value" typeRef="Run_value_def" />
+      </object>
+      <string name="RunResult" />
+      <string name="RunState" />
+      <string name="ConfigurationType" />
+      <string name="RepositoryType" />
+      <object name="RunResourcesParameters_builds_def" />
+      <object name="RunResourcesParameters_containers_def" />
+      <object name="RunResourcesParameters_packages_def" />
+      <object name="RunResourcesParameters_pipelines_def" />
+      <object name="RunResourcesParameters_repositories_def" />
+      <object name="RunResourcesParameters">
+        <property name="builds" typeRef="RunResourcesParameters_builds_def" />
+        <property name="containers" typeRef="RunResourcesParameters_containers_def" />
+        <property name="packages" typeRef="RunResourcesParameters_packages_def" />
+        <property name="pipelines" typeRef="RunResourcesParameters_pipelines_def" />
+        <property name="repositories" typeRef="RunResourcesParameters_repositories_def" />
+      </object>
+    </jsonTypes>
+  </grammars>
+  <resources siena:authenticationProviderHref="#PowerAppAuth" base="https://msmanaged-na.azure-apim.net/apim/visualstudioteamservices">
+    <resource path="/{connectionId}/_apis/Accounts">
+      <param style="template" name="connectionId" type="xs:string" required="true" />
+      <method siena:requiresAuthentication="true" name="GET" id="ListAccounts" actionName="ListAccounts" visibility="advanced" siena:isDeprecated="false">
+        <doc title="List Organizations&#xA;Retrieves the list of Organizations the user is a member of." />
+        <request />
+        <response>
+          <representation mediaType="application/json" element="service:VstsList_ux5B_Account_ux5D_" />
+        </response>
+      </method>
+    </resource>
+    <resource path="/{connectionId}/{project}/iterations">
+      <param style="template" name="connectionId" type="xs:string" required="true" />
+      <param style="template" name="project" type="xs:string" required="true">
+        <doc title="The name of the project within the specified Organization." />
+      </param>
+      <method siena:requiresAuthentication="true" name="GET" id="ListIterations" actionName="ListIterations" visibility="advanced" siena:isDeprecated="false">
+        <doc title="List iterations&#xA;Retrieves the list of iterations for a project." />
+        <request>
+          <param style="query" name="account" type="xs:string" required="true">
+            <doc title="The name of the Organization. This can be found in the instance URL i.e. {Organization}.visualstudio.com. The Organization should have &quot;Third-party application access via OAuth&quot; enabled to prevent errors in the operation." />
+          </param>
+          <param style="query" name="team" type="xs:string" required="true">
+            <doc title="The name of the team within the project." />
+          </param>
+        </request>
+        <response>
+          <representation mediaType="application/json" element="service:VstsList_ux5B_TeamSettingsIteration_ux5D_" />
+        </response>
+      </method>
+    </resource>
+    <resource path="/{connectionId}/{project}/_apis/build/builds">
+      <param style="template" name="connectionId" type="xs:string" required="true" />
+      <param style="template" name="project" type="xs:string" required="true">
+        <doc title="The name of the project within the specified Organization." />
+      </param>
+      <method siena:requiresAuthentication="true" name="POST" id="QueueNewBuild" actionName="QueueNewBuild" visibility="important" siena:isDeprecated="false">
+        <doc title="Queue a new build&#xA;Create a build, based on an existing build definition, and add it to the build queue." />
+        <request>
+          <param style="query" name="account" type="xs:string" required="true">
+            <doc title="The name of the Organization. This can be found in the instance URL i.e. {Organization}.visualstudio.com. The Organization should have &quot;Third-party application access via OAuth&quot; enabled to prevent errors in the operation." />
+          </param>
+          <param style="query" name="buildDefId" type="xs:string" required="true">
+            <doc title="The identifier of the build definition to use." />
+          </param>
+          <representation mediaType="application/json">
+            <param style="plain" name="sourceBranch" path="/sourceBranch" type="xs:string" />
+            <param style="plain" name="parameters" path="/parameters" type="xs:string" />
+          </representation>
+        </request>
+        <response>
+          <representation mediaType="application/json" element="service:BuildResult" />
+        </response>
+      </method>
+    </resource>
+    <resource path="/{connectionId}/{project}/_apis/git/repositories">
+      <param style="template" name="connectionId" type="xs:string" required="true" />
+      <param style="template" name="project" type="xs:string" required="true">
+        <doc title="The name of the project within the specified Organization." />
+      </param>
+      <method siena:requiresAuthentication="true" name="GET" id="ListGitRepositories" actionName="ListGitRepositories" visibility="advanced" siena:isDeprecated="false">
+        <doc title="List Git repositories&#xA;Retrieves the list of Git repositories in a project." />
+        <request>
+          <param style="query" name="account" type="xs:string" required="true">
+            <doc title="The name of the Organization. This can be found in the instance URL i.e. {Organization}.visualstudio.com. The Organization should have &quot;Third-party application access via OAuth&quot; enabled to prevent errors in the operation." />
+          </param>
+        </request>
+        <response>
+          <representation mediaType="application/json" element="service:VstsList_ux5B_GitRepository_ux5D_" />
+        </response>
+      </method>
+    </resource>
+    <resource path="/{connectionId}/_apis/projects">
+      <param style="template" name="connectionId" type="xs:string" required="true" />
+      <method siena:requiresAuthentication="true" name="GET" id="ListProjects" actionName="ListProjects" visibility="advanced" siena:isDeprecated="false">
+        <doc title="List projects&#xA;Retrieves the list of projects in an Organization." />
+        <request>
+          <param style="query" name="account" type="xs:string" required="true">
+            <doc title="The name of the Organization. This can be found in the instance URL i.e. {Organization}.visualstudio.com. The Organization should have &quot;Third-party application access via OAuth&quot; enabled to prevent errors in the operation." />
+          </param>
+        </request>
+        <response>
+          <representation mediaType="application/json" element="service:VstsList_ux5B_Project_ux5D_" />
+        </response>
+      </method>
+    </resource>
+    <resource path="/{connectionId}/{project}/definitions">
+      <param style="template" name="connectionId" type="xs:string" required="true" />
+      <param style="template" name="project" type="xs:string" required="true">
+        <doc title="The name of the project within the specified Organization." />
+      </param>
+      <method siena:requiresAuthentication="true" name="GET" id="ListReleaseDefinitions" actionName="ListReleaseDefinitions" visibility="advanced" siena:isDeprecated="false">
+        <doc title="List release definitions&#xA;Retrieves the list of release definitions associated with a project." />
+        <request>
+          <param style="query" name="account" type="xs:string" required="true">
+            <doc title="The name of the Organization. This can be found in the instance URL i.e. {Organization}.visualstudio.com. The Organization should have &quot;Third-party application access via OAuth&quot; enabled to prevent errors in the operation." />
+          </param>
+        </request>
+        <response>
+          <representation mediaType="application/json" element="service:VstsList_ux5B_ReleaseDefinition_ux5D_" />
+        </response>
+      </method>
+    </resource>
+    <resource path="/{connectionId}/{project}/releases">
+      <param style="template" name="connectionId" type="xs:string" required="true" />
+      <param style="template" name="project" type="xs:string" required="true">
+        <doc title="The name of the project within the specified Organization." />
+      </param>
+      <method siena:requiresAuthentication="true" name="POST" id="CreateRelease" actionName="CreateRelease" visibility="important" siena:isDeprecated="false">
+        <doc title="Create a new release&#xA;Create a release, based on an existing release definition." />
+        <request>
+          <param style="query" name="account" type="xs:string" required="true">
+            <doc title="The name of the Organization. This can be found in the instance URL i.e. {Organization}.visualstudio.com. The Organization should have &quot;Third-party application access via OAuth&quot; enabled to prevent errors in the operation." />
+          </param>
+          <param style="query" name="releaseDefId" type="xs:string" required="true">
+            <doc title="The identifier of the release definition to use." />
+          </param>
+          <representation mediaType="application/json">
+            <param style="plain" name="Description" path="/Description" type="xs:string" />
+            <param style="plain" name="IsDraft" path="/IsDraft" type="xs:boolean" />
+            <param style="plain" name="Reason" path="/Reason" type="xs:string">
+              <option value="None" />
+              <option value="Manual" />
+              <option value="ContinuousIntegration" />
+              <option value="Schedule" />
+              <option value="IndividualCI" />
+              <option value="BatchedCI" />
+            </param>
+            <param style="plain" name="Variables" path="/Variables" type="service:ReleaseStartMetadata_Variables_def" />
+          </representation>
+        </request>
+        <response>
+          <representation mediaType="application/json" element="service:Release" />
+        </response>
+      </method>
+    </resource>
+    <resource path="/{connectionId}/httprequest">
+      <param style="template" name="connectionId" type="xs:string" required="true" />
+      <method siena:requiresAuthentication="true" name="POST" id="HttpRequest" actionName="HttpRequest" visibility="important" siena:isDeprecated="false">
+        <doc title="Send an HTTP request to Azure DevOps&#xA;Construct an Azure DevOps REST API request to invoke. Please refer to the following link for all available endpoints: https://docs.microsoft.com/rest/api/azure/devops" />
+        <request>
+          <param style="query" name="account" type="xs:string" required="true">
+            <doc title="The name of the Organization. This can be found in the instance URL i.e. {Organization}.visualstudio.com. The Organization should have &quot;Third-party application access via OAuth&quot; enabled to prevent errors in the operation." />
+          </param>
+          <representation mediaType="application/json">
+            <param style="plain" name="Method" path="/Method" type="xs:string" required="true" default="GET">
+              <option value="GET" />
+              <option value="POST" />
+              <option value="PUT" />
+              <option value="PATCH" />
+              <option value="DELETE" />
+              <option value="OPTIONS" />
+            </param>
+            <param style="plain" name="Uri" path="/Uri" type="xs:string" required="true" />
+            <param style="plain" name="Headers" path="/Headers" type="service:VstsHttpRequestBodyParameters_Headers_def" />
+            <param style="plain" name="Body" path="/Body" type="xs:string" />
+            <param style="plain" name="IsBase64" path="/IsBase64" type="xs:boolean" />
+          </representation>
+        </request>
+      </method>
+    </resource>
+    <resource path="/{connectionId}/_apis/wit/workitemtypes">
+      <param style="template" name="connectionId" type="xs:string" required="true" />
+      <method siena:requiresAuthentication="true" name="GET" id="ListWorkItemTypes" actionName="ListWorkItemTypes" visibility="advanced" siena:isDeprecated="false">
+        <doc title="List work item types&#xA;Retrieves the list of Work Item Types accessible in a given Azure DevOps project." />
+        <request>
+          <param style="query" name="account" type="xs:string" required="true">
+            <doc title="The name of the Organization. This can be found in the instance URL i.e. {Organization}.visualstudio.com. The Organization should have &quot;Third-party application access via OAuth&quot; enabled to prevent errors in the operation." />
+          </param>
+          <param style="query" name="project" type="xs:string" required="true">
+            <doc title="The name of the project within the specified Organization." />
+          </param>
+        </request>
+        <response>
+          <representation mediaType="application/json" element="service:VstsList_ux5B_WorkItemType_ux5D_" />
+        </response>
+      </method>
+    </resource>
+    <resource path="/{connectionId}/_apis/wit/workitems/{id}">
+      <param style="template" name="connectionId" type="xs:string" required="true" />
+      <param style="template" name="id" type="xs:string" required="true">
+        <doc title="The unique id of the work item to get details for.The work item must be of the type specified in 'Work Item Type'." />
+      </param>
+      <method siena:requiresAuthentication="true" name="GET" id="GetWorkItemDetails" actionName="GetWorkItemDetails" visibility="advanced" siena:isDeprecated="false" siena:isDynamicSchema="true">
+        <doc title="Get work item details&#xA;Get the details of a single work item." />
+        <request>
+          <param style="query" name="account" type="xs:string" required="true">
+            <doc title="The name of the Organization. This can be found in the instance URL i.e. {Organization}.visualstudio.com. The Organization should have &quot;Third-party application access via OAuth&quot; enabled to prevent errors in the operation." />
+          </param>
+          <param style="query" name="project" type="xs:string" required="true">
+            <doc title="The name of the project within the specified Organization." />
+          </param>
+          <param style="query" name="typeName" type="xs:string" required="true">
+            <doc title="The work item type of the work item." />
+          </param>
+        </request>
+        <response>
+          <representation mediaType="application/json" element="service:DynamicWorkItemResponse" />
+        </response>
+      </method>
+    </resource>
+    <resource path="/{connectionId}/_apis/wit/workitems/{id}">
+      <param style="template" name="connectionId" type="xs:string" required="true" />
+      <param style="template" name="id" type="xs:string" required="true">
+        <doc title="The unique id of the work item to update." />
+      </param>
+      <method siena:requiresAuthentication="true" name="PATCH" id="UpdateWorkItem" actionName="UpdateWorkItem" visibility="important" siena:isDeprecated="false" siena:isDynamicSchema="true">
+        <doc title="Update a work item&#xA;Update an existing work item by id." />
+        <request>
+          <param style="query" name="account" type="xs:string" required="true">
+            <doc title="The name of the Organization. This can be found in the instance URL i.e. {Organization}.visualstudio.com. The Organization should have &quot;Third-party application access via OAuth&quot; enabled to prevent errors in the operation." />
+          </param>
+          <param style="query" name="project" type="xs:string">
+            <doc title="The name of the project within the specified Organization." />
+          </param>
+          <param style="query" name="type" type="xs:string">
+            <doc title="The work item type to generate schema for." />
+          </param>
+          <representation mediaType="application/json">
+            <param style="plain" name="title" path="/title" type="xs:string" />
+            <param style="plain" name="description" path="/description" type="xs:string" />
+            <param style="plain" name="priority" path="/priority" type="xs:int" />
+            <param style="plain" name="iteration" path="/iteration" type="xs:string" />
+            <param style="plain" name="area" path="/area" type="xs:string" />
+            <param style="plain" name="linkUrl" path="/linkUrl" type="xs:string" />
+            <param style="plain" name="linkType" path="/linkType" type="xs:string">
+              <option value="Dependency-forward" />
+              <option value="Dependency-reverse" />
+              <option value="Hierarchy-forward" />
+              <option value="Hierarchy-reverse" />
+              <option value="Related" />
+            </param>
+            <param style="plain" name="linkComment" path="/linkComment" type="xs:string" />
+            <param style="plain" name="dynamicFields" path="/dynamicFields" type="service:UpdateWorkItemRequest_dynamicFields_def" />
+            <param style="plain" name="userEnteredFields" path="/userEnteredFields" type="service:UpdateWorkItemRequest_userEnteredFields_def" />
+          </representation>
+        </request>
+        <response>
+          <representation mediaType="application/json" element="service:PatchWorkItemResponse" />
+        </response>
+      </method>
+    </resource>
+    <resource path="/{connectionId}/_apis/wit/workitems/{id}/children">
+      <param style="template" name="connectionId" type="xs:string" required="true" />
+      <param style="template" name="id" type="xs:string" required="true">
+        <doc title="The unique id of the work item to get the children for." />
+      </param>
+      <method siena:requiresAuthentication="true" name="GET" id="GetWorkItemChildren" actionName="GetWorkItemChildren" visibility="advanced" siena:isDeprecated="false" siena:isDynamicSchema="true" siena:family="GetWorkItemChildren" siena:revision="1" siena:status="Production">
+        <doc title="Get work item children&#xA;Get a list of children (max size 1000) of a single work item." />
+        <request>
+          <param style="query" name="account" type="xs:string" required="true">
+            <doc title="The name of the Organization. This can be found in the instance URL i.e. {Organization}.visualstudio.com. The Organization should have &quot;Third-party application access via OAuth&quot; enabled to prevent errors in the operation." />
+          </param>
+          <param style="query" name="project" type="xs:string" required="true">
+            <doc title="The name of the project within the specified Organization." />
+          </param>
+          <param style="query" name="workItemType" type="xs:string" default="">
+            <doc title="The type of the children work item(s)" />
+          </param>
+        </request>
+        <response>
+          <representation mediaType="application/json" element="service:VstsList_ux5B_ListWorkItemResponse_ux5D_" />
+        </response>
+      </method>
+    </resource>
+    <resource path="/{connectionId}/{project}/_apis/wit/workitems/${type}">
+      <param style="template" name="connectionId" type="xs:string" required="true" />
+      <param style="template" name="project" type="xs:string" required="true">
+        <doc title="The name of the project within the specified Organization." />
+      </param>
+      <param style="template" name="type" type="xs:string" required="true" default="Bug">
+        <doc title="Type of this work item" />
+      </param>
+      <method siena:requiresAuthentication="true" name="PATCH" id="CreateWorkItem" actionName="CreateWorkItem" visibility="important" siena:isDeprecated="false" siena:isDynamicSchema="true">
+        <doc title="Create a work item&#xA;Create a new work item with the provided attributes." />
+        <request>
+          <param style="query" name="account" type="xs:string" required="true">
+            <doc title="The name of the Organization. This can be found in the instance URL i.e. {Organization}.visualstudio.com. The Organization should have &quot;Third-party application access via OAuth&quot; enabled to prevent errors in the operation." />
+          </param>
+          <param style="query" name="shouldReturnAllFields" type="xs:boolean">
+            <doc title="When setting the value to 'No', only the work item ID will be returned. If the value is 'Yes', all fields of the created Item along with the ID will be returned. The default value is 'Yes'" />
+          </param>
+          <representation mediaType="application/json">
+            <param style="plain" name="title" path="/title" type="xs:string" required="true" />
+            <param style="plain" name="description" path="/description" type="xs:string" />
+            <param style="plain" name="priority" path="/priority" type="xs:int" />
+            <param style="plain" name="iteration" path="/iteration" type="xs:string" />
+            <param style="plain" name="area" path="/area" type="xs:string" />
+            <param style="plain" name="linkUrl" path="/linkUrl" type="xs:string" />
+            <param style="plain" name="linkType" path="/linkType" type="xs:string">
+              <option value="Dependency-forward" />
+              <option value="Dependency-reverse" />
+              <option value="Hierarchy-forward" />
+              <option value="Hierarchy-reverse" />
+              <option value="Related" />
+            </param>
+            <param style="plain" name="linkComment" path="/linkComment" type="xs:string" />
+            <param style="plain" name="dynamicFields" path="/dynamicFields" type="service:CreateWorkItemRequest_dynamicFields_def" />
+            <param style="plain" name="userEnteredFields" path="/userEnteredFields" type="service:CreateWorkItemRequest_userEnteredFields_def" />
+          </representation>
+        </request>
+        <response>
+          <representation mediaType="application/json" element="service:PatchWorkItemResponse" />
+        </response>
+      </method>
+    </resource>
+    <resource path="/{connectionId}/{project}/queryResults/{queryId}">
+      <param style="template" name="connectionId" type="xs:string" required="true" />
+      <param style="template" name="project" type="xs:string" required="true">
+        <doc title="The name of the project within the specified Organization." />
+      </param>
+      <param style="template" name="queryId" type="xs:string" required="true">
+        <doc title="The Id of the stored query to run." />
+      </param>
+      <method siena:requiresAuthentication="true" name="GET" id="GetQueryResults" actionName="GetQueryResults" visibility="advanced" siena:isDeprecated="true" siena:family="GetQueryResults" siena:revision="1" siena:status="Preview">
+        <doc title="Get query results&#xA;Retrieves the result of a work item query." />
+        <request>
+          <param style="query" name="account" type="xs:string" required="true">
+            <doc title="The name of the Organization. This can be found in the instance URL i.e. {Organization}.visualstudio.com. The Organization should have &quot;Third-party application access via OAuth&quot; enabled to prevent errors in the operation." />
+          </param>
+        </request>
+        <response>
+          <representation mediaType="application/json" element="service:VstsList_ux5B_JObject_ux5D_" />
+        </response>
+      </method>
+    </resource>
+    <resource path="/{connectionId}/v2/{project}/queryResults/{queryId}">
+      <param style="template" name="connectionId" type="xs:string" required="true" />
+      <param style="template" name="project" type="xs:string" required="true">
+        <doc title="The name of the project within the specified Organization." />
+      </param>
+      <param style="template" name="queryId" type="xs:string" required="true">
+        <doc title="The Id of the stored query to run." />
+      </param>
+      <method siena:requiresAuthentication="true" name="GET" id="GetQueryResultsV2" actionName="GetQueryResultsV2" visibility="advanced" siena:isDeprecated="false" siena:isDynamicSchema="true" siena:family="GetQueryResults" siena:revision="2" siena:status="Production">
+        <doc title="Get query results&#xA;Retrieves the result of a work item query." />
+        <request>
+          <param style="query" name="account" type="xs:string" required="true">
+            <doc title="The name of the Organization. This can be found in the instance URL i.e. {Organization}.visualstudio.com. The Organization should have &quot;Third-party application access via OAuth&quot; enabled to prevent errors in the operation." />
+          </param>
+          <param style="query" name="workItemsCount" type="xs:int" default="200">
+            <doc title="Max work items count to retrieve (1 - 20000)" />
+          </param>
+          <param style="query" name="throwIfQueryChanged" type="xs:boolean">
+            <doc title="If query results change during flow execution then flow run should fail to avoid inconsistencies." />
+          </param>
+          <param style="query" name="queryHash" type="xs:int">
+            <doc title="Hash value to detect changes in the query results." />
+          </param>
+          <param style="query" name="skip" type="xs:int">
+            <doc title="Number of items to skip to get next work items." />
+          </param>
+        </request>
+        <response>
+          <representation mediaType="application/json" element="service:VstsList_ux5B_QueryResultWorkItemResponse_ux5D_" />
+        </response>
+      </method>
+    </resource>
+    <resource path="/{connectionId}/{project}/queries">
+      <param style="template" name="connectionId" type="xs:string" required="true" />
+      <param style="template" name="project" type="xs:string" required="true">
+        <doc title="The name of the project within the specified Organization." />
+      </param>
+      <method siena:requiresAuthentication="true" name="GET" id="ListRootQueryFolders" actionName="ListRootQueryFolders" visibility="advanced" siena:isDeprecated="false">
+        <doc title="List root level queries&#xA;Retrieves the list of root-level work item queries in a project." />
+        <request>
+          <param style="query" name="account" type="xs:string" required="true">
+            <doc title="The name of the Organization. This can be found in the instance URL i.e. {Organization}.visualstudio.com. The Organization should have &quot;Third-party application access via OAuth&quot; enabled to prevent errors in the operation." />
+          </param>
+        </request>
+        <response>
+          <representation mediaType="application/json" element="service:VstsList_ux5B_QueryHierarchyItem_ux5D_" />
+        </response>
+      </method>
+    </resource>
+    <resource path="/{connectionId}/{project}/queriesInFolder">
+      <param style="template" name="connectionId" type="xs:string" required="true" />
+      <param style="template" name="project" type="xs:string" required="true">
+        <doc title="The name of the project within the specified Organization." />
+      </param>
+      <method siena:requiresAuthentication="true" name="GET" id="ListQueriesInFolder" actionName="ListQueriesInFolder" visibility="advanced" siena:isDeprecated="false">
+        <doc title="List queries within folder&#xA;Retrieves the list of work item queries within a folder for a given project." />
+        <request>
+          <param style="query" name="account" type="xs:string" required="true">
+            <doc title="The name of the Organization. This can be found in the instance URL i.e. {Organization}.visualstudio.com. The Organization should have &quot;Third-party application access via OAuth&quot; enabled to prevent errors in the operation." />
+          </param>
+          <param style="query" name="folderPath" type="xs:string" required="true">
+            <doc title="The folder path under which to look for queries." />
+          </param>
+        </request>
+        <response>
+          <representation mediaType="application/json" element="service:VstsList_ux5B_QueryHierarchyItem_ux5D_" />
+        </response>
+      </method>
+    </resource>
+    <resource path="/{connectionId}/{project}/_apis/wit/workitems">
+      <param style="template" name="connectionId" type="xs:string" required="true" />
+      <param style="template" name="project" type="xs:string" required="true">
+        <doc title="The name of the project within the specified Organization." />
+      </param>
+      <method siena:requiresAuthentication="true" name="GET" id="ListWorkItems" actionName="ListWorkItems" visibility="advanced" siena:isDeprecated="false" siena:isDynamicSchema="true">
+        <doc title="List work items&#xA;Returns a list of work items." />
+        <request>
+          <param style="query" name="account" type="xs:string" required="true">
+            <doc title="The name of the Organization. This can be found in the instance URL i.e. {Organization}.visualstudio.com. The Organization should have &quot;Third-party application access via OAuth&quot; enabled to prevent errors in the operation." />
+          </param>
+          <param style="query" name="workItemIds" type="xs:string" required="true">
+            <doc title="The comma-separated list of requested work item IDs." />
+          </param>
+          <param style="query" name="workItemType" type="xs:string" default="">
+            <doc title="The work item type to generate schema for." />
+          </param>
+        </request>
+        <response>
+          <representation mediaType="application/json" element="service:VstsList_ux5B_ListWorkItemResponse_ux5D_" />
+        </response>
+      </method>
+    </resource>
+    <resource path="/{connectionId}/codeless/{project}/_apis/pipelines">
+      <param style="template" name="connectionId" type="xs:string" required="true" />
+      <param style="template" name="project" type="xs:string" required="true">
+        <doc title="The name of the project within the specified Organization." />
+      </param>
+      <method siena:requiresAuthentication="true" name="GET" id="ListPipelines" actionName="ListPipelines" visibility="advanced" siena:isDeprecated="false">
+        <doc title="List pipelines&#xA;Retrieves the list of pipelines in a project." />
+        <request>
+          <param style="query" name="account" type="xs:string" required="true">
+            <doc title="The name of the Organization. This can be found in the instance URL i.e. {Organization}.visualstudio.com. The Organization should have &quot;Third-party application access via OAuth&quot; enabled to prevent errors in the operation." />
+          </param>
+        </request>
+        <response>
+          <representation mediaType="application/json" element="service:Pipeline" />
+        </response>
+      </method>
+    </resource>
+    <resource path="/{connectionId}/codeless/{project}/_apis/pipelines/{pipelineId}/runs">
+      <param style="template" name="connectionId" type="xs:string" required="true" />
+      <param style="template" name="project" type="xs:string" required="true">
+        <doc title="The name of the project within the specified Organization." />
+      </param>
+      <param style="template" name="pipelineId" type="xs:int" required="true">
+        <doc title="The pipeline ID" />
+      </param>
+      <method siena:requiresAuthentication="true" name="GET" id="ListPipelineRuns" actionName="ListPipelineRuns" visibility="advanced" siena:isDeprecated="false">
+        <doc title="List pipeline runs&#xA;Gets top 10000 runs for a particular pipeline" />
+        <request>
+          <param style="query" name="account" type="xs:string" required="true">
+            <doc title="The name of the Organization. This can be found in the instance URL i.e. {Organization}.visualstudio.com. The Organization should have &quot;Third-party application access via OAuth&quot; enabled to prevent errors in the operation." />
+          </param>
+        </request>
+        <response>
+          <representation mediaType="application/json" element="service:Run" />
+        </response>
+      </method>
+    </resource>
+  </resources>
+  <authenticationProviders xmlns="http://schemas.microsoft.com/MicrosoftProjectSiena/WADL/2014/11">
+    <connectionProvider id="PowerAppAuth" siena:connectionProviderId="shared_visualstudioteamservices" />
+  </authenticationProviders>
+  <template xmlns="http://schemas.microsoft.com/MicrosoftProjectSiena/WADL/2014/11">
+    <variable name="connectionId">
+      <modifyParams style="template" name="connectionId" attribute="fixed" />
+    </variable>
+  </template>
+</application>

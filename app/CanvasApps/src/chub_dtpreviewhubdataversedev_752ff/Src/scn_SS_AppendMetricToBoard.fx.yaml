@@ -1,0 +1,157 @@
+scn_SS_AppendMetricToBoard As screen:
+
+    btn_Back_AppendMetric As button:
+        OnSelect: =Navigate(scn_SelfService);
+        Text: ="Back"
+        Width: =120
+        X: =20
+        Y: =15
+        ZIndex: =1
+
+    ctn_Search_MetricType_ToAppend As groupContainer:
+        BorderThickness: =1
+        Height: =App.Height - 100
+        Width: |
+            =App.Width * 0.35
+        X: =20
+        Y: =60
+        ZIndex: =2
+
+        glry_Search_AppendMetric As gallery.variableTemplateHeightGallery:
+            Height: =Parent.Height - Self.Y
+            Items: |-
+                =Sort(
+                Search(
+                    ReviewHub_MetricTypes,
+                    Trim(ti_Search_AppendMetric.Text),
+                    "craf2_metrictypename",
+                    "craf2_metrictypeshortname"
+                ),
+                    MetricTypeID,
+                    SortOrder.Descending
+                )
+            Layout: =Layout.Vertical
+            TemplateFill: =If(ThisItem.IsSelected, RGBA(215, 223, 240, 1), RGBA(0, 0, 0, 0))
+            TemplatePadding: =0
+            TemplateSize: =280
+            Width: =Parent.Width
+            Y: =ti_Search_AppendMetric.Y + ti_Search_AppendMetric.Height + 5
+            ZIndex: =1
+
+            html_Pick_AppendMetric As htmlViewer:
+                AutoHeight: =true
+                HtmlText: |-
+                    ="<b>Metric Type ID: </b>" & ThisItem.MetricTypeID & "<br>" 
+                    & "<b><font color=black>Metric Type Name: </font></b>" & ThisItem.MetricTypeName & "<br>"
+                    & "<b>Short Name: </b>" & ThisItem.MetricTypeShortName & "<br>" 
+                    & "<b>Value Type: </b>" & ThisItem.ValueType & "&emsp;<b>Health Weight: </b>" & ThisItem.MetricTypeHealthWeight
+                    & "&emsp;<b>Trend Down? </b>" & ThisItem.MetricTypeIsTrendDown & "<br>"
+                    & "<b>Effective On:</b> " & Text(ThisItem.MetricTypeEffectiveDate, "m/d/yyyy")
+                    & "&emsp;<b>Deprecated On:</b> " & If(IsBlankOrError(ThisItem.MetricTypeDeprecatedDate),"(No value)", Text(ThisItem.MetricTypeDeprecatedDate, "m/d/yyyy"))
+                    & "<br><b>Linked Template(s): </b>" 
+                    & Concat(Filter(ReviewHub_MetricTypeDetails, ThisRecord.MetricType.MetricTypeID=ThisItem.MetricTypeID), MetricTypeDetailTemplate.TemplateName & "; ")
+                OnSelect: =Select(Parent)
+                PaddingBottom: =10
+                PaddingLeft: =7
+                PaddingTop: =10
+                Width: =Parent.Width - 25
+                ZIndex: =1
+
+            sp_Search_AppendMetric As rectangle:
+                Height: =1
+                OnSelect: =Select(Parent)
+                Width: =Parent.Width
+                X: |
+                    =0
+                Y: =html_Pick_AppendMetric.Y + html_Pick_AppendMetric.Height
+                ZIndex: =2
+
+            bttn_Pick_AppendMetric As button:
+                BorderThickness: =0
+                Color: =LEFTNAVBKGDCOLOR
+                Fill: =RGBA(0, 0, 0, 0)
+                FontWeight: =FontWeight.Normal
+                Height: |
+                    =25
+                HoverColor: =Color.Blue
+                HoverFill: =Self.Fill
+                OnSelect: =Set(record_Append_This_MetricType, ThisItem)
+                PressedColor: =Color.Purple
+                PressedFill: =Self.Fill
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Size: =11
+                Text: ="Edit"
+                Underline: =true
+                Width: =65
+                X: =Parent.Width - Self.Width - 25
+                ZIndex: =4
+
+        ti_Search_AppendMetric As text:
+            Clear: =true
+            Default: =""
+            Height: =35
+            HintText: ="Search Metric Type Name / Short Name"
+            Width: =Parent.Width - 40
+            X: =20
+            Y: |
+                =5
+            ZIndex: =3
+
+    Label_AppendMetric As label:
+        Align: =Align.Center
+        Color: =RGBA(0, 121, 187, 1)
+        FontWeight: =FontWeight.Bold
+        Size: =18
+        Text: ="Admin - Append Metric Type to Existing Metric Boards"
+        Width: =850
+        X: =181
+        Y: =15
+        ZIndex: =3
+
+    Label2 As label:
+        Height: =41
+        Text: ="From which review cycle should this new metric display on the board?"
+        Width: =619
+        X: =565
+        Y: =125
+        ZIndex: =4
+
+    Label2_1 As label:
+        Height: =41
+        Text: ="Which template should this new metric display?"
+        Width: =619
+        X: =565
+        Y: =252
+        ZIndex: =5
+
+    Dropdown1 As dropdown:
+        Items: =clln_dropdown_ReviewMthYr
+        X: =651
+        Y: =166
+        ZIndex: =6
+
+    ComboBox1 As combobox:
+        DisplayFields: =["TemplateName","craf2_templatedescription"]
+        IsSearchable: =false
+        Items: |-
+            =AddColumns(
+                Filter(ReviewHub_MetricTypeDetails, ThisRecord.MetricType.MetricTypeID = record_Append_This_MetricType.MetricTypeID),
+                "TemplateName", ThisRecord.MetricTypeDetailTemplate.TemplateName,
+                "TemplateDescription", ThisRecord.MetricTypeDetailTemplate.TemplateDescription
+            )
+        SearchFields: =["TemplateName"]
+        SearchItems: =[]
+        Template: =ListItemTemplate.Double
+        X: =651
+        Y: =305
+        ZIndex: =7
+
+    Button1 As button:
+        Text: ="Submit"
+        X: =1100
+        Y: =525
+        ZIndex: =8
+

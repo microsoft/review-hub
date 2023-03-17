@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Workflow WorkflowId="{8c072846-f627-ed11-9db1-000d3a36b03f}" Name="Review Hub - Calculate Portfolio Metrics (Monthly Run)" Description="The flow calculates the YoY, MoM, and Variance for each metric under each product, for each month. This feeds the portfolio metric screen in Review Hub that allows users to view more details about a product's metrics.&#xA;&#xA;Flow failure would result in outdated calculations for some metrics and missing calculations for others, reducing the value of the portfolio metric screen." xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <JsonFileName>/Workflows/ReviewHub-CalculatePortfolioMetricsMonthlyRun-8C072846-F627-ED11-9DB1-000D3A36B03F.json</JsonFileName>
+  <Type>1</Type>
+  <Subprocess>0</Subprocess>
+  <Category>5</Category>
+  <Mode>0</Mode>
+  <Scope>4</Scope>
+  <OnDemand>0</OnDemand>
+  <TriggerOnCreate>0</TriggerOnCreate>
+  <TriggerOnDelete>0</TriggerOnDelete>
+  <AsyncAutodelete>0</AsyncAutodelete>
+  <SyncWorkflowLogOnFailure>0</SyncWorkflowLogOnFailure>
+  <StateCode>1</StateCode>
+  <StatusCode>2</StatusCode>
+  <RunAs>1</RunAs>
+  <IsTransacted>1</IsTransacted>
+  <IntroducedVersion>1.0.0.08222022</IntroducedVersion>
+  <IsCustomizable>1</IsCustomizable>
+  <IsCustomProcessingStepAllowedForOtherPublishers>1</IsCustomProcessingStepAllowedForOtherPublishers>
+  <PrimaryEntity>none</PrimaryEntity>
+  <LocalizedNames>
+    <LocalizedName languagecode="1033" description="Review Hub - Calculate Portfolio Metrics (Monthly Run)" />
+  </LocalizedNames>
+  <Descriptions>
+    <Description languagecode="1033" description="The flow calculates the YoY, MoM, and Variance for each metric under each product, for each month. This feeds the portfolio metric screen in Review Hub that allows users to view more details about a product's metrics.&#xA;&#xA;Flow failure would result in outdated calculations for some metrics and missing calculations for others, reducing the value of the portfolio metric screen." />
+  </Descriptions>
+</Workflow>

@@ -1,0 +1,188 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <systemform>
+    <formid>{609bbe7c-68a0-4f75-bf8a-e3e08556579e}</formid>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <FormPresentation>1</FormPresentation>
+    <FormActivationState>1</FormActivationState>
+    <form headerdensity="HighWithControls">
+      <tabs>
+        <tab verticallayout="true" id="{9b47a33b-c299-47c2-8119-61a3787c760e}" IsUserDefined="1">
+          <labels>
+            <label description="General" languagecode="1033" />
+          </labels>
+          <columns>
+            <column width="100%">
+              <sections>
+                <section showlabel="false" showbar="false" IsUserDefined="0" id="{c0b99375-f596-42df-812f-e96f22a82ed4}">
+                  <labels>
+                    <label description="General" languagecode="1033" />
+                  </labels>
+                  <rows>
+                    <row>
+                      <cell id="{e392ee25-19bf-4fdf-bc7b-eaae2c936fcf}" locklevel="0" colspan="1" rowspan="1">
+                        <labels>
+                          <label description="MetricTypeID" languagecode="1033" />
+                        </labels>
+                        <control id="craf2_metrictypeid" classid="{C6D124CA-7EDA-4A60-AEA9-7FB8D318B68F}" datafieldname="craf2_metrictypeid" disabled="false" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{29c15d9c-0ffc-4c6c-8536-cda72bb6fb40}">
+                        <labels>
+                          <label description="MetricTypeName" languagecode="1033" />
+                        </labels>
+                        <control id="craf2_metrictypename" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="craf2_metrictypename" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{5e9abdcc-5594-4132-a533-2f7220dbe9ec}" visible="false">
+                        <labels>
+                          <label description="Owner" languagecode="1033" />
+                        </labels>
+                        <control id="ownerid" classid="{270BD3DB-D9AF-4782-9025-509E298DEC0A}" datafieldname="ownerid" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{9017bd50-e193-43cf-85d6-68e7fb80625a}" locklevel="0" colspan="1" rowspan="1">
+                        <labels>
+                          <label description="MetricType Description" languagecode="1033" />
+                        </labels>
+                        <control id="craf2_metrictypedescription" classid="{4273EDBD-AC1D-40D3-9FB2-095C621B552D}" datafieldname="craf2_metrictypedescription" disabled="false" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{338c452a-2598-4e89-aeda-e4ecd85de9c2}" locklevel="0" colspan="1" rowspan="1">
+                        <labels>
+                          <label description="MetricTypeSource" languagecode="1033" />
+                        </labels>
+                        <control id="craf2_metrictypesource" classid="{4273EDBD-AC1D-40D3-9FB2-095C621B552D}" datafieldname="craf2_metrictypesource" disabled="false" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{e05d3fdf-2fe2-4851-b6ba-022f2a7689f0}" locklevel="0" colspan="1" rowspan="1">
+                        <labels>
+                          <label description="MetricTypeStage" languagecode="1033" />
+                        </labels>
+                        <control id="craf2_metrictypestage" classid="{3EF39988-22BB-4F0B-BBBE-64B5A3748AEE}" datafieldname="craf2_metrictypestage" disabled="false" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{8dfaef69-083c-46f5-a2fc-81307593c7a5}" locklevel="0" colspan="1" rowspan="1">
+                        <labels>
+                          <label description="ValueType" languagecode="1033" />
+                        </labels>
+                        <control id="craf2_valuetype" classid="{3EF39988-22BB-4F0B-BBBE-64B5A3748AEE}" datafieldname="craf2_valuetype" disabled="false" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{97f196b3-70da-4f12-803a-cb009a9d1360}" locklevel="0" colspan="1" rowspan="1">
+                        <labels>
+                          <label description="MetricType ShortName" languagecode="1033" />
+                        </labels>
+                        <control id="craf2_metrictypeshortname" classid="{4273EDBD-AC1D-40D3-9FB2-095C621B552D}" datafieldname="craf2_metrictypeshortname" disabled="false" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{3d68bf2d-f5a2-4825-b1b9-6b3d0c336ec5}" locklevel="0" colspan="1" rowspan="1">
+                        <labels>
+                          <label description="MetricType HealthWeight" languagecode="1033" />
+                        </labels>
+                        <control id="craf2_metrictypehealthweight" classid="{C3EFE0C3-0EC6-42BE-8349-CBD9079DFD8E}" datafieldname="craf2_metrictypehealthweight" disabled="false" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{0b652d72-796f-4e43-96ef-9b7b0cb51ac3}" locklevel="0" colspan="1" rowspan="1">
+                        <labels>
+                          <label description="MetricType DeprecatedDate" languagecode="1033" />
+                        </labels>
+                        <control id="craf2_metrictypedeprecateddate" classid="{5B773807-9FB2-42DB-97C3-7A91EFF8ADFF}" datafieldname="craf2_metrictypedeprecateddate" disabled="false" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{71b69b81-88c0-4889-9923-337e3e5e020f}" locklevel="0" colspan="1" rowspan="1">
+                        <labels>
+                          <label description="MetricType EnumerateOptions" languagecode="1033" />
+                        </labels>
+                        <control id="craf2_metrictypeenumerateoptions" classid="{4273EDBD-AC1D-40D3-9FB2-095C621B552D}" datafieldname="craf2_metrictypeenumerateoptions" disabled="false" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{4c063762-908c-4db1-ad4b-5223916095d5}" locklevel="0" colspan="1" rowspan="1">
+                        <labels>
+                          <label description="MetricType IsTrendDown" languagecode="1033" />
+                        </labels>
+                        <control id="craf2_metrictypeistrenddown" classid="{67FAC785-CD58-4F9F-ABB3-4B7DDC6ED5ED}" datafieldname="craf2_metrictypeistrenddown" disabled="false" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{8ec9b5fb-2677-4f47-88c5-08e75276b375}" locklevel="0" colspan="1" rowspan="1">
+                        <labels>
+                          <label description="MetricType EffectiveDate" languagecode="1033" />
+                        </labels>
+                        <control id="craf2_metrictypeeffectivedate" classid="{5B773807-9FB2-42DB-97C3-7A91EFF8ADFF}" datafieldname="craf2_metrictypeeffectivedate" disabled="false" />
+                      </cell>
+                    </row>
+                  </rows>
+                </section>
+              </sections>
+            </column>
+          </columns>
+        </tab>
+      </tabs>
+      <header id="{0a4122f5-acbe-4982-b342-cfda5f07698a}" celllabelposition="Top" columns="111" labelwidth="115" celllabelalignment="Left">
+        <rows>
+          <row>
+            <cell id="{17185ffc-c26b-4822-b482-87c8914c9194}" showlabel="false">
+              <labels>
+                <label description="" languagecode="1033" />
+              </labels>
+            </cell>
+            <cell id="{12a4ded0-e730-4552-8406-0bca0c0174ab}" showlabel="false">
+              <labels>
+                <label description="" languagecode="1033" />
+              </labels>
+            </cell>
+            <cell id="{f017cda8-0ea4-4b7c-9fa8-8530da9c2ff0}" showlabel="false">
+              <labels>
+                <label description="" languagecode="1033" />
+              </labels>
+            </cell>
+          </row>
+        </rows>
+      </header>
+      <footer id="{a73b9ba8-9166-440a-b94d-399e91651acd}" celllabelposition="Top" columns="111" labelwidth="115" celllabelalignment="Left">
+        <rows>
+          <row>
+            <cell id="{3bf328f5-363b-4a82-98d6-8cbd8a809a0d}" showlabel="false">
+              <labels>
+                <label description="" languagecode="1033" />
+              </labels>
+            </cell>
+            <cell id="{e2dcd43c-a32b-4c4a-8a7f-3e6a86bf0bad}" showlabel="false">
+              <labels>
+                <label description="" languagecode="1033" />
+              </labels>
+            </cell>
+            <cell id="{1dfbc237-5bcd-4ec1-8cd5-f7becbddff2e}" showlabel="false">
+              <labels>
+                <label description="" languagecode="1033" />
+              </labels>
+            </cell>
+          </row>
+        </rows>
+      </footer>
+      <DisplayConditions Order="0" FallbackForm="true">
+        <Everyone />
+      </DisplayConditions>
+    </form>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>1</CanBeDeleted>
+    <LocalizedNames>
+      <LocalizedName description="Information" languagecode="1033" />
+    </LocalizedNames>
+    <Descriptions>
+      <Description description="A form for this entity." languagecode="1033" />
+    </Descriptions>
+  </systemform>
+</forms>

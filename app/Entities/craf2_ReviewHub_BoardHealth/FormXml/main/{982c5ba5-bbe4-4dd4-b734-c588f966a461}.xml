@@ -1,0 +1,140 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <systemform>
+    <formid>{982c5ba5-bbe4-4dd4-b734-c588f966a461}</formid>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <FormPresentation>1</FormPresentation>
+    <FormActivationState>1</FormActivationState>
+    <form headerdensity="HighWithControls">
+      <tabs>
+        <tab verticallayout="true" id="{a2aa808e-8f02-4a78-a03d-a543f724fd39}" IsUserDefined="1">
+          <labels>
+            <label description="General" languagecode="1033" />
+          </labels>
+          <columns>
+            <column width="100%">
+              <sections>
+                <section showlabel="false" showbar="false" IsUserDefined="0" id="{12d48439-7ef1-4015-a588-ef4228481da2}">
+                  <labels>
+                    <label description="General" languagecode="1033" />
+                  </labels>
+                  <rows>
+                    <row>
+                      <cell id="{0b7c8ce2-6643-4e69-9731-ee738f9125f6}">
+                        <labels>
+                          <label description="HealthRating" languagecode="1033" />
+                        </labels>
+                        <control id="craf2_healthrating" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="craf2_healthrating" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{90f26d90-55b5-4b5b-85d8-37a717639c63}" locklevel="0" colspan="1" rowspan="1">
+                        <labels>
+                          <label description="LowerBoundScore" languagecode="1033" />
+                        </labels>
+                        <control id="craf2_lowerboundscore" classid="{C3EFE0C3-0EC6-42BE-8349-CBD9079DFD8E}" datafieldname="craf2_lowerboundscore" disabled="false" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{3ec6eeb9-65d9-4b6d-b14b-492c71d196e0}" locklevel="0" colspan="1" rowspan="1">
+                        <labels>
+                          <label description="UpperBoundScore" languagecode="1033" />
+                        </labels>
+                        <control id="craf2_upperboundscore" classid="{C3EFE0C3-0EC6-42BE-8349-CBD9079DFD8E}" datafieldname="craf2_upperboundscore" disabled="false" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{1114500d-0d0c-4ac9-aba3-08f02a9ef86c}" locklevel="0" colspan="1" rowspan="1">
+                        <labels>
+                          <label description="Img" languagecode="1033" />
+                        </labels>
+                        <control id="craf2_img" classid="{7E548B0D-209C-477B-9DCD-F0F44472381D}" datafieldname="craf2_img" disabled="false" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{8dded54e-8e52-4913-a636-c5531e5f32b4}" locklevel="0" colspan="1" rowspan="1">
+                        <labels>
+                          <label description="DisplayOrder" languagecode="1033" />
+                        </labels>
+                        <control id="craf2_displayorder" classid="{C6D124CA-7EDA-4A60-AEA9-7FB8D318B68F}" datafieldname="craf2_displayorder" disabled="false" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{3f558855-da03-4d57-9a1f-98ef8a7f4445}" locklevel="0" colspan="1" rowspan="1">
+                        <labels>
+                          <label description="Comment" languagecode="1033" />
+                        </labels>
+                        <control id="craf2_comment" classid="{4273EDBD-AC1D-40D3-9FB2-095C621B552D}" datafieldname="craf2_comment" disabled="false" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{7b16de9b-482b-45bc-9f8b-5ea0718f855b}" colspan="1" rowspan="1" visible="false">
+                        <labels>
+                          <label description="CreatedBy" languagecode="1033" />
+                        </labels>
+                        <control id="ownerid" classid="{270BD3DB-D9AF-4782-9025-509E298DEC0A}" datafieldname="ownerid" />
+                      </cell>
+                    </row>
+                  </rows>
+                </section>
+              </sections>
+            </column>
+          </columns>
+        </tab>
+      </tabs>
+      <header id="{54f93806-2319-4889-a975-aeb82492e588}" celllabelposition="Top" columns="111" labelwidth="115" celllabelalignment="Left">
+        <rows>
+          <row>
+            <cell id="{0314427f-c4a7-4fef-94e1-ddbb3c636949}" showlabel="false">
+              <labels>
+                <label description="" languagecode="1033" />
+              </labels>
+            </cell>
+            <cell id="{a792799a-c738-42dc-b0a0-8b76eb10d87b}" showlabel="false">
+              <labels>
+                <label description="" languagecode="1033" />
+              </labels>
+            </cell>
+            <cell id="{dab99f32-3346-49df-b4e0-63484544fa89}" showlabel="false">
+              <labels>
+                <label description="" languagecode="1033" />
+              </labels>
+            </cell>
+          </row>
+        </rows>
+      </header>
+      <footer id="{f302a278-771a-4f5b-bef2-3312cc8cc12f}" celllabelposition="Top" columns="111" labelwidth="115" celllabelalignment="Left">
+        <rows>
+          <row>
+            <cell id="{2d9c015f-9825-407a-b428-ccfc98ed0778}" showlabel="false">
+              <labels>
+                <label description="" languagecode="1033" />
+              </labels>
+            </cell>
+            <cell id="{0d3ff290-ed62-4f75-8058-4d1fa4dc3a6f}" showlabel="false">
+              <labels>
+                <label description="" languagecode="1033" />
+              </labels>
+            </cell>
+            <cell id="{77aaeea1-55fd-463a-829e-27ffee41a066}" showlabel="false">
+              <labels>
+                <label description="" languagecode="1033" />
+              </labels>
+            </cell>
+          </row>
+        </rows>
+      </footer>
+      <DisplayConditions Order="0" FallbackForm="true">
+        <Everyone />
+      </DisplayConditions>
+    </form>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>1</CanBeDeleted>
+    <LocalizedNames>
+      <LocalizedName description="Information" languagecode="1033" />
+    </LocalizedNames>
+    <Descriptions>
+      <Description description="A form for this entity." languagecode="1033" />
+    </Descriptions>
+  </systemform>
+</forms>
