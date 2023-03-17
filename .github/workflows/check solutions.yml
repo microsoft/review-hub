@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: CI
+name: CHeck Soltuion
 
 # Controls when the workflow will run
 on:
@@ -35,8 +35,6 @@ jobs:
       - name: Check Solution
         uses: microsoft/powerplatform-actions/pack-solution@v0
         with:
-          path: 'ReviewHub.zip'
-          environment-url: ${{ vars.ENVIRONMENTURL }}
-          client-secret: ${{ secrets.SERVICEPRINCIPALSECRET }}
-          app-id: ${{ vars.SERVICEPRINCIPALCLIENTID }}
-          tenant-id: ${{ vars.SERVICEPRINCIPALTENANTID }}
+          solution-file: 'ReviewHub.zip'
+          solution-folder: 'app'
+          solution-type: 'Unmanaged'
