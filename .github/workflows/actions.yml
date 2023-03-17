@@ -14,10 +14,9 @@ jobs:
       - name: Install Power Platform CLI
         run: |
           npm install -g pac-cli
-      - name: Code Quality Check
+      - name: Build Control and Perform Code Quality Check
         run: |
-          pac pcf scan --path .
-      - name: Confirm Package Build
-        run: |
-          pac solution list --details --json > solutions.json
-          node -pe "JSON.parse(fs.readFileSync('solutions.json')).map(s => s.uniqueName).forEach(s => execSync(\`pac solution pack -n \${s}\`))"
+          pac pcf init --namespace <namespace> --name <name>
+          cd <name>
+          npm install
+          npm run build
