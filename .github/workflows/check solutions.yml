@@ -36,7 +36,7 @@ jobs:
         uses: microsoft/powerplatform-actions/pack-solution@v0
         with:
           path: 'ReviewHub.zip'
-          environment-url: ${{ variables.ENVIRONMENTURL }}
+          environment-url: ${{ vars.ENVIRONMENTURL }}
           client-secret: ${{ secrets.SERVICEPRINCIPALSECRET }}
-          app-id: ${{ variables.SERVICEPRINCIPALCLIENTID }}
-          tenant-id: ${{ SERVICEPRINCIPALTENANTID }}
+          app-id: ${{ vars.SERVICEPRINCIPALCLIENTID }}
+          tenant-id: ${{ vars.SERVICEPRINCIPALTENANTID }}
