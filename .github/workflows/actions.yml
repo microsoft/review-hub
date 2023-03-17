@@ -14,15 +14,16 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v2
 
-      # Install PowerApps CLI
-      - name: Install PowerApps CLI
-        uses: microsoft/powerapps-cli@v0.7.0
+      # Install Power Platform CLI
+      - name: Install Power Platform CLI
+        run: |
+          npm install -g @powerapps/cli
 
       # Authenticate with PowerApps environment
       - name: Authenticate with PowerApps Environment
         run: pac auth create --url <your-environment-url> --username <your-username> --password <your-password>
 
-      # Run code analysis using PowerApps CLI
+      # Run code analysis using Power Platform CLI
       - name: Run PowerApps Code Analysis
         run: pac pcf scan --path <path-to-your-component-folder>
 
