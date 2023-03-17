@@ -1,16 +1,12 @@
 # Review Hub
 
- “Review Hub” App is a tool built using Power Apps, Power BI to help organizations centralize all Rhythm of Business (RoB) and solve constraints related to tracking the multiple RoB ran within the organization.
+Review Hub leverages the power of Power Apps, a low-code platform, to provide an intuitive interface that makes it easy for users to create and share dynamic dashboards, reports, and presentations. The solution eliminates the need for manual data entry and saves time by automating the generation of review content. With Review Hub, users can access a centralized repository of information that provides a comprehensive view of their business performance, allowing them to make data-driven decisions quickly and accurately. 
 
-The primary goals of Review Hub is to:
+The solution is designed to support businesses of all sizes, from small startups to large enterprises. It integrates seamlessly with other Microsoft tools, such as Excel, Power BI, Dataverse and SharePoint, allowing users to access and visualize data from a wide range of sources. The platform’s interface makes it easy to customize and personalize dashboards and reports to meet the specific needs of each business. 
 
-- Centralize RoB Commentary.
+In addition to providing an efficient way to conduct business reviews, Review Hub also helps organizations to streamline their review process and increase collaboration among team members. The solution’s collaborative features, such as real-time commenting, shared workspaces, and version control, make it easy for teams to share feedback and work together to achieve their goals. 
 
-- Populate common metrics across multiple RoBs.
-
-- Provide a change management process for metric definition.
-
-- Provide a holistic view of products’ health across the origanization.
+Overall, Review Hub is a powerful solution that empowers organizations to drive their business forward by providing them with the insights and information they need to make informed decisions. By optimizing performance and streamlining processes, Review Hub enables organizations to focus on what matters most – growing their business.
 
 # Getting started.
 
@@ -41,7 +37,7 @@ The following connections are utilized within the solution. There a Data Loss Po
 
 - Clone the repository to your local machine 
 ```
-git clone https://github.com/your-username/power-apps-project.git
+git clone https://github.com/microsoft/review-hub.git
 ```
 - Import the zipped solution file, present within the solution files folder into your environment.
 
