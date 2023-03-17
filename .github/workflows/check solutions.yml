@@ -15,6 +15,8 @@ on:
 jobs:
   # This workflow contains a single job called "build"
   quality-check:
+    
+    environment: ReviewHub-DTPIAPreProd
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
     # Steps represent a sequence of tasks that will be executed as part of the job
@@ -30,8 +32,10 @@ jobs:
           solution-type: 'Unmanaged'
           
       - name: Check Solution
-        uses: microsoft/powerplatform-actions/pack-solution@v0
+        uses: microsoft/powerplatform-actions/check-solution@v0
         with:
-          solution-file: 'ReviewHub.zip'
-          solution-folder: 'app'
-          solution-type: 'Unmanaged'
+          path: 'ReviewHub.zip'
+          environment-url: ${{ vars.ENVIRONMENTURL }}
+          client-secret: ${{ secrets.SERVICEPRINCIPALSECRET }}
+          app-id: ${{ vars.SERVICEPRINCIPALCLIENTID }}
+          tenant-id: ${{ vars.SERVICEPRINCIPALTENANTID }}
