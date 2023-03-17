@@ -1,0 +1,295 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_commondataserviceforapps": {
+        "impersonation": {},
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "chub_sharedcommondataserviceforapps_72f86"
+        },
+        "api": {
+          "name": "shared_commondataserviceforapps"
+        }
+      },
+      "shared_office365users_1": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "chub_sharedoffice365users_3cce7"
+        },
+        "api": {
+          "name": "shared_office365users"
+        }
+      },
+      "shared_office365_1": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "chub_sharedoffice365_aaf4a"
+        },
+        "api": {
+          "name": "shared_office365"
+        }
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        },
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        },
+        "EnvVar - ReviewHub - Notification Email (chub_EnvVarReviewHubNotificationEmail)": {
+          "defaultValue": "reviewhub-noreply@microsoft.com",
+          "type": "String",
+          "metadata": {
+            "schemaName": "chub_EnvVarReviewHubNotificationEmail"
+          }
+        },
+        "EnvVar - ReviewHub - Team Email (chub_EnvVarReviewHubTeamEmail)": {
+          "defaultValue": "dtpreviewhub@microsoft.com",
+          "type": "String",
+          "metadata": {
+            "schemaName": "chub_EnvVarReviewHubTeamEmail"
+          }
+        }
+      },
+      "triggers": {
+        "When_a_row_is_added,_modified_or_deleted": {
+          "metadata": {
+            "operationMetadataId": "bb8e77fe-d998-4e86-90d8-bbe31ffdc906"
+          },
+          "type": "OpenApiConnectionWebhook",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+              "connectionName": "shared_commondataserviceforapps",
+              "operationId": "SubscribeWebhookTrigger"
+            },
+            "parameters": {
+              "subscriptionRequest/message": 4,
+              "subscriptionRequest/entityname": "craf2_reviewhub_requestedproduct",
+              "subscriptionRequest/scope": 4,
+              "subscriptionRequest/name": "03413583-c837-ed11-bba2-000d3a5bc542"
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "conditions": [
+            {
+              "expression": "@not(equals(triggerOutputs()?['body/_craf2_decision_label'], 'Pending'))"
+            },
+            {
+              "expression": "@equals(triggerOutputs()?['body/craf2_isaccessrevoked'], false)"
+            }
+          ]
+        }
+      },
+      "actions": {
+        "Initialize_htmlMessage": {
+          "runAfter": {
+            "Get_approver_profile": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "77d0322a-bfc5-4445-ada9-d460f84fe5cf"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "htmlMessage",
+                "type": "string",
+                "value": "<table class=\"message\">\n   <thead>\n        <tr style=\"background-color: #e8e7e1;\">\n            <th colspan=2>ACCESS REQUEST @{toUpper(triggerOutputs()?['body/_craf2_decision_label'])}</th>\n       </tr>\n   </thead>   \n   <tbody>\n        <tr>\n            <td class=\"title\">Request date</td>\n            <td style=\"width: 500px\">@{formatDateTime(outputs('Get_AccessRequest_item')?['body/craf2_requestdate'], 'MM/dd/yyyy hh:mm')}</td>\n         </tr>\n        <tr>\n            <td class=\"title\">Product</td>\n            <td>@{outputs('Get_a_product_by_ID')?['body/craf2_product/craf2_productname']}</td>\n         </tr>\n        <tr>\n            <td class=\"title\">Board Type</td>\n            <td>@{outputs('Get_a_product_by_ID')?['body/craf2_boardtype/craf2_boardtypename']}</td>\n         </tr>\n        <tr>\n            <td class=\"title\">Justification</td>\n            <td>@{outputs('Get_AccessRequest_item')?['body/craf2_justification']}</td>\n         </tr>\n        <tr>\n            <td class=\"title\">Approver Comments</td>\n            <td>@{triggerOutputs()?['body/craf2_approvercomment']}</td>\n         </tr>\n        <tr>\n            <td class=\"title\">Decision</td>\n            <td>@{triggerOutputs()?['body/_craf2_decision_label']}</td>\n         </tr>\n        <tr>\n            <td class=\"title\">Decision date</td>\n            <td>@{formatDateTime(triggerOutputs()?['body/craf2_decisiondate'], 'MM/dd/yyyy hh:mm')}</td>\n         </tr>\n    </tbody>\n</table>"
+              }
+            ]
+          }
+        },
+        "Get_AccessRequest_item": {
+          "runAfter": {
+            "Get_a_product_by_ID": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "5503bdd0-0307-40b0-96a4-2744c1c87a19"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+              "connectionName": "shared_commondataserviceforapps",
+              "operationId": "GetItem"
+            },
+            "parameters": {
+              "entityName": "craf2_reviewhub_accessrequests",
+              "recordId": "@triggerOutputs()?['body/_craf2_accessrequest_value']"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Get_requester_profile": {
+          "runAfter": {
+            "Get_AccessRequest_item": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "54ab1d79-fa84-40a5-b314-24b81f1df58f"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365users",
+              "connectionName": "shared_office365users_1",
+              "operationId": "UserProfile_V2"
+            },
+            "parameters": {
+              "id": "@outputs('Get_AccessRequest_item')?['body/craf2_requesteremail']"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Get_approver_profile": {
+          "runAfter": {
+            "Get_requester_profile": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "5af1403d-4b90-4777-9595-76215c3ac66e"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365users",
+              "connectionName": "shared_office365users_1",
+              "operationId": "UserProfile_V2"
+            },
+            "parameters": {
+              "id": "@triggerOutputs()?['body/craf2_approveremail']"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Get_a_product_by_ID": {
+          "runAfter": {},
+          "metadata": {
+            "operationMetadataId": "4a6544e1-667f-4910-a2e2-f6a3b392279b"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+              "connectionName": "shared_commondataserviceforapps",
+              "operationId": "GetItem"
+            },
+            "parameters": {
+              "entityName": "craf2_reviewhub_requestedproducts",
+              "recordId": "@triggerOutputs()?['body/craf2_reviewhub_requestedproductid']",
+              "$expand": "craf2_AccessRequest($select=craf2_name,craf2_reviewhub_accessrequestid), craf2_Product($select=craf2_productid,craf2_productname), craf2_BoardType($select=craf2_boardtypeid,craf2_boardtypename)"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Condition": {
+          "actions": {
+            "Get_revoked_date": {
+              "actions": {
+                "Compose": {
+                  "runAfter": {},
+                  "metadata": {
+                    "operationMetadataId": "7868c345-f439-4b47-b69a-8aa4e1483cd8"
+                  },
+                  "type": "Compose",
+                  "inputs": "@formatDateTime(triggerOutputs()?['body/craf2_proposedaccessrevokeddate'], 'MM-dd-yyyy')"
+                }
+              },
+              "runAfter": {},
+              "metadata": {
+                "operationMetadataId": "a3e7a1d6-6a2a-49a5-a093-841123933342"
+              },
+              "type": "Scope"
+            },
+            "Send_approval_email_to_requester": {
+              "runAfter": {
+                "Get_revoked_date": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "0d930b5f-430e-468f-89bc-f0b909243826"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
+                  "connectionName": "shared_office365_1",
+                  "operationId": "SendEmailV2"
+                },
+                "parameters": {
+                  "emailMessage/To": "@outputs('Get_AccessRequest_item')?['body/craf2_requesteremail']",
+                  "emailMessage/Subject": "ReviewHub - Access Request @{triggerOutputs()?['body/_craf2_decision_label']}",
+                  "emailMessage/Body": "<style>\ntable.message td, table.message th {\nborder:1px solid #e8e7e1;\nborder-collapse: collapse;\npadding: 5px\n}\ntable.message td.title {\nbackground-color: #d3d3d3;\nwidth: 300px;\n}\nbody {\n font-family: 'Lato';\n font-style: normal;\n}\n</style>\n\nDear @{outputs('Get_requester_profile')?['body/givenName']},<br><br>\nYour request to edit <b>@{outputs('Get_a_product_by_ID')?['body/craf2_boardtype/craf2_boardtypename']}: @{outputs('Get_a_product_by_ID')?['body/craf2_product/craf2_productname']}</b> has been <b>@{toLower(triggerOutputs()?['body/_craf2_decision_label'])}</b>. Please note that your Edit privileges are valid until <b>@{outputs('Compose')}</b>. See details below:<br>\n<br>\n@{variables('htmlMessage')}\n<br>\nBest regards,<br>\n<b>Review Hub Team</b>",
+                  "emailMessage/From": "@parameters('EnvVar - ReviewHub - Notification Email (chub_EnvVarReviewHubNotificationEmail)')",
+                  "emailMessage/Cc": "@parameters('EnvVar - ReviewHub - Team Email (chub_EnvVarReviewHubTeamEmail)')",
+                  "emailMessage/ReplyTo": "@parameters('EnvVar - ReviewHub - Team Email (chub_EnvVarReviewHubTeamEmail)')",
+                  "emailMessage/Importance": "Normal"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            }
+          },
+          "runAfter": {
+            "Initialize_htmlMessage": [
+              "Succeeded"
+            ]
+          },
+          "else": {
+            "actions": {
+              "Send_rejection_email_to_requester": {
+                "runAfter": {},
+                "metadata": {
+                  "operationMetadataId": "0d930b5f-430e-468f-89bc-f0b909243826"
+                },
+                "type": "OpenApiConnection",
+                "inputs": {
+                  "host": {
+                    "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
+                    "connectionName": "shared_office365_1",
+                    "operationId": "SendEmailV2"
+                  },
+                  "parameters": {
+                    "emailMessage/To": "@outputs('Get_AccessRequest_item')?['body/craf2_requesteremail']",
+                    "emailMessage/Subject": "ReviewHub - Access Request @{triggerOutputs()?['body/_craf2_decision_label']}",
+                    "emailMessage/Body": "<style>\ntable.message td, table.message th {\nborder:1px solid #e8e7e1;\nborder-collapse: collapse;\npadding: 5px\n}\ntable.message td.title {\nbackground-color: #d3d3d3;\nwidth: 300px;\n}\nbody {\n font-family: 'Lato';\n font-style: normal;\n}\n</style>\n\nDear @{outputs('Get_requester_profile')?['body/givenName']},<br><br>\nYour request to edit <b>@{outputs('Get_a_product_by_ID')?['body/craf2_boardtype/craf2_boardtypename']}: @{outputs('Get_a_product_by_ID')?['body/craf2_product/craf2_productname']}</b> has been <b>@{toLower(triggerOutputs()?['body/_craf2_decision_label'])}</b>. See details below:<br>\n<br>\n@{variables('htmlMessage')}\n<br>\nBest regards,<br>\n<b>Review Hub Team</b>",
+                    "emailMessage/From": "@parameters('EnvVar - ReviewHub - Notification Email (chub_EnvVarReviewHubNotificationEmail)')",
+                    "emailMessage/Cc": "@parameters('EnvVar - ReviewHub - Team Email (chub_EnvVarReviewHubTeamEmail)')",
+                    "emailMessage/ReplyTo": "@parameters('EnvVar - ReviewHub - Team Email (chub_EnvVarReviewHubTeamEmail)')",
+                    "emailMessage/Importance": "Normal"
+                  },
+                  "authentication": "@parameters('$authentication')"
+                }
+              }
+            }
+          },
+          "expression": {
+            "equals": [
+              "@triggerOutputs()?['body/_craf2_decision_label']",
+              "Approved"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "8480d7f7-3488-4072-a21d-16c229916c52"
+          },
+          "type": "If"
+        }
+      }
+    },
+    "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+}

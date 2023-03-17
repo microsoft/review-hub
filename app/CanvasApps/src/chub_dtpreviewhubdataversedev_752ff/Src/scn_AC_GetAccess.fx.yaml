@@ -1,0 +1,731 @@
+scn_AC_GetAccess As screen:
+    OnVisible: |
+        =UpdateContext({ctx_IfGalleryLoaded: true, ctx_savingData: false});
+        Concurrent(
+            ClearCollect(
+                clln_MyAppsWithEditAccess,
+                SortByColumns(
+                    AddColumns(
+                        GroupBy(
+                            AddColumns(
+                                ShowColumns(
+                                    Filter(
+                                        ReviewHub_Stakeholders,
+                                        Text(User().Email) in ProductStakeholderEmails
+                                    ),
+                                    "craf2_title", "craf2_productstakeholders", "craf2_stakeholdernames", "craf2_Product", "craf2_BoardType"
+                                ),
+                                "craf2_ProductName", craf2_Product.ProductName, "craf2_ProductID", craf2_Product.ProductID, "craf2_BoardTypeName", craf2_BoardType.BoardTypeName, "craf2_BoardTypeID", craf2_BoardType.BoardTypeID
+                            ),
+                            "craf2_ProductID", "craf2_BoardTypeID", "PRD_Group"
+                        ),
+                        "ProductName",
+                        First(PRD_Group).craf2_ProductName,
+                        "BoardTypeName",
+                        First(PRD_Group).craf2_BoardTypeName
+                    ),
+                    "BoardTypeName", SortOrder.Ascending, "ProductName", SortOrder.Ascending
+                )
+            ),
+            ClearCollect(
+                clln_AllApps,
+                SortByColumns(
+                    AddColumns(
+                        GroupBy(
+                            ShowColumns( 
+                                clln_factMetricBoard,  
+                                "fmb_BoardHealthDisplayOrder", "fmb_BoardHealthRating", "fmb_BoardHealthImage", "fmb_ReviewLockDate", "fmb_ReviewMonth", "fmb_ReviewYear", "fmb_ProductName", "fmb_HealthScore", "fmb_ID", "fmb_ProductID", "fmb_TemplateID", "fmb_MetricBoardTypeID"
+                            ),
+                            "fmb_ProductID", "fmb_MetricBoardTypeID", "PSR_ProductsGroup"
+                        ), 
+                        "ProductName",
+                        First(PSR_ProductsGroup).fmb_ProductName, 
+                        "FirstID",
+                        First(PSR_ProductsGroup).fmb_ID,
+                        "BoardTypeName",
+                        LookUp(ReviewHub_BoardTypes, BoardTypeID = fmb_MetricBoardTypeID).BoardTypeName
+                    ),
+                    "BoardTypeName", SortOrder.Ascending, "ProductName", SortOrder.Ascending
+                )
+            );
+            Clear(clln_SelectedApps);
+            Clear(clln_SelectedApps1);
+            Clear(clln__SelectedApps),
+            Reset(DataValue_Justification_ACGEA),
+            Reset(Check_AgreeTC_ACGEA)
+        );
+        UpdateContext({ctx_IfGalleryLoaded: false, ctx_savingData: false});
+
+    ctn_Main_ACGEA As groupContainer.horizontalAutoLayoutContainer:
+        Height: =App.Height - Self.Y - 10
+        LayoutGap: =10
+        LayoutMode: =LayoutMode.Auto
+        Width: =(App.Width * 0.90) - Self.X * 2
+        X: =SS_AppHeader_ACGEA.X+ 15
+        Y: |
+            =lbl_ScreenTitle_ACGEA.Y + lbl_ScreenTitle_ACGEA.Height + 5
+        ZIndex: =1
+
+        ctn_UserCurrAccess_ACGEA As groupContainer.manualLayoutContainer:
+            AlignInContainer: =AlignInContainer.SetByContainer
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            Height: =Parent.Height//910
+            LayoutMinHeight: =100
+            LayoutMinWidth: =250
+            X: =60
+            Y: =60
+            ZIndex: =1
+
+            glry_UserCurrentAccess_ACGEA As gallery.variableTemplateHeightGallery:
+                BorderColor: =SUBGROUPCOLOR
+                BorderThickness: =2
+                Height: =Parent.Height - Self.Y - 20 //Min(Parent.Height - Self.Y, 240) - 2
+                Items: |-
+                    =Ungroup(//Ungroup function to add a Row Number column.
+                        ForAll(
+                            Sequence(CountRows(clln_MyAppsWithEditAccess)),
+                            {
+                                Record:Table(Last(FirstN(clln_MyAppsWithEditAccess,Value))),
+                                RowNumber:Value
+                            }
+                        ),
+                        "Record"
+                    )
+                Layout: =Layout.Vertical
+                TemplateFill: =If(Mod(ThisItem.RowNumber, 2) = 0, GrayCanvasBackground, RGBA(0, 0, 0, 0))
+                TemplatePadding: =1
+                TemplateSize: =35
+                Width: =Parent.Width - 2
+                X: =1
+                Y: =lbl_UserCurrentAccess_ACGEA.Y + lbl_UserCurrentAccess_ACGEA.Height - 1
+                ZIndex: =1
+
+                Label_UserCurrentAccess_ACGEA As htmlViewer:
+                    BorderColor: =RGBA(0, 0, 0, 0)
+                    Fill: =RGBA(0, 0, 0, 0)
+                    Font: =FontStyle
+                    Height: =35
+                    HtmlText: |-
+                        =ThisItem.BoardTypeName & ": " & ThisItem.ProductName
+                    OnSelect: =Select(Parent)
+                    PaddingLeft: =15
+                    Size: =10
+                    Width: =496
+                    ZIndex: =1
+
+            lbl_UserCurrentAccess_ACGEA As button:
+                Align: =Align.Left
+                BorderColor: =Self.Fill
+                BorderStyle: =BorderStyle.None
+                BorderThickness: =0
+                Color: =RGBA(0, 0, 0, 1)
+                DisabledBorderColor: =Self.BorderColor
+                DisabledColor: =Self.Color
+                DisabledFill: =Self.Fill
+                DisplayMode: =DisplayMode.Disabled
+                Fill: =SUBGROUPCOLOR
+                Font: =FontStyle
+                FontWeight: =FontWeight.Bold
+                PaddingLeft: =15
+                RadiusBottomLeft: |
+                    =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =20
+                RadiusTopRight: =20
+                Size: =11
+                Text: ="Apps you have access to"
+                Width: =Parent.Width
+                ZIndex: =3
+
+        vctn_UserSelect_ACGEA As groupContainer.verticalAutoLayoutContainer:
+            AlignInContainer: =AlignInContainer.SetByContainer
+            ContentLanguage: =0
+            FillPortions: =2
+            Height: =Parent.Height//App.Height - Self.Y - 20
+            LayoutAlignItems: =LayoutAlignItems.Stretch
+            LayoutDirection: =LayoutDirection.Vertical
+            LayoutGap: =10
+            LayoutMinHeight: =100
+            LayoutMinWidth: =250
+            LayoutMode: =LayoutMode.Auto
+            LayoutOverflowY: =LayoutOverflow.Scroll
+            Width: =Parent.Width - Self.X - 15 //App.Width - ctn_Left_NM_1.Width - 50
+            X: =15
+            ZIndex: =4
+
+            hctn_UserSelect_ACGEA As groupContainer.horizontalAutoLayoutContainer:
+                AlignInContainer: =AlignInContainer.SetByContainer
+                FillPortions: =0
+                Height: =Parent.Height - ctn_UserComment_ACGEA.Height - 20//Max(ctn_ExecSummary_HL_ES_1.Height, ctn_ExecSummary_LL_ES_1.Height)
+                LayoutJustifyContent: =LayoutJustifyContent.Center
+                LayoutMinHeight: =100
+                LayoutMinWidth: =250
+                LayoutMode: =LayoutMode.Auto
+                LayoutOverflowY: =LayoutOverflow.Scroll
+                PaddingLeft: =20
+                PaddingRight: =20
+                Width: =Parent.Width//500
+                ZIndex: =1
+
+                ctn_UserReqAcess_ACGEA As groupContainer:
+                    AlignInContainer: =AlignInContainer.SetByContainer
+                    ContentLanguage: =
+                    FillPortions: =0
+                    Height: |
+                        =ctn_UserSelectAccess_ACGEA.Height
+                    LayoutMinHeight: =100
+                    LayoutMinWidth: =250
+                    Width: =(Parent.Width - divider_BetweenContainers_ACGEA.Width) * 0.5
+                    ZIndex: =1
+
+                    Back_glry_UserReqAccess_ACGEA As button:
+                        BorderColor: =Self.Fill
+                        BorderStyle: =BorderStyle.None
+                        BorderThickness: =0
+                        DisplayMode: =DisplayMode.View
+                        Fill: =SUBGROUPCOLOR
+                        Height: =Label_glry_UserReqAccess_ACGEA.Height
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =15
+                        RadiusTopRight: =15
+                        Text: =""
+                        Width: =Parent.Width
+                        ZIndex: =1
+
+                    Label_glry_UserReqAccess_ACGEA As label:
+                        Color: =RGBA(55, 118, 29, 1)
+                        Font: =FontStyle
+                        FontWeight: =FontWeight.Bold
+                        PaddingLeft: =15
+                        Size: =11
+                        Text: ="Select the services you want access to"
+                        Width: =Parent.Width
+                        X: |
+                            =0
+                        ZIndex: =2
+
+                    Back_UserReqAccess_ACGEA As label:
+                        BorderColor: =SUBGROUPCOLOR
+                        BorderThickness: =3
+                        Color: =RGBA(255, 255, 255, 1)
+                        Fill: =RGBA(255, 255, 255, 1)
+                        Height: =Parent.Height - Self.Y
+                        Size: =10
+                        Text: =//for the white background
+                        Width: =Parent.Width
+                        Y: =37.999999999999545
+                        ZIndex: =3
+
+                    glry_UserReqAccess_ACGEA As gallery.variableTemplateHeightGallery:
+                        BorderColor: =SUBGROUPCOLOR
+                        BorderStyle: =BorderStyle.None
+                        BorderThickness: =2
+                        Height: =Parent.Height - Self.Y
+                        Items: |-
+                            =
+                            Ungroup(//Ungroup function to add a Row Number column.
+                                ForAll(
+                                    Sequence(CountRows(Filter(clln_AllApps, fmb_MetricBoardTypeID = dpdn_Scorecard_ACGEA.Selected.filter_BoardTypeID))),
+                                    {
+                                        Record:Table(Last(FirstN(Filter(clln_AllApps, fmb_MetricBoardTypeID = dpdn_Scorecard_ACGEA.Selected.filter_BoardTypeID),Value))),
+                                        RowNumber:Value
+                                    }
+                                ),
+                                "Record"
+                            )
+                        Layout: =Layout.Vertical
+                        TemplateFill: =If(Mod(ThisItem.RowNumber, 2) = 0, GrayCanvasBackground, RGBA(0, 0, 0, 0))
+                        TemplatePadding: =1
+                        TemplateSize: =35
+                        Width: =Parent.Width - 2
+                        X: =1
+                        Y: =Label_Scorecard_ACGEA.Y + Label_Scorecard_ACGEA.Height + 10
+                        ZIndex: =4
+
+                        Label_NR_LogMsg_2 As htmlViewer:
+                            BorderColor: =RGBA(0, 0, 0, 0)
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Font: =FontStyle
+                            Height: =35
+                            HtmlText: |-
+                                =ThisItem.ProductName //craf2_BoardType.craf2_boardtypeid & ": " & ThisItem.craf2_Product.craf2_productid
+                            OnSelect: =Select(Parent)
+                            PaddingLeft: =15
+                            Size: =10
+                            Width: =Parent.Width
+                            ZIndex: =1
+
+                        icon_Back_NM_2 As icon.BackArrow:
+                            BorderColor: =RGBA(0, 0, 0, 0)
+                            BorderStyle: =BorderStyle.None
+                            Color: =BlueControlDarkBackground
+                            DisplayMode: =If(CountRows(Filter(clln_SelectedApps, FirstID = ThisItem.FirstID))>0 || CountRows(Filter(clln_MyAppsWithEditAccess, craf2_BoardTypeID = ThisItem.fmb_MetricBoardTypeID && craf2_ProductID = ThisItem.fmb_ProductID))>0, DisplayMode.Disabled, DisplayMode.Edit)
+                            Height: =30
+                            HoverBorderColor: =Self.BorderColor
+                            HoverColor: =Color.Purple
+                            Icon: =Icon.Add
+                            OnSelect: |
+                                =Collect(clln_SelectedApps1, LookUp(clln_AllApps, FirstID = ThisItem.FirstID));
+                                ClearCollect(clln__SelectedApps,
+                                    SortByColumns(
+                                        clln_SelectedApps1,
+                                        "BoardTypeName", SortOrder.Ascending, "ProductName", SortOrder.Ascending
+                                    )
+                                );
+                                Clear(clln_SelectedApps);
+                                Collect(clln_SelectedApps, 
+                                    Ungroup(//Ungroup function to add a Row Number column.
+                                        ForAll(
+                                            Sequence(CountRows(clln__SelectedApps)),
+                                            {
+                                                Record:Table(Last(FirstN(clln__SelectedApps,Value))),
+                                                RowNumber:Value
+                                            }
+                                        ),
+                                        "Record"
+                                    )
+                                );
+                            PaddingBottom: =5
+                            PaddingLeft: =5
+                            PaddingRight: =10
+                            PaddingTop: =5
+                            Tooltip: ="Back"
+                            Width: =Self.Height
+                            X: =Parent.Width - Self.Width - 10
+                            Y: =Label_NR_LogMsg_2.Y + (Label_NR_LogMsg_2.Height - Self.Height) * 0.50
+                            ZIndex: =2
+
+                    dpdn_Scorecard_ACGEA As dropdown:
+                        BorderColor: =
+                        BorderStyle: =BorderStyle.None
+                        BorderThickness: =0
+                        ChevronBackground: =Self.Fill
+                        ChevronDisabledFill: =RGBA(0, 0, 0, 0)
+                        ChevronFill: =RGBA(0, 0, 0, 1)
+                        ChevronHoverBackground: =BlueControlLightBackground
+                        ChevronHoverFill: =RGBA(0, 0, 0, 1)
+                        Default: ="Product Review"
+                        Fill: =GrayControlBackground
+                        Font: =FontStyle
+                        FontWeight: =FontWeight.Semibold
+                        Height: |
+                            =30
+                        HoverFill: =Self.ChevronHoverBackground
+                        Items: |-
+                            =RenameColumns(
+                                AddColumns(
+                                    ForAll(Distinct(clln_factMetricBoard, fmb_MetricBoardTypeID), {Result: ThisRecord.Value}).Result, 
+                                    "filter_BoardTypeName", LookUp(ReviewHub_BoardTypes, ThisRecord.BoardTypeID = Result).BoardTypeName
+                                ),
+                                "Result", "filter_BoardTypeID"
+                            )
+                        OnChange: =
+                        PressedColor: =BlueControlDarkBackground
+                        PressedFill: =BlueControlLightBackground
+                        SelectionFill: =BlueNaviHightLightBackground
+                        Size: =11
+                        Width: =190
+                        X: =Label_Scorecard_ACGEA.X + Label_Scorecard_ACGEA.Width
+                        Y: =Label_glry_UserReqAccess_ACGEA.Y + Label_glry_UserReqAccess_ACGEA.Height + 10
+                        ZIndex: =5
+
+                    Label_Scorecard_ACGEA As label:
+                        DisplayMode: =DisplayMode.View
+                        Font: =FontStyle
+                        Height: =30
+                        PaddingLeft: =15
+                        PaddingRight: =10
+                        Size: =11
+                        Text: |-
+                            ="Scorecard:"
+                        Width: =100
+                        Y: =Label_glry_UserReqAccess_ACGEA.Y + Label_glry_UserReqAccess_ACGEA.Height + 10
+                        ZIndex: =6
+
+                divider_BetweenContainers_ACGEA As rectangle:
+                    BorderColor: =RGBA(0, 0, 0, 0)
+                    BorderStyle: =BorderStyle.None
+                    DisplayMode: =DisplayMode.View
+                    Fill: =RGBA(0, 0, 0, 0)
+                    Height: =Parent.Height
+                    Width: =10
+                    ZIndex: =2
+
+                ctn_UserSelectAccess_ACGEA As groupContainer:
+                    AlignInContainer: =AlignInContainer.SetByContainer
+                    ContentLanguage: =0
+                    FillPortions: =0
+                    Height: |
+                        =Parent.Height//Label_glry_LL_ES_1.Height + GalleryLogs_3.Height
+                    LayoutMinHeight: =100
+                    LayoutMinWidth: =250
+                    Width: =(Parent.Width - divider_BetweenContainers_ACGEA.Width) * 0.5
+                    ZIndex: =3
+
+                    Back_glry_UserSelectAccess_ACGEA As button:
+                        BorderColor: =Self.Fill
+                        BorderStyle: =BorderStyle.None
+                        BorderThickness: =0
+                        DisplayMode: =DisplayMode.View
+                        Fill: =SUBGROUPCOLOR
+                        Height: =Label_glry_UserReqAccess_ACGEA.Height
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =15
+                        RadiusTopRight: =15
+                        Text: =""
+                        Width: =Parent.Width
+                        ZIndex: =7
+
+                    Label_glry_UserSelectAccess_ACGEA As label:
+                        Color: =RGBA(210, 64, 39, 1)
+                        Font: =FontStyle
+                        FontWeight: =FontWeight.Bold
+                        PaddingLeft: =15
+                        Size: =11
+                        Text: ="Services you have selected"
+                        Width: =Parent.Width
+                        X: |
+                            =0
+                        ZIndex: =8
+
+                    glry_UserSelectAccess_ACGEA As gallery.variableTemplateHeightGallery:
+                        BorderColor: =SUBGROUPCOLOR
+                        BorderThickness: =2
+                        Height: =Parent.Height - Self.Y//Min(Parent.Height - Self.Y, 240) - 2
+                        Items: |-
+                            =clln_SelectedApps/*Ungroup(//Ungroup function to add a Row Number column.
+                                ForAll(
+                                    Sequence(CountRows(clln_SelectedApps)),
+                                    {
+                                        Record:Table(Last(FirstN(clln_SelectedApps,Value))),
+                                        RowNumber:Value
+                                    }
+                                ),
+                                "Record"
+                            )*/
+                        Layout: =Layout.Vertical
+                        TemplateFill: =If(Mod(ThisItem.RowNumber, 2) = 0, GrayCanvasBackground, RGBA(0, 0, 0, 0))
+                        TemplatePadding: =1
+                        TemplateSize: =35
+                        Width: =Parent.Width - 3
+                        X: =2
+                        Y: =Back_glry_UserReqAccess_ACGEA.Y + Back_glry_UserReqAccess_ACGEA.Height - 1
+                        ZIndex: =9
+
+                        Label_UserSelectAccess_ACGEA As htmlViewer:
+                            BorderColor: =RGBA(0, 0, 0, 0)
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Font: =FontStyle
+                            Height: =35
+                            HtmlText: |-
+                                =ThisItem.BoardTypeName & ": " & ThisItem.ProductName
+                            OnSelect: =Select(Parent)
+                            PaddingLeft: =15
+                            Size: =10
+                            Width: =Parent.Width
+                            ZIndex: =1
+
+                        icon_Back_UserSelectAccess_ACGEA As icon.BackArrow:
+                            BorderColor: =RGBA(0, 0, 0, 0)
+                            BorderStyle: =BorderStyle.None
+                            Color: =BlueControlDarkBackground
+                            Height: =30
+                            HoverBorderColor: =Self.BorderColor
+                            HoverColor: =Color.Purple
+                            Icon: =Icon.Cancel
+                            OnSelect: |-
+                                =Remove(clln_SelectedApps, ThisItem);
+                                ClearCollect(clln_SelectedApps1, DropColumns(clln_SelectedApps, "RowNumber"));
+                                ClearCollect(clln__SelectedApps,
+                                    SortByColumns(
+                                        clln_SelectedApps1,
+                                        "BoardTypeName", SortOrder.Ascending, "ProductName", SortOrder.Ascending
+                                    )
+                                );
+                                Clear(clln_SelectedApps);
+                                Collect(clln_SelectedApps, 
+                                    Ungroup(//Ungroup function to add a Row Number column.
+                                        ForAll(
+                                            Sequence(CountRows(clln__SelectedApps)),
+                                            {
+                                                Record:Table(Last(FirstN(clln__SelectedApps,Value))),
+                                                RowNumber:Value
+                                            }
+                                        ),
+                                        "Record"
+                                    )
+                                );
+                            PaddingBottom: =5
+                            PaddingLeft: =5
+                            PaddingRight: =10
+                            PaddingTop: =5
+                            Tooltip: ="Back"
+                            Width: =Self.Height
+                            X: =Parent.Width - Self.Width - 10
+                            Y: =Label_UserSelectAccess_ACGEA.Y + (Label_UserSelectAccess_ACGEA.Height - Self.Height) * 0.50
+                            ZIndex: =2
+
+            ctn_UserComment_ACGEA As groupContainer:
+                AlignInContainer: =AlignInContainer.SetByContainer
+                FillPortions: =0
+                Height: =Check_AgreeTC_ACGEA.Height + DataValue_Justification_ACGEA.Height + html_ApprovalInfo_ACGEA.Height + bttn_Save_UserRequestAccess_ACGEA.Height + 40
+                LayoutMinHeight: =200
+                LayoutMinWidth: =250
+                PaddingBottom: =5
+                PaddingTop: =5
+                ZIndex: =2
+
+                html_ApprovalInfo_ACGEA As htmlViewer:
+                    AutoHeight: =true
+                    BorderColor: =RGBA(0, 0, 0, 0)
+                    Color: =If(var_EditExecSummaryDesc_ES,  RGBA(0, 0, 0, 0), RGBA(0, 0, 0, 1))
+                    Fill: =If(var_EditExecSummaryDesc_ES, RGBA(0, 0, 0, 0), RGBA(255, 255, 255, 1))
+                    Font: =FontStyle
+                    Height: =
+                    HtmlText: |-
+                        ="<b>* Access will be reviewed and approved by the admin. For any questions, please reach out to Review Hub feature team at <a href='mailto:"& var_TeamEmail &"'>"& var_TeamEmail &"<a/>.</b>"
+                    PaddingBottom: =0
+                    PaddingTop: =0
+                    Visible: =true //!var_EditExecSummaryDesc_ES
+                    Width: =Parent.Width
+                    Y: =DataValue_Justification_ACGEA.Y + DataValue_Justification_ACGEA.Height + 10
+                    ZIndex: =2
+
+                bttn_Save_UserRequestAccess_ACGEA As button:
+                    BorderColor: =Self.Fill
+                    DisabledBorderColor: =GrayBorderLight
+                    DisabledFill: =RGBA(0, 0, 0, 0)
+                    DisplayMode: =If(CountRows(clln_SelectedApps) = 0 || IsBlankOrError(DataValue_Justification_ACGEA.Text) || Check_AgreeTC_ACGEA.Value = false, DisplayMode.Disabled, DisplayMode.Edit)//lbl_Warn_CharacterLimit_1.Visible
+                    Fill: =BlueControlDarkBackground
+                    Font: =FontStyle
+                    FontWeight: =FontWeight.Bold
+                    Height: |
+                        =25
+                    HoverColor: =Self.Fill
+                    HoverFill: =Self.Color
+                    OnSelect: |-
+                        =UpdateContext({ctx_IfGalleryLoaded: true, ctx_savingData: true});
+                        Set(
+                            var_AccessRequests_GA,
+                            Patch(
+                                ReviewHub_AccessRequests,
+                                Defaults(ReviewHub_AccessRequests),
+                                {
+                                    craf2_requesteremail: User().Email,
+                                    craf2_requestdate: Now(),
+                                    craf2_justification: Trim(DataValue_Justification_ACGEA.Text)
+                                }
+                            )
+                        );
+                        ForAll(
+                            clln_SelectedApps,
+                            Patch(
+                                ReviewHub_RequestedProducts,
+                                Defaults(ReviewHub_RequestedProducts),
+                                {
+                                    craf2_AccessRequest: var_AccessRequests_GA,
+                                    craf2_Product: LookUp(ReviewHub_Products, ProductID = fmb_ProductID),
+                                    craf2_BoardType: LookUp(ReviewHub_BoardTypes, BoardTypeID = fmb_MetricBoardTypeID)
+                                }
+                            )
+                        );
+                        Select(bttn_Cancel_UserReqAccess_ACGEA);
+                        Notify("Your request has been submitted successfully", NotificationType.Success);
+                        UpdateContext({ctx_IfGalleryLoaded: false, ctx_savingData: false});
+                    PaddingBottom: =0
+                    PaddingTop: =0
+                    RadiusBottomLeft: =15
+                    RadiusBottomRight: =15
+                    RadiusTopLeft: =15
+                    RadiusTopRight: =15
+                    Size: =10
+                    Text: ="Submit"
+                    Width: =90
+                    X: =1
+                    Y: =Check_AgreeTC_ACGEA.Y + Check_AgreeTC_ACGEA.Height + 10
+                    ZIndex: =5
+
+                bttn_Cancel_UserReqAccess_ACGEA As button:
+                    BorderColor: =Self.Fill
+                    Fill: =GRAYCOLOR
+                    Font: =FontStyle
+                    FontWeight: =FontWeight.Bold
+                    Height: |
+                        =25
+                    HoverColor: =Self.Fill
+                    HoverFill: =Self.Color
+                    OnSelect: |-
+                        =Concurrent(
+                            Clear(clln__SelectedApps),
+                            Clear(clln_SelectedApps),
+                            Clear(clln_SelectedApps1),
+                            Reset(DataValue_Justification_ACGEA),
+                            Reset(Check_AgreeTC_ACGEA)
+                        )
+                    PaddingBottom: =0
+                    PaddingTop: =0
+                    RadiusBottomLeft: =15
+                    RadiusBottomRight: =15
+                    RadiusTopLeft: =15
+                    RadiusTopRight: =15
+                    Size: =10
+                    Text: ="Cancel"
+                    Width: =90
+                    X: =bttn_Save_UserRequestAccess_ACGEA.X + bttn_Save_UserRequestAccess_ACGEA.Width + 10
+                    Y: =Check_AgreeTC_ACGEA.Y + Check_AgreeTC_ACGEA.Height + 10
+                    ZIndex: =6
+
+                DataValue_Justification_ACGEA As text:
+                    BorderColor: =If(IsBlank(Self.Text), GrayBorderLight, IsError(Self.Text), Color.Red)
+                    BorderThickness: =1
+                    Default: =""
+                    DelayOutput: =true
+                    DisplayMode: =Parent.DisplayMode
+                    Font: =FontStyle
+                    Height: =100
+                    HintText: =If(Check_AgreeTC_ACGEA.Value || IsBlank(Self.Text), "Provide business justification here (required)")
+                    HoverBorderColor: =Self.BorderColor
+                    HoverFill: =ColorFade(BlueControlLightBackground, 75%)
+                    Mode: =TextMode.MultiLine
+                    PaddingBottom: =0
+                    PaddingLeft: =5
+                    PaddingRight: =0
+                    RadiusBottomLeft: =0
+                    RadiusBottomRight: =0
+                    RadiusTopLeft: =0
+                    RadiusTopRight: =0
+                    Size: =10
+                    Tooltip: ="Provide business justification here (required)"
+                    Width: =Parent.Width - 2
+                    X: =1
+                    Y: =1
+                    ZIndex: =8
+
+                Check_AgreeTC_ACGEA As checkbox:
+                    BorderColor: =RGBA(0, 0, 0, 0)
+                    CheckboxBorderColor: =Color.Gray
+                    CheckboxSize: =30
+                    CheckmarkFill: =LEFTNAVBKGDCOLOR
+                    Color: |-
+                        =If(
+                            Check_AgreeTC_ACGEA.Value, 
+                            RGBA(0, 0, 0, 1), 
+                            BlueControlDarkBackground
+                        )
+                    DisplayMode: =Parent.DisplayMode
+                    Font: =FontStyle
+                    FontWeight: |-
+                        =If(
+                            Check_AgreeTC_ACGEA.Value, 
+                            FontWeight.Normal, 
+                            FontWeight.Semibold
+                        )
+                    Height: =30
+                    HoverBorderColor: =
+                    HoverColor: =Self.Color
+                    PressedBorderColor: =RGBA(0, 0, 0, 0)
+                    PressedColor: =Self.Color
+                    Size: =10
+                    Text: ="By getting access, I confirm that I will only tag the comments for the products I own and ensure the quality of the tags"
+                    Width: =Parent.Width
+                    Y: =html_ApprovalInfo_ACGEA.Y + html_ApprovalInfo_ACGEA.Height + 10
+                    ZIndex: =9
+
+    lbl_ScreenTitle_ACGEA As label:
+        DisabledColor: =BlueControlDarkBackground
+        DisabledFill: =Self.Fill
+        DisplayMode: =DisplayMode.Disabled
+        Fill: =GrayCanvasBackground
+        Font: =FontStyle
+        FontWeight: =FontWeight.Bold
+        Height: =55
+        PaddingLeft: =60
+        Size: =18
+        Text: ="Get Access"
+        Width: =App.Width - Self.X
+        Y: =SS_AppHeader_ACGEA.Height
+        ZIndex: =2
+
+    icon_Back_ACGEA As icon.BackArrow:
+        BorderColor: =RGBA(0, 0, 0, 0)
+        BorderStyle: =BorderStyle.None
+        Color: =BlueControlDarkBackground
+        Height: =30
+        HoverBorderColor: =Self.BorderColor
+        HoverColor: =Color.Purple
+        Icon: =Icon.BackArrow
+        OnSelect: |-
+            =Back();//Navigate(scn_SelfService);
+            
+            Concurrent(
+                Set(Toggle_Btn_CreateMetrics_Check, false),
+                Set(Toggle_Btn_CreateMetrics_Loading, false),
+                Set(Toggle_Btn_CreateBoard_Check, false),
+                Set(Toggle_Btn_CreateBoard_Loading, false)
+            );
+        Tooltip: ="Back"
+        Width: =Self.Height
+        X: =15
+        Y: =lbl_ScreenTitle_ACGEA.Y + (lbl_ScreenTitle_ACGEA.Height - Self.Height) * 0.50
+        ZIndex: =3
+
+    SS_AppHeader_ACGEA As AppHeader:
+        DropDownSelection: =TrackRequestComponent_ACGEA.HideTrackRequest
+        FeatureRequestUrl: =var_FeatureRequestURL
+        FeedbackButtonUrl: =var_SendFeedback_URL
+        inputAppDisplayName: =varAppHeaderText
+        ScorecardOnboardingFeatureUrl: =var_ScorecardOnboardingRequestURL
+        ShowSurveyButton: =false
+        Y: =0
+        ZIndex: =4
+
+    TrackRequestComponent_ACGEA As TrackRequestComponent:
+        BlueControlDarkBackground: =BlueControlDarkBackground
+        BlueControlLightBackground: =BlueControlLightBackground
+        BlueNaviHightLightBackground: =BlueNaviHightLightBackground
+        DevOpsBaseUrl: =var_DevOpsBaseURL
+        DevOpsQueryID: =var_DevOpsQueryID
+        FontStyle: =FontStyle
+        GrayCanvasBackground: =GrayCanvasBackground
+        GRAYCOLOR: =GRAYCOLOR
+        GrayControlBackground: =GrayControlBackground
+        IsAdmin: =IsAdmin
+        Reset: =Self.Visible
+        Visible: =SS_AppHeader_ACGEA.DisplayTrackRequest
+        X: =App.Width - Self.Width
+        Y: =SS_AppHeader_ACGEA.Height
+        ZIndex: =5
+
+    ctn_IfGalleryLoaded_ACGEA As groupContainer:
+        BorderColor: =RGBA(0, 0, 0, 0)
+        BorderStyle: =BorderStyle.None
+        Fill: =RGBA(255, 255, 255, 0.9)
+        Height: =Parent.Height - Self.Y
+        Visible: =ctx_IfGalleryLoaded
+        Width: =App.Width
+        ZIndex: =6
+
+        Label_BoardSrn_Loading_1 As label:
+            Align: =Align.Center
+            Color: =LEFTNAVHIGLIGHTCOLOR
+            Font: =FONTNAME
+            Size: =18
+            Text: =If(ctx_savingData, "Saving data...", "Getting data...")
+            Width: =Image_BoardSrn_Loading_1.Width
+            X: =Image_BoardSrn_Loading_1.X
+            Y: =Image_BoardSrn_Loading_1.Y + Image_BoardSrn_Loading_1.Height - 10
+            ZIndex: =1
+
+        Image_BoardSrn_Loading_1 As image:
+            Image: =boardsrn_loading
+            PaddingBottom: =20
+            PaddingRight: =10
+            PaddingTop: =10
+            Width: =300
+            X: =Parent.Width * 0.5 - Self.Width * 0.5
+            Y: =Parent.Height * 0.5 - Self.Height * 0.5 - 50
+            ZIndex: =2
+

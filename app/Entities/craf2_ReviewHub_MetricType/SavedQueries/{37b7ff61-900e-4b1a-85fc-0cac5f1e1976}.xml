@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<savedqueries xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <savedquery>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>0</CanBeDeleted>
+    <isquickfindquery>0</isquickfindquery>
+    <isprivate>0</isprivate>
+    <isdefault>1</isdefault>
+    <savedqueryid>{37b7ff61-900e-4b1a-85fc-0cac5f1e1976}</savedqueryid>
+    <layoutxml>
+      <grid name="resultset" jump="craf2_metrictypename" select="1" icon="1" preview="1">
+        <row name="result" id="craf2_reviewhub_metrictypeid">
+          <cell name="craf2_metrictypename" width="174" />
+          <cell name="craf2_metrictypeid" width="158" />
+          <cell name="craf2_metrictypedescription" width="183" />
+          <cell name="craf2_metrictypesource" width="156" />
+          <cell name="craf2_metrictypestage" width="157" />
+          <cell name="craf2_valuetype" width="113" />
+          <cell name="craf2_metrictypeshortname" width="162" />
+          <cell name="craf2_metrictypehealthweight" width="176" />
+          <cell name="craf2_metrictypedeprecateddate" width="100" />
+          <cell name="craf2_metrictypeenumerateoptions" width="100" />
+          <cell name="craf2_metrictypeistrenddown" width="100" />
+          <cell name="craf2_metrictypeeffectivedate" width="183" />
+          <cell name="createdby" width="100" />
+        </row>
+      </grid>
+    </layoutxml>
+    <querytype>0</querytype>
+    <fetchxml>
+      <fetch version="1.0" mapping="logical">
+        <entity name="craf2_reviewhub_metrictype">
+          <attribute name="craf2_reviewhub_metrictypeid" />
+          <attribute name="craf2_metrictypename" />
+          <filter type="and">
+            <condition attribute="statecode" operator="eq" value="0" />
+          </filter>
+          <attribute name="craf2_metrictypeid" />
+          <attribute name="craf2_metrictypedescription" />
+          <attribute name="craf2_metrictypesource" />
+          <attribute name="craf2_metrictypestage" />
+          <attribute name="craf2_valuetype" />
+          <attribute name="craf2_metrictypeshortname" />
+          <attribute name="craf2_metrictypehealthweight" />
+          <attribute name="craf2_metrictypedeprecateddate" />
+          <attribute name="craf2_metrictypeenumerateoptions" />
+          <attribute name="createdby" />
+          <attribute name="craf2_metrictypeeffectivedate" />
+          <attribute name="craf2_metrictypeistrenddown" />
+          <order attribute="craf2_metrictypeid" descending="true" />
+        </entity>
+      </fetch>
+    </fetchxml>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <LocalizedNames>
+      <LocalizedName description="Active ReviewHub_MetricTypes" languagecode="1033" />
+    </LocalizedNames>
+  </savedquery>
+</savedqueries>

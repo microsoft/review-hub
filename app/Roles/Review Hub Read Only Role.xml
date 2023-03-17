@@ -1,0 +1,69 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Role id="{f1de5c32-bc27-ec11-b6e6-0022480491cd}" name="Review Hub Read Only Role" isinherited="1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <IsCustomizable>1</IsCustomizable>
+  <RolePrivileges>
+    <RolePrivilege name="prvAppendcraf2_ReviewHub_PrivacyAgreement" level="Global" />
+    <RolePrivilege name="prvAppendEnvironmentVariableDefinition" level="Global" />
+    <RolePrivilege name="prvAppendSolution" level="Global" />
+    <RolePrivilege name="prvAppendTocraf2_ReviewHub_PrivacyAgreement" level="Global" />
+    <RolePrivilege name="prvAppendToEnvironmentVariableDefinition" level="Global" />
+    <RolePrivilege name="prvAppendToSolution" level="Global" />
+    <RolePrivilege name="prvAssigncraf2_ReviewHub_PrivacyAgreement" level="Global" />
+    <RolePrivilege name="prvCreatecraf2_ReviewHub_PrivacyAgreement" level="Global" />
+    <RolePrivilege name="prvCreatecraf2_ReviewHub_UserRequest" level="Global" />
+    <RolePrivilege name="prvCreateSharePointData" level="Global" />
+    <RolePrivilege name="prvCreateSolution" level="Global" />
+    <RolePrivilege name="prvDeletecraf2_ReviewHub_PrivacyAgreement" level="Global" />
+    <RolePrivilege name="prvDeleteSolution" level="Global" />
+    <RolePrivilege name="prvReadAppConfigMaster" level="Global" />
+    <RolePrivilege name="prvReadArticle" level="Global" />
+    <RolePrivilege name="prvReadArticleTemplate" level="Global" />
+    <RolePrivilege name="prvReadAttributeMap" level="Global" />
+    <RolePrivilege name="prvReadBusinessUnit" level="Global" />
+    <RolePrivilege name="prvReadchub_ReviewHub_MetricUploadLog" level="Global" />
+    <RolePrivilege name="prvReadcraf2_ReviewHub_AutomaticNotifcationLog" level="Global" />
+    <RolePrivilege name="prvReadcraf2_ReviewHub_BoardHealth" level="Global" />
+    <RolePrivilege name="prvReadcraf2_ReviewHub_BoardType" level="Global" />
+    <RolePrivilege name="prvReadcraf2_ReviewHub_FactExecutiveSummary" level="Global" />
+    <RolePrivilege name="prvReadcraf2_ReviewHub_FactMetric" level="Global" />
+    <RolePrivilege name="prvReadcraf2_ReviewHub_FactMetric_Staging" level="Global" />
+    <RolePrivilege name="prvReadcraf2_ReviewHub_FactMetric_UploadLog" level="Global" />
+    <RolePrivilege name="prvReadcraf2_ReviewHub_FactMetricBoard" level="Global" />
+    <RolePrivilege name="prvReadcraf2_ReviewHub_MetricTemplate" level="Global" />
+    <RolePrivilege name="prvReadcraf2_ReviewHub_MetricType" level="Global" />
+    <RolePrivilege name="prvReadcraf2_ReviewHub_MetricTypeDetail" level="Global" />
+    <RolePrivilege name="prvReadcraf2_ReviewHub_MetricTypeObjective" level="Global" />
+    <RolePrivilege name="prvReadcraf2_ReviewHub_PrivacyAgreement" level="Global" />
+    <RolePrivilege name="prvReadcraf2_ReviewHub_Product" level="Global" />
+    <RolePrivilege name="prvReadcraf2_ReviewHub_ProductMetric" level="Global" />
+    <RolePrivilege name="prvReadcraf2_ReviewHub_ScorecardAutomation" level="Global" />
+    <RolePrivilege name="prvReadcraf2_ReviewHub_Stakeholder" level="Global" />
+    <RolePrivilege name="prvReadcraf2_ReviewHub_UserRequest" level="Global" />
+    <RolePrivilege name="prvReadcraf2_ReviewHub_Users" level="Global" />
+    <RolePrivilege name="prvReadCustomization" level="Global" />
+    <RolePrivilege name="prvReadEntity" level="Global" />
+    <RolePrivilege name="prvReadEnvironmentVariableDefinition" level="Global" />
+    <RolePrivilege name="prvReadKnowledgeArticle" level="Basic" />
+    <RolePrivilege name="prvReadKnowledgeArticleViews" level="Basic" />
+    <RolePrivilege name="prvReadmsdyn_kbattachment" level="Basic" />
+    <RolePrivilege name="prvReadmsdyn_knowledgearticleimage" level="Basic" />
+    <RolePrivilege name="prvReadmsdyn_knowledgeinteractioninsight" level="Basic" />
+    <RolePrivilege name="prvReadmsdyn_knowledgesearchinsight" level="Basic" />
+    <RolePrivilege name="prvReadPluginAssembly" level="Global" />
+    <RolePrivilege name="prvReadPluginType" level="Global" />
+    <RolePrivilege name="prvReadSdkMessage" level="Global" />
+    <RolePrivilege name="prvReadSdkMessageProcessingStep" level="Global" />
+    <RolePrivilege name="prvReadSdkMessageProcessingStepImage" level="Global" />
+    <RolePrivilege name="prvReadSharePointData" level="Global" />
+    <RolePrivilege name="prvReadSharePointDocument" level="Global" />
+    <RolePrivilege name="prvReadSolution" level="Global" />
+    <RolePrivilege name="prvReadTeam" level="Global" />
+    <RolePrivilege name="prvReadTerritory" level="Global" />
+    <RolePrivilege name="prvReadUser" level="Global" />
+    <RolePrivilege name="prvSharecraf2_ReviewHub_PrivacyAgreement" level="Global" />
+    <RolePrivilege name="prvWritecraf2_ReviewHub_PrivacyAgreement" level="Global" />
+    <RolePrivilege name="prvWritecraf2_ReviewHub_UserRequest" level="Global" />
+    <RolePrivilege name="prvWriteSharePointData" level="Global" />
+    <RolePrivilege name="prvWriteSolution" level="Global" />
+  </RolePrivileges>
+</Role>

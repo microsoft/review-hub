@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<savedqueries xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <savedquery>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>0</CanBeDeleted>
+    <isquickfindquery>0</isquickfindquery>
+    <isprivate>0</isprivate>
+    <isdefault>1</isdefault>
+    <savedqueryid>{f0644145-fe1f-4ee4-9cc8-9c800b33d798}</savedqueryid>
+    <layoutxml>
+      <grid name="resultset" jump="craf2_factmetricboardtitle" select="1" icon="1" preview="1">
+        <row name="result" id="craf2_reviewhub_factmetricboardid">
+          <cell name="craf2_factmetricboardid" width="100" />
+          <cell name="craf2_fmb_boardtype" width="100" />
+          <cell name="craf2_fmb_product" width="100" />
+          <cell name="craf2_fmb_reviewlockdate" width="141" />
+          <cell name="craf2_fmb_healthscore" width="100" />
+          <cell name="craf2_fmb_reviewownername" width="100" />
+          <cell name="craf2_fmb_reviewownerprincipal" width="100" />
+          <cell name="craf2_fmb_template" width="100" />
+          <cell name="createdon" width="100" />
+          <cell name="createdby" width="100" />
+        </row>
+      </grid>
+    </layoutxml>
+    <querytype>0</querytype>
+    <fetchxml>
+      <fetch version="1.0" mapping="logical">
+        <entity name="craf2_reviewhub_factmetricboard">
+          <attribute name="craf2_reviewhub_factmetricboardid" />
+          <filter type="and">
+            <condition attribute="statecode" operator="eq" value="0" />
+          </filter>
+          <attribute name="craf2_fmb_boardtype" />
+          <attribute name="craf2_fmb_reviewlockdate" />
+          <attribute name="craf2_fmb_product" />
+          <attribute name="craf2_fmb_healthscore" />
+          <attribute name="craf2_fmb_template" />
+          <attribute name="createdon" />
+          <attribute name="craf2_fmb_reviewownername" />
+          <attribute name="craf2_fmb_reviewownerprincipal" />
+          <attribute name="craf2_factmetricboardid" />
+          <attribute name="createdby" />
+          <order attribute="craf2_fmb_reviewlockdate" descending="false" />
+        </entity>
+      </fetch>
+    </fetchxml>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <LocalizedNames>
+      <LocalizedName description="Active ReviewHub_FactMetricBoards" languagecode="1033" />
+    </LocalizedNames>
+  </savedquery>
+</savedqueries>

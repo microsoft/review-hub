@@ -1,0 +1,13 @@
+<environmentvariabledefinition schemaname="chub_EnvVarReviewHubBulkImportSharepointFile">
+  <description default="A link to SharePoint excel file, which is used for bulk upload of Metrics.. ">
+    <label description="A link to SharePoint excel file, which is used for bulk upload of Metrics.. " languagecode="1033" />
+  </description>
+  <displayname default="EnvVar - ReviewHub - Bulk Import Sharepoint File">
+    <label description="EnvVar - ReviewHub - Bulk Import Sharepoint File" languagecode="1033" />
+  </displayname>
+  <introducedversion>1.0.0.12082022</introducedversion>
+  <iscustomizable>1</iscustomizable>
+  <isrequired>0</isrequired>
+  <secretstore>0</secretstore>
+  <type>100000000</type>
+</environmentvariabledefinition>

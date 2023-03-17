@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Workflow WorkflowId="{03413583-c837-ed11-bba2-000d3a5bc542}" Name="ReviewHub - Access Request Treated" Description="This flow implements the process flow after a response is given to the access request made by a user for stakeholder access. Which sends an email of the response and if the response is approved triggers the Add user to tempReadWriteTeam.&#xA;&#xA;Flow failure also results in the failure of the temporary stakeholder access feature offered by Review Hub. Specifically, the process that occurs after access is granted or rejected." xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <JsonFileName>/Workflows/ReviewHub-AccessRequestTreated-03413583-C837-ED11-BBA2-000D3A5BC542.json</JsonFileName>
+  <Type>1</Type>
+  <Subprocess>0</Subprocess>
+  <Category>5</Category>
+  <Mode>0</Mode>
+  <Scope>4</Scope>
+  <OnDemand>0</OnDemand>
+  <TriggerOnCreate>0</TriggerOnCreate>
+  <TriggerOnDelete>0</TriggerOnDelete>
+  <AsyncAutodelete>0</AsyncAutodelete>
+  <SyncWorkflowLogOnFailure>0</SyncWorkflowLogOnFailure>
+  <StateCode>1</StateCode>
+  <StatusCode>2</StatusCode>
+  <RunAs>1</RunAs>
+  <IsTransacted>1</IsTransacted>
+  <IntroducedVersion>1.0.0.0</IntroducedVersion>
+  <IsCustomizable>1</IsCustomizable>
+  <IsCustomProcessingStepAllowedForOtherPublishers>1</IsCustomProcessingStepAllowedForOtherPublishers>
+  <PrimaryEntity>none</PrimaryEntity>
+  <LocalizedNames>
+    <LocalizedName languagecode="1033" description="ReviewHub - Access Request Treated" />
+  </LocalizedNames>
+  <Descriptions>
+    <Description languagecode="1033" description="This flow implements the process flow after a response is given to the access request made by a user for stakeholder access. Which sends an email of the response and if the response is approved triggers the Add user to tempReadWriteTeam.&#xA;&#xA;Flow failure also results in the failure of the temporary stakeholder access feature offered by Review Hub. Specifically, the process that occurs after access is granted or rejected." />
+  </Descriptions>
+</Workflow>

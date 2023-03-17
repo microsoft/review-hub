@@ -1,0 +1,13 @@
+<environmentvariabledefinition schemaname="chub_EnvVarReviewHubEnvironmentID">
+  <description default="The id of the current environment the solution resides in.">
+    <label description="The id of the current environment the solution resides in." languagecode="1033" />
+  </description>
+  <displayname default="EnvVar - ReviewHub - Environment ID">
+    <label description="EnvVar - ReviewHub - Environment ID" languagecode="1033" />
+  </displayname>
+  <introducedversion>1.0.0.12082022</introducedversion>
+  <iscustomizable>1</iscustomizable>
+  <isrequired>0</isrequired>
+  <secretstore>0</secretstore>
+  <type>100000000</type>
+</environmentvariabledefinition>

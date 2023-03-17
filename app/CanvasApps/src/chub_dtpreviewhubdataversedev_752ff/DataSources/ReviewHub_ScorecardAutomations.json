@@ -1,0 +1,107 @@
+[
+  {
+    "CdsFCBContext": "{\"FileType\":true,\"ImageExternalStorage\":true}",
+    "EntitySetName": "craf2_reviewhub_scorecardautomations",
+    "IsHidden": false,
+    "IsSampleData": false,
+    "IsWritable": true,
+    "LogicalName": "craf2_reviewhub_scorecardautomation",
+    "MaxGetRowsCount": 2000,
+    "Name": "ReviewHub_ScorecardAutomations",
+    "NativeCDSDataSourceInfoNameMapping": {
+      "_ownerid_value": "Owner",
+      "craf2_automationstartdate": "AutomationStartDate",
+      "craf2_BoardType": "BoardType",
+      "craf2_dayofcreationpermonth": "DayOfCreationPerMonth",
+      "craf2_dayofreviewlockdatepermonth": "DayOfReviewLockDatePerMonth",
+      "craf2_lastcreationmonth": "LastCreationMonth",
+      "craf2_pausedsincemonth": "PausedSinceMonth",
+      "craf2_Product": "Product",
+      "craf2_reviewhub_scorecardautomation_AsyncOperations": "System Jobs",
+      "craf2_reviewhub_scorecardautomation_BulkDeleteFailures": "Bulk Delete Failures",
+      "craf2_reviewhub_scorecardautomation_DuplicateBaseRecord": "Duplicate Records (craf2_reviewhub_scorecardautomation_DuplicateBaseRecord)",
+      "craf2_reviewhub_scorecardautomation_DuplicateMatchingRecord": "Duplicate Records (craf2_reviewhub_scorecardautomation_DuplicateMatchingRecord)",
+      "craf2_reviewhub_scorecardautomation_MailboxTrackingFolders": "Mailbox Auto Tracking Folders",
+      "craf2_reviewhub_scorecardautomation_PrincipalObjectAttributeAccesses": "Field Sharing",
+      "craf2_reviewhub_scorecardautomation_ProcessSession": "Process Sessions",
+      "craf2_reviewhub_scorecardautomation_SyncErrors": "Sync Errors",
+      "craf2_reviewhub_scorecardautomationid": "ReviewHub_ScorecardAutomation",
+      "craf2_reviewownerdisplayname": "ReviewOwnerDisplayName",
+      "craf2_reviewownerprincipalemail": "ReviewOwnerPrincipalEmail",
+      "craf2_Template": "Template",
+      "craf2_title": "Title",
+      "createdby": "Created By",
+      "createdon": "Created On",
+      "createdonbehalfby": "Created By (Delegate)",
+      "importsequencenumber": "Import Sequence Number",
+      "modifiedby": "Modified By",
+      "modifiedon": "Modified On",
+      "modifiedonbehalfby": "Modified By (Delegate)",
+      "overriddencreatedon": "Record Created On",
+      "owningbusinessunit": "Owning Business Unit",
+      "owningteam": "Owning Team",
+      "owninguser": "Owning User",
+      "statecode": "Status",
+      "statuscode": "Status Reason",
+      "timezoneruleversionnumber": "Time Zone Rule Version Number",
+      "utcconversiontimezonecode": "UTC Conversion Time Zone Code",
+      "versionnumber": "Version Number"
+    },
+    "PreferredName": "ReviewHub_ScorecardAutomations",
+    "Type": "NativeCDSDataSourceInfo"
+  },
+  {
+    "DisplayName": "ReviewHub_ScorecardAutomations (Views)",
+    "Name": "_craf2_reviewhub_scorecardautomation_views",
+    "RelatedEntityName": "ReviewHub_ScorecardAutomations",
+    "TrimmedViewName": true,
+    "Type": "ViewInfo",
+    "ViewInfoNameMapping": {
+      "4393cd81-c51e-4ade-8a58-c10bb9ac44bd": "ReviewHub_ScorecardAutomation Lookup View",
+      "4808c895-f1a6-400f-9da1-e7bcab27ff34": "ReviewHub_ScorecardAutomation Associated View",
+      "5024b2a5-b87f-479e-a5e3-f6955e28f99b": "Inactive ReviewHub_ScorecardAutomations",
+      "eb7e6f03-de2f-445d-8e75-4dbddc48986f": "Active ReviewHub_ScorecardAutomations",
+      "f9de835c-87f7-4352-a53f-00bb7d2e7df1": "ReviewHub_ScorecardAutomation Advanced Find View"
+    }
+  },
+  {
+    "DisplayName": "Status (ReviewHub_ScorecardAutomations)",
+    "Name": "craf2_reviewhub_scorecardautomation_statecode",
+    "OptionSetInfoNameMapping": {
+      "0": "Active",
+      "1": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statecode",
+        "OptionSetReferenceEntityName": "ReviewHub_ScorecardAutomations"
+      }
+    },
+    "OptionSetTypeKey": "StateType",
+    "RelatedColumnInvariantName": "statecode",
+    "RelatedEntityName": "ReviewHub_ScorecardAutomations",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Status Reason (ReviewHub_ScorecardAutomations)",
+    "Name": "craf2_reviewhub_scorecardautomation_statuscode",
+    "OptionSetInfoNameMapping": {
+      "1": "Active",
+      "2": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statuscode",
+        "OptionSetReferenceEntityName": "ReviewHub_ScorecardAutomations"
+      }
+    },
+    "OptionSetTypeKey": "StatusType",
+    "RelatedColumnInvariantName": "statuscode",
+    "RelatedEntityName": "ReviewHub_ScorecardAutomations",
+    "Type": "OptionSetInfo"
+  }
+]

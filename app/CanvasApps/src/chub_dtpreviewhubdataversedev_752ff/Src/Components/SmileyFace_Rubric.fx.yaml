@@ -1,0 +1,199 @@
+SmileyFace_Rubric As CanvasComponent:
+    Display_HealthScoreCalc: =true
+    Fill: =RGBA(0, 0, 0, 0)
+    Height: =If(Self.Display_HealthScoreCalc, 343, 220)
+    TotalEarnedWgt: =100
+    TotalWeight: =100
+    Width: =350
+    X: =0
+    Y: =0
+    ZIndex: =1
+
+    ctn_SmileyFace As groupContainer:
+        BorderColor: =RGBA(0, 0, 0, 0)
+        BorderStyle: =BorderStyle.None
+        Height: =Gallery_SmileyFaceRubric.Y + Gallery_SmileyFaceRubric.Height + 5
+        Width: =350
+        ZIndex: =1
+
+        Lower_Background As button:
+            BorderColor: =Top_Background.Fill
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =Self.Color
+            DisabledFill: =RGBA(255, 255, 255, 1)
+            DisplayMode: =DisplayMode.Disabled
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =Parent.Height - Self.Y - 2
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Self.Color
+            HoverFill: =Self.Fill
+            PressedBorderColor: =Self.BorderColor
+            PressedColor: =Self.Color
+            PressedFill: =Self.Fill
+            RadiusBottomLeft: =Top_Background.RadiusTopLeft
+            RadiusBottomRight: =Top_Background.RadiusTopRight
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Text: ="Button"
+            Width: =Top_Background.Width - 2
+            X: =2
+            Y: =Top_Background.Y + Top_Background.Height - 1
+            ZIndex: =1
+
+        Top_Background As button:
+            BorderColor: =Self.Fill
+            DisabledColor: =Self.Color
+            DisplayMode: =DisplayMode.View
+            Fill: =RGBA(215,226,248,1)
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =20
+            RadiusTopRight: =20
+            Size: =10
+            Text: =""
+            Width: |
+                =Parent.Width - 2
+            X: =1
+            ZIndex: =2
+
+        "Gallery_SmileyFaceRubric As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver4.0'":
+            BorderColor: =RGBA(0, 0,0, 0)
+            BorderStyle: =BorderStyle.None
+            Height: =160
+            Items: =SortByColumns(Filter(clln_MetricBoardHealth, ThisRecord.DisplayOrder <> 5), "DisplayOrder")
+            Layout: =Layout.Vertical
+            TemplatePadding: =0
+            TemplateSize: =40
+            Width: =330
+            X: =10
+            Y: =lbl_HealthRating.Y + lbl_HealthRating.Height - 8
+            ZIndex: =3
+
+            Item_Background As button:
+                BorderColor: =RGBA(0,0,0,0)
+                BorderStyle: =BorderStyle.None
+                BorderThickness: =0
+                DisplayMode: =DisplayMode.View
+                Fill: =RGBA(237, 237, 237, 0.6)
+                Height: =Parent.TemplateHeight - 10
+                OnSelect: =Select(Parent)
+                RadiusBottomLeft: =20
+                RadiusBottomRight: =20
+                RadiusTopLeft: =20
+                RadiusTopRight: =20
+                Text: =""
+                Width: =Parent.TemplateWidth - 30
+                X: =(Parent.TemplateWidth - Self.Width) * 0.50
+                Y: =(Parent.TemplateHeight - Self.Height) * 0.50
+                ZIndex: =1
+
+            Image_SmileyFaces As image:
+                DisplayMode: =DisplayMode.View
+                Height: =28
+                Image: =ThisItem.Image
+                ImagePosition: =ImagePosition.Stretch
+                OnSelect: =Select(Parent)
+                PaddingBottom: =3
+                PaddingLeft: =3
+                PaddingRight: =3
+                PaddingTop: =3
+                Width: =28
+                X: =30
+                Y: =(Parent.TemplateHeight / 2) - (Self.Height / 2)
+                ZIndex: =2
+
+            Title_RatingName As label:
+                DisplayMode: =DisplayMode.View
+                Font: =Font.'Segoe UI'
+                Height: =Self.Size * 1.8
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: =ThisItem.Rating
+                VerticalAlign: =VerticalAlign.Top
+                Width: =145
+                X: =Image_SmileyFaces.X + Image_SmileyFaces.Width + 10
+                Y: =Self.Height * 0.5 + 3
+                ZIndex: =3
+
+            Title_Rubrics As label:
+                DisplayMode: =DisplayMode.View
+                Font: =Font.'Segoe UI'
+                Height: =Self.Size * 1.8
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: =ThisItem.MinScore*100 & "% - " & Round(ThisItem.MaxScore*100, 1) & "%"
+                VerticalAlign: =VerticalAlign.Top
+                Width: =Parent.Width - Self.X
+                X: |
+                    =Image_SmileyFaces.X + Image_SmileyFaces.Width + 170
+                Y: =Self.Height * 0.5 + 3
+                ZIndex: =4
+
+        lbl_HealthScoreRange As label:
+            Align: =Align.Right
+            Font: =Font.'Segoe UI'
+            FontWeight: =FontWeight.Bold
+            Height: =30
+            PaddingLeft: =0
+            PaddingRight: =15
+            Size: =9
+            Text: ="Health Score Range"
+            Width: =145
+            X: =180
+            Y: =lbl_HealthRating.Y
+            ZIndex: =5
+
+        lbl_HealthRating As label:
+            Font: =Font.'Segoe UI'
+            FontWeight: =FontWeight.Bold
+            Height: =30
+            Size: =9
+            Text: ="Health Rating"
+            Width: =120
+            X: =40
+            Y: =label_RubricNotes.Y + label_RubricNotes.Height - 3
+            ZIndex: =6
+
+        label_RubricNotes As label:
+            Font: =Font.'Segoe UI'
+            Height: =Top_Background.Height
+            PaddingBottom: =0
+            PaddingLeft: =15
+            Size: =10
+            Text: |-
+                ="** Health Rating is based on the below rubric:"
+            Width: =Parent.Width
+            Y: =If(SmileyFace_Rubric.Display_HealthScoreCalc, HtmlText_HealthScoreCalc.Y+HtmlText_HealthScoreCalc.Height, 0)
+            ZIndex: =7
+
+        HtmlText_HealthScoreCalc As htmlViewer:
+            AutoHeight: =true
+            Fill: =RGBA(0, 0, 0, 0)
+            Font: =Font.'Segoe UI'
+            Height: =120
+            HtmlText: |-
+                ="<b>&ensp;Health Score<sup>*</sup>:</b> "  
+                & 
+                If(
+                    SmileyFace_Rubric.TotalWeight=0, 
+                    "None",
+                    SmileyFace_Rubric.TotalEarnedWgt & " / " & SmileyFace_Rubric.TotalWeight & " = " &  Round(SmileyFace_Rubric.TotalEarnedWgt/(SmileyFace_Rubric.TotalWeight+0.0000001),4)*100 & "%"
+                )
+                & " <br><br>* Weights Distribution:<li>Green Metrics = Full Metric Weight</li><li>Yellow Metrics = 80% of Metric Weight</li><li>Red / Not Available Metrics = 0</li>"
+            PaddingBottom: =0
+            PaddingLeft: =15
+            PaddingRight: =0
+            PaddingTop: =10
+            Size: =10
+            Visible: =SmileyFace_Rubric.Display_HealthScoreCalc
+            Width: =Parent.Width 
+            ZIndex: =8
+

@@ -1,0 +1,124 @@
+[
+  {
+    "CdsFCBContext": "{\"FileType\":true,\"ImageExternalStorage\":true}",
+    "EntitySetName": "craf2_reviewhub_metrictemplates",
+    "IsHidden": false,
+    "IsSampleData": false,
+    "IsWritable": true,
+    "LogicalName": "craf2_reviewhub_metrictemplate",
+    "MaxGetRowsCount": 2000,
+    "Name": "ReviewHub_MetricTemplates",
+    "NativeCDSDataSourceInfoNameMapping": {
+      "_ownerid_value": "Owner",
+      "craf2_isdisplayinapp": "IsDisplayInApp",
+      "craf2_ReviewHub_FactMetricBoard_fmb_Templ": "ReviewHub_FactMetricBoards",
+      "craf2_reviewhub_metrictemplate_AsyncOperations": "System Jobs",
+      "craf2_reviewhub_metrictemplate_BulkDeleteFailures": "Bulk Delete Failures",
+      "craf2_reviewhub_metrictemplate_DuplicateBaseRecord": "Duplicate Records (craf2_reviewhub_metrictemplate_DuplicateBaseRecord)",
+      "craf2_reviewhub_metrictemplate_DuplicateMatchingRecord": "Duplicate Records (craf2_reviewhub_metrictemplate_DuplicateMatchingRecord)",
+      "craf2_reviewhub_metrictemplate_MailboxTrackingFolders": "Mailbox Auto Tracking Folders",
+      "craf2_reviewhub_metrictemplate_PrincipalObjectAttributeAccesses": "Field Sharing",
+      "craf2_reviewhub_metrictemplate_ProcessSession": "Process Sessions",
+      "craf2_reviewhub_metrictemplate_SyncErrors": "Sync Errors",
+      "craf2_reviewhub_metrictemplateid": "ReviewHub_MetricTemplate",
+      "craf2_ReviewHub_MetricTypeDetail_MetricTy": "ReviewHub_MetricTypeDetails",
+      "craf2_ReviewHub_ScorecardAutomation_Templ": "ReviewHub_ScorecardAutomations",
+      "craf2_TemplateBoardType": "TemplateBoardType",
+      "craf2_templatedescription": "TemplateDescription",
+      "craf2_templateid": "TemplateID",
+      "craf2_templatename": "TemplateName",
+      "createdby": "Created By",
+      "createdon": "Created On",
+      "createdonbehalfby": "Created By (Delegate)",
+      "importsequencenumber": "Import Sequence Number",
+      "modifiedby": "Modified By",
+      "modifiedon": "Modified On",
+      "modifiedonbehalfby": "Modified By (Delegate)",
+      "overriddencreatedon": "Record Created On",
+      "owningbusinessunit": "Owning Business Unit",
+      "owningteam": "Owning Team",
+      "owninguser": "Owning User",
+      "statecode": "Status",
+      "statuscode": "Status Reason",
+      "timezoneruleversionnumber": "Time Zone Rule Version Number",
+      "utcconversiontimezonecode": "UTC Conversion Time Zone Code",
+      "versionnumber": "Version Number"
+    },
+    "PreferredName": "ReviewHub_MetricTemplates",
+    "Type": "NativeCDSDataSourceInfo"
+  },
+  {
+    "DisplayName": "ReviewHub_MetricTemplates (Views)",
+    "Name": "_craf2_reviewhub_metrictemplate_views",
+    "RelatedEntityName": "ReviewHub_MetricTemplates",
+    "TrimmedViewName": true,
+    "Type": "ViewInfo",
+    "ViewInfoNameMapping": {
+      "1554301a-19eb-42d6-a858-91e370bab440": "ReviewHub_MetricTemplate Advanced Find View",
+      "60312c26-f6d8-445e-9362-8d51795ef3b7": "Active ReviewHub_MetricTemplates",
+      "6dce309c-eb10-4eaf-a4e2-9778fa14f7f2": "ReviewHub_MetricTemplate Associated View",
+      "cddda8d5-f2b8-4e00-b808-8883e27bedb0": "ReviewHub_MetricTemplate Lookup View",
+      "f4d9f81e-b6f0-45a1-88b1-86d398ac09fc": "Inactive ReviewHub_MetricTemplates"
+    }
+  },
+  {
+    "DisplayName": "IsDisplayInApp (ReviewHub_MetricTemplates)",
+    "Name": "craf2_reviewhub_metrictemplate_craf2_isdisplayinapp",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "craf2_isdisplayinapp",
+        "OptionSetReferenceEntityName": "ReviewHub_MetricTemplates"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "craf2_isdisplayinapp",
+    "RelatedEntityName": "ReviewHub_MetricTemplates",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Status (ReviewHub_MetricTemplates)",
+    "Name": "craf2_reviewhub_metrictemplate_statecode",
+    "OptionSetInfoNameMapping": {
+      "0": "Active",
+      "1": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statecode",
+        "OptionSetReferenceEntityName": "ReviewHub_MetricTemplates"
+      }
+    },
+    "OptionSetTypeKey": "StateType",
+    "RelatedColumnInvariantName": "statecode",
+    "RelatedEntityName": "ReviewHub_MetricTemplates",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Status Reason (ReviewHub_MetricTemplates)",
+    "Name": "craf2_reviewhub_metrictemplate_statuscode",
+    "OptionSetInfoNameMapping": {
+      "1": "Active",
+      "2": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statuscode",
+        "OptionSetReferenceEntityName": "ReviewHub_MetricTemplates"
+      }
+    },
+    "OptionSetTypeKey": "StatusType",
+    "RelatedColumnInvariantName": "statuscode",
+    "RelatedEntityName": "ReviewHub_MetricTemplates",
+    "Type": "OptionSetInfo"
+  }
+]

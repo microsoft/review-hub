@@ -1,0 +1,65 @@
+SurveyComponent As CanvasComponent:
+    BlueControlDarkBackground: =RGBA(0, 114, 198, 1)
+    Fill: =RGBA(211,211,211,0.3)
+    FontStyle: =Font.'Segoe UI'
+    GrayCanvasBackground: =RGBA(248, 248, 248, 1)
+    Height: =App.Height - 40
+    HideSurvey: =var_SurveyVisible
+    OnReset: =Set(var_SurveyVisible, false);
+    Reset: =true
+    Survey: =""
+    Width: =App.Width
+    X: =0
+    Y: =0
+    ZIndex: =1
+
+    BackGround_SC As groupContainer.manualLayoutContainer:
+        Fill: =Color.White
+        Height: =Parent.Height
+        Width: |-
+            =If(App.Width < 800, 
+                 App.Width * 0.43,
+                 App.Width * 0.32
+            )
+        X: =Parent.Width - Self.Width
+        ZIndex: =2
+
+        Header_SC As label:
+            DisabledColor: =SurveyComponent.BlueControlDarkBackground
+            DisabledFill: =Self.Fill
+            DisplayMode: =DisplayMode.Disabled
+            Fill: =SurveyComponent.GrayCanvasBackground
+            Font: =SurveyComponent.FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =55
+            PaddingLeft: =60
+            Size: =18
+            Text: ="Satisfaction Survey"
+            Width: =Parent.Width
+            ZIndex: =10
+
+        icon_Back_SC As icon.BackArrow:
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            Color: =SurveyComponent.BlueControlDarkBackground
+            Height: =30
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Color.Purple
+            Icon: =Icon.BackArrow
+            OnSelect: =Set(var_SurveyVisible, !var_SurveyVisible)
+            Rotation: =180
+            Tooltip: ="Back"
+            Width: =Self.Height
+            X: =15
+            Y: =Header_SC.Y + (Header_SC.Height - Self.Height) * 0.50
+            ZIndex: =11
+
+    ReviewHubSurvey As formspro:
+        BorderThickness: =0
+        Height: =SurveyComponent.Height - Header_SC.Height
+        SurveyID: =SurveyComponent.Survey
+        Width: =BackGround_SC.Width
+        X: =BackGround_SC.X
+        Y: =Header_SC.Height
+        ZIndex: =3
+

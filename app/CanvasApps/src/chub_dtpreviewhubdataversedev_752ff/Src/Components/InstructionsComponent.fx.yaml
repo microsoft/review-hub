@@ -1,0 +1,204 @@
+InstructionsComponent As CanvasComponent:
+    BlueControlDarkBackground: =RGBA(0, 114, 198, 1)
+    BlueControlLightBackground: =RGBA(218, 240, 250, 1)
+    BlueNaviHightLightBackground: =RGBA(121, 181, 222, 1)
+    Fill: =RGBA(211,211,211,0.3)
+    FontStyle: =Font.'Segoe UI'
+    GrayCanvasBackground: =RGBA(248, 248, 248, 1)
+    GRAYCOLOR: =RGBA(166, 166, 166, 1)
+    GrayControlBackground: =RGBA(236, 236, 236, 1)
+    Height: =App.Height
+    Hide: =var_visibleIC
+    Instructions: |-
+        =Table(
+            {
+                Instruction: "Select a review type", 
+                Step: 1, 
+                Image: 'Select Review Type'
+            },
+            {
+                Instruction: "Select the action you wish to carry out", 
+                Step: 2, 
+                Image: 'Select An Action'
+            },
+            {
+                Instruction: "Select the 'Launch Excel' Button to open up the excel template in a new tab", 
+                Step: 3, 
+                Image: 'Select Launch Excel Button'
+            },
+            {
+                Instruction: "Make adjustments to excel file following the examples made in the example's column", 
+                Step: 4, 
+                Image: 'Excel File Opens In a new tab'
+            },
+            {
+                Instruction: "Come back to the app the a new drop down will be visible search for the file you wish to upload", 
+                Step: 5, 
+                Image: 'Upload File'
+            },
+            {
+                Instruction: "Come back to the app and select the 'Upload' Button", 
+                Step: 6, 
+                Image: 'Select the validate button'
+            },
+            {
+                Instruction: "Confirm if all the data is loaded correctly", 
+                Step: 7, 
+                Image: 'Loaded Data Specific'
+            },
+            {
+                Instruction: "Input a batch name to help identify the action if a roll back is necessary later", 
+                Step: 8, 
+                Image: 'Select Submit Button'
+            },
+            {
+                Instruction: "Confirm the Upload was completed successfully", 
+                Step: 9, 
+                Image: 'Upload Complete'
+            }
+        )
+    InstructionTitle: ="Uploading excel"
+    IsAdmin: =false
+    OnReset: |-
+        =Set(var_visibleIC, false);
+        Set(var_StepIC, 1);
+        Set(var_Instruction, First(InstructionsComponent.Instructions));
+    Reset: =true
+    Width: =App.Width
+    X: =0
+    Y: =0
+    ZIndex: =1
+
+    BackGround_IC As groupContainer.manualLayoutContainer:
+        Fill: =Color.White
+        Height: =Parent.Height //* 0.51
+        Width: |-
+            =If(App.Width < 800, 
+                App.Width * 0.4,
+                App.Width * 0.3
+            )
+        X: =(Parent.Width - Self.Width) // 2
+        Y: =// (Parent.Height - Self.Height) / 2
+        ZIndex: =1
+
+        Header_IC As label:
+            DisabledColor: =InstructionsComponent.BlueControlDarkBackground
+            DisabledFill: =Self.Fill
+            DisplayMode: =DisplayMode.Disabled
+            Fill: |-
+                =//BackGround_IC.Fill
+                InstructionsComponent.GrayCanvasBackground
+            Font: =InstructionsComponent.FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =55
+            PaddingLeft: =60
+            Size: =18
+            Text: =InstructionsComponent.InstructionTitle
+            Width: =Parent.Width
+            ZIndex: =1
+
+        icon_Back_IC As icon.BackArrow:
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            Color: =InstructionsComponent.BlueControlDarkBackground
+            Height: =30
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Color.Purple
+            Icon: =Icon.BackArrow
+            OnSelect: =Set(var_visibleIC, !var_visibleIC)
+            Rotation: =180
+            Tooltip: ="Back"
+            Width: =Self.Height
+            X: =15
+            Y: =Header_IC.Y + (Header_IC.Height - Self.Height) * 0.50
+            ZIndex: =2
+
+        Next As button:
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =0
+            Color: =RGBA(0, 0, 0, 1)
+            DisplayMode: =If(var_Instruction.Step < Last(InstructionsComponent.Instructions).Step, DisplayMode.Edit, DisplayMode.Disabled)
+            Fill: |-
+                =ColorValue("#ECECEC")
+            Font: =InstructionsComponent.FontStyle
+            Height: =30
+            HoverFill: =InstructionsComponent.BlueControlDarkBackground
+            OnSelect: |-
+                =Set(var_StepIC, var_Instruction.Step + 1);
+                Set(var_Instruction, LookUp(InstructionsComponent.Instructions, Step = var_StepIC));
+            PressedFill: =InstructionsComponent.BlueControlDarkBackground
+            RadiusBottomLeft: =7
+            RadiusBottomRight: =7
+            RadiusTopLeft: =7
+            RadiusTopRight: =7
+            Size: =10
+            Text: =If(IsBlankOrError(var_Instruction), "Start", "Next Step")
+            Width: =100
+            X: =If(IsBlankOrError(var_Instruction), (Parent.Width -Self.Width)/ 2 ,Instruction.X + Instruction.Width - Self.Width)
+            Y: =Instruction.Y + Instruction.Height + 30
+            ZIndex: =12
+
+        Previous As button:
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =0
+            Color: =RGBA(0, 0, 0, 1)
+            DisplayMode: =If(var_Instruction.Step > 1, DisplayMode.Edit, DisplayMode.Disabled)
+            Fill: |-
+                =ColorValue("#ECECEC")
+            Font: =InstructionsComponent.FontStyle
+            Height: =30
+            HoverFill: =InstructionsComponent.BlueControlDarkBackground
+            OnSelect: |-
+                =Set(var_StepIC, var_Instruction.Step - 1);
+                Set(var_Instruction, LookUp(InstructionsComponent.Instructions, Step = var_StepIC));
+            PressedFill: =InstructionsComponent.BlueControlDarkBackground
+            RadiusBottomLeft: =7
+            RadiusBottomRight: =7
+            RadiusTopLeft: =7
+            RadiusTopRight: =7
+            Size: =10
+            Text: ="Previous Step"
+            Visible: =If(IsBlankOrError(var_Instruction), false, true)
+            Width: =100
+            X: =Instruction.X 
+            Y: =Instruction.Y + Instruction.Height + 30
+            ZIndex: =13
+
+        Instruction As label:
+            Align: =Align.Center
+            Font: =InstructionsComponent.FontStyle
+            Height: =60
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Text: =var_Instruction.Instruction
+            VerticalAlign: =VerticalAlign.Top
+            Width: =Step.Width
+            X: =Step.X
+            Y: =Step.Y + Step.Height + 8
+            ZIndex: =14
+
+        Step As label:
+            Align: =Align.Center
+            Font: =InstructionsComponent.FontStyle
+            Height: =Self.Size * 1.8
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Text: =If(IsBlankOrError(var_Instruction), "Instructions", "Step " & var_Instruction.Step)
+            VerticalAlign: =VerticalAlign.Top
+            Width: =Parent.Width - 64
+            X: =32
+            Y: ='Instruction Image'.Y + 'Instruction Image'.Height + 16
+            ZIndex: =15
+
+        "'Instruction Image' As image":
+            Height: =Parent.Height * 0.43
+            Image: =var_Instruction.Image
+            Width: =Parent.Width - 32
+            X: =(Parent.Width / 2) - (Self.Width / 2)
+            Y: =Header_IC.Height + 10
+            ZIndex: =16
+

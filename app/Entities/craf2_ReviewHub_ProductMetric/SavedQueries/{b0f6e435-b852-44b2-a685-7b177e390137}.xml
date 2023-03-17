@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<savedqueries xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <savedquery>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>0</CanBeDeleted>
+    <isquickfindquery>1</isquickfindquery>
+    <isprivate>0</isprivate>
+    <isdefault>1</isdefault>
+    <savedqueryid>{b0f6e435-b852-44b2-a685-7b177e390137}</savedqueryid>
+    <layoutxml>
+      <grid name="resultset" jump="craf2_productmetrictitle" select="1" icon="1" preview="1">
+        <row name="result" id="craf2_reviewhub_productmetricid">
+          <cell name="craf2_productmetrictitle" width="300" />
+          <cell name="createdon" width="125" />
+          <cell name="craf2_pm_boardtypeid" width="100" />
+          <cell name="craf2_pm_ismetricactive" width="100" />
+          <cell name="craf2_productmetricid" width="100" />
+          <cell name="a_c917ad9e9916403cb397588aebeaa03e.craf2_productid" width="100" />
+          <cell name="a_d227dc3689134162931bf4db51189c45.craf2_metrictypeid" width="100" />
+          <cell name="craf2_pm_product" width="100" />
+          <cell name="craf2_pm_metrictype" width="100" />
+          <cell name="chub_pm_metrictypeid" width="100" />
+          <cell name="chub_pm_productid" width="100" />
+        </row>
+      </grid>
+    </layoutxml>
+    <querytype>4</querytype>
+    <fetchxml>
+      <fetch version="1.0" mapping="logical">
+        <entity name="craf2_reviewhub_productmetric">
+          <attribute name="craf2_reviewhub_productmetricid" />
+          <attribute name="craf2_productmetrictitle" />
+          <attribute name="createdon" />
+          <order attribute="craf2_productmetrictitle" descending="false" />
+          <filter type="and">
+            <condition attribute="statecode" operator="eq" value="0" />
+          </filter>
+          <filter type="or" isquickfindfields="1">
+            <condition attribute="craf2_productmetrictitle" operator="like" value="{0}" />
+          </filter>
+          <attribute name="craf2_pm_boardtypeid" />
+          <attribute name="craf2_pm_ismetricactive" />
+          <attribute name="craf2_productmetricid" />
+          <link-entity alias="a_c917ad9e9916403cb397588aebeaa03e" name="craf2_reviewhub_product" to="craf2_pm_product" from="craf2_reviewhub_productid" link-type="outer" visible="false">
+            <attribute name="craf2_productid" />
+          </link-entity>
+          <link-entity alias="a_d227dc3689134162931bf4db51189c45" name="craf2_reviewhub_metrictype" to="craf2_pm_metrictype" from="craf2_reviewhub_metrictypeid" link-type="outer" visible="false">
+            <attribute name="craf2_metrictypeid" />
+          </link-entity>
+          <attribute name="craf2_pm_product" />
+          <attribute name="craf2_pm_metrictype" />
+          <attribute name="chub_pm_metrictypeid" />
+          <attribute name="chub_pm_productid" />
+        </entity>
+      </fetch>
+    </fetchxml>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <LocalizedNames>
+      <LocalizedName description="Quick Find Active ReviewHub_ProductMetrics" languagecode="1033" />
+    </LocalizedNames>
+  </savedquery>
+</savedqueries>

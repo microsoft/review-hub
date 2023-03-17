@@ -1,0 +1,102 @@
+[
+  {
+    "CdsFCBContext": "{\"FileType\":true,\"ImageExternalStorage\":true}",
+    "EntitySetName": "craf2_reviewhub_stakeholders",
+    "IsHidden": false,
+    "IsSampleData": false,
+    "IsWritable": true,
+    "LogicalName": "craf2_reviewhub_stakeholder",
+    "MaxGetRowsCount": 2000,
+    "Name": "ReviewHub_Stakeholders",
+    "NativeCDSDataSourceInfoNameMapping": {
+      "_ownerid_value": "Owner",
+      "craf2_BoardType": "BoardType",
+      "craf2_Product": "Product",
+      "craf2_productstakeholders": "ProductStakeholderEmails",
+      "craf2_reviewhub_stakeholder_AsyncOperations": "System Jobs",
+      "craf2_reviewhub_stakeholder_BulkDeleteFailures": "Bulk Delete Failures",
+      "craf2_reviewhub_stakeholder_DuplicateBaseRecord": "Duplicate Records (craf2_reviewhub_stakeholder_DuplicateBaseRecord)",
+      "craf2_reviewhub_stakeholder_DuplicateMatchingRecord": "Duplicate Records (craf2_reviewhub_stakeholder_DuplicateMatchingRecord)",
+      "craf2_reviewhub_stakeholder_MailboxTrackingFolders": "Mailbox Auto Tracking Folders",
+      "craf2_reviewhub_stakeholder_PrincipalObjectAttributeAccesses": "Field Sharing",
+      "craf2_reviewhub_stakeholder_ProcessSession": "Process Sessions",
+      "craf2_reviewhub_stakeholder_SyncErrors": "Sync Errors",
+      "craf2_reviewhub_stakeholderid": "ReviewHub_Stakeholder",
+      "craf2_stakeholdernames": "StakeholderNames",
+      "craf2_tempstakeholders": "TempStakeholders",
+      "craf2_title": "Title",
+      "createdby": "Created By",
+      "createdon": "Created On",
+      "createdonbehalfby": "Created By (Delegate)",
+      "importsequencenumber": "Import Sequence Number",
+      "modifiedby": "Modified By",
+      "modifiedon": "Modified On",
+      "modifiedonbehalfby": "Modified By (Delegate)",
+      "overriddencreatedon": "Record Created On",
+      "owningbusinessunit": "Owning Business Unit",
+      "owningteam": "Owning Team",
+      "owninguser": "Owning User",
+      "statecode": "Status",
+      "statuscode": "Status Reason",
+      "timezoneruleversionnumber": "Time Zone Rule Version Number",
+      "utcconversiontimezonecode": "UTC Conversion Time Zone Code",
+      "versionnumber": "Version Number"
+    },
+    "PreferredName": "ReviewHub_Stakeholders",
+    "Type": "NativeCDSDataSourceInfo"
+  },
+  {
+    "DisplayName": "ReviewHub_Stakeholders (Views)",
+    "Name": "_craf2_reviewhub_stakeholder_views",
+    "RelatedEntityName": "ReviewHub_Stakeholders",
+    "TrimmedViewName": true,
+    "Type": "ViewInfo",
+    "ViewInfoNameMapping": {
+      "22129e9b-02e0-45fa-a0eb-dc4ae437ffeb": "Active ReviewHub_Stakeholders",
+      "52b720d2-68ca-4e76-ac2f-1c379295af08": "ReviewHub_Stakeholder Advanced Find View",
+      "7900eea2-2d1c-4492-ada5-352161b67dea": "ReviewHub_Stakeholder Associated View",
+      "8b25b57a-f71b-4860-99c2-08f7768fe9bc": "Inactive ReviewHub_Stakeholders",
+      "e41a32d2-f61a-49d9-a2aa-260af7f1af6f": "ReviewHub_Stakeholder Lookup View"
+    }
+  },
+  {
+    "DisplayName": "Status (ReviewHub_Stakeholders)",
+    "Name": "craf2_reviewhub_stakeholder_statecode",
+    "OptionSetInfoNameMapping": {
+      "0": "Active",
+      "1": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statecode",
+        "OptionSetReferenceEntityName": "ReviewHub_Stakeholders"
+      }
+    },
+    "OptionSetTypeKey": "StateType",
+    "RelatedColumnInvariantName": "statecode",
+    "RelatedEntityName": "ReviewHub_Stakeholders",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Status Reason (ReviewHub_Stakeholders)",
+    "Name": "craf2_reviewhub_stakeholder_statuscode",
+    "OptionSetInfoNameMapping": {
+      "1": "Active",
+      "2": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statuscode",
+        "OptionSetReferenceEntityName": "ReviewHub_Stakeholders"
+      }
+    },
+    "OptionSetTypeKey": "StatusType",
+    "RelatedColumnInvariantName": "statuscode",
+    "RelatedEntityName": "ReviewHub_Stakeholders",
+    "Type": "OptionSetInfo"
+  }
+]

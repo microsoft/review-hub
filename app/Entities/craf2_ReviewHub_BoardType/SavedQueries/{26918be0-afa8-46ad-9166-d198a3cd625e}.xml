@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<savedqueries xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <savedquery>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>0</CanBeDeleted>
+    <isquickfindquery>0</isquickfindquery>
+    <isprivate>0</isprivate>
+    <isdefault>0</isdefault>
+    <savedqueryid>{26918be0-afa8-46ad-9166-d198a3cd625e}</savedqueryid>
+    <layoutxml>
+      <grid name="resultset" jump="craf2_boardtypename" select="1" icon="1" preview="1">
+        <row name="result" id="craf2_reviewhub_boardtypeid">
+          <cell name="craf2_boardtypename" width="300" />
+          <cell name="createdon" width="125" />
+        </row>
+      </grid>
+    </layoutxml>
+    <querytype>0</querytype>
+    <fetchxml>
+      <fetch version="1.0" mapping="logical">
+        <entity name="craf2_reviewhub_boardtype">
+          <attribute name="craf2_reviewhub_boardtypeid" />
+          <attribute name="craf2_boardtypename" />
+          <attribute name="createdon" />
+          <order attribute="craf2_boardtypename" descending="false" />
+          <filter type="and">
+            <condition attribute="statecode" operator="eq" value="1" />
+          </filter>
+        </entity>
+      </fetch>
+    </fetchxml>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <LocalizedNames>
+      <LocalizedName description="Inactive ReviewHub_BoardTypes" languagecode="1033" />
+    </LocalizedNames>
+  </savedquery>
+</savedqueries>

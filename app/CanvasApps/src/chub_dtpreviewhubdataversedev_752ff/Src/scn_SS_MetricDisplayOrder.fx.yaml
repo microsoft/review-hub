@@ -1,0 +1,873 @@
+"scn_SS_MetricDisplayOrder As screen.'phoneLayout_FluidGridWithHeaderPageLayout_ver3.0'":
+
+    lbl_Tips_MDO As label:
+        Font: =FontStyle
+        FontWeight: =FontWeight.Semibold
+        Height: =25
+        PaddingBottom: =0
+        PaddingLeft: =10
+        PaddingRight: =0
+        PaddingTop: =0
+        Size: =12
+        Text: ="The gray Stage tiles are hidden on the scorecards, so the ''Stage'' banner only shows one-time for each stage group."
+        Width: =glry_Scorecard_MDO.Width
+        X: =rec_grey.X + rec_grey.Width
+        Y: =rec_grey.Y
+        ZIndex: =1
+
+    rec_grey As rectangle:
+        BorderColor: =SUBGROUPCOLOR
+        BorderThickness: =2
+        DisplayMode: =DisplayMode.View
+        Fill: =GrayControlBackground
+        Height: =25
+        Width: =25
+        X: =glry_Scorecard_MDO.X + 8
+        Y: |
+            =glry_Scorecard_MDO.Y + glry_Scorecard_MDO.Height + 10
+        ZIndex: =2
+
+    glry_Scorecard_MDO As gallery.variableTemplateHeightGallery:
+        BorderColor: =Back_Header_MDO.Fill
+        BorderThickness: =2
+        Fill: =GrayCanvasBackground
+        Height: =Parent.Height - Self.Y - 50
+        Items: |-
+            =AddColumns(
+                GroupBy(
+                    Sort(
+                        Filter(
+                            clln_MetricTypeDetail,
+                            ThisRecord.mtd_BoardTypeID = dpdn_Scorecard_MDO.Selected.filter_BoardTypeID
+                                && ThisRecord.mtd_TemplateID = dpdn_Group_MDO.Selected.TemplateID
+                                && (
+                                    check_HideDepreMetrics_MDO.Value = false 
+                                        || (check_HideDepreMetrics_MDO.Value = true && IsBlankOrError(ThisRecord.mtd_MetricDeprecatedDate)) 
+                                )
+                        ),
+                        mtd_MetricDisplayOrder
+                    ),
+                    "mtd_MetricStage",
+                    "mtd_MetricTypeSubgroup",
+                    "MetricGroup"
+                ), 
+                "SubgroupDisplayOrder",
+                First(ThisRecord.MetricGroup).mtd_MetricDisplayOrder
+            )
+        Layout: =Layout.Vertical
+        TemplatePadding: =0
+        TemplateSize: =50
+        Visible: =ctn_Headers_MDO.Visible
+        Width: =ctn_Headers_MDO.Width - 2
+        X: =ctn_Headers_MDO.X + 1
+        Y: =ctn_Headers_MDO.Y + ctn_Headers_MDO.Height
+        ZIndex: =3
+
+        Back_Scorecard_MDO As rectangle:
+            BorderColor: =SUBGROUPCOLOR
+            BorderStyle: =BorderStyle.None
+            Fill: =Color.White
+            Height: =lbl_Stage_MDO.Height
+            OnSelect: =Select(Parent)
+            Width: =Rect_Separator1_MDO.Width - 1
+            X: =Rect_Separator1_MDO.X
+            Y: =lbl_Stage_MDO.Y
+            ZIndex: =1
+
+        RightBorder_Scorecard_MDO As rectangle:
+            BorderColor: =SUBGROUPCOLOR
+            BorderStyle: =BorderStyle.None
+            Fill: =SUBGROUPCOLOR
+            Height: =lbl_Stage_MDO.Height + 1
+            OnSelect: =Select(Parent)
+            Width: =2
+            X: =Top_StageBanner_MDO.X + Top_StageBanner_MDO.Width - Self.Width
+            Y: =lbl_Stage_MDO.Y
+            ZIndex: =2
+
+        glry_Subgroup_MDO As gallery.variableTemplateHeightGallery:
+            Fill: =RGBA(0,0,0,0)
+            Height: =Sum(glry_Subgroup_MDO.AllItems, Value(EachRowHeight_MDO.Text)) + 3
+            Items: =ThisItem.MetricGroup
+            Layout: =Layout.Vertical
+            ShowScrollbar: =false
+            TemplateFill: |-
+                =RGBA(0,0,0,0)
+                /*
+                If(
+                    Mod(ThisItem.RowNumber, 2) > 0,
+                    GrayCanvasBackground,
+                    RGBA(0,0,0,0)
+                )*/
+            TemplatePadding: =0
+            TemplateSize: =30
+            Width: =Parent.Width - lbl_Stage_MDO.Width - lbl_SubGroup_MDO.Width
+            X: =lbl_SubGroup_MDO.X + lbl_SubGroup_MDO.Width
+            Y: =lbl_Stage_MDO.Y
+            ZIndex: =3
+
+            ti_UpdateDisplayOrder_MDO As text:
+                Align: =Align.Center
+                BorderColor: |-
+                    =If(
+                        Value(Self.Text) = LookUp(clln_MetricTypeDetail, ThisRecord.mtd_MetricTypeId = ThisItem.mtd_MetricTypeId && ThisRecord.mtd_BoardTypeID = ThisItem.mtd_BoardTypeID && ThisRecord.mtd_TemplateID = ThisItem.mtd_TemplateID).mtd_MetricDisplayOrder, 
+                        GRAYCOLOR,
+                        BlueControlDarkBackground
+                    )
+                BorderThickness: =1
+                Color: |-
+                    =If(
+                        Value(Self.Text) = LookUp(clln_MetricTypeDetail, ThisRecord.mtd_MetricTypeId = ThisItem.mtd_MetricTypeId && ThisRecord.mtd_BoardTypeID = ThisItem.mtd_BoardTypeID && ThisRecord.mtd_TemplateID = ThisItem.mtd_TemplateID).mtd_MetricDisplayOrder, 
+                        RGBA(0, 0, 0, 1),
+                        BlueControlDarkBackground
+                    )
+                Default: =ThisItem.mtd_MetricDisplayOrder
+                Font: =FontStyle
+                FontWeight: |
+                    =If(
+                        Value(Self.Text) = LookUp(clln_MetricTypeDetail, ThisRecord.mtd_MetricTypeId = ThisItem.mtd_MetricTypeId && ThisRecord.mtd_BoardTypeID = ThisItem.mtd_BoardTypeID && ThisRecord.mtd_TemplateID = ThisItem.mtd_TemplateID).mtd_MetricDisplayOrder, 
+                        FontWeight.Normal,
+                        FontWeight.Bold
+                    )
+                Height: =20
+                HoverBorderColor: =Self.BorderColor
+                HoverFill: =BlueControlLightBackground
+                OnChange: |
+                    =Set(
+                        var_Reset_ti_DisplayOrder_MDO,
+                        false
+                    );
+                    If(
+                        CountIf(clln_editedDisplayOrders, ThisRecord.edit_MetricTypeID = ThisItem.mtd_MetricTypeId) > 0,
+                        Patch(
+                            clln_editedDisplayOrders,
+                            LookUp(
+                                clln_editedDisplayOrders,
+                                ThisRecord.edit_MetricTypeID = ThisItem.mtd_MetricTypeId
+                            ),
+                            {
+                                edit_DisplayOrderValue: 
+                                Value(Self.Text)
+                            }
+                        ),
+                        Collect(
+                            clln_editedDisplayOrders,
+                            {
+                                edit_MetricTypeID: ThisItem.mtd_MetricTypeId,
+                                edit_DisplayOrderValue: Value(Self.Text)
+                            }
+                        )
+                    );
+                OnSelect: =Select(Parent)
+                PaddingLeft: =5
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Reset: =var_Reset_ti_DisplayOrder_MDO
+                Size: =11
+                Width: =50
+                X: =lbl_CurrentDisplayOrder_MDO.X + lbl_CurrentDisplayOrder_MDO.Width + (Header_UpdateDisplayOrder_MDO.Width - Self.Width) * 0.50
+                Y: =lbl_MetricName_MDO.Y + (Value(EachRowHeight_MDO.Text) - Self.Height) * 0.50 + 2
+                ZIndex: =1
+
+            lbl_CurrentDisplayOrder_MDO As label:
+                Align: =Align.Center
+                AutoHeight: =true
+                Fill: |
+                    =//lbl_MetricType_Title_MDO.Fill 
+                    RGBA(0, 0, 0, 0) 
+                Font: =FontStyle
+                FontWeight: =FontWeight.Normal //If(ThisItem.ProductMetrics1.pm_ID = varSelectedItem.ProductMetrics1.pm_ID, FontWeight.Semibold, FontWeight.Normal)
+                Height: =lbl_MetricName_MDO.Height
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =RowHoverOverColor
+                OnSelect: =Select(Parent)
+                PaddingLeft: =10
+                Size: =11
+                Text: =ThisItem.mtd_MetricDisplayOrder
+                Tooltip: =
+                Width: =Header_CurrentDisplayOrder_MDO.Width
+                X: =lbl_DeprecatedOn_MDO.X + lbl_DeprecatedOn_MDO.Width
+                Y: =0 //Max(0, (Label_factMetric_Comment.Height-Self.Height)/2)
+                ZIndex: =2
+
+            lbl_DeprecatedOn_MDO As label:
+                Align: =Align.Center
+                AutoHeight: =true
+                Fill: |
+                    =//lbl_MetricType_Title_MDO.Fill 
+                    RGBA(0, 0, 0, 0) 
+                Font: =FontStyle
+                FontWeight: =FontWeight.Normal //If(ThisItem.ProductMetrics1.pm_ID = varSelectedItem.ProductMetrics1.pm_ID, FontWeight.Semibold, FontWeight.Normal)
+                Height: =lbl_MetricName_MDO.Height
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =RowHoverOverColor
+                OnSelect: =Select(Parent)
+                PaddingLeft: =10
+                Size: =11
+                Text: |-
+                    =If(
+                        IsBlankOrError(ThisItem.mtd_MetricDeprecatedDate),
+                        "-",
+                        Text(ThisItem.mtd_MetricDeprecatedDate, "mm/dd/yyyy")
+                    )
+                Tooltip: =
+                Width: =Header_DeprecatedOn_MDO.Width
+                X: =lbl_CreatedDate_MDO.X + lbl_CreatedDate_MDO.Width
+                Y: =0 //Max(0, (Label_factMetric_Comment.Height-Self.Height)/2)
+                ZIndex: =3
+
+            lbl_CreatedDate_MDO As label:
+                Align: =Align.Center
+                AutoHeight: =true
+                Fill: |
+                    =//lbl_MetricType_Title_MDO.Fill 
+                    RGBA(0, 0, 0, 0) 
+                Font: =FontStyle
+                FontWeight: =FontWeight.Normal //If(ThisItem.ProductMetrics1.pm_ID = varSelectedItem.ProductMetrics1.pm_ID, FontWeight.Semibold, FontWeight.Normal)
+                Height: =lbl_MetricName_MDO.Height
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =RowHoverOverColor
+                OnSelect: =Select(Parent)
+                PaddingLeft: =10
+                Size: =11
+                Text: |+
+                    =Text(ThisItem.mtd_MetricCreatedDate, "mm/dd/yyyy")
+                    
+                Tooltip: =
+                Width: =Header_CreatedDate_MDO.Width
+                X: =lbl_MetricName_MDO.X + lbl_MetricName_MDO.Width
+                Y: =0 //Max(0, (Label_factMetric_Comment.Height-Self.Height)/2)
+                ZIndex: =4
+
+            lbl_MetricName_MDO As label:
+                AutoHeight: =true
+                Fill: |
+                    =
+                    If(
+                        !(ti_SearchMetric_MDO.Text in Self.Text) || Trim(ti_SearchMetric_MDO.Text)="", //IsMatch(ThisItem.mtd_MetricTypeName, TextInput2.Text, Contains & IgnoreCase),
+                        RGBA(0, 0, 0, 0),
+                        RGBA(255, 255, 0, 1)
+                    )
+                Font: =FontStyle
+                FontWeight: =FontWeight.Normal //If(ThisItem.ProductMetrics1.pm_ID = varSelectedItem.ProductMetrics1.pm_ID, FontWeight.Semibold, FontWeight.Normal)
+                Height: =30
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =RowHoverOverColor
+                OnSelect: =Select(Parent)
+                PaddingLeft: =10
+                Size: =11
+                Text: =ThisItem.mtd_MetricTypeName
+                Tooltip: =
+                Width: =Header_MetricName_MDO.Width
+                X: =
+                Y: =0 //Max(0, (Label_factMetric_Comment.Height-Self.Height)/2)
+                ZIndex: =5
+
+            EachRowHeight_MDO As label:
+                Color: =RGBA(0, 0, 0, 0)
+                Font: =FontStyle
+                Height: =25
+                OnSelect: =Select(Parent)
+                Size: =11
+                Text: =Max(lbl_MetricName_MDO.Height, lbl_CreatedDate_MDO.Height)
+                Width: =30
+                X: =520
+                ZIndex: =6
+
+        html_Subgroup_MDO As htmlViewer:
+            AutoHeight: =true
+            Color: =RGBA(0, 0, 0, 0)
+            Font: =FontStyle
+            Height: =lbl_SubGroup_MDO.Height
+            HtmlText: =ThisItem.mtd_MetricTypeSubgroup
+            OnSelect: =Select(Parent)
+            PaddingLeft: =10
+            Width: =Header_Subgroup_MDO.Width
+            X: =Header_Subgroup_MDO.X
+            Y: =lbl_Stage_MDO.Y
+            ZIndex: =4
+
+        lbl_SubGroup_MDO As label:
+            AutoHeight: =true
+            Font: =FontStyle
+            Height: =50
+            OnSelect: =Select(Parent)
+            PaddingBottom: =2
+            PaddingLeft: =10
+            PaddingTop: =2
+            Size: =11
+            Text: |
+                =ThisItem.mtd_MetricTypeSubgroup
+            Visible: =If(Self.Height>5, true, false)
+            Width: =Header_Subgroup_MDO.Width
+            X: =lbl_Stage_MDO.X + lbl_Stage_MDO.Width
+            Y: =lbl_Stage_MDO.Y + (lbl_Stage_MDO.Height - Self.Height) * 0.50
+            ZIndex: =5
+
+        lbl_Stage_MDO As label:
+            Align: =Align.Center
+            BorderColor: =Top_StageBanner_MDO.Fill
+            BorderThickness: =2
+            Fill: |-
+                =If(
+                    IsBlankOrError(
+                        LookUp(
+                            colStageOrder, 
+                            ThisRecord.mtd_BoardTypeID = dpdn_Scorecard_MDO.Selected.filter_BoardTypeID
+                                && ThisRecord.mtd_TemplateID = dpdn_Group_MDO.Selected.TemplateID
+                                && ThisRecord.FirstDisplayOrder_ByStage = ThisItem.SubgroupDisplayOrder
+                                && ThisRecord.mtd_MetricStage = ThisItem.mtd_MetricStage
+                        ).FirstDisplayOrder_ByStage
+                    ),
+                    GrayControlBackground,//ColorFade(SUBGROUPCOLOR, 85%),
+                    SUBGROUPCOLOR
+                )
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =Max(glry_Subgroup_MDO.Height, lbl_SubGroup_MDO.Height)
+            OnSelect: =Select(Parent)
+            PaddingLeft: =10
+            Size: =11
+            Text: =ThisItem.mtd_MetricStage
+            Tooltip: |-
+                ="(Highest Display Order: " & ThisItem.SubgroupDisplayOrder & ")"
+            Width: =Header_Stage_MDO.Width
+            X: =Top_StageBanner_MDO.X + 1
+            Y: |-
+                =If(
+                    lbl_Stage_MDO.Fill = SUBGROUPCOLOR,
+                    Top_StageBanner_MDO.Y + Top_StageBanner_MDO.Height, 
+                    -1
+                )
+            ZIndex: =6
+
+        Top_StageBanner_MDO As button:
+            BorderColor: =Self.Fill
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =0
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =Color.Black
+            DisabledFill: =Self.Fill
+            DisplayMode: =DisplayMode.Disabled
+            Fill: =SUBGROUPCOLOR
+            Font: =FontStyle
+            Height: |-
+                =If(
+                    lbl_Stage_MDO.Fill = SUBGROUPCOLOR,
+                    30, 
+                    0
+                )
+            RadiusBottomLeft: |
+                =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =20
+            RadiusTopRight: =20
+            Size: =11
+            Text: =ThisItem.mtd_MetricStage
+            Tooltip: |-
+                ="(Highest Display Order: " & ThisItem.SubgroupDisplayOrder & ")"
+            Width: =Parent.Width - 27
+            X: =8
+            Y: =8
+            ZIndex: =7
+
+        Rect_Separator1_MDO As rectangle:
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            Fill: |-
+                =If(
+                    IsBlankOrError(
+                        LookUp(
+                            colStageOrder, 
+                            ThisRecord.mtd_BoardTypeID = dpdn_Scorecard_MDO.Selected.filter_BoardTypeID
+                                && ThisRecord.mtd_TemplateID = dpdn_Group_MDO.Selected.TemplateID
+                                && ThisRecord.FirstDisplayOrder_ByStage = ThisItem.SubgroupDisplayOrder
+                                && ThisRecord.mtd_MetricStage = ThisItem.mtd_MetricStage
+                        ).FirstDisplayOrder_ByStage
+                    ),
+                    GrayBorderLight,
+                    lbl_Stage_MDO.Fill
+                )
+            Height: =2
+            OnSelect: =Select(Parent)
+            Width: |-
+                =If(
+                    Self.Fill = Top_StageBanner_MDO.Fill,
+                    Top_StageBanner_MDO.Width,
+                    Top_StageBanner_MDO.Width - lbl_Stage_MDO.Width - 2
+                )
+            X: |-
+                =If(
+                    Self.Fill = Top_StageBanner_MDO.Fill,
+                    Top_StageBanner_MDO.X,
+                    lbl_Stage_MDO.X + lbl_Stage_MDO.Width
+                )
+            Y: =Top_StageBanner_MDO.Y - Self.Height - 8
+            ZIndex: =8
+
+    ctn_Headers_MDO As groupContainer.manualLayoutContainer:
+        Height: =40
+        Width: =App.Width - Self.X * 2
+        X: =15
+        Y: =Label_Scorecard_MDO.Y + Label_Scorecard_MDO.Height + 10
+        ZIndex: =4
+
+        Back_Header_MDO As button:
+            BorderColor: =Self.Fill
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =0
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =Self.Color
+            DisabledFill: =Self.Fill
+            DisplayMode: =DisplayMode.Disabled
+            Fill: =ColorFade(BlueNaviHightLightBackground, 50%)
+            Font: =FontStyle
+            RadiusBottomLeft: |
+                =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =20
+            RadiusTopRight: =20
+            Text: =""
+            Width: =Parent.Width
+            ZIndex: =1
+
+        Header_UpdateDisplayOrder_MDO As label:
+            Align: =Align.Center
+            DisplayMode: =DisplayMode.View
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =Parent.Height
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =11
+            Text: ="Update Display Order"
+            Width: =130
+            X: =Header_CurrentDisplayOrder_MDO.X + Header_CurrentDisplayOrder_MDO.Width
+            ZIndex: =2
+
+        Header_CurrentDisplayOrder_MDO As label:
+            Align: =Align.Center
+            DisplayMode: =DisplayMode.View
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =Parent.Height
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =11
+            Text: ="Current Display Order"
+            Width: =130
+            X: =Header_DeprecatedOn_MDO.X+Header_DeprecatedOn_MDO.Width
+            ZIndex: =3
+
+        Header_DeprecatedOn_MDO As label:
+            Align: =Align.Center
+            DisplayMode: =DisplayMode.View
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =Parent.Height
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =11
+            Text: ="Deprecated On"
+            Width: =130
+            X: =Header_CreatedDate_MDO.X+Header_CreatedDate_MDO.Width
+            ZIndex: =4
+
+        Header_CreatedDate_MDO As label:
+            Align: =Align.Center
+            DisplayMode: =DisplayMode.View
+            Font: =Font.'Segoe UI'
+            FontWeight: =FontWeight.Semibold
+            Height: =Parent.Height
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =11
+            Text: ="Created On"
+            Width: =120
+            X: =Header_MetricName_MDO.X+Header_MetricName_MDO.Width
+            ZIndex: =5
+
+        Header_MetricName_MDO As label:
+            DisplayMode: =DisplayMode.View
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =Parent.Height
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =10
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =11
+            Text: ="Metric Type Name"
+            Width: =Parent.Width - Header_Stage_MDO.Width - Header_Subgroup_MDO.Width - Header_UpdateDisplayOrder_MDO.Width - Header_CreatedDate_MDO.Width - Header_DeprecatedOn_MDO.Width - Header_CurrentDisplayOrder_MDO. Width - 50
+            X: =Header_Subgroup_MDO.X+Header_Subgroup_MDO.Width
+            ZIndex: =6
+
+        Header_Subgroup_MDO As label:
+            DisplayMode: =DisplayMode.View
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =Parent.Height
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =10
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =11
+            Text: ="Subgroup / Objective"
+            Width: =250
+            X: =Header_Stage_MDO.X + Header_Stage_MDO.Width
+            ZIndex: =7
+
+        Header_Stage_MDO As label:
+            DisplayMode: =DisplayMode.View
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =Parent.Height
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =10
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =11
+            Text: ="Stage"
+            X: =Top_StageBanner_MDO.X
+            ZIndex: =8
+
+    btn_Reset_MDO As button:
+        BorderStyle: =BorderStyle.None
+        BorderThickness: =0
+        Color: =RGBA(0, 134, 208, 1)
+        Fill: =RGBA(255, 255, 255, 1)
+        Font: =FontStyle
+        Height: =Label_Scorecard_MDO.Height
+        HoverColor: =Color.Purple
+        HoverFill: =Self.Fill
+        OnSelect: =Set(var_Reset_ti_DisplayOrder_MDO, true)
+        PressedColor: =Self.Color
+        PressedFill: =Self.Fill
+        RadiusBottomLeft: =0
+        RadiusBottomRight: =0
+        RadiusTopLeft: =0
+        RadiusTopRight: =0
+        Size: =11
+        Text: ="Reset"
+        Underline: =true
+        Width: =60
+        X: =ctn_Headers_MDO.X + ctn_Headers_MDO.Width - Self.Width
+        Y: =Label_Scorecard_MDO.Y
+        ZIndex: =5
+
+    btn_Save_MDO As button:
+        BorderColor: =Self.Fill
+        Fill: =LEFTNAVBKGDCOLOR
+        Font: =FontStyle
+        FontWeight: =FontWeight.Bold
+        Height: =Label_Scorecard_MDO.Height
+        HoverColor: =Self.Fill
+        HoverFill: =Self.Color
+        OnSelect: |
+            =ForAll(
+                clln_editedDisplayOrders,
+                Concurrent(
+                    Patch(
+                        ReviewHub_MetricTypeDetails,
+                        LookUp(
+                            ReviewHub_MetricTypeDetails,
+                            ThisRecord.craf2_MetricType.craf2_metrictypeid = edit_MetricTypeID 
+                                && ThisRecord.craf2_mtd_BoardType.craf2_boardtypeid = dpdn_Scorecard_MDO.Selected.filter_BoardTypeID 
+                                && ThisRecord.craf2_MetricTypeDetailTemplate.craf2_templateid = dpdn_Group_MDO.Selected.TemplateID
+                        ),
+                        {craf2_mtd_displayorder: edit_DisplayOrderValue}
+                    ),
+                    Patch(
+                        clln_MetricTypeDetail,
+                        LookUp(
+                            clln_MetricTypeDetail,
+                            ThisRecord.mtd_MetricTypeId = edit_MetricTypeID 
+                                && ThisRecord.mtd_BoardTypeID = dpdn_Scorecard_MDO.Selected.filter_BoardTypeID 
+                                && ThisRecord.mtd_TemplateID = dpdn_Group_MDO.Selected.TemplateID
+                        ),
+                        {mtd_MetricDisplayOrder: edit_DisplayOrderValue}
+                    )
+                );
+                
+            );
+            // Update Cache Table.
+            ClearCollect(
+                colStageOrder,
+                DropColumns(
+                    AddColumns(
+                        GroupBy(
+                            Sort(
+                                clln_MetricTypeDetail,
+                                mtd_MetricDisplayOrder
+                            ),
+                            "mtd_BoardTypeID",
+                            "mtd_TemplateID",
+                            "mtd_MetricStage",
+                            "MetricGroup"
+                        ),
+                        "FirstDisplayOrder_ByStage",
+                        First(ThisRecord.MetricGroup).mtd_MetricDisplayOrder
+                    ),
+                    "MetricGroup"
+                )
+            );
+        RadiusBottomLeft: =20
+        RadiusBottomRight: =20
+        RadiusTopLeft: =20
+        RadiusTopRight: =20
+        Size: =10
+        Text: ="Save"
+        Width: =90
+        X: =btn_Reset_MDO.X - Self.Width - 25
+        Y: =Label_Scorecard_MDO.Y
+        ZIndex: =6
+
+    ti_SearchMetric_MDO As text:
+        BorderColor: =GRAYCOLOR
+        BorderThickness: =1
+        Clear: =true
+        Default: =""
+        FocusedBorderThickness: =2
+        Font: =FontStyle
+        Height: =25
+        HintText: ="Search by Metric Type Name"
+        HoverBorderColor: =Self.BorderColor
+        HoverFill: =GrayControlBackground
+        PaddingBottom: =0
+        PaddingTop: =0
+        RadiusBottomLeft: =20
+        RadiusBottomRight: =20
+        RadiusTopLeft: =20
+        RadiusTopRight: =20
+        Size: =9
+        Width: =Min(btn_Save_MDO.X - Self.X - 30, 380)  //280
+        X: =icon_SearchMetric_MDO.X + icon_SearchMetric_MDO.Width + 5
+        Y: =icon_SearchMetric_MDO.Y
+        ZIndex: =7
+
+    icon_SearchMetric_MDO As icon.Search:
+        DisabledBorderColor: =RGBA(0, 0, 0, 0)
+        DisabledColor: =RGBA(0, 0, 0, 1)
+        DisplayMode: =DisplayMode.Disabled
+        Height: =ti_SearchMetric_MDO.Height
+        Icon: =Icon.Search
+        PaddingBottom: =2
+        PaddingLeft: =2
+        PaddingRight: =2
+        PaddingTop: =2
+        Width: =ti_SearchMetric_MDO.Height
+        X: |
+            =check_HideDepreMetrics_MDO.X + check_HideDepreMetrics_MDO.Width + 25
+        Y: =check_HideDepreMetrics_MDO.Y
+        ZIndex: =8
+
+    check_HideDepreMetrics_MDO As checkbox:
+        BorderColor: =RGBA(0, 0, 0, 0)
+        BorderStyle: =BorderStyle.None
+        CheckboxBorderColor: =Color.Black
+        CheckboxSize: =25
+        CheckmarkFill: =BlueControlDarkBackground
+        Color: =Color.Black
+        Font: =FontStyle
+        Height: =dpdn_Group_MDO.Height
+        HoverColor: =Color.Purple
+        HoverFill: =Self.Fill
+        PressedColor: =Self.Color
+        PressedFill: =Self.Fill
+        Size: =11
+        Text: ="Hide deprecated metrics"
+        Width: =205
+        X: |
+            =dpdn_Group_MDO.X +  dpdn_Group_MDO.Width + 30
+        Y: =Label_Scorecard_MDO.Y
+        ZIndex: =9
+
+    dpdn_Group_MDO As dropdown:
+        BorderColor: =
+        BorderThickness: =0
+        ChevronBackground: =Self.Fill
+        ChevronFill: =Color.Black
+        ChevronHoverBackground: =BlueControlLightBackground
+        ChevronHoverFill: =RGBA(0, 0, 0, 1)
+        Default: ="BAP"
+        Fill: =GrayControlBackground
+        Font: =FontStyle
+        FontWeight: =FontWeight.Semibold
+        Height: =25
+        HoverFill: =Self.ChevronHoverBackground
+        Items: |-
+            =RenameColumns(
+                ShowColumns(
+                    Filter(
+                        ReviewHub_MetricTemplates, 
+                        craf2_TemplateBoardType.craf2_boardtypeid = dpdn_Scorecard_MDO.Selected.filter_BoardTypeID
+                        && craf2_templateid in var_DisplayMetricTemplateID.TemplateID
+                    ),
+                    "craf2_templateid", "craf2_templatename", "craf2_templatedescription"
+                ),
+                "craf2_templateid", "TemplateID",
+                "craf2_templatename", "TemplateName",
+                "craf2_templatedescription", "Description"
+            )
+        OnChange: =Set(var_Timer_Refresh_HM_Start, true);
+        PressedColor: =BlueControlDarkBackground
+        PressedFill: =BlueControlLightBackground
+        SelectionFill: =BlueNaviHightLightBackground
+        Size: =11
+        Width: =160
+        X: =Label_Group_MDO.X + Label_Group_MDO.Width
+        Y: =Label_Scorecard_MDO.Y
+        ZIndex: =10
+
+    Label_Group_MDO As label:
+        Font: =FontStyle
+        FontWeight: =FontWeight.Semibold
+        Height: =Label_Scorecard_MDO.Height
+        PaddingRight: =0
+        Size: =11
+        Text: ="Group (Template)"
+        Width: =135
+        X: =dpdn_Scorecard_MDO.X + dpdn_Scorecard_MDO.Width + 30
+        Y: =Label_Scorecard_MDO.Y
+        ZIndex: =11
+
+    dpdn_Scorecard_MDO As dropdown:
+        BorderColor: =
+        BorderThickness: =0
+        ChevronBackground: =Self.Fill
+        ChevronFill: =Color.Black
+        ChevronHoverBackground: =BlueControlLightBackground
+        ChevronHoverFill: =RGBA(0, 0, 0, 1)
+        Default: ="Product Review"
+        Fill: =GrayControlBackground
+        Font: =FontStyle
+        FontWeight: =FontWeight.Semibold
+        Height: =25
+        HoverFill: =Self.ChevronHoverBackground
+        Items: |-
+            =DropColumns(
+                RenameColumns(
+                    Filter(
+                        AddColumns(
+                            ShowColumns(
+                                ReviewHub_BoardTypes,
+                                "craf2_boardtypeid",
+                                "craf2_boardtypename",
+                                "craf2_isdisplayinapp"
+                            ),
+                            "IsDisplayInApp",
+                            If(
+                                Text(craf2_isdisplayinapp) = "Yes",
+                                true,
+                                false
+                            )
+                        ),
+                        ThisRecord.IsDisplayInApp = true && (IsAdmin || (IsCoordinator && ThisRecord.craf2_boardtypeid in IsCoordinator_BoardTypes))
+                    ),
+                    "craf2_boardtypeid",
+                    "filter_BoardTypeID",
+                    "craf2_boardtypename",
+                    "filter_BoardTypeName"
+                ),
+                "craf2_isdisplayinapp"
+            )
+        OnChange: =
+        PressedColor: =BlueControlDarkBackground
+        PressedFill: =BlueControlLightBackground
+        SelectionFill: =BlueNaviHightLightBackground
+        Size: =11
+        Width: =170
+        X: =Label_Scorecard_MDO.X + Label_Scorecard_MDO.Width
+        Y: =Label_Scorecard_MDO.Y
+        ZIndex: =12
+
+    Label_Scorecard_MDO As label:
+        Font: =FontStyle
+        FontWeight: =FontWeight.Semibold
+        Height: =25
+        PaddingBottom: =0
+        PaddingRight: =0
+        PaddingTop: =0
+        Size: =11
+        Text: ="Scorecard (Board)"
+        Width: =135
+        X: =icon_Back_MDO.X
+        Y: =lbl_ScreenTitle_MDO.Y + lbl_ScreenTitle_MDO.Height + 10
+        ZIndex: =13
+
+    lbl_ScreenTitle_MDO As label:
+        DisabledColor: =BlueControlDarkBackground
+        DisabledFill: =Self.Fill
+        DisplayMode: =DisplayMode.Disabled
+        Fill: =GrayCanvasBackground
+        Font: =FontStyle
+        FontWeight: =FontWeight.Bold
+        Height: =55
+        PaddingLeft: =60
+        Size: =18
+        Text: ="Configure Metric Display Order for the Scorecard Screen"
+        Width: =App.Width - Self.X
+        Y: |-
+            =SS_AppHeader_MDO
+            .Height
+        ZIndex: =14
+
+    icon_Back_MDO As icon.BackArrow:
+        BorderColor: =RGBA(0, 0, 0, 0)
+        BorderStyle: =BorderStyle.None
+        Color: =BlueControlDarkBackground
+        Height: =30
+        HoverBorderColor: =Self.BorderColor
+        HoverColor: =Color.Purple
+        Icon: =Icon.BackArrow
+        OnSelect: =Navigate(scn_SelfService);
+        Tooltip: ="Back"
+        Width: =Self.Height
+        X: =15
+        Y: =lbl_ScreenTitle_MDO.Y + (lbl_ScreenTitle_MDO.Height - Self.Height) * 0.50
+        ZIndex: =15
+
+    SS_AppHeader_MDO As AppHeader:
+        DropDownSelection: =TrackRequestComponent_MDO.HideTrackRequest
+        FeatureRequestUrl: =var_FeatureRequestURL
+        FeedbackButtonUrl: =var_SendFeedback_URL
+        inputAppDisplayName: =varAppHeaderText
+        ScorecardOnboardingFeatureUrl: =var_ScorecardOnboardingRequestURL
+        ShowSurveyButton: =false
+        Y: =0
+        ZIndex: =16
+
+    TrackRequestComponent_MDO As TrackRequestComponent:
+        BlueControlDarkBackground: =BlueControlDarkBackground
+        BlueControlLightBackground: =BlueControlLightBackground
+        BlueNaviHightLightBackground: =BlueNaviHightLightBackground
+        DevOpsBaseUrl: =var_DevOpsBaseURL
+        DevOpsQueryID: =var_DevOpsQueryID
+        FontStyle: =FontStyle
+        GrayCanvasBackground: =GrayCanvasBackground
+        GRAYCOLOR: =GRAYCOLOR
+        GrayControlBackground: =GrayControlBackground
+        IsAdmin: =IsAdmin
+        Reset: =Self.Visible
+        Visible: =SS_AppHeader_MDO.DisplayTrackRequest
+        X: =App.Width - Self.Width
+        Y: =SS_AppHeader_MDO.Height
+        ZIndex: =17
+

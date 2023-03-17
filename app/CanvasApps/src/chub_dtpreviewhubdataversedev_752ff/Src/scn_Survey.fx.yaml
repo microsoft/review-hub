@@ -1,0 +1,288 @@
+scn_Survey As screen:
+    OnVisible: =Set(varSelectedBoardId, -7);
+
+    BAGIAAppHeader_SU As AppHeader:
+        DropDownSelection: =false
+        FeatureRequestUrl: =var_FeatureRequestURL
+        FeedbackButtonUrl: =var_SendFeedback_URL
+        inputAppDisplayName: =varAppHeaderText
+        ScorecardOnboardingFeatureUrl: =var_ScorecardOnboardingRequestURL
+        ShowFeedbackButton: =false
+        ShowSurveyButton: =false
+        Y: =0
+        ZIndex: =1
+
+    LeftNavi_SU As groupContainer.manualLayoutContainer:
+        BorderStyle: =BorderStyle.None
+        Fill: =BlueControlDarkBackground
+        Height: =App.Height - Self.Y
+        Width: =var_LeftNavi_Width
+        Y: =BAGIAAppHeader_SU.Height
+        ZIndex: =2
+
+        glry_LeftNavi_9 As gallery.variableTemplateHeightGallery:
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            Height: =Parent.Height - Self.Y
+            Items: |-
+                =Sort(
+                    varLeftNavOptions,
+                    If(ThisRecord.ID < 0, ID),
+                    SortOrder.Descending
+                )
+            Layout: =Layout.Vertical
+            OnSelect: |
+                =Set(varSelectedBoardId, ThisItem.ID);
+                Navigate(ThisItem.Screen);
+            ShowScrollbar: =false
+            TemplateFill: |-
+                =If(
+                    ThisItem.ID = varSelectedBoardId,
+                    ColorFade(BlueControlDarkBackground, 20%), 
+                    RGBA(0,0,0,0)
+                )
+            TemplatePadding: =0
+            TemplateSize: =45
+            Width: =Parent.Width
+            Y: =icon_CollapseExpand_9.Y + icon_CollapseExpand_9.Height
+            ZIndex: =1
+
+            imgCircle_LN_9 As circle:
+                DisplayMode: =DisplayMode.View
+                Fill: =RGBA(255, 255, 255, 0.90)
+                Height: =img_LN_9.Height - 5
+                OnSelect: =Select(Parent)
+                Visible: =If(IsBlank(ThisItem.BoardTypeID), false, true)
+                Width: =Self.Height
+                X: =img_LN_9.X + (img_LN_9.Width - Self.Width) * 0.5 
+                Y: =(Parent.TemplateHeight - Self.Height) * 0.5
+                ZIndex: =1
+
+            NoImage_LN_9 As label:
+                Align: =Align.Center
+                Color: =BlueControlDarkBackground
+                FocusedBorderThickness: =1
+                Font: =Font.'Segoe UI'
+                FontWeight: =FontWeight.Semibold
+                Height: =img_LN_9.Height
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Text: =Upper(Left(ThisItem.Title, 2))
+                Tooltip: =ThisItem.Title
+                Visible: |-
+                    =If(
+                        IsBlankOrError(ThisItem.PID), //It means this is not a scorecard tab and should always have a logo.
+                        false, 
+                        If(
+                            IsBlankOrError(LookUp(ReviewHub_Products, ThisRecord.ProductID = ThisItem.PID).LogoImage), //When on scorecard tab, the product logo is missing, 
+                            true,
+                            false
+                        )
+                    )
+                Width: =img_LN_9.Width
+                X: =img_LN_9.X
+                ZIndex: =2
+
+            img_LN_9 As image:
+                AutoDisableOnSelect: =false
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Height: =Self.Width
+                Image: |-
+                    =If(
+                        NoImage_LN_9.Visible,
+                        Blank(),
+                        If(IsBlankOrError(ThisItem.PID), 
+                        ThisItem.ImagePath , LookUp(ReviewHub_Products, ThisRecord.ProductID = ThisItem.PID).LogoImage.Value)
+                    )
+                OnSelect: =Select(Parent)
+                PaddingBottom: =If(IsBlank(ThisItem.BoardTypeID), 3, 9)
+                PaddingLeft: =If(IsBlank(ThisItem.BoardTypeID), 3, 8)
+                PaddingRight: =If(IsBlank(ThisItem.BoardTypeID), 3, 8)
+                PaddingTop: =If(IsBlank(ThisItem.BoardTypeID), 3, 9)
+                Tooltip: =ThisItem.Title
+                Width: =Parent.TemplateHeight
+                X: =rect_LN_9.X + rect_LN_9.Width
+                ZIndex: =3
+
+            html_LN_9 As htmlViewer:
+                Color: =RGBA(255, 255, 255, 1)
+                DisplayMode: =DisplayMode.View
+                Fill: =RGBA(0, 0, 0, 0)
+                Font: =FontStyle
+                Height: =45
+                HtmlText: |-
+                    ="<span style='background-color: " 
+                    & If(
+                        Parent.Width = var_LeftNavi_ExpandWidth, 
+                        "#79b5de; color: #FFFFFF;  display: inline-block; padding: 1px 6px; font-weight: ", 
+                        "rgba(121, 181, 222, 0.75); color: #FFFFFF;  display: inline-block; padding: 1px 3px; font-weight: "
+                    ) 
+                    & If(ThisItem.ID = varSelectedBoardId, "600", "400") & "; border-radius: 5px;'>"
+                    & If(
+                        Parent.Width = var_LeftNavi_ExpandWidth, 
+                        LookUp(clln_BoardTypes, ThisRecord.bt_BoardTypeID = ThisItem.BoardTypeID).bt_BoardTypeShortName,
+                        Upper(Left(LookUp(clln_BoardTypes, ThisRecord.bt_BoardTypeID = ThisItem.BoardTypeID).bt_BoardTypeShortName,2))
+                    )
+                    & "</span></font>"
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =Title_LN_9.PaddingLeft
+                PaddingRight: =Title_LN_9.PaddingRight
+                PaddingTop: =If(Parent.Width = var_LeftNavi_ExpandWidth, 6, 0)
+                Size: =Title_LN_9.Size
+                Visible: =If(IsBlank(ThisItem.BoardTypeID), false, true)
+                Width: =If(Parent.Width = var_LeftNavi_ExpandWidth, Title_LN_9.Width, img_LN_9.Width)
+                X: =If(Parent.Width = var_LeftNavi_ExpandWidth, Title_LN_9.X, img_LN_9.X)
+                ZIndex: =4
+
+            Title_LN_9 As label:
+                BorderColor: =RGBA(32, 54, 71, 1)
+                BorderStyle: =BorderStyle.None
+                Color: =RGBA(255, 255, 255, 1)
+                DisplayMode: =DisplayMode.View
+                FocusedBorderColor: =Title_LN_9.BorderColor
+                Font: =FontStyle
+                FontWeight: =If(ThisItem.ID = varSelectedBoardId, FontWeight.Semibold, FontWeight.Normal)
+                Height: =Parent.TemplateHeight
+                HoverBorderColor: =Title_LN_9.BorderColor
+                HoverColor: =Title_LN_9.Color
+                HoverFill: =Title_LN_9.Fill
+                LineHeight: =1
+                OnSelect: =Select(Parent)
+                PaddingBottom: =If(IsBlank(ThisItem.BoardTypeID), 0, 5)
+                PaddingLeft: =2
+                PaddingTop: =0
+                PressedBorderColor: =Title_LN_9.BorderColor
+                PressedColor: =Title_LN_9.Color
+                PressedFill: =Title_LN_9.Fill
+                Size: =9
+                Text: =ThisItem.Title
+                Tooltip: =ThisItem.Title
+                VerticalAlign: =If(IsBlank(ThisItem.BoardTypeID), VerticalAlign.Middle, VerticalAlign.Bottom)
+                Width: =Parent.Width - Self.X
+                Wrap: =false
+                X: =img_LN_9.X + img_LN_9.Width
+                ZIndex: =5
+
+            TopDivider_LN_9 As rectangle:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Fill: =RGBA(0, 91, 159, 0.30)
+                Height: =1
+                OnSelect: =Select(Parent)
+                Width: =Parent.Width
+                ZIndex: =6
+
+            rect_LN_9 As rectangle:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Fill: =If(ThisItem.ID = varSelectedBoardId, BlueNaviHightLightBackground, TABLEHEADERCOLOR)
+                FocusedBorderColor: =rect_LN_9.BorderColor
+                Height: =Parent.TemplateHeight - Self.Y
+                HoverFill: =rect_LN_9.Fill
+                OnSelect: =Select(Parent)
+                Tooltip: =
+                Width: =6
+                Y: =1
+                ZIndex: =7
+
+            btn_LN_Top_9 As button:
+                AutoDisableOnSelect: =false
+                BorderColor: =
+                BorderStyle: =BorderStyle.None
+                BorderThickness: =0
+                Color: =RGBA(0, 0, 0, 0)
+                DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                DisabledColor: =RGBA(0, 0, 0, 0)
+                DisabledFill: =RGBA(0, 0, 0, 0)
+                Fill: =RGBA(0, 0, 0, 0)
+                Font: =FontStyle
+                Height: =Parent.TemplateHeight
+                HoverBorderColor: =
+                HoverColor: =RGBA(0, 0, 0, 0)
+                HoverFill: =
+                OnSelect: =Select(Parent)
+                PressedBorderColor: =
+                PressedColor: =
+                Text: =//Need this button for the hover-over hand cursor.
+                Tooltip: |
+                    =If(
+                        IsBlankOrError(ThisItem.BoardTypeID),
+                        ThisItem.Title,
+                        Text(ThisItem.ReviewDate, "mmmm yyyy") &
+                            " - (" & LookUp(clln_BoardTypes, ThisRecord.bt_BoardTypeID = ThisItem.BoardTypeID).bt_BoardTypeShortName & ") " 
+                            & ThisItem.Title
+                    )
+                Width: =Parent.TemplateWidth
+                ZIndex: =8
+
+            close_LN_9 As icon.CancelBadge:
+                AutoDisableOnSelect: =false
+                BorderStyle: =BorderStyle.None
+                Color: =RGBA(255, 255, 255, 1)
+                Height: =25
+                HoverColor: =RedFontColor
+                HoverFill: =BlueNaviHightLightBackground
+                Icon: =Icon.Cancel
+                OnSelect: |-
+                    =If(
+                        App.ActiveScreen.Name = "BoardScreen", //When user is currently staying on a Board Screen, navigate to Home Screen.
+                        Navigate(HomeScreen)
+                    );
+                    
+                    RemoveIf(varLeftNavOptions, ThisRecord.ID = ThisItem.ID)
+                    /*
+                    Concurrent(
+                        RemoveIf(varLeftNavOptions, ThisRecord.ID = ThisItem.ID),
+                        RemoveIf(clln_ProductMetrics_BS, ThisRecord.pm_ProductID = ThisItem.PID),
+                        RemoveIf(clln_factMetrics_BS, ThisRecord.fm_ProductID = ThisItem.PID)
+                    );
+                    */
+                PaddingBottom: =5
+                PaddingLeft: =5
+                PaddingRight: =5
+                PaddingTop: =5
+                Tooltip: ="Close this tab"
+                Visible: =!IsBlankOrError(ThisItem.BoardTypeID) && Parent.Width = var_LeftNavi_ExpandWidth //When collapsed, not showing close button.
+                Width: =25
+                X: =Title_LN_9.X + Title_LN_9.Width - Self.Width
+                ZIndex: =9
+
+        icon_CollapseExpand_9 As icon.Add:
+            BorderColor: =RGBA(32, 54, 71, 1)
+            Color: =RGBA(255, 255, 255, 1)
+            DisabledFill: =icon_CollapseExpand_9.Fill
+            FocusedBorderColor: =icon_CollapseExpand_9.BorderColor
+            Height: |
+                =45
+            HoverBorderColor: =ColorFade(icon_CollapseExpand_9.BorderColor, 20%)
+            HoverColor: =ColorFade(icon_CollapseExpand_9.Color, 20%)
+            HoverFill: =icon_CollapseExpand_9.Fill
+            Icon: =If(Parent.Width = var_LeftNavi_ExpandWidth, Icon.DockLeft, Icon.DockRight)
+            OnSelect: =Set(var_LeftNavi_Width, If(Parent.Width = var_LeftNavi_CollapseWidth, var_LeftNavi_ExpandWidth, var_LeftNavi_CollapseWidth))
+            PaddingBottom: =10
+            PaddingLeft: =10
+            PaddingRight: =10
+            PaddingTop: =10
+            PressedBorderColor: =ColorFade(icon_CollapseExpand_9.BorderColor, -20%)
+            PressedColor: =ColorFade(icon_CollapseExpand_9.Color, -20%)
+            PressedFill: =icon_CollapseExpand_9.Fill
+            Tooltip: ="Collapse/Expand"
+            Width: =var_LeftNavi_CollapseWidth
+            X: =Parent.Width - Self.Width
+            ZIndex: =2
+
+    ReviewHubSurvey_SU As formspro:
+        BorderThickness: =0
+        Height: =App.Height - Self.Y
+        SurveyID: ="v4j5cvGGr0GRqy180BHbR5TXk9Xxff1ItQvlZgxAMoZUOENUSkJTUzBZTVk5TVZDTEU4UUVTWkpJTiQlQCN0PWcu"
+        Width: =App.Width - Self.X
+        X: =LeftNavi_SU.Width
+        Y: =BAGIAAppHeader_SU.Height
+        ZIndex: =3
+

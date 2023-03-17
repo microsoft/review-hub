@@ -1,0 +1,168 @@
+{
+  "ComponentAllowCustomization": true,
+  "ComponentChangedSinceFileImport": true,
+  "ComponentExtraMetadata": {
+    "ComponentDescription": "You will need to do the following:\n\n#1 : creat a glocal collection for tabs on App start and then have each of the LeftNav take that as Nav Items.\n#2 : Assign each tab\\item an ID.\n#3 : have a global variable called varInitialSelectedId put that as input to all LeftNav's in your app\n#4 : on Each screen OnHidden action set the variable\n------------------------------------------------------\nAdvanced: you can alter the collection at anytime to dynamically add tabs"
+  },
+  "ComponentManifest": {
+    "AllowAccessToGlobals": false,
+    "AllowCustomization": true,
+    "Description": "You will need to do the following:\n#1 : create a global collection for tabs on App start and then have each of the LeftNav instance take that as NavItems.\n#2 : Assign each tab\\item an ID.\n#3 : have a global variable called varInitialSelectedId put that as input to all LeftNav's in your app\n#4 : on Each screen OnHidden action set the variable\n------------------------------------------------------\nAdvanced: you can alter the collection at any time to dynamically add tabs\n",
+    "Name": "LeftNavigationBar",
+    "TemplateGuid": "61737c7a24cb45c296263f2ad5cc554a"
+  },
+  "ComponentType": "CanvasComponent",
+  "CustomGroupControlTemplateName": "",
+  "CustomProperties": [
+    {
+      "Category": 0,
+      "DisplayName": "NavItems",
+      "Hidden": false,
+      "Name": "NavItems",
+      "PropertyDataTypeKey": "Table",
+      "Tooltip": "Nav Items",
+      "Type": "{\"Version\":\"1.330\",\"Type\":{\"Name\":\"Root\",\"Kind\":\"Table\",\"EnumString\":\"\",\"Type\":[{\"Name\":\"BoardTypeID\",\"Kind\":\"Number\",\"EnumString\":\"\",\"Type\":[]},{\"Name\":\"ID\",\"Kind\":\"Number\",\"EnumString\":\"\",\"Type\":[]},{\"Name\":\"Icon\",\"Kind\":\"String\",\"EnumString\":\"\",\"Type\":[]},{\"Name\":\"ImagePath\",\"Kind\":\"String\",\"EnumString\":\"\",\"Type\":[]},{\"Name\":\"PID\",\"Kind\":\"Number\",\"EnumString\":\"\",\"Type\":[]},{\"Name\":\"ReviewDate\",\"Kind\":\"Date\",\"EnumString\":\"\",\"Type\":[]},{\"Name\":\"Screen\",\"Kind\":\"Control\",\"EnumString\":\"\",\"Template\":{\"TemplateName\":\"screen\",\"IsMetaLoc\":false,\"Intangible\":false,\"IsDataLimited\":false,\"ExpandoType\":{\"Version\":\"1.330\",\"Type\":{\"Name\":\"Root\",\"Kind\":\"Record\",\"EnumString\":\"\",\"Type\":[{\"Name\":\"BackgroundImage\",\"Kind\":\"Image\",\"EnumString\":\"\",\"Type\":[]},{\"Name\":\"ContentLanguage\",\"Kind\":\"String\",\"EnumString\":\"\",\"Type\":[]},{\"Name\":\"Fill\",\"Kind\":\"Color\",\"EnumString\":\"\",\"Type\":[]},{\"Name\":\"Height\",\"Kind\":\"Number\",\"EnumString\":\"\",\"Type\":[]},{\"Name\":\"ImagePosition\",\"Kind\":\"Enum\",\"EnumString\":\"%s[Center:\\\"center\\\", Fill:\\\"fill\\\", Fit:\\\"fit\\\", Stretch:\\\"stretch\\\", Tile:\\\"tile\\\"]\",\"Type\":[{\"Name\":\"Center\",\"Kind\":\"String\",\"EnumString\":\"\",\"Type\":[]},{\"Name\":\"Fill\",\"Kind\":\"String\",\"EnumString\":\"\",\"Type\":[]},{\"Name\":\"Fit\",\"Kind\":\"String\",\"EnumString\":\"\",\"Type\":[]},{\"Name\":\"Stretch\",\"Kind\":\"String\",\"EnumString\":\"\",\"Type\":[]},{\"Name\":\"Tile\",\"Kind\":\"String\",\"EnumString\":\"\",\"Type\":[]}]},{\"Name\":\"LoadingSpinner\",\"Kind\":\"Enum\",\"EnumString\":\"%n[Controls:0, Data:1, None:2]\",\"Type\":[{\"Name\":\"Controls\",\"Kind\":\"Number\",\"EnumString\":\"\",\"Type\":[]},{\"Name\":\"Data\",\"Kind\":\"Number\",\"EnumString\":\"\",\"Type\":[]},{\"Name\":\"None\",\"Kind\":\"Number\",\"EnumString\":\"\",\"Type\":[]}]},{\"Name\":\"LoadingSpinnerColor\",\"Kind\":\"Color\",\"EnumString\":\"\",\"Type\":[]},{\"Name\":\"Name\",\"Kind\":\"String\",\"EnumString\":\"\",\"Type\":[]},{\"Name\":\"Orientation\",\"Kind\":\"String\",\"EnumString\":\"\",\"Type\":[]},{\"Name\":\"Printing\",\"Kind\":\"_MinPrimitive\",\"EnumString\":\"\",\"Type\":[]},{\"Name\":\"Size\",\"Kind\":\"Number\",\"EnumString\":\"\",\"Type\":[]},{\"Name\":\"Width\",\"Kind\":\"Number\",\"EnumString\":\"\",\"Type\":[]}]}},\"Properties\":[{\"Name\":\"Fill\",\"InvariantType\":{\"Version\":\"1.330\",\"Type\":{\"Name\":\"Root\",\"Kind\":\"Color\",\"EnumString\":\"\",\"Type\":[]}},\"PropertyRuleCategory\":\"Design\",\"PropertyDisplayName\":\"Fill\"},{\"Name\":\"BackgroundImage\",\"InvariantType\":{\"Version\":\"1.330\",\"Type\":{\"Name\":\"Root\",\"Kind\":\"Image\",\"EnumString\":\"\",\"Type\":[]}},\"PropertyRuleCategory\":\"Data\",\"PropertyDisplayName\":\"Background image\"},{\"Name\":\"ImagePosition\",\"InvariantType\":{\"Version\":\"1.330\",\"Type\":{\"Name\":\"Root\",\"Kind\":\"Enum\",\"EnumString\":\"%s[Center:\\\"center\\\", Fill:\\\"fill\\\", Fit:\\\"fit\\\", Stretch:\\\"stretch\\\", Tile:\\\"tile\\\"]\",\"Type\":[{\"Name\":\"Center\",\"Kind\":\"String\",\"EnumString\":\"\",\"Type\":[]},{\"Name\":\"Fill\",\"Kind\":\"String\",\"EnumString\":\"\",\"Type\":[]},{\"Name\":\"Fit\",\"Kind\":\"String\",\"EnumString\":\"\",\"Type\":[]},{\"Name\":\"Stretch\",\"Kind\":\"String\",\"EnumString\":\"\",\"Type\":[]},{\"Name\":\"Tile\",\"Kind\":\"String\",\"EnumString\":\"\",\"Type\":[]}]}},\"PropertyRuleCategory\":\"Design\",\"PropertyDisplayName\":\"Image position\"},{\"Name\":\"Height\",\"InvariantType\":{\"Version\":\"1.330\",\"Type\":{\"Name\":\"Root\",\"Kind\":\"Number\",\"EnumString\":\"\",\"Type\":[]}},\"PropertyRuleCategory\":\"Design\",\"PropertyDisplayName\":\"Height\"},{\"Name\":\"Width\",\"InvariantType\":{\"Version\":\"1.330\",\"Type\":{\"Name\":\"Root\",\"Kind\":\"Number\",\"EnumString\":\"\",\"Type\":[]}},\"PropertyRuleCategory\":\"Design\",\"PropertyDisplayName\":\"Width\"},{\"Name\":\"Size\",\"InvariantType\":{\"Version\":\"1.330\",\"Type\":{\"Name\":\"Root\",\"Kind\":\"Number\",\"EnumString\":\"\",\"Type\":[]}},\"PropertyRuleCategory\":\"Design\",\"PropertyDisplayName\":\"Size\"},{\"Name\":\"Orientation\",\"InvariantType\":{\"Version\":\"1.330\",\"Type\":{\"Name\":\"Root\",\"Kind\":\"String\",\"EnumString\":\"\",\"Type\":[]}},\"PropertyRuleCategory\":\"Design\",\"PropertyDisplayName\":\"Orientation\"},{\"Name\":\"LoadingSpinner\",\"InvariantType\":{\"Version\":\"1.330\",\"Type\":{\"Name\":\"Root\",\"Kind\":\"Enum\",\"EnumString\":\"%n[Controls:0, Data:1, None:2]\",\"Type\":[{\"Name\":\"Controls\",\"Kind\":\"Number\",\"EnumString\":\"\",\"Type\":[]},{\"Name\":\"Data\",\"Kind\":\"Number\",\"EnumString\":\"\",\"Type\":[]},{\"Name\":\"None\",\"Kind\":\"Number\",\"EnumString\":\"\",\"Type\":[]}]}},\"PropertyRuleCategory\":\"Design\",\"PropertyDisplayName\":\"Loading spinner\"},{\"Name\":\"LoadingSpinnerColor\",\"InvariantType\":{\"Version\":\"1.330\",\"Type\":{\"Name\":\"Root\",\"Kind\":\"Color\",\"EnumString\":\"\",\"Type\":[]}},\"PropertyRuleCategory\":\"Design\",\"PropertyDisplayName\":\"Loading spinner color\"},{\"Name\":\"Name\",\"InvariantType\":{\"Version\":\"1.330\",\"Type\":{\"Name\":\"Root\",\"Kind\":\"String\",\"EnumString\":\"\",\"Type\":[]}},\"PropertyRuleCategory\":\"Design\",\"PropertyDisplayName\":\"Name\"},{\"Name\":\"Printing\",\"InvariantType\":{\"Version\":\"1.330\",\"Type\":{\"Name\":\"Root\",\"Kind\":\"_MinPrimitive\",\"EnumString\":\"\",\"Type\":[]}},\"PropertyRuleCategory\":\"Data\",\"PropertyDisplayName\":\"Printing\"},{\"Name\":\"ContentLanguage\",\"InvariantType\":{\"Version\":\"1.330\",\"Type\":{\"Name\":\"Root\",\"Kind\":\"String\",\"EnumString\":\"\",\"Type\":[]}},\"PropertyRuleCategory\":\"Data\",\"PropertyDisplayName\":\"Content language\"}]}},{\"Name\":\"TemplateID\",\"Kind\":\"Number\",\"EnumString\":\"\",\"Type\":[]},{\"Name\":\"Title\",\"Kind\":\"String\",\"EnumString\":\"\",\"Type\":[]}]}}"
+    },
+    {
+      "Category": 0,
+      "DisplayName": "MenuWidth",
+      "Hidden": true,
+      "Name": "MenuWidth",
+      "PropertyDataTypeKey": "Number",
+      "Tooltip": "The width of my component",
+      "Type": "{\"Version\":\"1.330\",\"Type\":{\"Name\":\"Root\",\"Kind\":\"Number\",\"EnumString\":\"\",\"Type\":[]}}"
+    },
+    {
+      "Category": 0,
+      "DisplayName": "FullMenuWidth",
+      "Hidden": false,
+      "Name": "FullMenuWidth",
+      "PropertyDataTypeKey": "Number",
+      "Tooltip": "A custom property",
+      "Type": "{\"Version\":\"1.330\",\"Type\":{\"Name\":\"Root\",\"Kind\":\"Number\",\"EnumString\":\"\",\"Type\":[]}}"
+    },
+    {
+      "Category": 0,
+      "DisplayName": "CollapsedMenuWidth",
+      "Hidden": false,
+      "Name": "CollapsedMenuWidth",
+      "PropertyDataTypeKey": "Number",
+      "Tooltip": "A custom property",
+      "Type": "{\"Version\":\"1.330\",\"Type\":{\"Name\":\"Root\",\"Kind\":\"Number\",\"EnumString\":\"\",\"Type\":[]}}"
+    },
+    {
+      "Category": 0,
+      "DisplayName": "SelectedColor",
+      "Hidden": false,
+      "Name": "SelectedColor",
+      "PropertyDataTypeKey": "Color",
+      "Tooltip": "A custom property",
+      "Type": "{\"Version\":\"1.330\",\"Type\":{\"Name\":\"Root\",\"Kind\":\"Color\",\"EnumString\":\"\",\"Type\":[]}}"
+    },
+    {
+      "Category": 0,
+      "DisplayName": "FontSize",
+      "Hidden": false,
+      "Name": "FontSize",
+      "PropertyDataTypeKey": "Number",
+      "Tooltip": "A custom property",
+      "Type": "{\"Version\":\"1.330\",\"Type\":{\"Name\":\"Root\",\"Kind\":\"Number\",\"EnumString\":\"\",\"Type\":[]}}"
+    },
+    {
+      "Category": 0,
+      "DisplayName": "FontColor",
+      "Hidden": false,
+      "Name": "FontColor",
+      "PropertyDataTypeKey": "Color",
+      "Tooltip": "A custom property",
+      "Type": "{\"Version\":\"1.330\",\"Type\":{\"Name\":\"Root\",\"Kind\":\"Color\",\"EnumString\":\"\",\"Type\":[]}}"
+    },
+    {
+      "Category": 0,
+      "DisplayName": "OutSelectedID",
+      "Hidden": true,
+      "Name": "OutSelectedID",
+      "PropertyDataTypeKey": "Number",
+      "Tooltip": "This property will output the ID that is selected. This is consumed by the screen to tailor the content based on the ID",
+      "Type": "{\"Version\":\"1.330\",\"Type\":{\"Name\":\"Root\",\"Kind\":\"Number\",\"EnumString\":\"\",\"Type\":[]}}"
+    },
+    {
+      "Category": 0,
+      "DisplayName": "InitialSelectedID",
+      "Hidden": false,
+      "IsResettable": true,
+      "Name": "InitialSelectedID",
+      "PropertyDataTypeKey": "Number",
+      "Tooltip": "ID is used to synchronize what is shown as selected.This property helps when you have many menu items mapping to one screen",
+      "Type": "{\"Version\":\"1.330\",\"Type\":{\"Name\":\"Root\",\"Kind\":\"Number\",\"EnumString\":\"\",\"Type\":[]}}"
+    },
+    {
+      "Category": 0,
+      "DisplayName": "SelectBackgroundColor",
+      "Hidden": false,
+      "Name": "SelectBackgroundColor",
+      "PropertyDataTypeKey": "Color",
+      "Tooltip": "Back ground color of the selected item",
+      "Type": "{\"Version\":\"1.330\",\"Type\":{\"Name\":\"Root\",\"Kind\":\"Color\",\"EnumString\":\"\",\"Type\":[]}}"
+    },
+    {
+      "Category": 0,
+      "DisplayName": "MenuOpen",
+      "Hidden": false,
+      "IsResettable": true,
+      "Name": "MenuOpen",
+      "PropertyDataTypeKey": "Boolean",
+      "Tooltip": "A custom property",
+      "Type": "{\"Version\":\"1.330\",\"Type\":{\"Name\":\"Root\",\"Kind\":\"_MinPrimitive\",\"EnumString\":\"\",\"Type\":[]}}"
+    },
+    {
+      "Category": 0,
+      "DisplayName": "IconColor",
+      "Hidden": false,
+      "Name": "IconColor",
+      "PropertyDataTypeKey": "Color",
+      "Tooltip": "Icon Color",
+      "Type": "{\"Version\":\"1.330\",\"Type\":{\"Name\":\"Root\",\"Kind\":\"Color\",\"EnumString\":\"\",\"Type\":[]}}"
+    },
+    {
+      "Category": 0,
+      "DisplayName": "IsMenuOpen",
+      "Hidden": true,
+      "Name": "IsMenuOpen",
+      "PropertyDataTypeKey": "Boolean",
+      "Tooltip": "Is Navigation Menu open?",
+      "Type": "{\"Version\":\"1.330\",\"Type\":{\"Name\":\"Root\",\"Kind\":\"_MinPrimitive\",\"EnumString\":\"\",\"Type\":[]}}"
+    },
+    {
+      "Category": 2,
+      "DisplayName": "OnChange",
+      "Hidden": false,
+      "Name": "OnChange",
+      "PropertyDataTypeKey": "String",
+      "Tooltip": "OnChange",
+      "Type": "{\"Version\":\"1.330\",\"Type\":{\"Name\":\"Root\",\"Kind\":\"String\",\"EnumString\":\"\",\"Type\":[]}}"
+    },
+    {
+      "Category": 0,
+      "DisplayName": "Blob Storage Base URL",
+      "Hidden": false,
+      "Name": "BlobStorageBaseURL",
+      "PropertyDataTypeKey": "String",
+      "Tooltip": "A custom property",
+      "Type": "{\"Version\":\"1.330\",\"Type\":{\"Name\":\"Root\",\"Kind\":\"String\",\"EnumString\":\"\",\"Type\":[]}}"
+    }
+  ],
+  "FirstParty": true,
+  "Id": "http://microsoft.com/appmagic/Component",
+  "IsComponentLocked": false,
+  "IsComponentTemplate": true,
+  "IsCustomGroupControlTemplate": false,
+  "IsPcfControl": false,
+  "IsPremiumPcfControl": false,
+  "IsWidgetTemplate": false,
+  "LastModifiedTimestamp": "638144872699901925",
+  "Name": "61737c7a24cb45c296263f2ad5cc554a",
+  "OverridableProperties": {},
+  "TemplateOriginalName": "10764652df6447cd8a4773c7dd2a41c5",
+  "Version": "637720105619530899"
+}

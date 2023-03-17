@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<savedqueries xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <savedquery>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>0</CanBeDeleted>
+    <isquickfindquery>0</isquickfindquery>
+    <isprivate>0</isprivate>
+    <isdefault>1</isdefault>
+    <savedqueryid>{45ede58e-d4f2-4a8e-bc2e-ca47f53a0e4c}</savedqueryid>
+    <layoutxml>
+      <grid name="craf2_reviewhub_factmetrics" jump="craf2_factmetrictitle" select="1" icon="1" preview="1">
+        <row name="craf2_reviewhub_factmetric" id="craf2_reviewhub_factmetricid">
+          <cell name="craf2_factmetrictitle" width="300" />
+          <cell name="createdon" width="125" />
+        </row>
+      </grid>
+    </layoutxml>
+    <querytype>2</querytype>
+    <fetchxml>
+      <fetch version="1.0" mapping="logical">
+        <entity name="craf2_reviewhub_factmetric">
+          <attribute name="craf2_reviewhub_factmetricid" />
+          <attribute name="craf2_factmetrictitle" />
+          <attribute name="createdon" />
+          <order attribute="craf2_factmetrictitle" descending="false" />
+          <filter type="and">
+            <condition attribute="statecode" operator="eq" value="0" />
+          </filter>
+        </entity>
+      </fetch>
+    </fetchxml>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <LocalizedNames>
+      <LocalizedName description="ReviewHub_FactMetric Associated View" languagecode="1033" />
+    </LocalizedNames>
+  </savedquery>
+</savedqueries>

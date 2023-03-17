@@ -1,0 +1,838 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_excelonlinebusiness": {
+        "runtimeSource": "invoker",
+        "connection": {
+          "connectionReferenceLogicalName": "new_sharedexcelonlinebusiness_0a366"
+        },
+        "api": {
+          "name": "shared_excelonlinebusiness"
+        }
+      },
+      "shared_commondataserviceforapps_1": {
+        "impersonation": {},
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "chub_sharedcommondataserviceforapps_72f86"
+        },
+        "api": {
+          "name": "shared_commondataserviceforapps"
+        }
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        },
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        }
+      },
+      "triggers": {
+        "manual": {
+          "metadata": {
+            "operationMetadataId": "c4d060db-4a97-498f-99c7-2bb0d25de8fb"
+          },
+          "type": "Request",
+          "kind": "PowerApp",
+          "inputs": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "GetValueType_Content": {
+                  "type": "any",
+                  "x-ms-powerflows-param-ispartial": false
+                },
+                "Filename_Value": {
+                  "type": "string",
+                  "description": "Enter initial value",
+                  "x-ms-powerflows-param-ispartial": false
+                },
+                "ReviewType_Value": {
+                  "type": "integer",
+                  "description": "Enter initial value",
+                  "x-ms-powerflows-param-ispartial": false
+                },
+                "ActionType_Value": {
+                  "type": "string",
+                  "description": "Enter initial value",
+                  "x-ms-powerflows-param-ispartial": false
+                },
+                "GetValueType_Content_1": {
+                  "type": "any"
+                },
+                "GetUpdateMethod_Content": {
+                  "type": "any",
+                  "x-ms-powerflows-param-ispartial": false
+                },
+                "GetQuarterlyCalcMethod_Content": {
+                  "type": "any",
+                  "x-ms-powerflows-param-ispartial": false
+                }
+              },
+              "required": [
+                "GetValueType_Content",
+                "Filename_Value",
+                "ReviewType_Value",
+                "ActionType_Value",
+                "GetValueType_Content_1",
+                "GetUpdateMethod_Content",
+                "GetQuarterlyCalcMethod_Content"
+              ]
+            }
+          }
+        }
+      },
+      "actions": {
+        "Filename": {
+          "runAfter": {},
+          "metadata": {
+            "operationMetadataId": "f76d0421-a094-4631-a2fc-f0262d46e1a6"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "filename",
+                "type": "string",
+                "value": "@{triggerBody()['Filename_Value']}"
+              }
+            ]
+          }
+        },
+        "ReviewType": {
+          "runAfter": {
+            "Filename": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "57366561-7c03-4879-a3d5-e952980c5298"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "ReviewType",
+                "type": "integer",
+                "value": "@triggerBody()['ReviewType_Value']"
+              }
+            ]
+          }
+        },
+        "ReviewHub_IsTrendDown": {
+          "runAfter": {
+            "ReviewType": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "0067e180-580b-407c-9e53-dfeafb45475c"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "ReviewHub_IsTrendDown",
+                "type": "array",
+                "value": [
+                  "yes",
+                  "no"
+                ]
+              }
+            ]
+          }
+        },
+        "ActionType": {
+          "runAfter": {
+            "ReviewHub_IsTrendDown": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "151d345e-e053-4bd9-a94e-7cbc996d1b72"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "ActionType",
+                "type": "string",
+                "value": "@{triggerBody()['ActionType_Value']}"
+              }
+            ]
+          }
+        },
+        "Invalid_Data_Types": {
+          "runAfter": {
+            "ActionType": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "a94766f7-3b47-4b09-83d6-aa8e3d47ff07"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "InvalidDataTypes",
+                "type": "array",
+                "value": []
+              }
+            ]
+          }
+        },
+        "Null_Values": {
+          "runAfter": {
+            "Invalid_Data_Types": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "1252be07-8233-4e7d-adee-c4c100994baf"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "NullValues",
+                "type": "array",
+                "value": []
+              }
+            ]
+          }
+        },
+        "GetValueType": {
+          "runAfter": {
+            "Null_Values": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "83d6dc34-abb4-4d3d-a85d-eaa3e134d87e"
+          },
+          "type": "ParseJson",
+          "inputs": {
+            "content": "@triggerBody()['GetValueType_Content']",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "value"
+                ]
+              }
+            }
+          }
+        },
+        "ValueType": {
+          "runAfter": {
+            "GetValueType": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "257bd1e9-d10e-4d26-aabb-0f254a78fa55"
+          },
+          "type": "Select",
+          "inputs": {
+            "from": "@body('GetValueType')",
+            "select": "@item()['Value']"
+          }
+        },
+        "GetUpdateMethod": {
+          "runAfter": {
+            "ValueType": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "af86a5a7-ed5b-42fe-a1a2-2b54508e80bf"
+          },
+          "type": "ParseJson",
+          "inputs": {
+            "content": "@triggerBody()['GetUpdateMethod_Content']",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "value"
+                ]
+              }
+            }
+          }
+        },
+        "UpdateMethod": {
+          "runAfter": {
+            "GetUpdateMethod": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "ebc67571-13b8-4903-ae18-a19b578f71ce"
+          },
+          "type": "Select",
+          "inputs": {
+            "from": "@body('GetUpdateMethod')",
+            "select": "@item()['value']"
+          }
+        },
+        "GetQuarterlyCalcMethod": {
+          "runAfter": {
+            "UpdateMethod": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "88044c27-5087-4f57-a6cf-b10d6c6a4cc1"
+          },
+          "type": "ParseJson",
+          "inputs": {
+            "content": "@triggerBody()['GetQuarterlyCalcMethod_Content']",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "value"
+                ]
+              }
+            }
+          }
+        },
+        "QuarterlyCalcMethod": {
+          "runAfter": {
+            "GetQuarterlyCalcMethod": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "a31920b1-6119-4d2b-aaa8-71da172255ea"
+          },
+          "type": "Select",
+          "inputs": {
+            "from": "@body('GetQuarterlyCalcMethod')",
+            "select": "@item()['value']"
+          }
+        },
+        "MetricTypeDetails": {
+          "runAfter": {
+            "Apply_to_each": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "21d128fb-e867-4a7d-a3a4-b01962acf22e"
+          },
+          "type": "Compose",
+          "inputs": "@outputs('Compose')"
+        },
+        "Is_Metric_Details": {
+          "actions": {},
+          "runAfter": {
+            "MetricTypeDetails": [
+              "Succeeded"
+            ]
+          },
+          "else": {
+            "actions": {
+              "MetricDetails_Empty": {
+                "runAfter": {},
+                "metadata": {
+                  "operationMetadataId": "1560cc89-d798-4b72-9f27-e63ca6d6ceaf"
+                },
+                "type": "Compose",
+                "inputs": [
+                  {
+                    "ID": "",
+                    "MetricName": "",
+                    "ShortName": "",
+                    "Stage": "",
+                    "UpdateMethod": "",
+                    "PowerBIUrl": "",
+                    "ValueType": "",
+                    "Objective": "",
+                    "HealthWeight": "",
+                    "EnumerateOptions": "",
+                    "IsTrendDown": "",
+                    "MetricDescription": "",
+                    "EffectiveDate": "",
+                    "QuarterlyCalculationMethod": "",
+                    "DataSource": "",
+                    "Template": "",
+                    "ValidationStatus": "Missing Required Values",
+                    "ValidationMessage": "All required values are not filled"
+                  }
+                ]
+              }
+            }
+          },
+          "expression": {
+            "not": {
+              "equals": [
+                "@outputs('MetricTypeDetails')",
+                "@null"
+              ]
+            }
+          },
+          "metadata": {
+            "operationMetadataId": "daf144e8-8c38-43b8-8e65-0635763743ac"
+          },
+          "type": "If"
+        },
+        "Response": {
+          "runAfter": {
+            "Is_Metric_Details": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "8883ab4f-bda0-47c9-9760-ab887aa52f5b"
+          },
+          "type": "Response",
+          "kind": "Http",
+          "inputs": {
+            "statusCode": 200,
+            "body": "@if(equals(outputs('MetricTypeDetails'), null), outputs('MetricDetails_Empty'), outputs('MetricTypeDetails') )",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "ID": {
+                    "type": "string"
+                  },
+                  "MetricName": {
+                    "type": "string"
+                  },
+                  "ShortName": {
+                    "type": "string"
+                  },
+                  "Stage": {
+                    "type": "string"
+                  },
+                  "UpdateMethod": {
+                    "type": "string"
+                  },
+                  "PowerBIUrl": {
+                    "type": "string"
+                  },
+                  "ValueType": {
+                    "type": "string"
+                  },
+                  "Objective": {
+                    "type": "string"
+                  },
+                  "HealthWeight": {
+                    "type": "string"
+                  },
+                  "EnumerateOptions": {
+                    "type": "string"
+                  },
+                  "IsTrendDown": {
+                    "type": "string"
+                  },
+                  "MetricDescription": {
+                    "type": "string"
+                  },
+                  "EffectiveDate": {
+                    "type": "string"
+                  },
+                  "QuarterlyCalculationMethod": {
+                    "type": "string"
+                  },
+                  "DataSource": {
+                    "type": "string"
+                  },
+                  "ValidationStatus": {
+                    "type": "string"
+                  },
+                  "ValidationMessage": {
+                    "type": "string"
+                  },
+                  "Template": {
+                    "type": "string"
+                  }
+                },
+                "required": []
+              }
+            }
+          }
+        },
+        "List_rows_present_in_a_table": {
+          "runAfter": {
+            "QuarterlyCalcMethod": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "7afc7c8b-75e1-4048-9a8e-37f774e3b6f7",
+            "tableId": "Table3"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness",
+              "connectionName": "shared_excelonlinebusiness",
+              "operationId": "GetItems"
+            },
+            "parameters": {
+              "source": "groups/95527e4b-b958-4bca-abc7-b3b15e4ef88c",
+              "drive": "b!Za8lWTXqxEOP8PI-AWUin1uHVTUMjdpBrxPWsgBrMIjQzevZzwIKS7uowD6FtdNp",
+              "file": "Uploads/@{variables('filename')}",
+              "table": "Table3",
+              "$filter": "MetricName ne '@{null}'"
+            },
+            "authentication": {
+              "value": "@json(decodeBase64(triggerOutputs().headers['X-MS-APIM-Tokens']))['$ConnectionKey']",
+              "type": "Raw"
+            }
+          }
+        },
+        "Apply_to_each": {
+          "foreach": "@outputs('List_rows_present_in_a_table')?['body/value']",
+          "actions": {
+            "Is_not_missing_required_values": {
+              "actions": {
+                "Does_not_have_invalid_data_types": {
+                  "actions": {
+                    "Is_Not_Duplicate": {
+                      "actions": {},
+                      "runAfter": {
+                        "List_rows": [
+                          "Succeeded"
+                        ]
+                      },
+                      "else": {
+                        "actions": {
+                          "Duplicate": {
+                            "runAfter": {},
+                            "metadata": {
+                              "operationMetadataId": "33496d0d-91dd-4503-a924-522d83e93c23"
+                            },
+                            "type": "Compose",
+                            "inputs": "@true"
+                          }
+                        }
+                      },
+                      "expression": {
+                        "and": [
+                          {
+                            "or": [
+                              {
+                                "and": [
+                                  {
+                                    "less": [
+                                      "@length(outputs('List_rows')?['body/value'])",
+                                      1
+                                    ]
+                                  },
+                                  {
+                                    "contains": [
+                                      "@variables('ActionType')",
+                                      "Create"
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "and": [
+                                  {
+                                    "greaterOrEquals": [
+                                      "@length(outputs('List_rows')?['body/value'])",
+                                      1
+                                    ]
+                                  },
+                                  {
+                                    "contains": [
+                                      "@variables('ActionType')",
+                                      "Update"
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "equals": [
+                              "@length(body('Check_Duplicates_Within'))",
+                              1
+                            ]
+                          }
+                        ]
+                      },
+                      "metadata": {
+                        "operationMetadataId": "e948c3b9-6dda-48f4-b6bd-2e90a40b033a"
+                      },
+                      "type": "If"
+                    },
+                    "Check_Duplicates_Within": {
+                      "runAfter": {},
+                      "metadata": {
+                        "operationMetadataId": "4e22c8a3-6dd5-42a1-88a6-e3cf3c850b92"
+                      },
+                      "type": "Query",
+                      "inputs": {
+                        "from": "@outputs('List_rows_present_in_a_table')?['body/value']",
+                        "where": "@equals(item()?['MetricName'], items('Apply_to_each')?['MetricName'])"
+                      }
+                    },
+                    "List_rows": {
+                      "runAfter": {
+                        "Check_Duplicates_Within": [
+                          "Succeeded"
+                        ]
+                      },
+                      "metadata": {
+                        "operationMetadataId": "aa29bdc2-0a48-40e9-bb19-24d90675160d"
+                      },
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                          "connectionName": "shared_commondataserviceforapps_1",
+                          "operationId": "ListRecords"
+                        },
+                        "parameters": {
+                          "entityName": "craf2_reviewhub_metrictypedetails",
+                          "$select": "craf2_reviewhub_metrictypedetailid",
+                          "$filter": " craf2_mtd_BoardType/craf2_boardtypeid eq @{variables('ReviewType')} and craf2_mtd_Objective/craf2_objectivename eq '@{replace(items('Apply_to_each')?['Objective'], '''', '''''')}' and craf2_MetricType/craf2_metrictypename eq '@{replace(items('Apply_to_each')?['MetricName'], '''', '''''')}'",
+                          "$top": 1
+                        },
+                        "authentication": "@parameters('$authentication')"
+                      }
+                    }
+                  },
+                  "runAfter": {},
+                  "else": {
+                    "actions": {
+                      "Invalid": {
+                        "runAfter": {},
+                        "metadata": {
+                          "operationMetadataId": "e389cac0-cea2-423d-ae92-e51ac04b752f"
+                        },
+                        "type": "Compose",
+                        "inputs": "@true"
+                      },
+                      "InvalidValuesArray": {
+                        "runAfter": {
+                          "Invalid": [
+                            "Succeeded"
+                          ]
+                        },
+                        "metadata": {
+                          "operationMetadataId": "9cba3d58-1fe7-4daf-9308-89e73482cbbb"
+                        },
+                        "type": "Compose",
+                        "inputs": "@concat(\r\n    if(contains(variables('ReviewHub_IsTrendDown'), toLower(trim(items('Apply_to_each')?['IsTrendDown']))), '', 'Is Trend Down, ') ,\r\n\r\n    if(contains(body('UpdateMethod'), toLower(items('Apply_to_each')?['UpdateMethod'])), '', 'Update Method, '),\r\n\r\n    if(contains(body('QuarterlyCalcMethod'), toLower(trim(items('Apply_to_each')?['QuarterlyCalculationMethod']))), '', 'Quarterly Calculation Method, '),\r\n\r\n    if(contains(body('ValueType'), toLower(trim(items('Apply_to_each')?['ValueType']))), '', 'Value Type, ')\r\n)"
+                      }
+                    }
+                  },
+                  "expression": {
+                    "and": [
+                      {
+                        "equals": [
+                          "@contains(variables('ReviewHub_IsTrendDown'), toLower(trim(items('Apply_to_each')?['IsTrendDown'])))",
+                          "@true"
+                        ]
+                      },
+                      {
+                        "equals": [
+                          "@contains(body('UpdateMethod'), toLower(items('Apply_to_each')?['UpdateMethod']))",
+                          "@true"
+                        ]
+                      },
+                      {
+                        "equals": [
+                          "@contains(body('QuarterlyCalcMethod'), toLower(trim(items('Apply_to_each')?['QuarterlyCalculationMethod'])))",
+                          "@true"
+                        ]
+                      },
+                      {
+                        "equals": [
+                          "@contains(body('ValueType'), toLower(trim(items('Apply_to_each')?['ValueType'])))",
+                          "@true"
+                        ]
+                      }
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "93913ec7-0995-44ff-801b-84df53e44f7c"
+                  },
+                  "type": "If"
+                }
+              },
+              "runAfter": {},
+              "else": {
+                "actions": {
+                  "MissingValues": {
+                    "runAfter": {},
+                    "metadata": {
+                      "operationMetadataId": "5ffcc6c2-7dd5-4337-9539-b5ae5b3d2a6b"
+                    },
+                    "type": "Compose",
+                    "inputs": "@true"
+                  },
+                  "MissingValuesArray": {
+                    "runAfter": {
+                      "MissingValues": [
+                        "Succeeded"
+                      ]
+                    },
+                    "metadata": {
+                      "operationMetadataId": "0b333242-b922-400e-9b83-fdc64501b0b9"
+                    },
+                    "type": "Compose",
+                    "inputs": "@concat(\r\n    if(empty(items('Apply_to_each')?['MetricName']), 'Metric Name, ', ''),\r\n\r\n    if(empty(items('Apply_to_each')?['Shortname']), 'Short Name, ', ''),\r\n\r\n    if(empty(items('Apply_to_each')?['UpdateMethod']), 'Update Method, ', ''),\r\n\r\n    if(empty(items('Apply_to_each')?['ValueType']), 'Value Type, ', ''),\r\n\r\n    if(empty(items('Apply_to_each')?['Objective']), 'Objective, ', ''),\r\n\r\n    if(empty(items('Apply_to_each')?['Stage']), 'Stage, ', ''),\r\n\r\n    if(empty(items('Apply_to_each')?['QuarterlyCalculationMethod']), 'Quarterly Calculation Method, ', ''),\r\n\r\n    if(empty(items('Apply_to_each')?['IsTrendDown']), 'Is Trend Down, ', '')\r\n)\r\n"
+                  }
+                }
+              },
+              "expression": {
+                "and": [
+                  {
+                    "not": {
+                      "equals": [
+                        "@empty(items('Apply_to_each')?['MetricName'])",
+                        "@true"
+                      ]
+                    }
+                  },
+                  {
+                    "not": {
+                      "equals": [
+                        "@empty(items('Apply_to_each')?['ShortName'])",
+                        "@true"
+                      ]
+                    }
+                  },
+                  {
+                    "not": {
+                      "equals": [
+                        "@empty(items('Apply_to_each')?['Objective'])",
+                        "@true"
+                      ]
+                    }
+                  },
+                  {
+                    "not": {
+                      "equals": [
+                        "@empty(items('Apply_to_each')?['Stage'])",
+                        "@true"
+                      ]
+                    }
+                  },
+                  {
+                    "not": {
+                      "equals": [
+                        "@empty(items('Apply_to_each')?['IsTrendDown'])",
+                        "@true"
+                      ]
+                    }
+                  },
+                  {
+                    "not": {
+                      "equals": [
+                        "@empty(items('Apply_to_each')?['UpdateMethod'])",
+                        "@true"
+                      ]
+                    }
+                  },
+                  {
+                    "not": {
+                      "equals": [
+                        "@empty(items('Apply_to_each')?['QuarterlyCalculationMethod'])",
+                        "@true"
+                      ]
+                    }
+                  },
+                  {
+                    "not": {
+                      "equals": [
+                        "@empty(items('Apply_to_each')?['ValueType'])",
+                        "@true"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "6a18dd02-8424-47fe-aee6-3c7211ed9d4b"
+              },
+              "type": "If"
+            },
+            "Compose": {
+              "runAfter": {
+                "Is_not_missing_required_values": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "2aa63ad5-79b2-4a2a-9ff2-f67f1f98acbd"
+              },
+              "type": "Compose",
+              "inputs": {
+                "ID": "@if(greater(indexOf(toLower(variables('ActionType')), 'create') ,  0), null, items('Apply_to_each')?['ID'])",
+                "MetricName": "@trim(items('Apply_to_each')?['MetricName'])",
+                "ShortName": "@trim(items('Apply_to_each')?['ShortName'])",
+                "Stage": "@trim(items('Apply_to_each')?['Stage'])",
+                "UpdateMethod": "@trim(items('Apply_to_each')?['UpdateMethod'])",
+                "PowerBIUrl": "@trim(items('Apply_to_each')?['PowerBIUrl'])",
+                "ValueType": "@trim(items('Apply_to_each')?['ValueType'])",
+                "Objective": "@trim(items('Apply_to_each')?['Objective'])",
+                "HealthWeight": "@trim(items('Apply_to_each')?['HealthWeight'])",
+                "EnumerateOptions": "@trim(items('Apply_to_each')?['EnumerateOptions'])",
+                "IsTrendDown": "@trim(items('Apply_to_each')?['IsTrendDown'])",
+                "MetricDescription": "@trim(items('Apply_to_each')?['MetricDescription'])",
+                "EffectiveDate": "@if(equals(items('Apply_to_each')?['EffectiveDate'], ''), formatDateTime(utcNow(),'MM/dd/yyyy'), addSeconds('1899-12-30', int(formatNumber(mul(float(items('Apply_to_each')?['EffectiveDate']), 86400), '0'))))",
+                "QuarterlyCalculationMethod": "@trim(items('Apply_to_each')?['QuarterlyCalculationMethod'])",
+                "DataSource": "@trim(items('Apply_to_each')?['DataSource'])",
+                "Template": "",
+                "ValidationStatus": "@if(not(equals(outputs('Duplicate'), null)), 'Duplicate', if(not(equals(outputs('Invalid'), null)), 'Invalid Values', if(not(equals(outputs('MissingValues'), null)), 'Missing Required Values', 'Pass')))",
+                "ValidationMessage": "@if(not(equals(outputs('Duplicate'), null)), 'Duplicate', if(not(equals(outputs('Invalid'), null)), concat('The following columns have invalid values', '(', outputs('InvalidValuesArray')  , ')') , if(not(equals(outputs('MissingValues'), null)), concat('The following columns are required', '(',  outputs('MissingValuesArray')   , ')'), 'No Errors')))"
+              }
+            }
+          },
+          "runAfter": {
+            "List_rows_present_in_a_table": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "bfbd4c6f-a5d1-4594-9a82-1fcbee1ceaee"
+          },
+          "type": "Foreach",
+          "runtimeConfiguration": {
+            "concurrency": {
+              "repetitions": 50
+            }
+          }
+        }
+      }
+    },
+    "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+}

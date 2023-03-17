@@ -1,0 +1,13 @@
+<environmentvariabledefinition schemaname="chub_EnvVarReviewHubDevelopers">
+  <description default="A list of developers separated by semi colon. Users within this list will be granted super user access to all aspects of the app.">
+    <label description="A list of developers separated by semi colon. Users within this list will be granted super user access to all aspects of the app." languagecode="1033" />
+  </description>
+  <displayname default="EnvVar - ReviewHub - Developers">
+    <label description="EnvVar - ReviewHub - Developers" languagecode="1033" />
+  </displayname>
+  <introducedversion>1.0.0.12082022</introducedversion>
+  <iscustomizable>1</iscustomizable>
+  <isrequired>0</isrequired>
+  <secretstore>0</secretstore>
+  <type>100000000</type>
+</environmentvariabledefinition>

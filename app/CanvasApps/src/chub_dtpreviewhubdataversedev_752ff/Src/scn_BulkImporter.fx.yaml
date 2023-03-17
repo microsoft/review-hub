@@ -1,0 +1,885 @@
+scn_BulkImporter As screen:
+    OnHidden: =Set(Toggle_Button_Submit_Done, false);
+    OnVisible: |-
+        =Concurrent(
+            ClearCollect(
+                BulkUpdateScreenLogs,
+                Table(
+                    {
+                        message: "(Logs will display here.)",
+                        timestamp: Now()
+                    }
+                )
+            ),
+            ClearCollect(
+                colFactMetricsToUpload_CheckDuplicates,
+                Filter(
+                    AddColumns(
+                        GroupBy(
+                            colFactMetricsToUpload,
+                            "RefProductMetricID",
+                            "GroupByPMID"
+                        ),
+                        "CountID",
+                        CountRows(GroupByPMID)
+                    ),
+                    ThisRecord.CountID > 1
+                )
+            ),
+            Set(var_IsEditable_BU, !IsBlankOrError(LookUp(colFactMetricsToUpload, DateValue(ThisRecord.ReviewLockDate) <= Today())) || 
+            !IsBlankOrError(LookUp(colFactMetricsToUpload, Date(Year(DateValue(ThisRecord.ReviewLockDate)), Month(DateValue(ThisRecord.ReviewLockDate)),  LookUp(clln_BoardTypes, bt_BoardTypeID = dpdn_Scorecard_BS.Selected.BoardTypeID).bt_ReviewLockDay) <= Today())));
+        )
+
+    ctn_Main_BI As groupContainer.manualLayoutContainer:
+        BorderStyle: =BorderStyle.None
+        Height: =App.Height - Self.Y - 10
+        Width: |
+            =(App.Width - Self.X) - 15
+        X: |
+            =15
+        Y: =lbl_ScreenTitle_BI.Y + lbl_ScreenTitle_BI.Height + 5
+        ZIndex: =1
+
+        ctn_Step3_BI As groupContainer.manualLayoutContainer:
+            BorderStyle: =BorderStyle.None
+            Height: =Parent.Height - Self.Y
+            Width: =ctn_Step2_BI.Width
+            Y: =ctn_Step2_BI.Y + ctn_Step2_BI.Height + 15
+            ZIndex: =1
+
+            GalleryLogs_BI As gallery.galleryVertical:
+                BorderColor: =Back_Step3_BI.Fill
+                BorderThickness: =2
+                Height: =Parent.Height - Self.Y - 1 //Min(Parent.Height - Self.Y - 2, 200)
+                Items: |-
+                    =Sort(
+                    Ungroup( //Ungroup function to add a Row Number column.
+                            ForAll(
+                                Sequence(CountRows(BulkUpdateScreenLogs)),
+                                {
+                                    Record: Table(Last(FirstN(BulkUpdateScreenLogs, Value))),
+                                    RowNumber: Value
+                                }
+                            ),
+                            "Record"
+                        ), timestamp)
+                Layout: =Layout.Vertical
+                TemplateFill: |-
+                    =If(Mod(ThisItem.RowNumber, 2) = 0, ColorValue("#F3F8FC"), RGBA(255, 255, 255, 1))
+                TemplatePadding: =0
+                TemplateSize: =30
+                Width: =Parent.Width - 2
+                X: =1
+                Y: =Back_Step3_BI.Y + Back_Step3_BI.Height - 1
+                ZIndex: =1
+
+                lbl_Msg_BI As label:
+                    Font: =FontStyle
+                    Height: =lbl_Timestamp_BI.Height
+                    OnSelect: =Select(Parent)
+                    Size: =12
+                    Text: =ThisItem.message
+                    Width: =Parent.Width - Self.X
+                    X: =lbl_Timestamp_BI.X + lbl_Timestamp_BI.Width
+                    Y: =lbl_Timestamp_BI.Y
+                    ZIndex: =1
+
+                lbl_Timestamp_BI As label:
+                    Font: =FontStyle
+                    Height: =30
+                    OnSelect: =Select(Parent)
+                    PaddingLeft: =10
+                    PaddingRight: =0
+                    Size: =12
+                    Text: =ThisItem.timestamp
+                    Width: =175
+                    ZIndex: =2
+
+            Back_Step3_BI As button:
+                BorderColor: =Self.Fill
+                BorderStyle: =BorderStyle.None
+                BorderThickness: =0
+                DisabledBorderColor: =Self.BorderColor
+                DisabledColor: =Self.Color
+                DisabledFill: =Self.Fill
+                DisplayMode: =DisplayMode.Disabled
+                Fill: =ColorFade(BlueNaviHightLightBackground, 50%)
+                Height: =Label_Step3_BI.Height
+                RadiusBottomLeft: |
+                    =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =20
+                RadiusTopRight: =20
+                Text: =""
+                Width: =Label_Step3_BI.Width
+                ZIndex: =2
+
+            Label_Step3_BI As label:
+                BorderStyle: =BorderStyle.None
+                Font: =FontStyle
+                FontWeight: =FontWeight.Bold
+                PaddingLeft: =15
+                Size: =11
+                Text: ="Activity Logs"
+                Width: =Parent.Width
+                X: |
+                    =0
+                ZIndex: =3
+
+        ctn_Step2_BI As groupContainer.manualLayoutContainer:
+            BorderStyle: =BorderStyle.None
+            Height: =110
+            Width: =750
+            Y: =HtmlText_Note_BI.Y + HtmlText_Note_BI.Height + 10
+            ZIndex: =4
+
+            Back_Step2_Lower As label:
+                BorderColor: =Back_Step2_BI.Fill
+                BorderThickness: =2
+                Height: =Parent.Height - Self.Y - 1
+                Text: =""
+                Width: =Back_Step2_BI.Width - 2
+                X: =1
+                Y: =Label_Step2_BI.Height - 1
+                ZIndex: =1
+
+            Label_UploadedRec_BI As label:
+                Color: =RGBA(255, 0, 0, 1)
+                Font: =FontStyle
+                Height: =TextBatchName.Height
+                Size: =11
+                Text: |-
+                    =Concatenate(
+                        "Number of records uploaded: ",
+                        Text(
+                            CountA(
+                                Filter(
+                                    ReviewHub_FactMetrics,
+                                    ThisRecord.FactMetricTitle = TextBatchName.Text
+                                ).FactMetricID
+                            )
+                        )
+                    )
+                Width: =270
+                X: =btn_Submit_Loading.X + btn_Submit_Loading.Width + 20
+                Y: =TextBatchName.Y
+                ZIndex: =2
+
+            btn_Submit_Done As icon.CheckBadge:
+                Color: =RGBA(127, 178, 57, 1)
+                DisplayMode: =DisplayMode.View
+                FocusedBorderThickness: =10
+                Height: =btn_Submit_BI.Height
+                Icon: =Icon.CheckBadge
+                PaddingBottom: =8
+                PaddingLeft: =5
+                PaddingRight: =5
+                PaddingTop: =8
+                Visible: =Toggle_Button_Submit_Done
+                Width: =Self.Height
+                X: =btn_Submit_BI.X + btn_Submit_BI.Width + 5
+                Y: =btn_Submit_BI.Y
+                ZIndex: =3
+
+            btn_Submit_Loading As image:
+                Height: =btn_Submit_BI.Height
+                Image: =img_loading
+                Visible: =Toggle_Button_Submit_Loading
+                Width: =Self.Height
+                X: =btn_Submit_BI.X + btn_Submit_BI.Width + 5
+                Y: =btn_Submit_BI.Y
+                ZIndex: =4
+
+            btn_Submit_BI As button:
+                BorderColor: =Self.Fill
+                DisplayMode: =If(IsBlankOrError(TextBatchName.Text)||Trim(TextBatchName.Text)=""||"red" in HtmlText_Note_BI.HtmlText, DisplayMode.Disabled, DisplayMode.Edit)
+                Fill: =BlueControlDarkBackground
+                Font: =FontStyle
+                Height: =30
+                HoverBorderColor: =Self.Fill
+                HoverColor: =Self.Fill
+                HoverFill: =Self.Color
+                OnSelect: |-
+                    =If(
+                        !IsBlankOrError(TextBatchName.Text),
+                        Set(
+                            Toggle_Button_Submit_Loading,
+                            true
+                        );
+                        Set(
+                            Toggle_Button_Submit_Done,
+                            false
+                        );
+                        ClearCollect(
+                            BulkUpdateScreenLogs,
+                            Table(
+                                {
+                                    message: "Logs: Import Started",
+                                    timestamp: Now()
+                                }
+                            )
+                        );
+                        ForAll(
+                            colFactMetricsToUpload,
+                            Collect(
+                                BulkUpdateScreenLogs,
+                                {
+                                    message: Concatenate(
+                                        "Adding row for MetricID-",
+                                        ThisRecord.RefMetricID,
+                                        " Date:",
+                                        ThisRecord.ValueDate
+                                    ),
+                                    timestamp: Now()
+                                }
+                            );
+                            Concurrent(
+                                Patch(
+                                    ReviewHub_FactMetrics,
+                                    LookUp(
+                                        ReviewHub_FactMetrics,
+                                        ThisRecord.craf2_factmetricid = FactMetricID_Existed
+                                    ),
+                                    //Update records because when review cycle created, the dummy records were generated by admin.
+                                    {
+                                        craf2_factmetrictitle: Trim(TextBatchName.Text),
+                                        craf2_fm_valuedate: DateValue(ThisRecord.ValueDate),
+                                        craf2_fm_valuenumber: Value(ThisRecord.ValueNumber),
+                                        craf2_fm_valueyesno: Switch(
+                                            ThisRecord.ValueYesNo,
+                                            "Yes",
+                                            1,
+                                            "No",
+                                            0,
+                                            "",
+                                            Blank(),
+                                            Blank(),
+                                            Blank()
+                                        )
+                                    }
+                                ),
+                                Patch(
+                                    clln_factMetrics,
+                                    LookUp(
+                                        clln_factMetrics,
+                                        ThisRecord.fm_ID = FactMetricID_Existed
+                                    ),
+                                    {
+                                        fm_Title: Trim(TextBatchName.Text),
+                                        fm_ValueDate: DateValue(ThisRecord.ValueDate),
+                                        fm_ValueNumber: Value(ThisRecord.ValueNumber),
+                                        fm_ValueYesNo: Switch(
+                                            ThisRecord.ValueYesNo,
+                                            "Yes",
+                                            1,
+                                            "No",
+                                            0,
+                                            "",
+                                            Blank(),
+                                            Blank(),
+                                            Blank()
+                                        )
+                                    }
+                                );
+                            )
+                        );
+                        Collect(
+                            BulkUpdateScreenLogs,
+                            {
+                                message: "Completed uploading for this Batch (Batch Name: " & TextBatchName.Text & ")!",
+                                timestamp: Now()
+                            }
+                        );
+                        Concurrent(
+                            Set(
+                                IsFmbEditedByAdmin,
+                                true
+                            ),//To let home screen know if the collection needs to refresh over there. 
+                            RemoveIf(
+                                varLeftNavOptions,
+                                !IsBlankOrError(ThisRecord.PID)
+                            ),
+                            //Clear(clln_ProductMetrics_BS),
+                            //Clear(clln_factMetrics_BS),
+                            Set(
+                                Toggle_Button_Submit_Loading,
+                                false
+                            ),
+                            Set(
+                                Toggle_Button_Submit_Done,
+                                true
+                            )
+                        )
+                    )
+                RadiusBottomLeft: =40
+                RadiusBottomRight: =40
+                RadiusTopLeft: =40
+                RadiusTopRight: =40
+                Size: =11
+                Text: ="Submit"
+                Width: =100
+                X: =TextBatchName.X + TextBatchName.Width + 30
+                Y: =TextBatchName.Y
+                ZIndex: =5
+
+            TextBatchName As text:
+                BorderColor: =GRAYCOLOR
+                BorderThickness: =1
+                Default: =""
+                Font: =FontStyle
+                Height: =30
+                HintText: ="Enter Batch Name"
+                HoverBorderColor: =RGBA(204, 204, 204, 1)
+                HoverFill: =ColorFade(BlueControlLightBackground, 75%)
+                RadiusBottomLeft: =20
+                RadiusBottomRight: =20
+                RadiusTopLeft: =20
+                RadiusTopRight: =20
+                Size: =10
+                Width: =270
+                X: =20
+                Y: =Back_Step2_BI.Y + Back_Step2_BI.Height+ 20
+                ZIndex: =6
+
+            Back_Step2_BI As button:
+                BorderColor: =Self.Fill
+                BorderStyle: =BorderStyle.None
+                BorderThickness: =0
+                DisabledBorderColor: =Self.BorderColor
+                DisabledColor: =Self.Color
+                DisabledFill: =Self.Fill
+                DisplayMode: =DisplayMode.Disabled
+                Fill: =ColorFade(BlueNaviHightLightBackground, 50%)
+                Height: =Label_Step2_BI.Height
+                RadiusBottomLeft: |
+                    =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =20
+                RadiusTopRight: =20
+                Text: =""
+                Width: =Label_Step2_BI.Width
+                ZIndex: =7
+
+            Label_Step2_BI As label:
+                BorderStyle: =BorderStyle.None
+                Font: =FontStyle
+                FontWeight: =FontWeight.Bold
+                PaddingLeft: =15
+                Size: =11
+                Text: |-
+                    ="Step2: Enter Batch Name and Submit"
+                Width: =750
+                X: |
+                    =0
+                ZIndex: =8
+
+        HtmlText_Note_BI As htmlViewer:
+            AutoHeight: =true
+            Font: =FontStyle
+            HtmlText: |-
+                ="<font color=black>*<b>Note:</b> The <b>''RefMetricID'', ''ValueDate'', ''ReviewLockDate''</b> columns cannot contain blank values. Otherwise, the upload will fail.</font> <br>" 
+                & If(
+                    CountRows(colFactMetricsToUpload_CheckDuplicates)>0,
+                    "<font color=red><b>Warning:</b> RefMetricID " & Left(Concat(colFactMetricsToUpload_CheckDuplicates, RefProductMetricID & ", "), Len(Concat(colFactMetricsToUpload_CheckDuplicates, RefProductMetricID & ", "))-2) & " have duplicates."
+                )
+                & If(
+                    var_IsEditable_BU,
+                    "<font color=red><b>Warning:</b> The <b>Review Lock Date</b> in the above table cannot be a past date! <b>Review Lock Date</b> must always be a future date!"
+                )
+            PaddingLeft: =15
+            Width: =Parent.Width - 4
+            Y: =ctn_DataPreview_BI.Y + ctn_DataPreview_BI.Height 
+            ZIndex: =5
+
+        ctn_DataPreview_BI As groupContainer.manualLayoutContainer:
+            Height: =(App.Height - SS_AppHeader_BI.Height) * 0.36
+            Width: =Parent.Width
+            Y: =btn_BulkImporter_Refresh.Y + btn_BulkImporter_Refresh.Height + 10
+            ZIndex: =6
+
+            BulkUploadGallery As gallery.galleryVertical:
+                BorderColor: =SUBGROUPCOLOR
+                BorderThickness: =2
+                Height: =Parent.Height - Self.Y - 1
+                Items: |
+                    =
+                    
+                    
+                    
+                    Filter(
+                        Ungroup( //Ungroup function to add a Row Number column.
+                            ForAll(
+                                Sequence(CountRows(colFactMetricsToUpload)),
+                                {
+                                    Record: Table(Last(FirstN(colFactMetricsToUpload, Value))),
+                                    RowNumber: Value
+                                }
+                            ),
+                            "Record"
+                        ), 
+                        (!IsBlank(Filter_RefMetricID_BI.Text) && Value(Filter_RefMetricID_BI.Text) in Text(RefProductMetricID)) 
+                            || IsBlank(Filter_RefMetricID_BI.Text)
+                    )
+                Layout: =Layout.Vertical
+                TemplateFill: =If(Mod(ThisItem.RowNumber, 2) = 0, GrayCanvasBackground, RGBA(255, 255, 255, 1))
+                TemplatePadding: =0
+                TemplateSize: =40
+                Width: =Label_Step1_BI.Width - 2
+                X: =1
+                Y: =hdr_ProductMetricID_BI.Y + hdr_ProductMetricID_BI.Height
+                ZIndex: =1
+
+                lbl_LatestGreenTarget1 As label:
+                    Align: =Align.Center
+                    Font: =FontStyle
+                    OnSelect: =Select(Parent)
+                    Size: =12
+                    Text: =ThisItem.LatestGreenTargetStart
+                    Tooltip: =ThisItem.LatestGreenTargetStart
+                    Width: =hdr_LatestGreenTarget_BI.Width
+                    X: =lbl_LatestYellowTarget1.X + lbl_LatestYellowTarget1.Width
+                    Y: =lbl_RefMetricID1.Y
+                    ZIndex: =1
+
+                lbl_LatestYellowTarget1 As label:
+                    Align: =Align.Center
+                    Font: =FontStyle
+                    OnSelect: =Select(Parent)
+                    Size: =12
+                    Text: =ThisItem.LatestYellowTargetStart
+                    Width: =hdr_LatestYellowTarget_BI.Width
+                    X: =lbl_ValueYesNo1.X + lbl_ValueYesNo1.Width
+                    Y: =lbl_RefMetricID1.Y
+                    ZIndex: =2
+
+                lbl_ValueYesNo1 As label:
+                    Align: =Align.Center
+                    Font: =FontStyle
+                    OnSelect: =Select(Parent)
+                    Size: =12
+                    Text: =ThisItem.ValueYesNo
+                    Width: =hdr_ValueYesNo_BI.Width
+                    Wrap: =false
+                    X: =lbl_ValueNumber1.X + lbl_ValueNumber1.Width
+                    Y: =lbl_RefMetricID1.Y
+                    ZIndex: =3
+
+                lbl_ValueNumber1 As label:
+                    Align: =Align.Center
+                    Font: =FontStyle
+                    OnSelect: =Select(Parent)
+                    Size: =12
+                    Text: =ThisItem.ValueNumber
+                    Width: =hdr_ValueNumber_BI.Width
+                    X: =lbl_ReviewLockDate1.X + lbl_ReviewLockDate1.Width
+                    Y: =lbl_RefMetricID1.Y
+                    ZIndex: =4
+
+                lbl_ReviewLockDate1 As label:
+                    Align: =Align.Center
+                    Font: =FontStyle
+                    OnSelect: =Select(Parent)
+                    Size: =12
+                    Text: =ThisItem.ReviewLockDate
+                    Tooltip: =ThisItem.ReviewLockDate
+                    Width: =hdr_ReviewLockDate.Width
+                    X: =lbl_ValueDate1.X + lbl_ValueDate1.Width
+                    Y: =lbl_RefMetricID1.Y
+                    ZIndex: =5
+
+                lbl_ValueDate1 As label:
+                    Align: =Align.Center
+                    Font: =FontStyle
+                    OnSelect: =Select(Parent)
+                    Size: =12
+                    Text: =ThisItem.ValueDate
+                    Width: =hdr_ValueDate_BI.Width
+                    X: =lbl_RefMetricID1.X + lbl_RefMetricID1.Width
+                    Y: =lbl_RefMetricID1.Y
+                    ZIndex: =6
+
+                lbl_RefMetricID1 As label:
+                    Align: =Align.Center
+                    Font: =FontStyle
+                    OnSelect: =Select(Parent)
+                    Size: =12
+                    Text: =ThisItem.RefMetricID
+                    Width: =hdr_ProductMetricID_BI.Width
+                    ZIndex: =7
+
+                lbl_FactMetricID_Existed1 As label:
+                    Align: =Align.Center
+                    Font: =FontStyle
+                    OnSelect: =Select(Parent)
+                    Size: =12
+                    Text: =ThisItem.FactMetricID_Existed//Text(ThisItem.ValueDate, ShortDate, "en-US")
+                    Width: =hdr_FactMetricID_Existed.Width
+                    X: =lbl_LatestGreenTarget1.X + lbl_LatestGreenTarget1.Width
+                    Y: =lbl_RefMetricID1.Y
+                    ZIndex: =8
+
+                lbl_ReviewLockDate_BI As label:
+                    Align: =Align.Center
+                    Font: =FontStyle
+                    OnSelect: =Select(Parent)
+                    Size: =12
+                    Text: =ThisItem.RefReviewLockDate
+                    Width: =(Parent.Width - 4) / 9
+                    X: =lbl_FactMetricID_Existed1.X + lbl_FactMetricID_Existed1.Width
+                    Y: =lbl_RefMetricID1.Y
+                    ZIndex: =9
+
+            hdr_LatestGreenTarget_BI As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Fill: =SUBGROUPCOLOR
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Size: =10
+                Text: ="Latest Green Target"
+                Width: =120
+                X: =hdr_LatestYellowTarget_BI.X + hdr_LatestYellowTarget_BI.Width
+                Y: =hdr_ProductMetricID_BI.Y
+                ZIndex: =2
+
+            hdr_LatestYellowTarget_BI As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Fill: =SUBGROUPCOLOR
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Size: =10
+                Text: ="Latest Yellow Target"
+                Width: =120
+                X: =hdr_ValueYesNo_BI.X + hdr_ValueYesNo_BI.Width
+                Y: =hdr_ProductMetricID_BI.Y
+                ZIndex: =3
+
+            hdr_ValueYesNo_BI As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Fill: =SUBGROUPCOLOR
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Size: =10
+                Text: ="Value Yes/No"
+                Width: =120
+                X: =hdr_ValueNumber_BI.X + hdr_ValueNumber_BI.Width
+                Y: =hdr_ProductMetricID_BI.Y
+                ZIndex: =4
+
+            hdr_ValueNumber_BI As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Fill: =SUBGROUPCOLOR
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Size: =10
+                Text: ="Value Number"
+                Width: =120
+                X: =hdr_ReviewLockDate.X + hdr_ReviewLockDate.Width
+                Y: =hdr_ProductMetricID_BI.Y
+                ZIndex: =5
+
+            hdr_ReviewLockDate As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Fill: =SUBGROUPCOLOR
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Size: =10
+                Text: ="Review Lock Date"
+                Width: =(Parent.Width - 4) / 9
+                X: =hdr_ValueDate_BI.X + hdr_ValueDate_BI.Width
+                Y: =hdr_ProductMetricID_BI.Y
+                ZIndex: =6
+
+            hdr_FactMetricID_Existed As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Fill: =SUBGROUPCOLOR
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Size: =10
+                Text: ="Fm_ID To Update"
+                Width: =140
+                X: =hdr_LatestGreenTarget_BI.X + hdr_LatestGreenTarget_BI.Width
+                Y: =hdr_ProductMetricID_BI.Y
+                ZIndex: =7
+
+            hdr_RefReviewLockDate As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Fill: =SUBGROUPCOLOR
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Size: =10
+                Text: ="Ref Review Lock Date"
+                Width: =140
+                X: =hdr_FactMetricID_Existed.X + hdr_FactMetricID_Existed.Width
+                Y: =hdr_ProductMetricID_BI.Y
+                ZIndex: =8
+
+            hdr_ValueDate_BI As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Fill: =SUBGROUPCOLOR
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Size: =10
+                Text: ="Value Date"
+                Width: |
+                    =130
+                X: =hdr_ProductMetricID_BI.X + hdr_ProductMetricID_BI.Width
+                Y: =hdr_ProductMetricID_BI.Y
+                ZIndex: =9
+
+            hdr_ProductMetricID_BI As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Fill: =SUBGROUPCOLOR
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Size: =10
+                Text: ="Ref Metric ID"
+                Width: =120
+                Y: =Back_Step1_BI.Height - 1
+                ZIndex: =10
+
+            Back_Step1_BI As button:
+                BorderColor: =Self.Fill
+                BorderStyle: =BorderStyle.None
+                BorderThickness: =0
+                DisabledBorderColor: =Self.BorderColor
+                DisabledColor: =Self.Color
+                DisabledFill: =Self.Fill
+                DisplayMode: =DisplayMode.Disabled
+                Fill: =ColorFade(BlueNaviHightLightBackground, 50%)
+                Height: =Label_Step1_BI.Height
+                RadiusBottomLeft: |
+                    =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =20
+                RadiusTopRight: =20
+                Text: =""
+                Width: =Label_Step1_BI.Width
+                ZIndex: =11
+
+            Label_Step1_BI As label:
+                BorderStyle: =BorderStyle.None
+                Font: =FontStyle
+                FontWeight: =FontWeight.Bold
+                PaddingLeft: =15
+                Size: =11
+                Text: |-
+                    ="Step1: Confirm your entries show here.  (Row Count: " & CountA(colFactMetricsToUpload.RefMetricID) & ")"
+                Width: =hdr_RefReviewLockDate.X + hdr_RefReviewLockDate.Width
+                X: |
+                    =0
+                ZIndex: =12
+
+            Filter_RefMetricID_BI As text:
+                BorderColor: =GrayControlBackground
+                BorderThickness: =1
+                Clear: =true
+                Default: =""
+                Font: =FontStyle
+                Height: |
+                    =25
+                HintText: ="Filter By Ref Metric ID"
+                HoverBorderColor: =RGBA(204, 204, 204, 1)
+                HoverFill: =ColorFade(BlueControlLightBackground, 75%)
+                RadiusBottomLeft: =20
+                RadiusBottomRight: =20
+                RadiusTopLeft: =20
+                RadiusTopRight: =20
+                Size: =10
+                Width: =200
+                X: =Label_Step1_BI.X + Label_Step1_BI.Width - Self.Width - 15
+                Y: =Label_Step1_BI.Y + (Label_Step1_BI.Height - Self.Height) * 0.50
+                ZIndex: =13
+
+        lbl_Step1_Note_BI As label:
+            Align: =Align.Right
+            Font: =FontStyle
+            Height: =btn_BulkImporter_Refresh.Height
+            Size: =11
+            Text: ="*The 5 Latest Target Value columns' data come from the [ProductMetric] table."
+            Width: =550
+            X: =Label_Step1_BI.X + Label_Step1_BI.Width - Self.Width
+            Y: =btn_BulkImporter_Refresh.Y
+            ZIndex: =7
+
+        btn_GoToFile_BI As button:
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =0
+            Color: =RGBA(0, 0, 0, 1)
+            Fill: |-
+                =ColorValue("#ECECEC")
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =btn_BulkImporter_Refresh.Height
+            HoverFill: =BlueControlDarkBackground
+            OnSelect: =Launch(var_BulkImportSharepoint)
+            PressedFill: =BlueControlDarkBackground
+            RadiusBottomLeft: =20
+            RadiusBottomRight: =20
+            RadiusTopLeft: =20
+            RadiusTopRight: =20
+            Size: =10
+            Text: ="Go To Excel File"
+            Width: =140
+            X: |
+                =btn_BulkImporter_Refresh.X + btn_BulkImporter_Refresh.Width + 25
+            Y: =5
+            ZIndex: =8
+
+        btn_BulkImporter_Refresh As button:
+            BorderColor: =Self.Fill
+            DisabledBorderColor: =RGBA(0, 0, 0, 0)
+            DisabledFill: =RGBA(0, 0, 0, 0)
+            Fill: =GreenFontColor
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =30
+            HoverColor: =Self.Fill
+            HoverFill: =Self.Color
+            OnSelect: |
+                =ClearCollect(
+                    colFactMetricsToUpload,
+                    AddColumns(
+                        AddColumns(
+                            AddColumns(
+                                Table1,
+                                "RefProductMetricID",
+                                Value(RefMetricID),
+                                "LockDate",
+                                DateValue(ThisRecord.ReviewLockDate)
+                            ),
+                            "ProductMetrics_Rec",
+                            LookUp(
+                                ReviewHub_ProductMetrics,
+                                ProductMetricID = RefProductMetricID
+                            )
+                        ),
+                        "RefProductID",
+                        ProductMetrics_Rec.pm_ProductID,
+                        "LatestTargetNumber",
+                        ProductMetrics_Rec.pm_LatestTargetNumber,
+                        "LatestTargetText",
+                        ProductMetrics_Rec.pm_LatestTargetText,
+                        "LatestTargetYesNo",
+                        ProductMetrics_Rec.pm_LatestTargetYesNo,
+                        "LatestYellowTargetStart",
+                        ProductMetrics_Rec.pm_LatestYellowTargetStart,
+                        "LatestGreenTargetStart",
+                        ProductMetrics_Rec.pm_LatestGreenTargetStart,
+                        "RefReviewLockDate",
+                        Text(
+                            DateValue(ThisRecord.ReviewLockDate),
+                            "mmddyyyy"
+                        ),
+                        "FactMetricID_Existed",
+                        LookUp(
+                            ReviewHub_FactMetrics,
+                            ThisRecord.fm_ProductMetricID = RefProductMetricID && 
+                            ThisRecord.fm_ReviewLockDate = LockDate
+                        ).FactMetricID
+                    )
+                );
+                Set(
+                    var_IsEditable_BU,
+                    !IsBlankOrError(
+                        LookUp(
+                            colFactMetricsToUpload,
+                            DateValue(ThisRecord.ReviewLockDate) <= Today()
+                        )
+                    ) || !IsBlankOrError(
+                        LookUp(
+                            colFactMetricsToUpload,
+                            Date(
+                                Year(DateValue(ThisRecord.ReviewLockDate)),
+                                Month(DateValue(ThisRecord.ReviewLockDate)),
+                                LookUp(
+                                    clln_BoardTypes,
+                                    bt_BoardTypeID = dpdn_Scorecard_BS.Selected.BoardTypeID
+                                ).bt_ReviewLockDay
+                            ) <= Today()
+                        )
+                    )
+                );
+            RadiusBottomLeft: =20
+            RadiusBottomRight: =20
+            RadiusTopLeft: =20
+            RadiusTopRight: =20
+            Size: =10
+            Text: ="Load Excel Data"
+            Width: =150
+            X: =2
+            Y: =5
+            ZIndex: =9
+
+    lbl_ScreenTitle_BI As label:
+        DisabledColor: =BlueControlDarkBackground
+        DisabledFill: =Self.Fill
+        DisplayMode: =DisplayMode.Disabled
+        Fill: =GrayCanvasBackground
+        Font: =FontStyle
+        FontWeight: =FontWeight.Bold
+        Height: =55
+        PaddingLeft: =60
+        Size: =18
+        Text: ="Bulk Upload"
+        Width: =App.Width - Self.X
+        Y: =SS_AppHeader_BI.Height
+        ZIndex: =2
+
+    icon_Back_BI As icon.BackArrow:
+        BorderColor: =RGBA(0, 0, 0, 0)
+        BorderStyle: =BorderStyle.None
+        Color: =BlueControlDarkBackground
+        Height: =30
+        HoverBorderColor: =Self.BorderColor
+        HoverColor: =Color.Purple
+        Icon: =Icon.BackArrow
+        OnSelect: =Navigate(scn_SelfService);
+        Tooltip: ="Back"
+        Width: =Self.Height
+        X: =15
+        Y: =lbl_ScreenTitle_BI.Y + (lbl_ScreenTitle_BI.Height - Self.Height) * 0.50
+        ZIndex: =4
+
+    SS_AppHeader_BI As AppHeader:
+        DropDownSelection: =TrackRequestComponent_BI.HideTrackRequest
+        FeedbackButtonUrl: =var_SendFeedback_URL
+        inputAppDisplayName: =varAppHeaderText
+        ShowSurveyButton: =false
+        Y: =0
+        ZIndex: =5
+
+    TrackRequestComponent_BI As TrackRequestComponent:
+        BlueControlDarkBackground: =BlueControlDarkBackground
+        BlueControlLightBackground: =BlueControlLightBackground
+        BlueNaviHightLightBackground: =BlueNaviHightLightBackground
+        DevOpsBaseUrl: =var_DevOpsBaseURL
+        DevOpsQueryID: =var_DevOpsQueryID
+        FontStyle: =FontStyle
+        GrayCanvasBackground: =GrayCanvasBackground
+        GRAYCOLOR: =GRAYCOLOR
+        GrayControlBackground: =GrayControlBackground
+        IsAdmin: =IsAdmin
+        Reset: =Self.Visible
+        Visible: =SS_AppHeader_BI.DisplayTrackRequest
+        X: =App.Width - Self.Width
+        Y: =SS_AppHeader_BI.Height
+        ZIndex: =6
+

@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<savedqueries xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <savedquery>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>0</CanBeDeleted>
+    <isquickfindquery>1</isquickfindquery>
+    <isprivate>0</isprivate>
+    <isdefault>1</isdefault>
+    <savedqueryid>{add66cec-0216-47a4-8dc7-a840b096e21c}</savedqueryid>
+    <layoutxml>
+      <grid name="resultset" jump="craf2_objectivename" select="1" icon="1" preview="1">
+        <row name="result" id="craf2_reviewhub_metrictypeobjectiveid">
+          <cell name="craf2_objectivename" width="300" />
+          <cell name="createdon" width="125" />
+          <cell name="craf2_mto_boardtypeid" width="100" />
+        </row>
+      </grid>
+    </layoutxml>
+    <querytype>4</querytype>
+    <fetchxml>
+      <fetch version="1.0" mapping="logical">
+        <entity name="craf2_reviewhub_metrictypeobjective">
+          <attribute name="craf2_reviewhub_metrictypeobjectiveid" />
+          <attribute name="craf2_objectivename" />
+          <attribute name="createdon" />
+          <order attribute="craf2_objectivename" descending="false" />
+          <filter type="and">
+            <condition attribute="statecode" operator="eq" value="0" />
+          </filter>
+          <filter type="or" isquickfindfields="1">
+            <condition attribute="craf2_objectivename" operator="like" value="{0}" />
+          </filter>
+          <attribute name="craf2_mto_boardtypeid" />
+        </entity>
+      </fetch>
+    </fetchxml>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <LocalizedNames>
+      <LocalizedName description="Quick Find Active ReviewHub_MetricTypeObjectives" languagecode="1033" />
+    </LocalizedNames>
+  </savedquery>
+</savedqueries>

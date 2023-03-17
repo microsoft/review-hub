@@ -1,0 +1,13 @@
+<environmentvariabledefinition schemaname="chub_EnvVarReviewHubFeatureRequestTitle">
+  <description default="Text expected to be found within all project feature requests title, to help filter feature request from other work items within the DevOps Query.">
+    <label description="Text expected to be found within all project feature requests title, to help filter feature request from other work items within the DevOps Query." languagecode="1033" />
+  </description>
+  <displayname default="EnvVar - ReviewHub - Feature Request Title">
+    <label description="EnvVar - ReviewHub - Feature Request Title" languagecode="1033" />
+  </displayname>
+  <introducedversion>1.0.0.12082022</introducedversion>
+  <iscustomizable>1</iscustomizable>
+  <isrequired>0</isrequired>
+  <secretstore>0</secretstore>
+  <type>100000000</type>
+</environmentvariabledefinition>

@@ -1,0 +1,13 @@
+<environmentvariabledefinition schemaname="chub_EnvVarReviewHubFeedbackURL">
+  <description default="The link to the template bug work item for reporting bugs on the application.">
+    <label description="The link to the template bug work item for reporting bugs on the application." languagecode="1033" />
+  </description>
+  <displayname default="EnvVar - ReviewHub - Feedback URL">
+    <label description="EnvVar - ReviewHub - Feedback URL" languagecode="1033" />
+  </displayname>
+  <introducedversion>1.0.0.12082022</introducedversion>
+  <iscustomizable>1</iscustomizable>
+  <isrequired>0</isrequired>
+  <secretstore>0</secretstore>
+  <type>100000000</type>
+</environmentvariabledefinition>

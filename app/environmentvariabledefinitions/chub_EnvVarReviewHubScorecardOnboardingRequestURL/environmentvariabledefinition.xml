@@ -1,0 +1,13 @@
+<environmentvariabledefinition schemaname="chub_EnvVarReviewHubScorecardOnboardingRequestURL">
+  <description default="The link to a template work items for scorecard onboarding requests.">
+    <label description="The link to a template work items for scorecard onboarding requests." languagecode="1033" />
+  </description>
+  <displayname default="EnvVar - ReviewHub - Scorecard Onboarding Request URL">
+    <label description="EnvVar - ReviewHub - Scorecard Onboarding Request URL" languagecode="1033" />
+  </displayname>
+  <introducedversion>1.0.0.12082022</introducedversion>
+  <iscustomizable>1</iscustomizable>
+  <isrequired>0</isrequired>
+  <secretstore>0</secretstore>
+  <type>100000000</type>
+</environmentvariabledefinition>

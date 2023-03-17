@@ -1,0 +1,562 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_commondataserviceforapps": {
+        "impersonation": {},
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "chub_sharedcommondataserviceforapps_72f86"
+        },
+        "api": {
+          "name": "shared_commondataserviceforapps"
+        }
+      },
+      "shared_office365users_1": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "chub_sharedoffice365users_3cce7"
+        },
+        "api": {
+          "name": "shared_office365users"
+        }
+      },
+      "shared_office365_1": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "chub_sharedoffice365_aaf4a"
+        },
+        "api": {
+          "name": "shared_office365"
+        }
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        },
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        },
+        "EnvVar - ReviewHub - Temporary Access Team Name (chub_EnvVarReviewHubTemporaryAccessTeamName)": {
+          "defaultValue": "ReviewHub-TempReadWrite",
+          "type": "String",
+          "metadata": {
+            "schemaName": "chub_EnvVarReviewHubTemporaryAccessTeamName"
+          }
+        },
+        "EnvVar - ReviewHub - Notification Email (chub_EnvVarReviewHubNotificationEmail)": {
+          "defaultValue": "reviewhub-noreply@microsoft.com",
+          "type": "String",
+          "metadata": {
+            "schemaName": "chub_EnvVarReviewHubNotificationEmail"
+          }
+        },
+        "EnvVar - ReviewHub - Team Email (chub_EnvVarReviewHubTeamEmail)": {
+          "defaultValue": "dtpreviewhub@microsoft.com",
+          "type": "String",
+          "metadata": {
+            "schemaName": "chub_EnvVarReviewHubTeamEmail"
+          }
+        }
+      },
+      "triggers": {
+        "Recurrence": {
+          "recurrence": {
+            "frequency": "Day",
+            "interval": 1,
+            "startTime": "2022-09-19T23:00:00Z"
+          },
+          "metadata": {
+            "operationMetadataId": "4edae21d-3026-4050-8aaf-4bde0b60f36e"
+          },
+          "type": "Recurrence"
+        }
+      },
+      "actions": {
+        "Initialize_team_name": {
+          "runAfter": {},
+          "metadata": {
+            "operationMetadataId": "cda79d5e-93c5-4432-9840-cf608294f497"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "teamName",
+                "type": "string",
+                "value": "@parameters('EnvVar - ReviewHub - Temporary Access Team Name (chub_EnvVarReviewHubTemporaryAccessTeamName)')"
+              }
+            ]
+          }
+        },
+        "Get_team_details": {
+          "actions": {
+            "Get_ReviewHub-TempReadWrite_details": {
+              "runAfter": {},
+              "metadata": {
+                "operationMetadataId": "ae3265eb-f212-4b26-857c-cfd2f35314ee"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "connectionName": "shared_commondataserviceforapps",
+                  "operationId": "ListRecords"
+                },
+                "parameters": {
+                  "entityName": "teams",
+                  "$filter": "name eq '@{variables('teamName')}'"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "Get_team_ID": {
+              "runAfter": {
+                "Get_ReviewHub-TempReadWrite_details": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "b81dd833-8603-460e-b69c-220540cb438c"
+              },
+              "type": "Compose",
+              "inputs": "@first(outputs('Get_ReviewHub-TempReadWrite_details')?['body/value'])?['@odata.id']"
+            }
+          },
+          "runAfter": {
+            "Initialize_htmlMessage": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "690613cd-59fc-47c7-bc9c-203ad08a731a"
+          },
+          "type": "Scope"
+        },
+        "Get_today": {
+          "actions": {
+            "Compose": {
+              "runAfter": {
+                "today": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "7868c345-f439-4b47-b69a-8aa4e1483cd8"
+              },
+              "type": "Compose",
+              "inputs": "@formatDateTime(outputs('today'), 'yyyy-MM-dd')"
+            },
+            "today": {
+              "runAfter": {},
+              "metadata": {
+                "operationMetadataId": "2c6945c2-08d0-4265-ac9f-0a028cac7b86"
+              },
+              "type": "Compose",
+              "inputs": "@utcNow()"
+            }
+          },
+          "runAfter": {
+            "Get_team_details": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "a3e7a1d6-6a2a-49a5-a093-841123933342"
+          },
+          "type": "Scope"
+        },
+        "Scope": {
+          "actions": {
+            "List_products_due_for_revoking": {
+              "runAfter": {},
+              "metadata": {
+                "operationMetadataId": "d8153034-e7b2-4cd6-9038-c3275abe992d"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "connectionName": "shared_commondataserviceforapps",
+                  "operationId": "ListRecords"
+                },
+                "parameters": {
+                  "entityName": "craf2_reviewhub_requestedproducts",
+                  "$filter": "craf2_isaccessrevoked eq false and  craf2_proposedaccessrevokeddate le @{outputs('Compose')}",
+                  "$expand": "craf2_AccessRequest($select=craf2_name,craf2_reviewhub_accessrequestid), craf2_Product($select=craf2_productid,craf2_productname), craf2_BoardType($select=craf2_boardtypeid,craf2_boardtypename)"
+                },
+                "authentication": "@parameters('$authentication')"
+              },
+              "runtimeConfiguration": {
+                "paginationPolicy": {
+                  "minimumItemCount": 100000
+                }
+              }
+            },
+            "Apply_to_each_product": {
+              "foreach": "@outputs('List_products_due_for_revoking')?['body/value']",
+              "actions": {
+                "Get_AccessRequest_item": {
+                  "runAfter": {},
+                  "metadata": {
+                    "operationMetadataId": "5503bdd0-0307-40b0-96a4-2744c1c87a19"
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                      "connectionName": "shared_commondataserviceforapps",
+                      "operationId": "GetItem"
+                    },
+                    "parameters": {
+                      "entityName": "craf2_reviewhub_accessrequests",
+                      "recordId": "@items('Apply_to_each_product')?['craf2_accessrequest/craf2_reviewhub_accessrequestid']"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                },
+                "Set_internalemailaddress": {
+                  "runAfter": {
+                    "Get_AccessRequest_item": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "22b5b897-aa01-433c-b820-fa9c04c08f76"
+                  },
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "internalemailaddress",
+                    "value": "@outputs('Get_AccessRequest_item')?['body/craf2_requesteremail']"
+                  }
+                },
+                "Get_user_team_association": {
+                  "runAfter": {
+                    "Set_internalemailaddress": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "94e940f7-ef3d-42fd-97c5-77ace36cba3f"
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                      "connectionName": "shared_commondataserviceforapps",
+                      "operationId": "ListRecords"
+                    },
+                    "parameters": {
+                      "entityName": "systemusers",
+                      "$filter": "contains(internalemailaddress, '@{variables('internalemailaddress')}')",
+                      "$expand": "teammembership_association($select=*)",
+                      "$top": 1
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                },
+                "Filter_user_team_associations": {
+                  "runAfter": {
+                    "Get_user_team_association": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "bce62983-7c96-4a59-b726-0a240bfbabbe"
+                  },
+                  "type": "Query",
+                  "inputs": {
+                    "from": "@first(outputs('Get_user_team_association')?['body/value'])?['teammembership_association']",
+                    "where": "@equals(item()?['name'], variables('teamName'))"
+                  }
+                },
+                "Length_of_filter_result": {
+                  "runAfter": {
+                    "Filter_user_team_associations": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "283fef0e-dda8-41f7-a11d-0f9fcd261087"
+                  },
+                  "type": "Compose",
+                  "inputs": "@length(body('Filter_user_team_associations'))"
+                },
+                "Condition": {
+                  "actions": {
+                    "Unrelate_rows": {
+                      "runAfter": {
+                        "Remove_as_stakeholder": [
+                          "Succeeded"
+                        ]
+                      },
+                      "metadata": {
+                        "operationMetadataId": "6ba168e8-ba30-4c47-bdb3-64d37a4443eb"
+                      },
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                          "connectionName": "shared_commondataserviceforapps",
+                          "operationId": "DisassociateEntities"
+                        },
+                        "parameters": {
+                          "entityName": "systemusers",
+                          "recordId": "@first(outputs('Get_user_team_association')?['body/value'])?['systemuserid']",
+                          "associationEntityRelationship": "teammembership_association",
+                          "$id": "@outputs('Get_team_ID')"
+                        },
+                        "authentication": "@parameters('$authentication')"
+                      }
+                    },
+                    "Get_requester_profile": {
+                      "runAfter": {},
+                      "metadata": {
+                        "operationMetadataId": "54ab1d79-fa84-40a5-b314-24b81f1df58f"
+                      },
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365users",
+                          "connectionName": "shared_office365users_1",
+                          "operationId": "UserProfile_V2"
+                        },
+                        "parameters": {
+                          "id": "@outputs('Get_AccessRequest_item')?['body/craf2_requesteremail']"
+                        },
+                        "authentication": "@parameters('$authentication')"
+                      }
+                    },
+                    "Remove_as_stakeholder": {
+                      "actions": {
+                        "List_stakeholders_match": {
+                          "runAfter": {},
+                          "metadata": {
+                            "operationMetadataId": "7d31c29b-b71a-4e5c-842e-284adef3b2eb"
+                          },
+                          "type": "OpenApiConnection",
+                          "inputs": {
+                            "host": {
+                              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                              "connectionName": "shared_commondataserviceforapps",
+                              "operationId": "ListRecords"
+                            },
+                            "parameters": {
+                              "entityName": "craf2_reviewhub_stakeholders",
+                              "$select": "craf2_productstakeholders, craf2_tempstakeholders, craf2_stakeholdernames, craf2_reviewhub_stakeholderid",
+                              "$filter": "contains(craf2_productstakeholders, '@{variables('internalemailaddress')}') or contains(craf2_tempstakeholders, '@{variables('internalemailaddress')}') or contains(craf2_stakeholdernames, '@{outputs('Get_requester_profile')?['body/displayName']}')"
+                            },
+                            "authentication": "@parameters('$authentication')"
+                          }
+                        },
+                        "Apply_to_each_match": {
+                          "foreach": "@outputs('List_stakeholders_match')?['body/value']",
+                          "actions": {
+                            "Update_row_match": {
+                              "runAfter": {},
+                              "metadata": {
+                                "operationMetadataId": "1fb04e43-2415-4086-8b1a-b96620871853"
+                              },
+                              "type": "OpenApiConnection",
+                              "inputs": {
+                                "host": {
+                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                  "connectionName": "shared_commondataserviceforapps",
+                                  "operationId": "UpdateRecord"
+                                },
+                                "parameters": {
+                                  "entityName": "craf2_reviewhub_stakeholders",
+                                  "recordId": "@items('Apply_to_each_match')?['craf2_reviewhub_stakeholderid']",
+                                  "item/craf2_productstakeholders": "@replace(replace(replace(items('Apply_to_each_match')?['craf2_productstakeholders'], concat('|', variables('internalemailaddress')), ''), concat(variables('internalemailaddress'), '|'), ''), variables('internalemailaddress'), '')",
+                                  "item/craf2_stakeholdernames": "@replace(replace(replace(items('Apply_to_each_match')?['craf2_stakeholdernames'], concat('|', outputs('Get_requester_profile')?['body/displayName']), ''), concat(outputs('Get_requester_profile')?['body/displayName'], '|'), ''), outputs('Get_requester_profile')?['body/displayName'], '')",
+                                  "item/craf2_tempstakeholders": "@replace(replace(replace(items('Apply_to_each_match')?['craf2_tempstakeholders'], concat('|', variables('internalemailaddress')), ''), concat(variables('internalemailaddress'), '|'), ''), variables('internalemailaddress'), '')"
+                                },
+                                "authentication": "@parameters('$authentication')"
+                              }
+                            }
+                          },
+                          "runAfter": {
+                            "List_stakeholders_match": [
+                              "Succeeded"
+                            ]
+                          },
+                          "metadata": {
+                            "operationMetadataId": "c0818063-a175-4544-8747-8ba299f47a32"
+                          },
+                          "type": "Foreach"
+                        }
+                      },
+                      "runAfter": {
+                        "Get_requester_profile": [
+                          "Succeeded"
+                        ]
+                      },
+                      "metadata": {
+                        "operationMetadataId": "18a864ad-00d3-488b-80ef-43cfab117235"
+                      },
+                      "type": "Scope"
+                    },
+                    "Notify_requester": {
+                      "actions": {
+                        "Set_htmlMessage": {
+                          "runAfter": {},
+                          "metadata": {
+                            "operationMetadataId": "9b42898b-358a-47a5-a51a-189ec18a3f52"
+                          },
+                          "type": "SetVariable",
+                          "inputs": {
+                            "name": "htmlMessage",
+                            "value": "<table class=\"message\">\n   <thead>\n        <tr style=\"background-color: #e8e7e1;\">\n            <th colspan=2>ACCESS REQUEST REVOKED</th>\n       </tr>\n   </thead>   \n   <tbody>\n        <tr>\n            <td class=\"title\">Request date</td>\n            <td style=\"width: 800px\">@{if(equals(outputs('Get_AccessRequest_item')?['body/craf2_requestdate'], null), '', formatDateTime(outputs('Get_AccessRequest_item')?['body/craf2_requestdate'], 'MM/dd/yyyy hh:mm'))}</td>\n         </tr>\n        <tr>\n            <td class=\"title\">Product</td>\n            <td>@{items('Apply_to_each_product')?['craf2_product/craf2_productname']}</td>\n         </tr>\n        <tr>\n            <td class=\"title\">Board Type</td>\n            <td>@{items('Apply_to_each_product')?['craf2_boardtype/craf2_boardtypename']}</td>\n         </tr>\n        <tr>\n            <td class=\"title\">Justification</td>\n            <td>@{outputs('Get_AccessRequest_item')?['body/craf2_justification']}</td>\n         </tr>\n        <tr>\n            <td class=\"title\">Decision date</td>\n            <td>@{if(equals(items('Apply_to_each_product')?['body/craf2_decisiondate'], null), '', formatDateTime(items('Apply_to_each_product')?['body/craf2_decisiondate'], 'MM/dd/yyyy hh:mm'))}</td>\n         </tr>\n    </tbody>\n</table>"
+                          }
+                        },
+                        "Send_an_email_to_requester": {
+                          "runAfter": {
+                            "Set_htmlMessage": [
+                              "Succeeded"
+                            ]
+                          },
+                          "metadata": {
+                            "operationMetadataId": "0d930b5f-430e-468f-89bc-f0b909243826"
+                          },
+                          "type": "OpenApiConnection",
+                          "inputs": {
+                            "host": {
+                              "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
+                              "connectionName": "shared_office365_1",
+                              "operationId": "SendEmailV2"
+                            },
+                            "parameters": {
+                              "emailMessage/To": "@variables('internalemailaddress')",
+                              "emailMessage/Subject": "ReviewHub - Access Request Revoked",
+                              "emailMessage/Body": "<style>\ntable.message td, table.message th {\nborder:1px solid #e8e7e1;\nborder-collapse: collapse;\npadding: 5px\n}\ntable.message td.title {\nbackground-color: #d3d3d3;\nwidth: 300px;\n}\nbody {\n font-family: 'Lato';\n font-style: normal;\n}\n</style>\n\nDear @{outputs('Get_requester_profile')?['body/givenName']},<br><br>\nYour edit access for <b>@{items('Apply_to_each_product')?['craf2_boardtype/craf2_boardtypename']}: @{items('Apply_to_each_product')?['craf2_product/craf2_productname']}</b> has been <b>revoked</b>. See details below:<br>\n<br>\n@{variables('htmlMessage')}\n<br>\nGo to the <a href=\"https://aka.ms/reviewhub \">ReviewHub</a> application to see details<br>\n<br>\nBest regards,<br>\n<b>Review Hub Team</b>",
+                              "emailMessage/From": "@parameters('EnvVar - ReviewHub - Notification Email (chub_EnvVarReviewHubNotificationEmail)')",
+                              "emailMessage/Cc": "@parameters('EnvVar - ReviewHub - Team Email (chub_EnvVarReviewHubTeamEmail)')",
+                              "emailMessage/Importance": "Normal"
+                            },
+                            "authentication": "@parameters('$authentication')"
+                          }
+                        }
+                      },
+                      "runAfter": {
+                        "Update_a_row": [
+                          "Succeeded"
+                        ]
+                      },
+                      "metadata": {
+                        "operationMetadataId": "0ba45870-9501-4e7b-bd81-fe1016cf2d2c"
+                      },
+                      "type": "Scope"
+                    },
+                    "Update_a_row": {
+                      "runAfter": {
+                        "Unrelate_rows": [
+                          "Succeeded"
+                        ]
+                      },
+                      "metadata": {
+                        "operationMetadataId": "d7757a4e-e135-43d9-8412-7f88bec02d7c"
+                      },
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                          "connectionName": "shared_commondataserviceforapps",
+                          "operationId": "UpdateRecord"
+                        },
+                        "parameters": {
+                          "entityName": "craf2_reviewhub_requestedproducts",
+                          "recordId": "@items('Apply_to_each_product')?['craf2_reviewhub_requestedproductid']",
+                          "item/craf2_accessrevokeddate": "@utcNow()",
+                          "item/craf2_isaccessrevoked": true
+                        },
+                        "authentication": "@parameters('$authentication')"
+                      }
+                    }
+                  },
+                  "runAfter": {
+                    "Length_of_filter_result": [
+                      "Succeeded"
+                    ]
+                  },
+                  "expression": {
+                    "greater": [
+                      "@outputs('Length_of_filter_result')",
+                      0
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "18e815c5-0eff-45da-bab4-8031a7404b10"
+                  },
+                  "type": "If"
+                }
+              },
+              "runAfter": {
+                "List_products_due_for_revoking": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "5f1df2be-502d-491b-bd33-79d137715176"
+              },
+              "type": "Foreach"
+            }
+          },
+          "runAfter": {
+            "Get_today": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "1c2e3936-9886-4ebd-8349-8cbfc6a16767"
+          },
+          "type": "Scope"
+        },
+        "Initialize_user_internalemailaddress": {
+          "runAfter": {
+            "Initialize_team_name": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "fd50763b-0345-44c7-9fff-1d8a99ae2a0b"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "internalemailaddress",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "Initialize_htmlMessage": {
+          "runAfter": {
+            "Initialize_user_internalemailaddress": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "77d0322a-bfc5-4445-ada9-d460f84fe5cf"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "htmlMessage",
+                "type": "string"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+}

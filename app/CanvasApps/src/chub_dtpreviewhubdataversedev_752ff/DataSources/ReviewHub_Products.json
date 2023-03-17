@@ -1,0 +1,131 @@
+[
+  {
+    "CdsFCBContext": "{\"FileType\":true,\"ImageExternalStorage\":true}",
+    "EntitySetName": "craf2_reviewhub_products",
+    "IsHidden": false,
+    "IsSampleData": false,
+    "IsWritable": true,
+    "LogicalName": "craf2_reviewhub_product",
+    "MaxGetRowsCount": 2000,
+    "Name": "ReviewHub_Products",
+    "NativeCDSDataSourceInfoNameMapping": {
+      "_ownerid_value": "Owner",
+      "chub_craf2_reviewhub_factmetric_chub_Prod": "ReviewHub_FactMetrics",
+      "craf2_craf2_reviewhub_requestedproduct_Product_": "ReviewHub_RequestedProducts",
+      "craf2_internalproductid": "InternalProductID",
+      "craf2_logoimage": "LogoImage",
+      "craf2_logoimageid": "craf2_LogoImageId",
+      "craf2_powerbiurl": "PowerBIUrl",
+      "craf2_productcategory": "ProductCategory",
+      "craf2_productid": "ProductID",
+      "craf2_productname": "ProductName",
+      "craf2_ReviewHub_FactExecutiveSummary_Prod": "ReviewHub_FactExecutiveSummaries",
+      "craf2_ReviewHub_FactMetricBoard_fmb_Produ": "ReviewHub_FactMetricBoards",
+      "craf2_reviewhub_product_AsyncOperations": "System Jobs",
+      "craf2_reviewhub_product_BulkDeleteFailures": "Bulk Delete Failures",
+      "craf2_reviewhub_product_DuplicateBaseRecord": "Duplicate Records (craf2_reviewhub_product_DuplicateBaseRecord)",
+      "craf2_reviewhub_product_DuplicateMatchingRecord": "Duplicate Records (craf2_reviewhub_product_DuplicateMatchingRecord)",
+      "craf2_reviewhub_product_MailboxTrackingFolders": "Mailbox Auto Tracking Folders",
+      "craf2_reviewhub_product_PrincipalObjectAttributeAccesses": "Field Sharing",
+      "craf2_reviewhub_product_ProcessSession": "Process Sessions",
+      "craf2_reviewhub_product_SyncErrors": "Sync Errors",
+      "craf2_reviewhub_productid": "ReviewHub_Product",
+      "craf2_ReviewHub_ProductMetric_pm_Product_": "ReviewHub_ProductMetrics",
+      "craf2_ReviewHub_ScorecardAutomation_Produ": "ReviewHub_ScorecardAutomations",
+      "craf2_ReviewHub_Stakeholder_Product_craf2": "ReviewHub_Stakeholders",
+      "createdby": "Created By",
+      "createdon": "Created On",
+      "createdonbehalfby": "Created By (Delegate)",
+      "importsequencenumber": "Import Sequence Number",
+      "modifiedby": "Modified By",
+      "modifiedon": "Modified On",
+      "modifiedonbehalfby": "Modified By (Delegate)",
+      "overriddencreatedon": "Record Created On",
+      "owningbusinessunit": "Owning Business Unit",
+      "owningteam": "Owning Team",
+      "owninguser": "Owning User",
+      "statecode": "Status",
+      "statuscode": "Status Reason",
+      "timezoneruleversionnumber": "Time Zone Rule Version Number",
+      "utcconversiontimezonecode": "UTC Conversion Time Zone Code",
+      "versionnumber": "Version Number"
+    },
+    "PreferredName": "ReviewHub_Products",
+    "Type": "NativeCDSDataSourceInfo"
+  },
+  {
+    "DisplayName": "ReviewHub_Products (Views)",
+    "Name": "_craf2_reviewhub_product_views",
+    "RelatedEntityName": "ReviewHub_Products",
+    "TrimmedViewName": true,
+    "Type": "ViewInfo",
+    "ViewInfoNameMapping": {
+      "01b48757-dc40-47e1-8f9b-e2b709a233ac": "ReviewHub_Product Associated View",
+      "07461076-92e3-4122-bc09-6b961796964d": "Inactive ReviewHub_Products",
+      "4bbe2cf9-9dc1-49e7-80b1-8ccc7579bed1": "Active ReviewHub_Products",
+      "518593cc-b41f-48bb-a204-b30dd06f458a": "ReviewHub_Product Advanced Find View",
+      "d0f557c5-79c2-484b-be4c-55b4ca6542d6": "ReviewHub_Product Lookup View"
+    }
+  },
+  {
+    "DisplayName": "ReviewHub_ProductCategory",
+    "Name": "craf2_productcategory",
+    "OptionSetInfoNameMapping": {
+      "803840000": "L1",
+      "803840001": "L2",
+      "803840002": "Org"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": true,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "craf2_productcategory",
+        "OptionSetReferenceEntityName": "ReviewHub_Products"
+      }
+    },
+    "OptionSetTypeKey": "PicklistType",
+    "RelatedColumnInvariantName": "craf2_productcategory",
+    "RelatedEntityName": "ReviewHub_Products",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Status (ReviewHub_Products)",
+    "Name": "craf2_reviewhub_product_statecode",
+    "OptionSetInfoNameMapping": {
+      "0": "Active",
+      "1": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statecode",
+        "OptionSetReferenceEntityName": "ReviewHub_Products"
+      }
+    },
+    "OptionSetTypeKey": "StateType",
+    "RelatedColumnInvariantName": "statecode",
+    "RelatedEntityName": "ReviewHub_Products",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Status Reason (ReviewHub_Products)",
+    "Name": "craf2_reviewhub_product_statuscode",
+    "OptionSetInfoNameMapping": {
+      "1": "Active",
+      "2": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statuscode",
+        "OptionSetReferenceEntityName": "ReviewHub_Products"
+      }
+    },
+    "OptionSetTypeKey": "StatusType",
+    "RelatedColumnInvariantName": "statuscode",
+    "RelatedEntityName": "ReviewHub_Products",
+    "Type": "OptionSetInfo"
+  }
+]

@@ -1,0 +1,63 @@
+HowToComponent As CanvasComponent:
+    BlueControlDarkBackground: =RGBA(0, 114, 198, 1)
+    Fill: =RGBA(211,211,211,0.3)
+    FontStyle: =Font.'Segoe UI'
+    GrayCanvasBackground: =RGBA(248, 248, 248, 1)
+    Height: =App.Height - 40
+    HideHowTo: =var_HTCVisible
+    OnReset: =Set(var_HTCVisible, false);
+    Reset: =true
+    VideoUrl: =""
+    Width: =App.Width
+    X: =0
+    Y: =0
+    ZIndex: =1
+
+    BackGround_HTC As groupContainer.manualLayoutContainer:
+        Fill: =Color.White
+        Height: =Parent.Height
+        Width: |-
+            =If(App.Width < 800, 
+                 App.Width * 0.6,
+                 App.Width * 0.5
+            )
+        X: =Parent.Width - Self.Width
+        ZIndex: =2
+
+        Header_HTC As label:
+            DisabledColor: =HowToComponent.BlueControlDarkBackground
+            DisabledFill: =Self.Fill
+            DisplayMode: =DisplayMode.Disabled
+            Fill: =HowToComponent.GrayCanvasBackground
+            Font: =HowToComponent.FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =55
+            PaddingLeft: =60
+            Size: =18
+            Text: ="How to Navigate"
+            Width: =Parent.Width
+            ZIndex: =10
+
+        icon_Back_HTC As icon.BackArrow:
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            Color: =HowToComponent.BlueControlDarkBackground
+            Height: =30
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Color.Purple
+            Icon: =Icon.BackArrow
+            OnSelect: =Set(var_HTCVisible, !var_HTCVisible)
+            Rotation: =180
+            Tooltip: ="Back"
+            Width: =Self.Height
+            X: =15
+            Y: =Header_HTC.Y + (Header_HTC.Height - Self.Height) * 0.50
+            ZIndex: =11
+
+        HTCVideo As microsoftStreamPlayback:
+            Height: =Parent.Height - Self.Y
+            StreamUrl: =HowToComponent.VideoUrl
+            Width: =Parent.Width
+            Y: =Header_HTC.Height
+            ZIndex: =13
+

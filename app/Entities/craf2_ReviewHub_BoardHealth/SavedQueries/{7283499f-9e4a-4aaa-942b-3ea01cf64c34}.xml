@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<savedqueries xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <savedquery>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>0</CanBeDeleted>
+    <isquickfindquery>1</isquickfindquery>
+    <isprivate>0</isprivate>
+    <isdefault>1</isdefault>
+    <savedqueryid>{7283499f-9e4a-4aaa-942b-3ea01cf64c34}</savedqueryid>
+    <layoutxml>
+      <grid name="resultset" jump="craf2_healthrating" select="1" icon="1" preview="1">
+        <row name="result" id="craf2_reviewhub_boardhealthid">
+          <cell name="craf2_healthrating" width="300" />
+          <cell name="createdon" width="125" />
+        </row>
+      </grid>
+    </layoutxml>
+    <querytype>4</querytype>
+    <fetchxml>
+      <fetch version="1.0" mapping="logical">
+        <entity name="craf2_reviewhub_boardhealth">
+          <attribute name="craf2_reviewhub_boardhealthid" />
+          <attribute name="craf2_healthrating" />
+          <attribute name="createdon" />
+          <order attribute="craf2_healthrating" descending="false" />
+          <filter type="and">
+            <condition attribute="statecode" operator="eq" value="0" />
+          </filter>
+          <filter type="or" isquickfindfields="1">
+            <condition attribute="craf2_healthrating" operator="like" value="{0}" />
+          </filter>
+        </entity>
+      </fetch>
+    </fetchxml>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <LocalizedNames>
+      <LocalizedName description="Quick Find Active ReviewHub_BoardHealths" languagecode="1033" />
+    </LocalizedNames>
+  </savedquery>
+</savedqueries>

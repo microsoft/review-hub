@@ -1,0 +1,106 @@
+[
+  {
+    "CdsFCBContext": "{\"FileType\":true,\"ImageExternalStorage\":true}",
+    "EntitySetName": "craf2_reviewhub_factmetricboards",
+    "IsHidden": false,
+    "IsSampleData": false,
+    "IsWritable": true,
+    "LogicalName": "craf2_reviewhub_factmetricboard",
+    "MaxGetRowsCount": 2000,
+    "Name": "ReviewHub_FactMetricBoards",
+    "NativeCDSDataSourceInfoNameMapping": {
+      "_ownerid_value": "Owner",
+      "craf2_factmetricboardid": "FactMetricBoardID",
+      "craf2_factmetricboardtitle": "FactMetricBoardTitle",
+      "craf2_fmb_BoardType": "fmb_BoardType",
+      "craf2_fmb_ExecutiveSummary": "fmb_ExecutiveSummary",
+      "craf2_fmb_healthscore": "fmb_HealthScore",
+      "craf2_fmb_Product": "fmb_Product",
+      "craf2_fmb_reviewlockdate": "fmb_ReviewLockDate",
+      "craf2_fmb_reviewownername": "fmb_ReviewOwnerName",
+      "craf2_fmb_reviewownerprincipal": "fmb_ReviewOwnerPrincipal",
+      "craf2_fmb_Template": "fmb_Template",
+      "craf2_reviewhub_factmetricboard_AsyncOperations": "System Jobs",
+      "craf2_reviewhub_factmetricboard_BulkDeleteFailures": "Bulk Delete Failures",
+      "craf2_reviewhub_factmetricboard_DuplicateBaseRecord": "Duplicate Records (craf2_reviewhub_factmetricboard_DuplicateBaseRecord)",
+      "craf2_reviewhub_factmetricboard_DuplicateMatchingRecord": "Duplicate Records (craf2_reviewhub_factmetricboard_DuplicateMatchingRecord)",
+      "craf2_reviewhub_factmetricboard_MailboxTrackingFolders": "Mailbox Auto Tracking Folders",
+      "craf2_reviewhub_factmetricboard_PrincipalObjectAttributeAccesses": "Field Sharing",
+      "craf2_reviewhub_factmetricboard_ProcessSession": "Process Sessions",
+      "craf2_reviewhub_factmetricboard_SyncErrors": "Sync Errors",
+      "craf2_reviewhub_factmetricboardid": "ReviewHub_FactMetricBoard",
+      "createdby": "Created By",
+      "createdon": "Created On",
+      "createdonbehalfby": "Created By (Delegate)",
+      "importsequencenumber": "Import Sequence Number",
+      "modifiedby": "Modified By",
+      "modifiedon": "Modified On",
+      "modifiedonbehalfby": "Modified By (Delegate)",
+      "overriddencreatedon": "Record Created On",
+      "owningbusinessunit": "Owning Business Unit",
+      "owningteam": "Owning Team",
+      "owninguser": "Owning User",
+      "statecode": "Status",
+      "statuscode": "Status Reason",
+      "timezoneruleversionnumber": "Time Zone Rule Version Number",
+      "utcconversiontimezonecode": "UTC Conversion Time Zone Code",
+      "versionnumber": "Version Number"
+    },
+    "PreferredName": "ReviewHub_FactMetricBoards",
+    "Type": "NativeCDSDataSourceInfo"
+  },
+  {
+    "DisplayName": "ReviewHub_FactMetricBoards (Views)",
+    "Name": "_craf2_reviewhub_factmetricboard_views",
+    "RelatedEntityName": "ReviewHub_FactMetricBoards",
+    "TrimmedViewName": true,
+    "Type": "ViewInfo",
+    "ViewInfoNameMapping": {
+      "52d110b2-39a9-4014-8acb-b1fd4203cd53": "ReviewHub_FactMetricBoard Advanced Find View",
+      "63e63916-04a9-465b-b0d7-384fb344aef5": "Inactive ReviewHub_FactMetricBoards",
+      "9728a3e3-e760-4543-997c-a2b3ba48c6eb": "ReviewHub_FactMetricBoard Associated View",
+      "bfe9f595-0897-4acf-97d7-90bcc0923101": "ReviewHub_FactMetricBoard Lookup View",
+      "f0644145-fe1f-4ee4-9cc8-9c800b33d798": "Active ReviewHub_FactMetricBoards"
+    }
+  },
+  {
+    "DisplayName": "Status (ReviewHub_FactMetricBoards)",
+    "Name": "craf2_reviewhub_factmetricboard_statecode",
+    "OptionSetInfoNameMapping": {
+      "0": "Active",
+      "1": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statecode",
+        "OptionSetReferenceEntityName": "ReviewHub_FactMetricBoards"
+      }
+    },
+    "OptionSetTypeKey": "StateType",
+    "RelatedColumnInvariantName": "statecode",
+    "RelatedEntityName": "ReviewHub_FactMetricBoards",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Status Reason (ReviewHub_FactMetricBoards)",
+    "Name": "craf2_reviewhub_factmetricboard_statuscode",
+    "OptionSetInfoNameMapping": {
+      "1": "Active",
+      "2": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statuscode",
+        "OptionSetReferenceEntityName": "ReviewHub_FactMetricBoards"
+      }
+    },
+    "OptionSetTypeKey": "StatusType",
+    "RelatedColumnInvariantName": "statuscode",
+    "RelatedEntityName": "ReviewHub_FactMetricBoards",
+    "Type": "OptionSetInfo"
+  }
+]

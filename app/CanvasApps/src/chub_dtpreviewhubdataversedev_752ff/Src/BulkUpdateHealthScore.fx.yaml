@@ -1,0 +1,690 @@
+BulkUpdateHealthScore As screen:
+    OnHidden: |
+        =
+    OnVisible: |-
+        =ClearCollect(
+            MetricBoardScreenLogs,
+            Table(
+                {
+                    message: "Logs",
+                    timestamp: Now()
+                }
+            )
+        )
+
+    BAGIAAppHeader_12 As AppHeader:
+        FeedbackButtonUrl: =var_SendFeedback_URL
+        inputAppDisplayName: =varAppHeaderText
+        Y: =0
+        ZIndex: =1
+
+    Label_BulkUpdateHealthScore_1 As label:
+        AutoHeight: =true
+        FontWeight: =FontWeight.Bold
+        Height: =35
+        Size: =20
+        Text: ="(Admin Only) Bulk Update Health Scores"
+        Width: =760
+        X: =400
+        Y: =61
+        ZIndex: =2
+
+    Label_BulkUpdateHealthScore_2 As label:
+        Height: =45
+        Text: ="Please note that current Yellow Range Health Weight is " & Input_YellowRangeWeight.Text & "% of Metric's Total Weight."
+        Width: =856
+        X: =Label_BulkUpdateHealthScore_1.X-20
+        Y: =105
+        ZIndex: =3
+
+    bttn_BulkUpdate_HealthScore As button:
+        BorderThickness: =0
+        DisplayMode: =DisplayMode.Disabled
+        Fill: =RGBA(151, 0, 0, 1)
+        FontWeight: =FontWeight.Normal
+        Height: =59
+        HoverFill: =ColorFade(Self.Fill, -50%)
+        OnSelect: |-
+            =//////// Re-load data from the SharePoint lists to collections. ////////
+            /*
+            
+            Concurrent(
+                ClearCollect(
+                    clln_factMetricBoard,
+                    ShowColumns(
+                        AddColumns(
+                            AddColumns(
+                                factMetricBoard,
+                                "MetricBoardTypeID", MetricBoardType.Id,
+                                    "MetricBoardTypeValue", MetricBoardType.Value,
+                                "ProductArray", Product,
+                                "ProductID", Product.Id,
+                                "ProductName", Product.Value,
+                                "NextReviewMonth", Month(NextReviewDate),
+                                "NextReviewYear", Year(NextReviewDate),
+                                "ReviewOwnerName", ReviewOwner.DisplayName,
+                                "ReviewOwnerEmail", ReviewOwner.Email,
+                                "ReviewOwnerClaims", ReviewOwner.Claims,
+                                "BoardHealth", 
+                                LookUp(
+                                    clln_MetricBoardHealth, 
+                                    (IsBlankOrError(HealthScore) && MinScore<=-999) || (!IsBlankOrError(HealthScore) && (HealthScore>=MinScore && HealthScore<MaxScore))
+                                )
+                            ), 
+                            "BoardHealthRating", BoardHealth.Rating, "BoardHealthImage", BoardHealth.Image, "BoardHealthDisplayOrder", BoardHealth.DisplayOrder,
+                            "fmb_TemplateID", Template.Id, "fmb_TemplateName", Template.Value
+                        ),
+                        "ID", "MetricBoardTypeID", "MetricBoardTypeValue", "ProductArray", "ProductID", "ProductName",
+                        "NextReviewDate", "NextReviewMonth", "NextReviewYear", "ReviewOwnerName", "ReviewOwnerEmail", "ReviewOwnerClaims", "HealthScore", 
+                        "BoardHealthRating", "BoardHealthImage", "BoardHealthDisplayOrder",
+                        "fmb_TemplateID", "fmb_TemplateName"
+                    )
+                ),
+            
+            Clear(clln_factMetrics);
+            ForAll(
+                Filter(Loader_FactMetrics, Mod(MonthNum, 2)=0),
+                Collect(
+                    clln_factMetrics,
+                    ShowColumns(
+                        RenameColumns(
+                            AddColumns(
+                                Filter(factMetrics, ValueDate >= LastMonthStart &&  ValueDate < NextMonthStart),
+                                "fm_MetricProductMapID", MetricID.Id,
+                                "fm_ValueMonth", Month(ValueDate),
+                                "fm_ValueYear", Year(ValueDate)
+                            ),
+                            "Title", "fm_Title", "ID", "fm_ID",
+                            "ValueNumber", "fm_ValueNumber", "ValueYesNo", "fm_ValueYesNo", "ValueText", "fm_ValueText", 
+                            "TargetNumber", "fm_TargetNumber", "TargetText", "fm_TargetText", "TargetYesNo", "fm_TargetYesNo", 
+                            "YellowTargetValue", "fm_YellowTargetValue", "GreenTargetStart", "fm_GreenTargetStart",
+                            "Comments", "fm_Comments", "ValueDate", "fm_ValueDate"
+                        ),
+                        "fm_Title", "fm_ID", "fm_MetricProductMapID", "fm_ValueNumber", "fm_ValueYesNo", "fm_ValueText", 
+                        "fm_TargetNumber", "fm_TargetText", "fm_TargetYesNo", "fm_YellowTargetValue", "fm_GreenTargetStart",
+                        "fm_Comments", "fm_ValueDate", "fm_ValueMonth", "fm_ValueYear", "IsNotApplicable", "ReviewLockDate",
+                        "Modified", "Created"
+                    )
+                )
+            ),
+            
+            ClearCollect(
+                    clln_BoardToMetricTypeMap_stg,
+                    ShowColumns(
+                        AddColumns(
+                            BoardToMetricTypeMap,
+                            "Link_MetricType", LookUp(ReviewHub_MetricTypes, MetricTypeID = BoardToMetricTypeMap[@MetricTypeLookup].Id)
+                        ),
+                        "DisplayOrder", "MetricTypeLookup", "BoardTypeLookup", "Link_MetricType"
+                    )
+                );
+            ClearCollect(
+                    clln_BoardToMetricTypeMap,
+                    ShowColumns(
+                        AddColumns(
+                            clln_BoardToMetricTypeMap_stg,
+                            "BoardTypeId", BoardTypeLookup.Id,
+                            "BoardTypeValue", BoardTypeLookup.Value,
+                            "MetricTypeId", MetricTypeLookup.Id,
+                            "MetricTypeTitle", Link_MetricType.MetricTypeName,
+                            "MetricValueType", Text(Link_MetricType.ValueType),
+                            "MetricStageValue", Link_MetricType.MetricTypeStage,
+                            "MetricShortName", Link_MetricType.MetricTypeShortName,
+                            "MetricHealthWeight", Link_MetricType.MetricTypeHealthWeight,
+                            "MetricDeprecatedDate", Link_MetricType.MetricTypeDeprecatedDate,
+                            "MetricCreatedDate", Link_MetricType.MetricTypeEffectiveDate,
+                            "MetricTypeDescription", Link_MetricType.MetricTypeDescription,
+                            "MetricTypeSource", Link_MetricType.MetricTypeSource,
+                            "MetricTypeSubgroup", Link_MetricType.MetricTypeSubgroup,
+                            "MetricTypeEnumerateOptions", Link_MetricType.MetricTypeEnumerateOptions,
+                            "MetricTypeIsTrendDown", Link_MetricType.MetricTypeIsTrendDown
+                        ),
+                        "DisplayOrder", "BoardTypeId", "BoardTypeValue",  "MetricTypeId", "MetricTypeTitle", "MetricValueType", 
+                        "MetricStageValue", "MetricShortName", "MetricHealthWeight", 
+                        "MetricDeprecatedDate", "MetricCreatedDate", "MetricTypeDescription", "MetricTypeSource", "MetricTypeSubgroup",
+                        "MetricTypeEnumerateOptions", "MetricTypeIsTrendDown"
+                    )
+                ),
+            
+            ClearCollect(
+                clln_MetricProductMap,
+                ShowColumns(
+                    AddColumns(
+                        Metric,
+                        "MPM_MetricTypeID", Metric[@MetricTypeName].Id,
+                        "MPM_MetricTypeValue", Metric[@MetricTypeName].Value,
+                        "MPM_PID", Metric[@ProductName].Id,
+                        "MPM_PName", Metric[@ProductName].Value
+                    ),
+                    "ID", "MPM_MetricTypeID", "MPM_MetricTypeValue", "MPM_PID", "MPM_PName", "IsMetricActive",
+                    "LatestTargetYesNo", "LatestTargetNumber", "LatestTargetText", "LatestYellowTargetValue", "LatestGreenTargetStart"
+                )
+            )
+            
+            );
+            
+            
+            ////Join all above collections, and compute each Metric Earned Weight.
+            Clear(clln_ProductRatings);
+            ForAll(
+                ////(ID=1||ID=3||ID=5||ID=6||ID=9||ID=16||ID=25) &&
+                Filter(clln_factMetricBoard, MetricBoardTypeID=2),  //By Product, NextReviewDate 
+                Collect(
+                    clln_ProductRatings,
+                    AddColumns(
+                        AddColumns(
+                            AddColumns(
+                                AddColumns(
+                                    Filter(clln_MetricProductMap, MPM_PID=ProductID),
+                                    "ReviewLockDate", NextReviewDate,
+                                    "Join_clln_BoardToMetricTypeMap", LookUp(clln_BoardToMetricTypeMap, MPM_MetricTypeID=MetricTypeId),
+                                    "Join_clln_factMetrics",
+                                    First(Sort(Filter(clln_factMetrics, ID=fm_MetricProductMapID && Month(NextReviewDate)=Month(ReviewLockDate) && Year(NextReviewDate)=Year(ReviewLockDate) ), fm_ValueDate, Descending))
+                                    //Abs(DateDiff(NextReviewDate, fm_ValueDate, Days))<30
+                                ),
+                            "MetricValueType", Join_clln_BoardToMetricTypeMap.MetricValueType,
+                            "MetricUpdateMethod", LookUp(clln_MetricTypeDetail, mtd_TemplateID=fmb_TemplateID && mtd_MetricTypeId=MPM_MetricTypeID).mtd_UpdateMethod,
+                            "MetricDeprecatedDate", Join_clln_BoardToMetricTypeMap.MetricDeprecatedDate,
+                            "MetricCreatedDate", Join_clln_BoardToMetricTypeMap.MetricCreatedDate,
+                            "MetricIsTrendDown", Join_clln_BoardToMetricTypeMap.MetricTypeIsTrendDown,
+                            "fctNumber", Join_clln_factMetrics.fm_ValueNumber,
+                            "fctYesNo", Join_clln_factMetrics.fm_ValueYesNo,
+                            "fctText", Join_clln_factMetrics.fm_ValueText,
+                            "fctIsNotApplicable", Join_clln_factMetrics.IsNotApplicable,
+                            "fm_TargetText", Join_clln_factMetrics.fm_TargetText,
+                            "fm_TargetNumber", Join_clln_factMetrics.fm_TargetNumber,
+                            "fm_TargetYesNo", Join_clln_factMetrics.fm_TargetYesNo,
+                            "fm_YellowTargetValue", Join_clln_factMetrics.fm_YellowTargetValue,
+                            "fm_GreenTargetStart", Join_clln_factMetrics.fm_GreenTargetStart,
+                            "fm_Created", Join_clln_factMetrics.Created,
+                            "fm_Modified", Join_clln_factMetrics.Modified
+                            ),
+                            "MetricTotalWeight", 
+                            Switch(
+                                Join_clln_BoardToMetricTypeMap.MetricValueType,
+                                "Text", 
+                                If(
+                                    !IsBlank(fm_TargetText) 
+                                        && (IsMetricActive || (!IsMetricActive && !IsBlank(fctText)))
+                                        && !fctIsNotApplicable 
+                                        && (IsBlank(MetricDeprecatedDate) || ReviewLockDate<MetricDeprecatedDate)
+                                        && ReviewLockDate > MetricCreatedDate, 
+                                    Join_clln_BoardToMetricTypeMap.MetricHealthWeight, 
+                                    Blank()
+                                ),
+                                "Boolean", 
+                                If(
+                                    !IsBlank(fm_TargetYesNo) 
+                                        && (IsMetricActive || (!IsMetricActive && !IsBlank(fctYesNo)))
+                                        && !fctIsNotApplicable 
+                                        && (IsBlank(MetricDeprecatedDate) || ReviewLockDate<MetricDeprecatedDate)
+                                        && ReviewLockDate > MetricCreatedDate, 
+                                    Join_clln_BoardToMetricTypeMap.MetricHealthWeight, 
+                                    Blank()
+                                ),
+                                "Percentage", 
+                                If(
+                                    !IsBlank(fm_TargetNumber) && fm_TargetNumber<>-1 
+                                        && (IsMetricActive || (!IsMetricActive && !IsBlank(fctNumber)))
+                                        && !fctIsNotApplicable 
+                                        && (IsBlank(MetricDeprecatedDate) || ReviewLockDate<MetricDeprecatedDate)
+                                        && ReviewLockDate > MetricCreatedDate, 
+                                    Join_clln_BoardToMetricTypeMap.MetricHealthWeight, 
+                                    Blank()
+                                ),
+                                "Number", 
+                                If(
+                                    !IsBlank(fm_TargetNumber) && fm_TargetNumber<>-1 
+                                        && (IsMetricActive || (!IsMetricActive && !IsBlank(fctNumber)))
+                                        && !fctIsNotApplicable 
+                                        && (IsBlank(MetricDeprecatedDate) || ReviewLockDate<MetricDeprecatedDate)
+                                        && ReviewLockDate > MetricCreatedDate, 
+                                    Join_clln_BoardToMetricTypeMap.MetricHealthWeight, 
+                                    Blank()
+                                )
+                            )
+                        ),
+                        "MetricEarnedWeight", 
+                        If(!fctIsNotApplicable && (IsBlank(MetricDeprecatedDate) || ReviewLockDate<MetricDeprecatedDate) && ReviewLockDate>MetricCreatedDate,
+                            Switch(
+                                MetricValueType,
+                                "Text", If(fm_TargetText=fctText, MetricTotalWeight, 0),
+                                "Boolean", If(fm_TargetYesNo=fctYesNo && (MetricUpdateMethod="BAG IA automated" || (MetricUpdateMethod="Manual" && fm_Created<>fm_Modified)),  MetricTotalWeight, 0),
+                                "Percentage", 
+                                If(MetricIsTrendDown,
+                                    If(
+                                        fm_TargetNumber>=fctNumber 
+                                            || (!IsBlank(fm_YellowTargetValue) && fm_YellowTargetValue>=fctNumber) 
+                                            || (!IsBlank(fm_GreenTargetStart) && fm_GreenTargetStart>=fctNumber)
+                                            ||fm_TargetNumber=-1, 
+                                        MetricTotalWeight * 
+                                            If(
+                                                fm_TargetNumber>=fctNumber || (!IsBlank(fm_GreenTargetStart) && fm_GreenTargetStart>=fctNumber) || fm_TargetNumber=-1, 
+                                                1.0, 
+                                                YellowRangeHealthWeight  //e.g., 0.80
+                                            ), 
+                                        0
+                                    ),
+                                    If(
+                                        fm_TargetNumber<=fctNumber 
+                                            || (!IsBlank(fm_YellowTargetValue) && fm_YellowTargetValue<=fctNumber)
+                                            || (!IsBlank(fm_GreenTargetStart) && fm_GreenTargetStart<=fctNumber)
+                                            ||fm_TargetNumber=-1, 
+                                        MetricTotalWeight * 
+                                            If(
+                                                fm_TargetNumber<=fctNumber || (!IsBlank(fm_GreenTargetStart) && fm_GreenTargetStart<=fctNumber) || fm_TargetNumber=-1, 
+                                                1.0, 
+                                                YellowRangeHealthWeight  //e.g., 0.80
+                                            ), 
+                                        0
+                                    )
+                                ),
+                                "Number", 
+                                If(MetricIsTrendDown,
+                                    If(
+                                        fm_TargetNumber>=fctNumber 
+                                            || (!IsBlank(fm_YellowTargetValue) && fm_YellowTargetValue>=fctNumber) 
+                                            || (!IsBlank(fm_GreenTargetStart) && fm_GreenTargetStart>=fctNumber)
+                                            ||fm_TargetNumber=-1, 
+                                        MetricTotalWeight * 
+                                            If(
+                                                fm_TargetNumber>=fctNumber || (!IsBlank(fm_GreenTargetStart) && fm_GreenTargetStart>=fctNumber) || fm_TargetNumber=-1, 
+                                                1.0, 
+                                                YellowRangeHealthWeight  //e.g., 0.80
+                                            ), 
+                                        0
+                                    ),
+                                    If(
+                                        fm_TargetNumber<=fctNumber 
+                                            || (!IsBlank(fm_YellowTargetValue) && fm_YellowTargetValue<=fctNumber)
+                                            || (!IsBlank(fm_GreenTargetStart) && fm_GreenTargetStart<=fctNumber)
+                                            ||fm_TargetNumber=-1, 
+                                        MetricTotalWeight * 
+                                            If(
+                                                fm_TargetNumber<=fctNumber || (!IsBlank(fm_GreenTargetStart) && fm_GreenTargetStart<=fctNumber) || fm_TargetNumber=-1, 
+                                                1.0, 
+                                                YellowRangeHealthWeight  //e.g., 0.80
+                                            ), 
+                                        0
+                                    )
+                                )
+                            ), 
+                            Blank()
+                        )
+                    )
+                )
+            );
+            
+            //Group By ProductID, ReviewLockDate to compute the HealthScore.
+            ClearCollect(
+                clln_ProductRatings_Summary,
+                AddColumns(
+                    GroupBy(clln_ProductRatings, "MPM_PID", "ReviewLockDate", "GroupBy_Product_ReviewDate"), 
+                    "CountRows", CountRows(GroupBy_Product_ReviewDate),
+                    "Group_HealthScore", Sum(GroupBy_Product_ReviewDate, MetricEarnedWeight)/Sum(GroupBy_Product_ReviewDate, MetricTotalWeight)
+                )
+            );
+            
+            //Send each HealthScore to the [factMetricBoard] list.
+            ForAll(
+                Filter(clln_ProductRatings_Summary, Group_HealthScore<>0),
+                Patch(
+                    factMetricBoard,
+                    LookUp(factMetricBoard, MetricBoardType.Id=2 && NextReviewDate=ReviewLockDate && Product.Id=MPM_PID),
+                    {HealthScore: Group_HealthScore}
+                )
+            );
+            
+            ClearCollect(
+                    clln_factMetricBoard,
+                    ShowColumns(
+                        AddColumns(
+                        AddColumns(
+                            factMetricBoard,
+                            "MetricBoardTypeID", MetricBoardType.Id,
+                            "MetricBoardTypeValue", MetricBoardType.Value,
+                            "ProductArray", Product,
+                            "ProductID", Product.Id,
+                            "ProductName", Product.Value,
+                            "NextReviewMonth", Month(NextReviewDate),
+                            "NextReviewYear", Year(NextReviewDate),
+                            "ReviewOwnerName", ReviewOwner.DisplayName,
+                            "ReviewOwnerEmail", ReviewOwner.Email,
+                            "ReviewOwnerClaims", ReviewOwner.Claims,
+                            "BoardHealth", 
+                            LookUp(
+                                clln_MetricBoardHealth, 
+                                (IsBlankOrError(HealthScore) && MinScore<=-999) || (!IsBlankOrError(HealthScore) && (HealthScore>=MinScore && HealthScore<MaxScore))
+                            )
+                        ), "BoardHealthRating", BoardHealth.Rating, "BoardHealthImage", BoardHealth.Image, "BoardHealthDisplayOrder", BoardHealth.DisplayOrder
+                        ),
+                        "ID", "MetricBoardTypeID", "MetricBoardTypeValue", "ProductArray", "ProductID", "ProductName",
+                        "NextReviewDate", "NextReviewMonth", "NextReviewYear", "ReviewOwnerName", "ReviewOwnerEmail", "ReviewOwnerClaims", "HealthScore", 
+                        "BoardHealthRating", "BoardHealthImage", "BoardHealthDisplayOrder"
+                    )
+                );
+            
+            */
+        Size: =14
+        Text: ="Bulk Update HealthScores for ALL products"
+        Width: =244
+        X: =LeftNavigation_BUHS.X + LeftNavigation_BUHS.Width + 100
+        Y: =App.Height*0.5
+        ZIndex: =4
+
+    Label_Warn_UpdateHealthScore As label:
+        Color: =RGBA(255, 0, 0, 1)
+        Height: =bttn_BulkUpdate_HealthScore.Height
+        PaddingLeft: =8
+        Size: =12
+        Text: ="*Use this button only when you changed the metric weight. It will update all historical health scores for all products. It takes about 30-60 seconds to process."
+        Width: =500
+        X: =bttn_BulkUpdate_HealthScore.X + bttn_BulkUpdate_HealthScore.Width + 20
+        Y: =bttn_BulkUpdate_HealthScore.Y
+        ZIndex: =5
+
+    LeftNavigation_BUHS As groupContainer.manualLayoutContainer:
+        BorderStyle: =BorderStyle.None
+        Fill: =BlueControlDarkBackground
+        Height: =App.Height - Self.Y
+        Width: =var_LeftNavi_Width
+        Y: =BAGIAAppHeader_12.Height
+        ZIndex: =7
+
+        glry_LeftNavi_6 As gallery.variableTemplateHeightGallery:
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            Height: =Parent.Height - Self.Y
+            Items: |-
+                =Sort(
+                    varLeftNavOptions,
+                    If(ThisRecord.ID < 0, ID),
+                    SortOrder.Descending
+                )
+            Layout: =Layout.Vertical
+            OnSelect: |-
+                =Set(varSelectedBoardId, ThisItem.ID);
+                Navigate(ThisItem.Screen);
+            ShowScrollbar: =false
+            TemplateFill: |-
+                =If(
+                    ThisItem.ID = varSelectedBoardId,
+                    ColorFade(BlueControlDarkBackground, 20%), 
+                    RGBA(0,0,0,0)
+                )
+            TemplatePadding: =0
+            TemplateSize: =45
+            Width: =Parent.Width
+            Y: =icon_CollapseExpand_6.Y + icon_CollapseExpand_6.Height
+            ZIndex: =1
+
+            imgCircle_LN_6 As circle:
+                DisplayMode: =DisplayMode.View
+                Fill: =RGBA(255, 255, 255, 0.90)
+                Height: =img_LN_6.Height - 5
+                OnSelect: =Select(Parent)
+                Visible: =If(IsBlank(ThisItem.BoardTypeID), false, true)
+                Width: =Self.Height
+                X: =img_LN_6.X + (img_LN_6.Width - Self.Width) * 0.5 
+                Y: =(Parent.TemplateHeight - Self.Height) * 0.5
+                ZIndex: =1
+
+            NoImage_LN_6 As label:
+                Align: =Align.Center
+                Color: =BlueControlDarkBackground
+                FocusedBorderThickness: =1
+                Font: =Font.'Segoe UI'
+                FontWeight: =FontWeight.Semibold
+                Height: =img_LN_6.Height
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Text: =Upper(Left(ThisItem.Title, 2))
+                Tooltip: =ThisItem.Title
+                Visible: |-
+                    =If(
+                        IsBlankOrError(ThisItem.PID), //It means this is not a scorecard tab and should always have a logo.
+                        false, 
+                        If(
+                            IsBlankOrError(LookUp(ReviewHub_Products, ThisRecord.ProductID = ThisItem.PID).LogoImage), //When on scorecard tab, the product logo is missing, 
+                            true,
+                            false
+                        )
+                    )
+                Width: =img_LN_6.Width
+                X: =rect_LN_6.X + rect_LN_6.Width
+                ZIndex: =2
+
+            img_LN_6 As image:
+                AutoDisableOnSelect: =false
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Height: =Self.Width
+                Image: |-
+                    =If(
+                        NoImage_LN_6.Visible, //It means this is not a scorecard tab and should always have a logo.
+                        Blank(), 
+                        ThisItem.ImagePath
+                    )
+                OnSelect: =Select(Parent)
+                PaddingBottom: =If(IsBlank(ThisItem.BoardTypeID), 3, 9)
+                PaddingLeft: =If(IsBlank(ThisItem.BoardTypeID), 3, 8)
+                PaddingRight: =If(IsBlank(ThisItem.BoardTypeID), 3, 8)
+                PaddingTop: =If(IsBlank(ThisItem.BoardTypeID), 3, 9)
+                Tooltip: =ThisItem.Title
+                Width: =Parent.TemplateHeight
+                X: =rect_LN_6.X + rect_LN_6.Width
+                ZIndex: =3
+
+            html_LN_6 As htmlViewer:
+                Color: =RGBA(255, 255, 255, 1)
+                DisplayMode: =DisplayMode.View
+                Fill: =RGBA(0, 0, 0, 0)
+                Font: =FontStyle
+                Height: =45
+                HtmlText: |-
+                    ="<span style='background-color: " 
+                    & If(
+                        Parent.Width = var_LeftNavi_ExpandWidth, 
+                        "#79b5de; color: #FFFFFF;  display: inline-block; padding: 1px 6px; font-weight: ", 
+                        "rgba(121, 181, 222, 0.75); color: #FFFFFF;  display: inline-block; padding: 1px 3px; font-weight: "
+                    ) 
+                    & If(ThisItem.ID = varSelectedBoardId, "600", "400") & "; border-radius: 5px;'>"
+                    & If(
+                        Parent.Width = var_LeftNavi_ExpandWidth, 
+                        LookUp(clln_BoardTypes, ThisRecord.bt_BoardTypeID = ThisItem.BoardTypeID).bt_BoardTypeShortName,
+                        Upper(Left(LookUp(clln_BoardTypes, ThisRecord.bt_BoardTypeID = ThisItem.BoardTypeID).bt_BoardTypeShortName,2))
+                    )
+                    & "</span></font>"
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =Title_LN_6.PaddingLeft
+                PaddingRight: =Title_LN_6.PaddingRight
+                PaddingTop: =If(Parent.Width = var_LeftNavi_ExpandWidth, 6, 0)
+                Size: =Title_LN_6.Size
+                Visible: =If(IsBlank(ThisItem.BoardTypeID), false, true)
+                Width: =If(Parent.Width = var_LeftNavi_ExpandWidth, Title_LN_6.Width, img_LN_6.Width)
+                X: =If(Parent.Width = var_LeftNavi_ExpandWidth, Title_LN_6.X, img_LN_6.X)
+                ZIndex: =4
+
+            Title_LN_6 As label:
+                BorderColor: =RGBA(32, 54, 71, 1)
+                BorderStyle: =BorderStyle.None
+                Color: =RGBA(255, 255, 255, 1)
+                DisplayMode: =DisplayMode.View
+                FocusedBorderColor: =Title_LN_6.BorderColor
+                Font: =FontStyle
+                FontWeight: =If(ThisItem.ID = varSelectedBoardId, FontWeight.Semibold, FontWeight.Normal)
+                Height: =Parent.TemplateHeight
+                HoverBorderColor: =Title_LN_6.BorderColor
+                HoverColor: =Title_LN_6.Color
+                HoverFill: =Title_LN_6.Fill
+                LineHeight: =1
+                OnSelect: =Select(Parent)
+                PaddingBottom: =If(IsBlank(ThisItem.BoardTypeID), 0, 5)
+                PaddingLeft: =2
+                PaddingTop: =0
+                PressedBorderColor: =Title_LN_6.BorderColor
+                PressedColor: =Title_LN_6.Color
+                PressedFill: =Title_LN_6.Fill
+                Size: =9
+                Text: =ThisItem.Title
+                Tooltip: =ThisItem.Title
+                VerticalAlign: =If(IsBlank(ThisItem.BoardTypeID), VerticalAlign.Middle, VerticalAlign.Bottom)
+                Width: =Parent.Width - Self.X
+                Wrap: =false
+                X: =img_LN_6.X + img_LN_6.Width
+                ZIndex: =5
+
+            TopDivider_LN_6 As rectangle:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Fill: =RGBA(0, 91, 159, 0.30)
+                Height: =1
+                OnSelect: =Select(Parent)
+                Width: =Parent.Width
+                ZIndex: =6
+
+            rect_LN_6 As rectangle:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Fill: =If(ThisItem.ID = varSelectedBoardId, BlueNaviHightLightBackground, TABLEHEADERCOLOR)
+                FocusedBorderColor: =rect_LN_6.BorderColor
+                Height: =Parent.TemplateHeight - Self.Y
+                HoverFill: =rect_LN_6.Fill
+                OnSelect: =Select(Parent)
+                Tooltip: =
+                Width: =6
+                Y: =1
+                ZIndex: =7
+
+            btn_LN_Top_6 As button:
+                AutoDisableOnSelect: =false
+                BorderColor: =
+                BorderStyle: =BorderStyle.None
+                BorderThickness: =0
+                Color: =RGBA(0, 0, 0, 0)
+                DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                DisabledColor: =RGBA(0, 0, 0, 0)
+                DisabledFill: =RGBA(0, 0, 0, 0)
+                Fill: =RGBA(0, 0, 0, 0)
+                Font: =FontStyle
+                Height: =Parent.TemplateHeight
+                HoverBorderColor: =
+                HoverColor: =RGBA(0, 0, 0, 0)
+                HoverFill: =
+                OnSelect: =Select(Parent)
+                PressedBorderColor: =
+                PressedColor: =
+                Text: =//Need this button for the hover-over hand cursor.
+                Tooltip: |
+                    =If(
+                        IsBlankOrError(ThisItem.BoardTypeID),
+                        ThisItem.Title,
+                        Text(ThisItem.ReviewDate, "mmmm yyyy") &
+                            " - (" & LookUp(clln_BoardTypes, ThisRecord.bt_BoardTypeID = ThisItem.BoardTypeID).bt_BoardTypeShortName & ") " 
+                            & ThisItem.Title
+                    )
+                Width: =Parent.TemplateWidth
+                ZIndex: =8
+
+            close_LN_6 As icon.CancelBadge:
+                AutoDisableOnSelect: =false
+                BorderStyle: =BorderStyle.None
+                Color: =RGBA(255, 255, 255, 1)
+                Height: =25
+                HoverColor: =RedFontColor
+                HoverFill: =BlueNaviHightLightBackground
+                Icon: =Icon.Cancel
+                OnSelect: |-
+                    =If(
+                        App.ActiveScreen.Name = "BoardScreen", //When user is currently staying on a Board Screen, navigate to Home Screen.
+                        Navigate(HomeScreen)
+                    );
+                    
+                    RemoveIf(varLeftNavOptions, ThisRecord.ID = ThisItem.ID)
+                    /*
+                    Concurrent(
+                        RemoveIf(varLeftNavOptions, ThisRecord.ID = ThisItem.ID),
+                        RemoveIf(clln_ProductMetrics_BS, ThisRecord.pm_ProductID = ThisItem.PID),
+                        RemoveIf(clln_factMetrics_BS, ThisRecord.fm_ProductID = ThisItem.PID)
+                    );
+                    */
+                PaddingBottom: =5
+                PaddingLeft: =5
+                PaddingRight: =5
+                PaddingTop: =5
+                Tooltip: ="Close this tab"
+                Visible: =!IsBlankOrError(ThisItem.BoardTypeID) && Parent.Width = var_LeftNavi_ExpandWidth //When collapsed, not showing close button.
+                Width: =25
+                X: =Title_LN_6.X + Title_LN_6.Width - Self.Width
+                ZIndex: =9
+
+        icon_CollapseExpand_6 As icon.Add:
+            BorderColor: =RGBA(32, 54, 71, 1)
+            Color: =RGBA(255, 255, 255, 1)
+            DisabledFill: =icon_CollapseExpand_6.Fill
+            FocusedBorderColor: =icon_CollapseExpand_6.BorderColor
+            Height: |
+                =45
+            HoverBorderColor: =ColorFade(icon_CollapseExpand_6.BorderColor, 20%)
+            HoverColor: =ColorFade(icon_CollapseExpand_6.Color, 20%)
+            HoverFill: =icon_CollapseExpand_6.Fill
+            Icon: =If(Parent.Width = var_LeftNavi_ExpandWidth, Icon.DockLeft, Icon.DockRight)
+            OnSelect: =Set(var_LeftNavi_Width, If(Parent.Width = var_LeftNavi_CollapseWidth, var_LeftNavi_ExpandWidth, var_LeftNavi_CollapseWidth))
+            PaddingBottom: =10
+            PaddingLeft: =10
+            PaddingRight: =10
+            PaddingTop: =10
+            PressedBorderColor: =ColorFade(icon_CollapseExpand_6.BorderColor, -20%)
+            PressedColor: =ColorFade(icon_CollapseExpand_6.Color, -20%)
+            PressedFill: =icon_CollapseExpand_6.Fill
+            Tooltip: ="Collapse/Expand"
+            Width: =var_LeftNavi_CollapseWidth
+            X: =Parent.Width - Self.Width
+            ZIndex: =2
+
+    Input_YellowRangeWeight As text:
+        BorderColor: =RGBA(151, 0, 0, 1)
+        BorderThickness: =1
+        Default: =YellowRangeHealthWeight*100
+        DisplayMode: =DisplayMode.View
+        Height: =35
+        HoverBorderColor: =RGBA(203, 102, 102, 1)
+        OnChange: =Set(YellowRangeHealthWeight, Self.Text/100.0)
+        PaddingLeft: =3
+        RadiusBottomLeft: =0
+        RadiusBottomRight: =0
+        RadiusTopLeft: =0
+        RadiusTopRight: =0
+        Size: =12
+        Width: =45
+        X: =lbl_YellowRangeWeight.X + lbl_YellowRangeWeight.Width
+        Y: =lbl_YellowRangeWeight.Y
+        ZIndex: =8
+
+    lbl_YellowRangeWeight As label:
+        FontWeight: =FontWeight.Semibold
+        Height: =35
+        Size: =12
+        Text: |-
+            ="Yellow Range Health Weight:"
+        Width: =260
+        X: =bttn_BulkUpdate_HealthScore.X
+        Y: =bttn_BulkUpdate_HealthScore.Y-Self.Height -30
+        ZIndex: =9
+
+    "'lbl_YellowRangeWeight_%' As label":
+        FontWeight: =FontWeight.Semibold
+        Height: =Input_YellowRangeWeight.Height
+        PaddingLeft: =3
+        Size: =Input_YellowRangeWeight.Size
+        Text: ="%"
+        Width: =30
+        X: =Input_YellowRangeWeight.X + Input_YellowRangeWeight.Width
+        Y: =Input_YellowRangeWeight.Y
+        ZIndex: =10
+

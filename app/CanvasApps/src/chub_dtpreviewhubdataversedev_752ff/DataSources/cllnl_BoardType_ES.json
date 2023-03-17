@@ -1,0 +1,9 @@
+[
+  {
+    "IsComponentScoped": false,
+    "IsSampleData": false,
+    "IsWritable": true,
+    "Name": "cllnl_BoardType_ES",
+    "Type": "CollectionDataSourceInfo"
+  }
+]

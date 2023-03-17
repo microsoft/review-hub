@@ -1,0 +1,13 @@
+<environmentvariabledefinition schemaname="chub_EnvVarReviewHubTemporaryAccessTeamName">
+  <description default="Team name for temporary access team, created in admin center and used to grant temproray read write access to users.">
+    <label description="Team name for temporary access team, created in admin center and used to grant temproray read write access to users." languagecode="1033" />
+  </description>
+  <displayname default="EnvVar - ReviewHub - Temporary Access Team Name">
+    <label description="EnvVar - ReviewHub - Temporary Access Team Name" languagecode="1033" />
+  </displayname>
+  <introducedversion>1.0.0.12082022</introducedversion>
+  <iscustomizable>1</iscustomizable>
+  <isrequired>0</isrequired>
+  <secretstore>0</secretstore>
+  <type>100000000</type>
+</environmentvariabledefinition>

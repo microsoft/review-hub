@@ -1,0 +1,10 @@
+[
+  {
+    "ApiId": "/providers/microsoft.powerapps/apis/shared_logicflows",
+    "FlowNameId": "7620d638-4a81-45e5-9eaf-2e661eab7764",
+    "Name": "ReviewHub-DeleteExcelFile",
+    "ServiceKind": "ConnectedWadl",
+    "Type": "ServiceInfo",
+    "WorkflowEntityId": "ea71d94b-f52f-ed11-9db1-000d3a5bc542"
+  }
+]

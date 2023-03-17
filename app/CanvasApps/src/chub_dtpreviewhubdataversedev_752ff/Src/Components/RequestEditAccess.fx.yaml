@@ -1,0 +1,152 @@
+RequestEditAccess As CanvasComponent:
+    Fill: =RGBA(0, 0, 0, 0)
+    Height: =177
+    Output_ViewMyAccess: =varViewMyAccess
+    RequestEditAccess_URL: ="Text"
+    Width: =312
+    X: =0
+    Y: =0
+    ZIndex: =1
+
+    ctn_RequestEditAccess As groupContainer:
+        BorderColor: =RGBA(0, 0, 0, 0)
+        BorderStyle: =BorderStyle.None
+        Height: =Parent.Height
+        Width: =Parent.Width
+        ZIndex: =1
+
+        Back_Lower As button:
+            BorderColor: =Back_TopBanner.Fill
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =Self.Color
+            DisabledFill: =RGBA(255, 255, 255, 1)
+            DisplayMode: =DisplayMode.Disabled
+            Fill: =RGBA(0, 0, 0, 0)
+            Font: =Font.'Segoe UI'
+            Height: =Parent.Height - Self.Y - 1
+            HoverColor: =Self.Color
+            HoverFill: =Self.Fill
+            RadiusBottomLeft: |
+                =20
+            RadiusBottomRight: =20
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Text: =""
+            Width: =Parent.Width - 2
+            X: =1
+            Y: =Back_TopBanner.Y + Back_TopBanner.Height - 1
+            ZIndex: =1
+
+        Back_TopBanner As button:
+            Color: =RGBA(0, 0, 0, 0)
+            DisplayMode: =DisplayMode.View
+            Fill: =RGBA(215,226,248,1)
+            Font: =Font.'Segoe UI'
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =20
+            RadiusTopRight: =20
+            Size: =10
+            Text: =""
+            Width: =Parent.Width
+            ZIndex: =2
+
+        label_StepTwo As label:
+            Font: =Font.'Segoe UI'
+            FontWeight: =FontWeight.Semibold
+            Height: =30
+            Size: =10
+            Text: |-
+                ="Step 2:"
+            Width: =65
+            X: =20
+            Y: |
+                =label_StepOne.Y + label_StepOne.Height + 10
+            ZIndex: =3
+
+        HtmlText_Header As htmlViewer:
+            Font: =Font.'Segoe UI'
+            HtmlText: |-
+                ="<b>Request Edit Access</sup>:</b> "
+            PaddingBottom: =0
+            PaddingLeft: =15
+            PaddingRight: =0
+            PaddingTop: =10
+            Size: =12
+            Width: =Parent.Width
+            ZIndex: =4
+
+        label_StepThree As label:
+            Font: =Font.'Segoe UI'
+            FontWeight: =FontWeight.Semibold
+            Height: =45
+            PaddingTop: =0
+            Size: =10
+            Text: |-
+                ="Step 3:   Ask any listed stakeholders to add you as a stakeholder for a product."
+            Width: =286
+            X: =label_StepTwo.X
+            Y: |
+                =label_StepTwo.Y + label_StepTwo.Height + 5
+            ZIndex: =5
+
+        btn_RequestEditAccess_Comp As button:
+            BorderColor: =Self.Fill
+            Fill: =RGBA(0, 114, 198, 1)
+            Font: =Font.'Segoe UI'
+            FontWeight: =FontWeight.Bold
+            Height: =30
+            HoverColor: =Self.Fill
+            HoverFill: =Self.Color
+            OnSelect: =Launch(RequestEditAccess.RequestEditAccess_URL)
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            RadiusBottomLeft: =20
+            RadiusBottomRight: =20
+            RadiusTopLeft: =20
+            RadiusTopRight: =20
+            Size: =10
+            Text: ="Request Edit Access"
+            Visible: =true 
+            X: =label_StepTwo.X + label_StepTwo.Width
+            Y: =label_StepTwo.Y
+            ZIndex: =6
+
+        btn_ViewAccess As button:
+            BorderColor: =Self.Fill
+            Fill: =RGBA(0, 114, 198, 1)
+            Font: =Font.'Segoe UI'
+            FontWeight: =FontWeight.Bold
+            Height: =30
+            HoverColor: =Self.Fill
+            HoverFill: =Self.Color
+            OnSelect: =Set(varViewMyAccess, true)
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            RadiusBottomLeft: =20
+            RadiusBottomRight: =20
+            RadiusTopLeft: =20
+            RadiusTopRight: =20
+            Size: =10
+            Text: ="View My Access"
+            Visible: =true 
+            X: =label_StepOne.X + label_StepOne.Width
+            Y: =label_StepOne.Y
+            ZIndex: =7
+
+        label_StepOne As label:
+            Font: =Font.'Segoe UI'
+            FontWeight: =FontWeight.Semibold
+            Height: =30
+            Size: =10
+            Text: |-
+                ="Step 1:"
+            Width: =65
+            X: =20
+            Y: =Back_Lower.Y + 10
+            ZIndex: =8
+

@@ -1,0 +1,79 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<savedqueries xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <savedquery>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>0</CanBeDeleted>
+    <isquickfindquery>0</isquickfindquery>
+    <isprivate>0</isprivate>
+    <isdefault>1</isdefault>
+    <savedqueryid>{47314359-5519-478c-8bf2-b702bc626de7}</savedqueryid>
+    <layoutxml>
+      <grid name="resultset" jump="craf2_factmetrictitle" select="1" icon="1" preview="1">
+        <row name="result" id="craf2_reviewhub_factmetricid">
+          <cell name="craf2_factmetricid" width="100" />
+          <cell name="a_c668ea4211624d629ce24951a68efe4f.craf2_productmetricid" width="112" />
+          <cell name="craf2_fm_valuenumber" width="100" />
+          <cell name="craf2_fm_valueyesno" width="100" />
+          <cell name="craf2_fm_valuetext" width="100" />
+          <cell name="craf2_fm_valuedate" width="100" />
+          <cell name="craf2_fm_comment" width="100" />
+          <cell name="craf2_fm_isnotapplicable" width="100" />
+          <cell name="craf2_fm_reviewlockdate" width="100" />
+          <cell name="craf2_fm_targetnumber" width="100" />
+          <cell name="craf2_fm_targetyesno" width="100" />
+          <cell name="craf2_fm_targettext" width="100" />
+          <cell name="craf2_fm_greentargetstart" width="100" />
+          <cell name="craf2_fm_yellowtargetstart" width="100" />
+          <cell name="chub_fm_boardtypeid" width="100" />
+          <cell name="craf2_fm_productid" width="100" />
+          <cell name="modifiedon" width="100" />
+          <cell name="modifiedby" width="100" />
+          <cell name="craf2_mom" width="100" />
+          <cell name="craf2_variancetotarget" width="100" />
+          <cell name="craf2_yoy" width="100" />
+        </row>
+      </grid>
+    </layoutxml>
+    <querytype>0</querytype>
+    <fetchxml>
+      <fetch version="1.0" mapping="logical" distinct="true">
+        <entity name="craf2_reviewhub_factmetric">
+          <attribute name="craf2_reviewhub_factmetricid" />
+          <attribute name="craf2_factmetricid" />
+          <attribute name="craf2_fm_valuenumber" />
+          <attribute name="craf2_fm_valueyesno" />
+          <attribute name="craf2_fm_valuetext" />
+          <attribute name="craf2_fm_valuedate" />
+          <attribute name="craf2_fm_comment" />
+          <attribute name="craf2_fm_isnotapplicable" />
+          <attribute name="craf2_fm_reviewlockdate" />
+          <attribute name="craf2_fm_targetnumber" />
+          <attribute name="craf2_fm_targetyesno" />
+          <attribute name="craf2_fm_targettext" />
+          <attribute name="craf2_fm_greentargetstart" />
+          <attribute name="craf2_fm_yellowtargetstart" />
+          <filter type="and">
+            <condition attribute="statecode" operator="eq" value="0" />
+            <condition attribute="chub_fm_boardtypeid" operator="ne" value="2" />
+          </filter>
+          <link-entity alias="a_c668ea4211624d629ce24951a68efe4f" name="craf2_reviewhub_productmetric" to="craf2_fm_productmetric" from="craf2_reviewhub_productmetricid" link-type="outer" visible="false">
+            <attribute name="craf2_productmetricid" />
+          </link-entity>
+          <attribute name="modifiedon" />
+          <attribute name="modifiedby" />
+          <attribute name="craf2_fm_productid" />
+          <attribute name="chub_fm_boardtypeid" />
+          <attribute name="craf2_mom" />
+          <attribute name="craf2_variancetotarget" />
+          <attribute name="craf2_yoy" />
+          <order attribute="craf2_fm_reviewlockdate" descending="false" />
+          <order attribute="chub_fm_boardtypeid" descending="false" />
+        </entity>
+      </fetch>
+    </fetchxml>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <LocalizedNames>
+      <LocalizedName description="Active ReviewHub_FactMetrics" languagecode="1033" />
+    </LocalizedNames>
+  </savedquery>
+</savedqueries>

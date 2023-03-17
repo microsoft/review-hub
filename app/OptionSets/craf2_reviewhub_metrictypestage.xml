@@ -1,0 +1,86 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<optionset Name="craf2_reviewhub_metrictypestage" localizedName="ReviewHub_MetricTypeStage" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <OptionSetType>picklist</OptionSetType>
+  <IsGlobal>1</IsGlobal>
+  <IntroducedVersion>1.0.0.0</IntroducedVersion>
+  <IsCustomizable>1</IsCustomizable>
+  <displaynames>
+    <displayname description="ReviewHub_MetricTypeStage" languagecode="1033" />
+  </displaynames>
+  <Descriptions>
+    <Description description="" languagecode="1033" />
+  </Descriptions>
+  <options>
+    <option value="803840000">
+      <labels>
+        <label description="Acquire" languagecode="1033" />
+      </labels>
+    </option>
+    <option value="803840001">
+      <labels>
+        <label description="Advocate" languagecode="1033" />
+      </labels>
+    </option>
+    <option value="803840002">
+      <labels>
+        <label description="Discover" languagecode="1033" />
+      </labels>
+    </option>
+    <option value="803840003">
+      <labels>
+        <label description="Implement &amp; Use" languagecode="1033" />
+      </labels>
+    </option>
+    <option value="840660000">
+      <labels>
+        <label description="Experience" languagecode="1033" />
+      </labels>
+    </option>
+    <option value="840660001">
+      <labels>
+        <label description="Support Case Volume" languagecode="1033" />
+      </labels>
+    </option>
+    <option value="840660002">
+      <labels>
+        <label description="Efficiency" languagecode="1033" />
+      </labels>
+    </option>
+    <option value="840660003">
+      <labels>
+        <label description="Escalation" languagecode="1033" />
+      </labels>
+    </option>
+    <option value="840660004">
+      <labels>
+        <label description="Self Help" languagecode="1033" />
+      </labels>
+    </option>
+    <option value="840660005">
+      <labels>
+        <label description="SE Tooling" languagecode="1033" />
+      </labels>
+    </option>
+    <option value="840660008">
+      <labels>
+        <label description="Customer Empathy" languagecode="1033" />
+      </labels>
+    </option>
+    <option value="840660009">
+      <labels>
+        <label description="All up OKR" languagecode="1033" />
+      </labels>
+      <Descriptions>
+        <Description description="" languagecode="1033" />
+      </Descriptions>
+    </option>
+    <option value="840660010">
+      <labels>
+        <label description="Support Readiness" languagecode="1033" />
+      </labels>
+      <Descriptions>
+        <Description description="" languagecode="1033" />
+      </Descriptions>
+    </option>
+  </options>
+</optionset>

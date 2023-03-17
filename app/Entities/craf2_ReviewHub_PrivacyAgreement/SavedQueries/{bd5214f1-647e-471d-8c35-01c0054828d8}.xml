@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<savedqueries xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <savedquery>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>0</CanBeDeleted>
+    <isquickfindquery>0</isquickfindquery>
+    <isprivate>0</isprivate>
+    <isdefault>1</isdefault>
+    <savedqueryid>{bd5214f1-647e-471d-8c35-01c0054828d8}</savedqueryid>
+    <layoutxml>
+      <grid name="resultset" jump="craf2_userprincipalemail" select="1" icon="1" preview="1">
+        <row name="result" id="craf2_reviewhub_privacyagreementid">
+          <cell name="craf2_userprincipalemail" width="300" />
+          <cell name="craf2_userdisplayname" width="284" />
+          <cell name="craf2_currentagreementdatetime" width="279" />
+          <cell name="craf2_nextagreementdatetime" width="200" />
+        </row>
+      </grid>
+    </layoutxml>
+    <querytype>0</querytype>
+    <fetchxml>
+      <fetch version="1.0" mapping="logical">
+        <entity name="craf2_reviewhub_privacyagreement">
+          <attribute name="craf2_reviewhub_privacyagreementid" />
+          <attribute name="craf2_userprincipalemail" />
+          <order attribute="craf2_userprincipalemail" descending="false" />
+          <filter type="and">
+            <condition attribute="statecode" operator="eq" value="0" />
+          </filter>
+          <attribute name="craf2_userdisplayname" />
+          <attribute name="craf2_currentagreementdatetime" />
+          <attribute name="craf2_nextagreementdatetime" />
+        </entity>
+      </fetch>
+    </fetchxml>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <LocalizedNames>
+      <LocalizedName description="Active ReviewHub_PrivacyAgreements" languagecode="1033" />
+    </LocalizedNames>
+  </savedquery>
+</savedqueries>

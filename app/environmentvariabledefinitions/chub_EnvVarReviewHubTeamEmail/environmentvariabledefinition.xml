@@ -1,0 +1,13 @@
+<environmentvariabledefinition schemaname="chub_EnvVarReviewHubTeamEmail">
+  <description default="App team email, will be used as the reply to for all outgoing emails.">
+    <label description="App team email, will be used as the reply to for all outgoing emails." languagecode="1033" />
+  </description>
+  <displayname default="EnvVar - ReviewHub - Team Email">
+    <label description="EnvVar - ReviewHub - Team Email" languagecode="1033" />
+  </displayname>
+  <introducedversion>1.0.0.12082022</introducedversion>
+  <iscustomizable>1</iscustomizable>
+  <isrequired>0</isrequired>
+  <secretstore>0</secretstore>
+  <type>100000000</type>
+</environmentvariabledefinition>

@@ -1,0 +1,2238 @@
+scn_AC_Administration As screen:
+    OnVisible: |
+        =UpdateContext({ctx_IfGalleryLoaded: true, ctx_savingData: false});
+        Concurrent(
+            Select(btn_BulkStakeholderUpdate_ACADM),
+            Set(record_Edit_This_ACADM, Blank()),
+            Reset(check_selectAll_ACADM), 
+            Set(var_UFMB_SelectAll, false),
+            Select(btn_BulkInfo_Cancel_ACADM),
+            Select(btn_ItemInfo_Cancel_ACADM),
+            Set(var_AddUserVisible, false)
+        );
+        Concurrent(
+            ClearCollect(
+                clln_RequestedProducts_AC,
+                AddColumns(
+                    ShowColumns(
+                        ReviewHub_RequestedProducts,
+                        "craf2_AccessRequest", "craf2_BoardType", "craf2_decisiondate", "craf2_Product", "craf2_name", "craf2_decision", "craf2_accessrevokeddate", "craf2_isaccessrevoked", "craf2_approveremail"
+                    ),
+                    "craf2_requesteremail",  craf2_AccessRequest.RequesterEmail,
+                    "craf2_requestdate",  craf2_AccessRequest.RequestDate,
+                    "craf2_justification", craf2_AccessRequest.Justification,
+                    "craf2_boardtypename",  craf2_BoardType.BoardTypeName,
+                    "craf2_productname", craf2_Product.ProductName,
+                    "craf2_boardtypeid",  craf2_BoardType.BoardTypeID,
+                    "craf2_productid", craf2_Product.ProductID
+                )
+            );,
+            ClearCollect(
+                clln_RequestedReadOnly_AC,
+                ShowColumns(
+                    ReviewHub_UserRequests,
+                    "craf2_email", "craf2_justification", "chub_decision", "craf2_name", "createdon", "chub_approveremail", "chub_decisiondate", "chub_approvercomments"
+                )
+            );
+        );
+        UpdateContext({ctx_IfGalleryLoaded: false, ctx_savingData: false});
+
+    btn_BulkDelete_ACADM As button:
+        BorderColor: =Self.Fill
+        Fill: =REDWARNINGCOLOR
+        Font: =FontStyle
+        FontWeight: =FontWeight.Bold
+        Height: =btn_BulkUpdate_ACADM.Height
+        HoverBorderColor: =Self.BorderColor
+        HoverColor: =Self.Fill
+        HoverFill: =Self.Color
+        OnSelect: |-
+            =Set(var_bulk_update_visible_UFMB, true);
+            UpdateContext({var_show_delete: true});
+        RadiusBottomLeft: =25
+        RadiusBottomRight: =25
+        RadiusTopLeft: =25
+        RadiusTopRight: =25
+        Size: =11
+        Text: ="Bulk Decline"
+        Visible: =btn_BulkUpdate_ACADM.Visible
+        Width: =btn_BulkUpdate_ACADM.Width
+        X: =btn_BulkUpdate_ACADM.X
+        Y: =btn_BulkUpdate_ACADM.Y + btn_BulkUpdate_ACADM.Height + 30
+        ZIndex: =1
+
+    btn_BulkUpdate_ACADM As button:
+        BorderColor: =Self.Fill
+        Fill: =BlueControlDarkBackground
+        Font: =FontStyle
+        FontWeight: =FontWeight.Bold
+        Height: =35
+        HoverColor: =Self.Fill
+        HoverFill: =Self.Color
+        OnSelect: |
+            =Set(var_bulk_update_visible_UFMB, true);
+            UpdateContext({var_show_delete: false});
+        RadiusBottomLeft: =25
+        RadiusBottomRight: =25
+        RadiusTopLeft: =25
+        RadiusTopRight: =25
+        Size: =11
+        Text: ="Bulk Approve"
+        Visible: |-
+            =CountRows(Filter(glry_RequestedProducts_ACADM.AllItems, ThisRecord.check_Selected_UFMB_1.Value = true)) > 1 
+            && var_bulk_update_visible_UFMB <> true
+        Width: =130
+        X: =ctn_Search_ACADM.X + ctn_Search_ACADM.Width + 17 + (ctn_Approve_Decline_ACADM.Width - Self.Width) * 0.50
+        Y: =ctn_Search_ACADM.Y + (ctn_Search_ACADM.Height - Self.Height*2 - 30) * 0.50 
+        ZIndex: =2
+
+    ctn_Add_User_ReadOnly As groupContainer:
+        Height: =btn_ItemInfo_Submit_ReadOnly.Y + btn_ItemInfo_Submit_ReadOnly.Height + 25
+        Visible: ="Read Access" = dpdn_AccessRequestType_ACA.Selected.name
+        Width: =App.Width - Self.X - 15
+        X: =ctn_Search_ReadOnly.X + ctn_Search_ReadOnly.Width + 20
+        Y: =ctn_Search_ACADM.Y
+        ZIndex: =3
+
+        Back_SelectInfo_ReadOnly As button:
+            BorderColor: =Top_SelectInfo_ReadOnly.Fill
+            DisabledBorderColor: =Self.BorderColor
+            DisabledFill: =RGBA(0, 0, 0, 0)
+            DisplayMode: =DisplayMode.Disabled
+            Font: =FontStyle
+            Height: =Parent.Height - Self.Y - 1
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Text: =""
+            Width: =Parent.Width - 2
+            X: =1
+            Y: =Top_SelectInfo_ReadOnly.Height - 1
+            ZIndex: =1
+
+        lbl_ItemInfo_ApproverComment_ReadOnly As label:
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =30
+            PaddingLeft: =0
+            Size: =12
+            Text: |-
+                ="Comment:"
+            Visible: =var_AddUserVisible
+            Width: =220
+            X: =combo_NewUser_ReadOnly.X
+            Y: =combo_NewUser_ReadOnly.Y + combo_NewUser_ReadOnly.Height + 10
+            ZIndex: =7
+
+        ti_ItemInfo_ApproverComment_ReadOnly As text:
+            BorderColor: =GRAYCOLOR
+            BorderThickness: =1
+            Default: =
+            Font: =FontStyle
+            Height: =50
+            HoverBorderColor: =Self.BorderColor
+            HoverFill: =ColorFade(BlueControlLightBackground, 75%)
+            Mode: =TextMode.MultiLine
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Size: =12
+            Visible: =var_AddUserVisible
+            Width: =Parent.Width - Self.X - (Self.PaddingLeft * 2)
+            X: =lbl_ItemInfo_ApproverComment_ReadOnly.X
+            Y: =lbl_ItemInfo_ApproverComment_ReadOnly.Y + lbl_ItemInfo_ApproverComment_ReadOnly.Height
+            ZIndex: =8
+
+        btn_ItemInfo_Submit_ReadOnly As button:
+            BorderColor: =If(var_show_delete, REDWARNINGCOLOR, BlueControlDarkBackground)
+            DisplayMode: =If(IsBlankOrError(ti_ItemInfo_ApproverComment_ReadOnly.Text), DisplayMode.Disabled, DisplayMode.Edit)
+            Fill: =If(var_show_delete, REDWARNINGCOLOR, BlueControlDarkBackground)
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =30
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Self.Fill
+            HoverFill: =Self.Color
+            OnSelect: |-
+                =UpdateContext({ctx_IfGalleryLoaded: true, ctx_savingData: true});
+                
+                    Concurrent(
+                        Patch(
+                            ReviewHub_UserRequests,
+                            Defaults(ReviewHub_UserRequests),
+                            {
+                                Decision: 'Decision (ReviewHub_UserRequests)'.Approved,
+                                DecisionDate: Now(),
+                                ApproverEmail: User().Email,
+                                ApproverComments: Trim(ti_ItemInfo_ApproverComment_ReadOnly.Text),
+                                Email: combo_NewUser_ReadOnly.Selected.UserPrincipalName,
+                                Justification: Trim(ti_ItemInfo_ApproverComment_ReadOnly.Text),
+                                ID: Max(ReviewHub_UserRequests, ThisRecord.ID) + 1
+                            }
+                        ),
+                        Patch(
+                            clln_RequestedReadOnly_AC,
+                            Defaults(clln_RequestedReadOnly_AC),
+                            {
+                                chub_decision: 'Decision (ReviewHub_UserRequests)'.Approved,
+                                chub_decisiondate: Now(),
+                                chub_approveremail: User().Email,
+                                craf2_email: combo_NewUser_ReadOnly.Selected.UserPrincipalName,
+                                craf2_justification: Trim(ti_ItemInfo_ApproverComment_ReadOnly.Text),
+                                craf2_name: Max(clln_RequestedReadOnly_AC, craf2_name) + 1,
+                                createdon: Now()
+                            }
+                        )
+                    );
+                    
+                Select(btn_ItemInfo_Cancel_ReadOnly);
+                UpdateContext({ctx_IfGalleryLoaded: false, ctx_savingData: false});
+            RadiusBottomLeft: =40
+            RadiusBottomRight: =40
+            RadiusTopLeft: =40
+            RadiusTopRight: =40
+            Size: =10
+            Text: ="Add"
+            Visible: =var_AddUserVisible
+            Width: =90
+            X: =ti_ItemInfo_ApproverComment_ReadOnly.X
+            Y: =If(!var_AddUserVisible,  btn_AddNew_ReadOnly.Y, ti_ItemInfo_ApproverComment_ReadOnly.Y + ti_ItemInfo_ApproverComment_ReadOnly.Height + 20)
+            ZIndex: =9
+
+        btn_ItemInfo_Cancel_ReadOnly As button:
+            BorderColor: =GRAYCOLOR
+            Fill: =GRAYCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =30
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Self.Fill
+            HoverFill: =Self.Color
+            OnSelect: |-
+                =Concurrent(
+                    Reset(ti_ItemInfo_ApproverComment_ReadOnly),
+                    Set(var_AddUserVisible, false),
+                    Reset(combo_NewUser_ReadOnly)
+                )
+            RadiusBottomLeft: =40
+            RadiusBottomRight: =40
+            RadiusTopLeft: =40
+            RadiusTopRight: =40
+            Size: =10
+            Text: ="Cancel"
+            Visible: =var_AddUserVisible
+            Width: =90
+            X: =btn_ItemInfo_Submit_ReadOnly.X + btn_ItemInfo_Submit_ReadOnly.Width + 30
+            Y: =btn_ItemInfo_Submit_ReadOnly.Y
+            ZIndex: =10
+
+        Top_SelectInfo_ReadOnly As button:
+            Align: =Align.Left
+            BorderColor: =Self.Fill
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =0
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =Color.Black
+            DisabledFill: =Self.Fill
+            DisplayMode: =DisplayMode.Disabled
+            Fill: =SUBGROUPCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =60
+            HoverFill: =Self.Fill
+            PaddingLeft: =20
+            RadiusBottomLeft: |
+                =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: |
+                =25
+            RadiusTopRight: |
+                =25
+            Size: =14
+            Text: = "Grant View Only Access"
+            Width: =Parent.Width
+            ZIndex: =16
+
+        btn_ACADM_Reset_AU As button:
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =0
+            Color: =BlueControlDarkBackground
+            Fill: =RGBA(0, 0, 0, 0)
+            Font: =FontStyle
+            HoverColor: =Color.Purple
+            HoverFill: =Self.Fill
+            OnSelect: |-
+                =Concurrent(
+                    Reset(ti_ItemInfo_ApproverComment_ReadOnly),
+                    
+                    Reset(combo_NewUser_ReadOnly)
+                )
+            PressedColor: =Self.Color
+            PressedFill: =Self.Fill
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Size: =12
+            Text: ="Reset"
+            Underline: =true
+            Visible: =var_AddUserVisible
+            Width: =55
+            X: =Parent.Width - Self.Width - 10
+            Y: =(Top_SelectInfo_ReadOnly.Height - Self.Height) * 0.50
+            ZIndex: =17
+
+        btn_AddNew_ReadOnly As button:
+            BorderColor: =Self.Fill
+            Fill: =BlueControlDarkBackground
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =30
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Self.Fill
+            HoverFill: =Self.Color
+            OnSelect: =Set(var_AddUserVisible, true);
+            RadiusBottomLeft: =20
+            RadiusBottomRight: =20
+            RadiusTopLeft: =20
+            RadiusTopRight: =20
+            Size: =10
+            Text: ="Clcik Here to Add"
+            Visible: =!var_AddUserVisible
+            Width: =150
+            X: =(Parent.Width - Self.Width) * 0.50
+            Y: =Top_SelectInfo_ReadOnly.Y + Top_SelectInfo_ReadOnly.Height + 15
+            ZIndex: =22
+
+        combo_NewUser_ReadOnly As combobox:
+            BorderColor: =RGBA(0, 0, 0, 1)
+            BorderThickness: =1
+            ChevronBackground: =Self.Fill
+            ChevronDisabledFill: =RGBA(0, 0, 0, 0)
+            ChevronFill: =RGBA(0, 0, 0, 1)
+            ChevronHoverBackground: =
+            DefaultSelectedItems: =
+            DisplayFields: =["DisplayName","UserPrincipalName","Picture"]
+            Font: =FontStyle
+            Height: =30
+            HoverBorderColor: =
+            HoverFill: =ColorFade(BlueNaviHightLightBackground, 85%)
+            InputTextPlaceholder: ="Search by name or principal email alias"
+            Items: |-
+                =Office365Users.SearchUserV2({searchTerm: Trim(Self.SearchText)}).value
+            PaddingBottom: =0
+            PaddingLeft: =8
+            PaddingTop: =0
+            PressedColor: =BlueControlDarkBackground
+            PressedFill: =BlueControlLightBackground
+            SearchFields: =["UserPrincipalName", "DisplayName"]
+            SearchItems: |-
+                =Search(Office365Users.SearchUserV2({searchTerm: Trim(Self.SearchText)}).value,combo_NewUser_ReadOnly.SearchText,"UserPrincipalName","DisplayName")
+            SelectionFill: =BlueNaviHightLightBackground
+            SelectMultiple: =false
+            Size: =11
+            Template: =ListItemTemplate.Double
+            Tooltip: =
+            Visible: =var_AddUserVisible
+            Width: =ti_ItemInfo_ApproverComment_ReadOnly.Width
+            X: =20
+            Y: =Top_SelectInfo_ReadOnly.Y + Top_SelectInfo_ReadOnly.Height + 15
+            ZIndex: =23
+
+    ctn_Approve_Decline_ACADM As groupContainer:
+        Height: =btn_ItemInfo_Submit_ACADM.Y + btn_ItemInfo_Submit_ACADM.Height + 25
+        Visible: |-
+            =If(
+                var_UFMB_SelectAll || CountRows(Filter(glry_RequestedProducts_ACADM.AllItems, ThisRecord.check_Selected_UFMB_1.Value = true)) > 1 ,
+                false,
+                !IsBlankOrError(record_Edit_This_ACADM)
+            )
+        Width: =App.Width - Self.X - 15
+        X: =ctn_Search_ACADM.X + ctn_Search_ACADM.Width + 20
+        Y: =ctn_Search_ACADM.Y
+        ZIndex: =4
+
+        Back_SelectInfo_ACADM As button:
+            BorderColor: =Top_SelectInfo_ACADM.Fill
+            DisabledBorderColor: =Self.BorderColor
+            DisabledFill: =RGBA(0, 0, 0, 0)
+            DisplayMode: =DisplayMode.Disabled
+            Font: =FontStyle
+            Height: =Parent.Height - Self.Y - 1
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Text: =""
+            Width: =Parent.Width - 2
+            X: =1
+            Y: =Top_SelectInfo_ACADM.Height - 1
+            ZIndex: =1
+
+        lbl_ItemInfo_ApproverComment_ACADM As label:
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =30
+            PaddingLeft: =0
+            Size: =12
+            Text: |-
+                ="Approver's Comment:"
+            Width: =220
+            X: =html_ItemInfo_Justification_ACADM.X + html_ItemInfo_Justification_ACADM.PaddingLeft
+            Y: =html_ItemInfo_Justification_ACADM.Y + html_ItemInfo_Justification_ACADM.Height + 10
+            ZIndex: =7
+
+        ti_ItemInfo_ApproverComment_ACADM As text:
+            BorderColor: =GRAYCOLOR
+            BorderThickness: =1
+            Default: =
+            Font: =FontStyle
+            Height: =50
+            HoverBorderColor: =Self.BorderColor
+            HoverFill: =ColorFade(BlueControlLightBackground, 75%)
+            Mode: =TextMode.MultiLine
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Size: =12
+            Width: =Parent.Width - Self.X - (Self.PaddingLeft * 2)
+            X: =lbl_ItemInfo_ApproverComment_ACADM.X
+            Y: =lbl_ItemInfo_ApproverComment_ACADM.Y + lbl_ItemInfo_ApproverComment_ACADM.Height
+            ZIndex: =8
+
+        btn_ItemInfo_Submit_ACADM As button:
+            BorderColor: =If(var_show_delete, REDWARNINGCOLOR, BlueControlDarkBackground)
+            DisplayMode: =If(IsBlankOrError(ti_ItemInfo_ApproverComment_ACADM.Text), DisplayMode.Disabled, DisplayMode.Edit)
+            Fill: =If(var_show_delete, REDWARNINGCOLOR, BlueControlDarkBackground)
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =30
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Self.Fill
+            HoverFill: =Self.Color
+            OnSelect: |-
+                =UpdateContext({ctx_IfGalleryLoaded: true, ctx_savingData: true});
+                If("Read Access" = dpdn_AccessRequestType_ACA.Selected.name,
+                    Concurrent(
+                        Patch(
+                            ReviewHub_UserRequests,
+                            LookUp(
+                                ReviewHub_UserRequests,
+                                ThisRecord.ID = record_Edit_This_ACADM.craf2_name 
+                            ),
+                            {
+                                Decision: If(var_show_delete, 'Decision (ReviewHub_UserRequests)'.Declined, 'Decision (ReviewHub_UserRequests)'.Approved),
+                                DecisionDate: Now(),
+                                ApproverEmail: User().Email,
+                                ApproverComments: ti_ItemInfo_ApproverComment_ACADM.Text
+                            }
+                        ),
+                        Patch(
+                            clln_RequestedReadOnly_AC,
+                            LookUp(clln_RequestedReadOnly_AC, ThisRecord.craf2_name=record_Edit_This_ACADM.craf2_name),
+                            {
+                                chub_decision: If(var_show_delete, 'Decision (ReviewHub_UserRequests)'.Declined, 'Decision (ReviewHub_UserRequests)'.Approved),
+                                chub_decisiondate: Now(),
+                                chub_approveremail: User().Email
+                            }
+                        )
+                    );
+                    ,
+                    Concurrent(
+                        Patch(
+                            ReviewHub_RequestedProducts,
+                            LookUp(
+                                ReviewHub_RequestedProducts,
+                                ThisRecord.ID = record_Edit_This_ACADM.craf2_name 
+                            ),
+                            {
+                                craf2_decision: If(var_show_delete, 'Decision (ReviewHub_RequestedProducts)'.Declined, 'Decision (ReviewHub_RequestedProducts)'.Approved),
+                                craf2_decisiondate: Now(),
+                                craf2_approveremail: User().Email,
+                                craf2_approvercomment: ti_ItemInfo_ApproverComment_ACADM.Text,
+                                craf2_proposedaccessrevokeddate: If(var_show_delete, Blank(),DateAdd(Today(), 14, TimeUnit.Days))
+                            }
+                        ),
+                        Patch(
+                            clln_RequestedProducts_AC,
+                            LookUp(clln_RequestedProducts_AC, ThisRecord.craf2_name=record_Edit_This_ACADM.craf2_name),
+                            {
+                                craf2_decision: If(var_show_delete, 'Decision (ReviewHub_RequestedProducts)'.Declined, 'Decision (ReviewHub_RequestedProducts)'.Approved),
+                                craf2_decisiondate: Now(),
+                                craf2_approveremail: User().Email
+                            }
+                        )
+                    );
+                    If(var_show_delete = false,
+                        If(
+                            IsBlankOrError(LookUp(ReviewHub_Stakeholders, ThisRecord.craf2_Product.craf2_productid = record_Edit_This_ACADM.craf2_productid && ThisRecord.craf2_BoardType.craf2_boardtypeid = record_Edit_This_ACADM.craf2_boardtypeid)),
+                            Patch(
+                                ReviewHub_Stakeholders,
+                                Defaults(ReviewHub_Stakeholders),
+                                {
+                                    craf2_title: LookUp(ReviewHub_BoardTypes, ThisRecord.craf2_boardtypeid=record_Edit_This_ACADM.craf2_boardtypeid).craf2_boardtypeshortname & ": " & LookUp(ReviewHub_Products, ThisRecord.craf2_productid = record_Edit_This_ACADM.craf2_productid).craf2_productname,
+                                    craf2_BoardType: LookUp(ReviewHub_BoardTypes, ThisRecord.craf2_boardtypeid=record_Edit_This_ACADM.craf2_boardtypeid),
+                                    craf2_Product: LookUp(ReviewHub_Products, ThisRecord.craf2_productid = record_Edit_This_ACADM.craf2_productid),
+                                    ProductStakeholderEmails: 
+                                        If(
+                                            IsBlankOrError(record_Edit_This_ACADM.craf2_requesteremail),
+                                            "",
+                                            record_Edit_This_ACADM.craf2_requesteremail
+                                        ),
+                                    TempStakeholders: 
+                                        If(
+                                            IsBlankOrError(record_Edit_This_ACADM.craf2_requesteremail),
+                                            "",
+                                            record_Edit_This_ACADM.craf2_requesteremail
+                                        ),
+                                    StakeholderNames:
+                                        If(
+                                            IsBlankOrError(record_Edit_This_ACADM.craf2_requesteremail),
+                                            "",
+                                            Office365Users.UserProfile(record_Edit_This_ACADM.craf2_requesteremail).DisplayName
+                                        )
+                                }
+                            ),
+                            Patch(
+                                ReviewHub_Stakeholders,
+                                LookUp(
+                                    ReviewHub_Stakeholders,
+                                    ThisRecord.craf2_Product.craf2_productid = record_Edit_This_ACADM.craf2_productid && ThisRecord.craf2_BoardType.craf2_boardtypeid = record_Edit_This_ACADM.craf2_boardtypeid
+                                ),
+                                {
+                                    ProductStakeholderEmails: 
+                                        If(
+                                            IsBlankOrError(record_Edit_This_ACADM.craf2_requesteremail),
+                                            "",
+                                            LookUp(
+                                    ReviewHub_Stakeholders,
+                                    ThisRecord.craf2_Product.craf2_productid = record_Edit_This_ACADM.craf2_productid && ThisRecord.craf2_BoardType.craf2_boardtypeid = record_Edit_This_ACADM.craf2_boardtypeid
+                                ).ProductStakeholderEmails & "|" & record_Edit_This_ACADM.craf2_requesteremail
+                                        ),
+                                    TempStakeholders: 
+                                        If(
+                                            IsBlankOrError(LookUp(
+                                    ReviewHub_Stakeholders,
+                                    ThisRecord.craf2_Product.craf2_productid = record_Edit_This_ACADM.craf2_productid && ThisRecord.craf2_BoardType.craf2_boardtypeid = record_Edit_This_ACADM.craf2_boardtypeid, TempStakeholders)) || IsBlankOrError(record_Edit_This_ACADM.craf2_requesteremail),
+                                            "",
+                                            LookUp(
+                                    ReviewHub_Stakeholders,
+                                    ThisRecord.craf2_Product.craf2_productid = record_Edit_This_ACADM.craf2_productid && ThisRecord.craf2_BoardType.craf2_boardtypeid = record_Edit_This_ACADM.craf2_boardtypeid
+                                ).TempStakeholders & "|" & record_Edit_This_ACADM.craf2_requesteremail
+                                        ),
+                                    StakeholderNames:
+                                        If(
+                                            IsBlankOrError(record_Edit_This_ACADM.craf2_requesteremail),
+                                            "",
+                                            LookUp(
+                                    ReviewHub_Stakeholders,
+                                    ThisRecord.craf2_Product.craf2_productid = record_Edit_This_ACADM.craf2_productid && ThisRecord.craf2_BoardType.craf2_boardtypeid = record_Edit_This_ACADM.craf2_boardtypeid
+                                ).StakeholderNames & "|" & Office365Users.UserProfile(record_Edit_This_ACADM.craf2_requesteremail).DisplayName
+                                        )
+                                }
+                            )
+                        );
+                    );
+                    Notify("The request has been " & If(var_show_delete, "declined", "approved") , NotificationType.Success);
+                );
+                Select(btn_ItemInfo_Cancel_ACADM);
+                Set(record_Edit_This_ACADM, Blank());
+                UpdateContext({ctx_IfGalleryLoaded: false, ctx_savingData: false});
+            RadiusBottomLeft: =40
+            RadiusBottomRight: =40
+            RadiusTopLeft: =40
+            RadiusTopRight: =40
+            Size: =10
+            Text: =If(var_show_delete, "Decline", "Approve")
+            Width: =90
+            X: =ti_ItemInfo_ApproverComment_ACADM.X
+            Y: =ti_ItemInfo_ApproverComment_ACADM.Y + ti_ItemInfo_ApproverComment_ACADM.Height + 20
+            ZIndex: =9
+
+        btn_ItemInfo_Cancel_ACADM As button:
+            BorderColor: =GRAYCOLOR
+            Fill: =GRAYCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =30
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Self.Fill
+            HoverFill: =Self.Color
+            OnSelect: |
+                =Set(record_Edit_This_ACADM, Blank());
+                Reset(ti_ItemInfo_ApproverComment_ACADM);
+            RadiusBottomLeft: =40
+            RadiusBottomRight: =40
+            RadiusTopLeft: =40
+            RadiusTopRight: =40
+            Size: =10
+            Text: ="Cancel"
+            Width: =90
+            X: =btn_ItemInfo_Submit_ACADM.X + btn_ItemInfo_Submit_ACADM.Width + 30
+            Y: =btn_ItemInfo_Submit_ACADM.Y
+            ZIndex: =10
+
+        html_ItemInfo_User_ACADM As htmlViewer:
+            AutoHeight: =true
+            Font: =FontStyle
+            HtmlText: |-
+                ="<font style='font-weight: 900;'>User: </font>" & If(IsBlankOrError(record_Edit_This_ACADM.craf2_requesteremail), 
+                If(IsBlankOrError(record_Edit_This_ACADM.craf2_email), "", Office365Users.UserProfile(record_Edit_This_ACADM.craf2_email).DisplayName), 
+                Office365Users.UserProfile(record_Edit_This_ACADM.craf2_requesteremail).DisplayName)
+            PaddingLeft: =15
+            Size: =12
+            Width: =Parent.Width - Self.X
+            Y: |
+                =Top_SelectInfo_ACADM.Y + Top_SelectInfo_ACADM.Height + 5
+            ZIndex: =15
+
+        Top_SelectInfo_ACADM As button:
+            Align: =Align.Left
+            BorderColor: =Self.Fill
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =0
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =Color.Black
+            DisabledFill: =Self.Fill
+            DisplayMode: =DisplayMode.Disabled
+            Fill: =SUBGROUPCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =60
+            HoverFill: =Self.Fill
+            PaddingLeft: =20
+            RadiusBottomLeft: |
+                =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: |
+                =25
+            RadiusTopRight: |
+                =25
+            Size: =14
+            Text: |-
+                =If(var_show_delete, "Decline - REQ. ID: ", "Approve - REQ. ID: ") & record_Edit_This_ACADM.craf2_name
+            Width: =Parent.Width
+            ZIndex: =16
+
+        btn_ACADM_Reset As button:
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =0
+            Color: =BlueControlDarkBackground
+            Fill: =RGBA(0, 0, 0, 0)
+            Font: =FontStyle
+            HoverColor: =Color.Purple
+            HoverFill: =Self.Fill
+            OnSelect: |-
+                =Concurrent(
+                    Reset(ti_ItemInfo_ApproverComment_ACADM),
+                    Set(var_Display_UFMB_ReviewOwner_Combo, false),
+                    Set(var_UFMB_SelectAll, false)
+                )
+            PressedColor: =Self.Color
+            PressedFill: =Self.Fill
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Size: =12
+            Text: ="Reset"
+            Underline: =true
+            Width: =55
+            X: =Parent.Width - Self.Width - 10
+            Y: =(Top_SelectInfo_ACADM.Height - Self.Height) * 0.50
+            ZIndex: =17
+
+        html_ItemInfo_Product_ACADM As htmlViewer:
+            AutoHeight: =true
+            Font: =FontStyle
+            Height: =If("Read Access" = dpdn_AccessRequestType_ACA.Selected.name, 0, 40)
+            HtmlText: |-
+                ="<font style='font-weight: 900;'>Product: </font>" & record_Edit_This_ACADM.craf2_Product.ProductName
+            PaddingLeft: =15
+            Size: =12
+            Visible: ="Read Access" <> dpdn_AccessRequestType_ACA.Selected.name
+            Width: =Parent.Width - Self.X
+            Y: =html_ItemInfo_User_ACADM.Y + html_ItemInfo_User_ACADM.Height + 10
+            ZIndex: =18
+
+        html_ItemInfo_BoardType_ACADM As htmlViewer:
+            AutoHeight: =true
+            Font: =FontStyle
+            Height: =If("Read Access" = dpdn_AccessRequestType_ACA.Selected.name, 0, 40)
+            HtmlText: |-
+                ="<font style='font-weight: 900;'>Board Type: </font>" & record_Edit_This_ACADM.craf2_BoardType.BoardTypeName
+            PaddingLeft: =15
+            Size: =12
+            Visible: ="Read Access" <> dpdn_AccessRequestType_ACA.Selected.name
+            Width: =Parent.Width - Self.X
+            X: =0.8000000000000682
+            Y: =html_ItemInfo_Product_ACADM.Y + html_ItemInfo_Product_ACADM.Height + 10
+            ZIndex: =19
+
+        html_ItemInfo_RequestDate_ACADM As htmlViewer:
+            AutoHeight: =true
+            Font: =FontStyle
+            HtmlText: |-
+                ="<font style='font-weight: 900;'>Request Date: </font>" & If(IsBlankOrError(record_Edit_This_ACADM.craf2_requestdate), record_Edit_This_ACADM.createdon, record_Edit_This_ACADM.craf2_requestdate)
+            PaddingLeft: =15
+            Size: =12
+            Width: =Parent.Width - Self.X
+            X: =0.8000000000000682
+            Y: =If("Read Access" = dpdn_AccessRequestType_ACA.Selected.name, html_ItemInfo_User_ACADM.Y + html_ItemInfo_User_ACADM.Height + 10,  html_ItemInfo_BoardType_ACADM.Y + html_ItemInfo_BoardType_ACADM.Height + 10)
+            ZIndex: =20
+
+        html_ItemInfo_Justification_ACADM As htmlViewer:
+            AutoHeight: =true
+            Font: =FontStyle
+            HtmlText: |-
+                ="<font style='font-weight: 900;'>Justification: </font>" & record_Edit_This_ACADM.craf2_justification
+            PaddingLeft: =15
+            Size: =12
+            Width: =Parent.Width - Self.X
+            X: =0.8000000000000682
+            Y: =html_ItemInfo_RequestDate_ACADM.Y + html_ItemInfo_RequestDate_ACADM.Height + 10
+            ZIndex: =21
+
+    ctn_BulkUpdate_ACADM As groupContainer:
+        Height: |-
+            =Top_BulkUpdate_ACADM.Height + lbl_BulkSelected_ACADM.Height + html_BulkInfo_User_ACADM.Height + html_BulkInfo_Product_ACADM.Height + html_BulkInfo_BoardType_ACADM.Height + html_BulkInfo_RequestDate_ACADM.Height + lbl_BulkUpdate_ApproverComment_ACADM.Height +
+            ti_BulkUpdate_ApproverComment_ACADM.Height + btn_BulkInfo_Cancel_ACADM.Height + 100
+        Visible: =var_bulk_update_visible_UFMB && If("Read Access" = dpdn_AccessRequestType_ACA.Selected.name, CountRows(Filter(glry_Search_ReadOnly_ACA.AllItems, ThisRecord.check_Selected_ReadOnly.Value = true)) > 1, CountRows(Filter(glry_RequestedProducts_ACADM.AllItems, ThisRecord.check_Selected_UFMB_1.Value = true)) > 1)
+        Width: =App.Width - Self.X - 15
+        X: =ctn_Search_ACADM.X + ctn_Search_ACADM.Width + 20
+        Y: =ctn_Search_ACADM.Y
+        ZIndex: =5
+
+        Back_BulkUpdate_ACADM As button:
+            BorderColor: =Top_SelectInfo_ACADM.Fill
+            DisabledBorderColor: =Self.BorderColor
+            DisabledFill: =RGBA(0, 0, 0, 0)
+            DisplayMode: =DisplayMode.Disabled
+            Font: =FontStyle
+            Height: =Parent.Height - Self.Y - 1
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Text: =""
+            Width: =Parent.Width - 2
+            X: =1
+            Y: =Top_BulkUpdate_ACADM.Height - 1
+            ZIndex: =1
+
+        lbl_BulkSelected_ACADM As label:
+            AutoHeight: =true
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =48
+            PaddingLeft: =15
+            Size: =12
+            Text: |-
+                ="Number of Selected Requests: " & If("Read Access" = dpdn_AccessRequestType_ACA.Selected.name, CountRows(Filter(glry_Search_ReadOnly_ACA.AllItems, ThisRecord.check_Selected_ReadOnly.Value = true)), CountRows(Filter(glry_RequestedProducts_ACADM.AllItems, ThisRecord.check_Selected_UFMB_1.Value = true)))
+            Width: =Parent.Width
+            Y: =Top_BulkUpdate_ACADM.Y + Top_BulkUpdate_ACADM.Height + 5
+            ZIndex: =7
+
+        Top_BulkUpdate_ACADM As button:
+            Align: =Align.Left
+            BorderColor: =Self.Fill
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =0
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =Color.Black
+            DisabledFill: =Self.Fill
+            DisplayMode: =DisplayMode.Disabled
+            Fill: =SUBGROUPCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =60
+            HoverFill: =Self.Fill
+            PaddingLeft: =20
+            RadiusBottomLeft: |
+                =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: |
+                =25
+            RadiusTopRight: |
+                =25
+            Size: =14
+            Text: =If(var_show_delete, "Bulk Delete Access Request", "Bulk Approve Access Request")
+            Width: =Parent.Width
+            ZIndex: =8
+
+        lbl_BulkUpdate_ApproverComment_ACADM As label:
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =30
+            PaddingLeft: =0
+            Size: =12
+            Text: |-
+                ="Approver's Comment:"
+            Width: =220
+            X: =html_BulkInfo_RequestDate_ACADM.X + html_BulkInfo_RequestDate_ACADM.PaddingLeft
+            Y: =html_BulkInfo_RequestDate_ACADM.Y + html_BulkInfo_RequestDate_ACADM.Height + 10
+            ZIndex: =9
+
+        ti_BulkUpdate_ApproverComment_ACADM As text:
+            BorderColor: =GRAYCOLOR
+            BorderThickness: =1
+            Default: =
+            Font: =FontStyle
+            Height: =50
+            HoverBorderColor: =Self.BorderColor
+            HoverFill: =ColorFade(BlueControlLightBackground, 75%)
+            Mode: =TextMode.MultiLine
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Size: =12
+            Width: =Parent.Width - Self.X - (Self.PaddingLeft * 2)
+            X: =lbl_BulkUpdate_ApproverComment_ACADM.X
+            Y: =lbl_BulkUpdate_ApproverComment_ACADM.Y + lbl_BulkUpdate_ApproverComment_ACADM.Height + 10
+            ZIndex: =10
+
+        btn_BulkInfo_Submit_ACADM As button:
+            BorderColor: =If(var_show_delete, REDWARNINGCOLOR, BlueControlDarkBackground)
+            DisplayMode: =If(IsBlankOrError(ti_BulkUpdate_ApproverComment_ACADM.Text), DisplayMode.Disabled, DisplayMode.Edit)
+            Fill: =If(var_show_delete, REDWARNINGCOLOR, BlueControlDarkBackground)
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =30
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Self.Fill
+            HoverFill: =Self.Color
+            OnSelect: |-
+                =UpdateContext({ctx_IfGalleryLoaded: true, ctx_savingData: true});
+                Set(var_bulk_update_visible_UFMB, false);
+                If(
+                    "Read Access" = dpdn_AccessRequestType_ACA.Selected.name,
+                    ClearCollect(
+                        clln_BulkUpdate_RequestedProducts,
+                        AddColumns(
+                            Filter(glry_Search_ReadOnly_ACA.AllItems, ThisRecord.check_Selected_ReadOnly.Value = true),
+                            "reqID_ToUpdate", ThisRecord.craf2_name
+                        )
+                    );
+                    ForAll(
+                        clln_BulkUpdate_RequestedProducts,
+                        Concurrent(
+                            Patch(
+                                ReviewHub_UserRequests,
+                                LookUp(
+                                    ReviewHub_UserRequests,
+                                    ThisRecord.ID = record_Edit_This_ACADM.craf2_name 
+                                ),
+                                {
+                                    Decision: If(var_show_delete, 'Decision (ReviewHub_UserRequests)'.Declined, 'Decision (ReviewHub_UserRequests)'.Approved),
+                                    DecisionDate: Now(),
+                                    ApproverEmail: User().Email,
+                                    ApproverComments: ti_BulkUpdate_ApproverComment_ACADM.Text
+                                }
+                            ),
+                            Patch(
+                                clln_RequestedReadOnly_AC,
+                                LookUp(clln_RequestedReadOnly_AC, ThisRecord.craf2_name=record_Edit_This_ACADM.craf2_name),
+                                {
+                                    chub_decision: If(var_show_delete, 'Decision (ReviewHub_UserRequests)'.Declined, 'Decision (ReviewHub_UserRequests)'.Approved),
+                                    chub_decisiondate: Now(),
+                                    chub_approveremail: User().Email
+                                }
+                            )
+                        );
+                    );
+                    ,
+                    ClearCollect(
+                        clln_BulkUpdate_RequestedProducts,
+                        AddColumns(
+                            Filter(glry_RequestedProducts_ACADM.AllItems, ThisRecord.check_Selected_UFMB_1.Value = true),
+                            "reqID_ToUpdate", ThisRecord.craf2_name, "btpID_ToUpdate", ThisRecord.craf2_BoardType.BoardTypeID, "prdID_ToUpdate", ThisRecord.craf2_Product.ProductID
+                        )
+                    );
+                    ForAll(
+                        clln_BulkUpdate_RequestedProducts,
+                        Concurrent(
+                            //Update backend table
+                            Patch(
+                                ReviewHub_RequestedProducts,
+                                LookUp(
+                                    ReviewHub_RequestedProducts,
+                                    ThisRecord.ID = reqID_ToUpdate
+                                ),
+                                {
+                                    craf2_decision: If(var_show_delete, 'Decision (ReviewHub_RequestedProducts)'.Declined, 'Decision (ReviewHub_RequestedProducts)'.Approved),
+                                    craf2_decisiondate: Now(),
+                                    craf2_approveremail: User().Email,
+                                    craf2_approvercomment: ti_BulkUpdate_ApproverComment_ACADM.Text,
+                                    craf2_accessrevokeddate: If(var_show_delete, Blank(), DateAdd(Today(), 14, TimeUnit.Days))
+                                }
+                            ),
+                            //Update cache table
+                            Patch(
+                                clln_RequestedProducts_AC,
+                                LookUp(clln_RequestedProducts_AC, ThisRecord.craf2_name=reqID_ToUpdate),
+                                {
+                                    craf2_decision: If(var_show_delete, 'Decision (ReviewHub_RequestedProducts)'.Declined, 'Decision (ReviewHub_RequestedProducts)'.Approved),
+                                    craf2_decisiondate: Now(),
+                                    craf2_approveremail: User().Email
+                                }
+                            )
+                        )
+                    );
+                    Notify("The requests has been " & If(var_show_delete, "declined", "approved") , NotificationType.Success);
+                );
+                Concurrent(
+                    Select(btn_BulkStakeholderUpdate_ACADM),
+                    Set(record_Edit_This_ACADM, Blank()),
+                    Reset(check_selectAll_ACADM), 
+                    Set(var_UFMB_SelectAll, false),
+                    Select(btn_BulkInfo_Cancel_ACADM)
+                );
+                UpdateContext({ctx_IfGalleryLoaded: false, ctx_savingData: false});
+            RadiusBottomLeft: =40
+            RadiusBottomRight: =40
+            RadiusTopLeft: =40
+            RadiusTopRight: =40
+            Size: =10
+            Text: =If(var_show_delete, "Decline", "Approve")
+            Width: =90
+            X: =ti_BulkUpdate_ApproverComment_ACADM.X
+            Y: =ti_BulkUpdate_ApproverComment_ACADM.Y + ti_BulkUpdate_ApproverComment_ACADM.Height + 20
+            ZIndex: =11
+
+        btn_BulkInfo_Cancel_ACADM As button:
+            BorderColor: =GRAYCOLOR
+            Fill: =GRAYCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =30
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Self.Fill
+            HoverFill: =Self.Color
+            OnSelect: |-
+                =Reset(check_selectAll_ACADM);
+                Reset(check_selectAll_ReadOnly);
+                Reset(ti_BulkUpdate_ApproverComment_ACADM);
+                Set(var_UFMB_SelectAll, false);
+                Set(record_Edit_This_ACADM, Blank());
+                Set(var_bulk_update_visible_UFMB, false);
+                UpdateContext({var_show_delete: false});
+            RadiusBottomLeft: =40
+            RadiusBottomRight: =40
+            RadiusTopLeft: =40
+            RadiusTopRight: =40
+            Size: =10
+            Text: ="Cancel"
+            Width: =90
+            X: =btn_BulkInfo_Submit_ACADM.X + btn_BulkInfo_Submit_ACADM.Width + 30
+            Y: =ti_BulkUpdate_ApproverComment_ACADM.Y + ti_BulkUpdate_ApproverComment_ACADM.Height + 20
+            ZIndex: =12
+
+        html_BulkInfo_User_ACADM As htmlViewer:
+            AutoHeight: =true
+            Font: =FontStyle
+            HtmlText: |-
+                ="<font style='font-weight: 900;'>User: </font>" & 
+                If("Read Access" = dpdn_AccessRequestType_ACA.Selected.name,
+                
+                If(IsBlankOrError(LookUp(glry_Search_ReadOnly_ACA.AllItems, ThisRecord.check_Selected_ReadOnly.Value = true).craf2_email), "", Office365Users.UserProfile(LookUp(glry_Search_ReadOnly_ACA.AllItems, ThisRecord.check_Selected_ReadOnly.Value = true).craf2_email).DisplayName) & If(CountRows(Filter(glry_Search_ReadOnly_ACA.AllItems, ThisRecord.check_Selected_ReadOnly.Value = true)) >= 2, " +" & CountRows(Filter(glry_Search_ReadOnly_ACA.AllItems, ThisRecord.check_Selected_ReadOnly.Value = true))-1 & " other", ""),
+                
+                
+                If(IsBlankOrError(LookUp(glry_RequestedProducts_ACADM.AllItems, ThisRecord.check_Selected_UFMB_1.Value = true).craf2_requesteremail), "", Office365Users.UserProfile(LookUp(glry_RequestedProducts_ACADM.AllItems, ThisRecord.check_Selected_UFMB_1.Value = true).craf2_requesteremail).DisplayName) & If(CountRows(Filter(glry_RequestedProducts_ACADM.AllItems, ThisRecord.check_Selected_UFMB_1.Value = true)) >= 2, " +" & CountRows(Filter(glry_RequestedProducts_ACADM.AllItems, ThisRecord.check_Selected_UFMB_1.Value = true))-1 & " other", "")
+                )
+            PaddingLeft: =15
+            Size: =12
+            Width: =Parent.Width - Self.X
+            Y: |
+                =lbl_BulkSelected_ACADM.Y + lbl_BulkSelected_ACADM.Height + 5
+            ZIndex: =13
+
+        html_BulkInfo_Product_ACADM As htmlViewer:
+            AutoHeight: =true
+            Font: =FontStyle
+            HtmlText: |-
+                ="<font style='font-weight: 900;'>Product: </font>" & If(IsBlankOrError(LookUp(glry_RequestedProducts_ACADM.AllItems, ThisRecord.check_Selected_UFMB_1.Value = true).craf2_Product.ProductName), "", LookUp(glry_RequestedProducts_ACADM.AllItems, ThisRecord.check_Selected_UFMB_1.Value = true).craf2_Product.ProductName) & If(CountRows(Filter(glry_RequestedProducts_ACADM.AllItems, ThisRecord.check_Selected_UFMB_1.Value = true)) >= 2, " +" & CountRows(Filter(glry_RequestedProducts_ACADM.AllItems, ThisRecord.check_Selected_UFMB_1.Value = true))-1 & " other", "")
+            PaddingLeft: =15
+            Size: =12
+            Visible: ="Read Access" <> dpdn_AccessRequestType_ACA.Selected.name
+            Width: =Parent.Width - Self.X
+            Y: =html_BulkInfo_User_ACADM.Y + html_BulkInfo_User_ACADM.Height + 10
+            ZIndex: =14
+
+        html_BulkInfo_BoardType_ACADM As htmlViewer:
+            AutoHeight: =true
+            Font: =FontStyle
+            HtmlText: |-
+                ="<font style='font-weight: 900;'>Board Type: </font>" & If(IsBlankOrError(LookUp(glry_RequestedProducts_ACADM.AllItems, ThisRecord.check_Selected_UFMB_1.Value = true).craf2_BoardType.BoardTypeName), "", LookUp(glry_RequestedProducts_ACADM.AllItems, ThisRecord.check_Selected_UFMB_1.Value = true).craf2_BoardType.BoardTypeName) & If(CountRows(Filter(glry_RequestedProducts_ACADM.AllItems, ThisRecord.check_Selected_UFMB_1.Value = true)) >= 2, " +" & CountRows(Filter(glry_RequestedProducts_ACADM.AllItems, ThisRecord.check_Selected_UFMB_1.Value = true))-1 & " other", "")
+            PaddingLeft: =15
+            Size: =12
+            Visible: ="Read Access" <> dpdn_AccessRequestType_ACA.Selected.name
+            Width: =Parent.Width - Self.X
+            X: =0.8000000000000682
+            Y: =html_BulkInfo_Product_ACADM.Y + html_BulkInfo_Product_ACADM.Height + 10
+            ZIndex: =15
+
+        html_BulkInfo_RequestDate_ACADM As htmlViewer:
+            AutoHeight: =true
+            Font: =FontStyle
+            HtmlText: |-
+                ="<font style='font-weight: 900;'>Request Date: </font>" & If(CountRows(ForAll(Distinct(Filter(glry_RequestedProducts_ACADM.AllItems, ThisRecord.check_Selected_UFMB_1.Value = true), craf2_requestdate), {Result: ThisRecord.Value})) > 1, Text(Min(Filter(glry_RequestedProducts_ACADM.AllItems, ThisRecord.check_Selected_UFMB_1.Value = true), craf2_requestdate), "dd/mm/yyyy")  & " - " & Text(Max(Filter(glry_RequestedProducts_ACADM.AllItems, ThisRecord.check_Selected_UFMB_1.Value = true), craf2_requestdate), "dd/mm/yyyy"), Text(LookUp(glry_RequestedProducts_ACADM.AllItems, ThisRecord.check_Selected_UFMB_1.Value = true).craf2_requestdate, "dd/mm/yyyy"))
+            PaddingLeft: =15
+            Size: =12
+            Width: =Parent.Width - Self.X
+            X: =0.8000000000000682
+            Y: =If("Read Access" = dpdn_AccessRequestType_ACA.Selected.name, html_BulkInfo_User_ACADM.Y + html_BulkInfo_User_ACADM.Height + 10,  html_BulkInfo_BoardType_ACADM.Y + html_BulkInfo_BoardType_ACADM.Height + 10)
+            ZIndex: =16
+
+    ctn_Search_ACADM As groupContainer:
+        BorderColor: =
+        BorderStyle: =BorderStyle.None
+        Height: =App.Height- Self.Y - 15
+        Visible: ="Write" in dpdn_AccessRequestType_ACA.Selected.name
+        Width: |-
+            =If(
+                btn_BulkUpdate_ACADM.Visible,
+                App.Width - Self.X * 3 - btn_BulkUpdate_ACADM.Width,
+                If (
+                    !ctn_Approve_Decline_ACADM.Visible && !ctn_BulkUpdate_ACADM.Visible,
+                    App.Width - Self.X * 2,
+                    App.Width * 0.70
+                )
+            )
+        X: =icon_Back_ACADM.X
+        Y: =icon_Search_ACADM.Y + icon_Search_ACADM.Height + 10
+        ZIndex: =9
+
+        glry_RequestedProducts_ACADM As gallery.variableTemplateHeightGallery:
+            BorderColor: =Back_Header_ACADM.Fill
+            BorderThickness: =2
+            Height: =Parent.Height - Self.Y - 1
+            Items: |-
+                =Ungroup(//Ungroup function to add a Row Number column.
+                    ForAll(
+                        Sequence(
+                            CountRows(
+                                Search(
+                                    Filter(
+                                        clln_RequestedProducts_AC, dpdn_RequestDecision_ACADM.Selected.Value = ThisRecord.craf2_decision
+                                    ),
+                                    Trim(ti_Search_ACADM.Text),
+                                    "craf2_productname",
+                                    "craf2_productname",
+                                    "craf2_requesteremail"
+                                )
+                            )
+                        ),
+                        {
+                            Record:Table(
+                                Last(
+                                    FirstN(
+                                        Search(
+                                            Filter(
+                                                clln_RequestedProducts_AC, dpdn_RequestDecision_ACADM.Selected.Value = ThisRecord.craf2_decision
+                                            ),
+                                            Trim(ti_Search_ACADM.Text),
+                                            "craf2_productname",
+                                            "craf2_productname",
+                                            "craf2_requesteremail"
+                                        ),
+                                        Value
+                                    )
+                                )
+                            ),
+                            RowNumber:Value
+                        }
+                    ),
+                    "Record"
+                )
+            Layout: =Layout.Vertical
+            TemplateFill: |-
+                =If(
+                    Mod(ThisItem.RowNumber, 2) > 0,
+                    If(
+                        check_Selected_UFMB_1.Value || ThisItem.craf2_name = record_Edit_This_ACADM.craf2_name || ThisItem.IsSelected, 
+                        ColorFade(BlueNaviHightLightBackground, 80%), 
+                        RGBA(0, 0, 0, 0)
+                    ),
+                    If(
+                        check_Selected_UFMB_1.Value || ThisItem.craf2_name = record_Edit_This_ACADM.craf2_name || ThisItem.IsSelected, 
+                        ColorFade(BlueNaviHightLightBackground, 80%), 
+                        GrayCanvasBackground
+                    )
+                )
+            TemplatePadding: =0
+            TemplateSize: =60
+            Width: =Parent.Width - 2
+            X: =1
+            Y: =ctn_Headers_ACADM.Y + ctn_Headers_ACADM.Height - 1
+            ZIndex: =1
+
+            btn_Delete_UFMB_1 As icon.Edit:
+                BorderColor: =REDWARNINGCOLOR
+                BorderThickness: =2
+                Color: =If(ThisItem.RowNumber = record_Edit_This_ACADM.RowNumber && var_show_delete, RGBA(255, 255, 255, 1), REDWARNINGCOLOR)
+                DisplayMode: =If(Text(ThisItem.craf2_decision) = "Pending", DisplayMode.Edit, DisplayMode.Disabled)
+                Fill: =If(ThisItem.RowNumber = record_Edit_This_ACADM.RowNumber && var_show_delete, REDWARNINGCOLOR, RGBA(0, 0, 0, 0))
+                Height: =25
+                HoverColor: =Color.White
+                HoverFill: =REDWARNINGCOLOR
+                Icon: =Icon.Cancel
+                OnSelect: |-
+                    =Concurrent(
+                        Set(record_Edit_This_ACADM, ThisItem),
+                        Select(btn_ACADM_Reset),
+                        UpdateContext({var_show_delete: true})
+                    )
+                Tooltip: ="Delete"
+                Visible: |-
+                    =If(
+                        Header_ApproveOrDecilne_ACADM.Width = 1,
+                        false,
+                        true
+                    )
+                Width: =25
+                X: |
+                    =btn_Edit_UFMB_1.X + btn_Edit_UFMB_1.Width + 15
+                Y: =(check_Selected_UFMB_1.Height - Self.Height) * 0.50
+                ZIndex: =1
+
+            btn_Edit_UFMB_1 As icon.Edit:
+                BorderColor: =BlueControlDarkBackground
+                BorderThickness: =2
+                Color: =If(ThisItem.RowNumber = record_Edit_This_ACADM.RowNumber && !var_show_delete, RGBA(255, 255, 255, 1), BlueControlDarkBackground)
+                DisplayMode: =If(Text(ThisItem.craf2_decision) = "Pending", DisplayMode.Edit, DisplayMode.Disabled)
+                Fill: =If(ThisItem.RowNumber = record_Edit_This_ACADM.RowNumber && !var_show_delete, BlueControlDarkBackground, RGBA(0, 0, 0, 0))
+                Height: =25
+                HoverBorderColor: =Self.Color
+                HoverColor: =Color.White
+                HoverFill: =Self.Color
+                Icon: =Icon.Check
+                OnSelect: |-
+                    =Concurrent(
+                        Set(record_Edit_This_ACADM, ThisItem),
+                        Select(btn_ACADM_Reset),
+                        UpdateContext({var_show_delete: false})
+                    )
+                PaddingBottom: =3
+                PaddingLeft: =3
+                PaddingRight: =3
+                PaddingTop: =3
+                Tooltip: ="Edit"
+                Visible: |-
+                    =If(
+                        Header_ApproveOrDecilne_ACADM.Width = 1,
+                        false,
+                        true
+                    )
+                Width: =25
+                X: =Header_ApproveOrDecilne_ACADM.X + (Header_ApproveOrDecilne_ACADM.Width - Self.Width - btn_Delete_UFMB_1.Width - 15) * 0.50
+                Y: =(check_Selected_UFMB_1.Height - Self.Height) * 0.50
+                ZIndex: =2
+
+            lbl_ReviewOwner_UFMB_1 As label:
+                Align: =Align.Center
+                AutoHeight: =true
+                Fill: =Parent.Fill
+                Font: =FontStyle
+                Height: =0
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =10
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: =ThisItem.craf2_requestdate
+                Width: =Header_RequestDate_ACADM.Width
+                X: =Header_RequestDate_ACADM.X
+                Y: =(lbl_FMBID_UFMB_1.Height - Self.Height) * 0.50
+                ZIndex: =10
+
+            html_BoardTypeTemplate_UFMB_1 As htmlViewer:
+                AutoHeight: =true
+                BorderColor: =RGBA(0, 0, 0, 0)
+                Fill: =RGBA(0, 0, 0, 0)
+                Font: =FontStyle
+                Height: =20
+                HtmlText: =ThisItem.craf2_justification
+                OnSelect: =Select(Parent)
+                PaddingLeft: =10
+                Size: =10
+                Width: =Header_Justification_ACADM.Width
+                X: =Header_Justification_ACADM.X
+                Y: =check_Selected_UFMB_1.Y + (check_Selected_UFMB_1.Height - Self.Height) * 0.50
+                ZIndex: =11
+
+            lbl_Product_UFMB_1 As label:
+                AutoHeight: =true
+                Fill: =Parent.Fill
+                Font: =FontStyle
+                Height: =50
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =10
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: =ThisItem.craf2_BoardType.BoardTypeName
+                Width: =Header_ReviewType_ACADM.Width
+                X: =Header_ReviewType_ACADM.X
+                Y: =(lbl_FMBID_UFMB_1.Height - Self.Height) * 0.50
+                ZIndex: =12
+
+            lbl_FMBID_UFMB_1 As label:
+                Align: =Align.Center
+                Fill: =Parent.Fill
+                Font: =FontStyle
+                Height: =check_Selected_UFMB_1.Height
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: =ThisItem.craf2_Product.ProductName
+                Width: =Header_Product_ACADM.Width
+                X: =Header_Product_ACADM.X
+                ZIndex: =13
+
+            lbl_LockDate_UFMB_1 As label:
+                Align: =Align.Center
+                Fill: =Parent.Fill
+                Font: =FontStyle
+                Height: =check_Selected_UFMB_1.Height
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: =ThisItem.craf2_requesteremail
+                Width: =Header_User_ACADM.Width
+                X: =Header_User_ACADM.X
+                ZIndex: =14
+
+            check_Selected_UFMB_1 As checkbox:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                CheckboxBorderColor: =check_selectAll_ACADM.CheckboxBorderColor
+                CheckboxSize: =check_selectAll_ACADM.CheckboxSize
+                CheckmarkFill: =check_selectAll_ACADM.CheckmarkFill
+                Default: =If(var_UFMB_SelectAll, true, false)
+                DisplayMode: =If(Text(ThisItem.craf2_decision) = "Pending", DisplayMode.Edit, DisplayMode.Disabled)
+                Fill: =Parent.Fill
+                Font: =FontStyle
+                Height: =60
+                OnCheck: |-
+                    =Set(var_bulk_update_visible_UFMB, false);
+                    Set(record_Edit_This_ACADM, Blank());
+                OnSelect: =Select(Parent)
+                OnUncheck: |-
+                    =Set(var_bulk_update_visible_UFMB, false);
+                    Set(record_Edit_This_ACADM, Blank());
+                PaddingLeft: =(Self.Width - Self.CheckboxSize) * 0.50
+                Size: =11
+                Text: =""
+                Width: =check_selectAll_ACADM.Width
+                X: =
+                ZIndex: =15
+
+            lbl_ReviewOwner_UFMB_2 As htmlViewer:
+                AutoHeight: =true
+                BorderColor: =RGBA(0, 0, 0, 0)
+                Fill: =RGBA(0, 0, 0, 0)
+                Font: =FontStyle
+                Height: =20
+                HtmlText: |-
+                    ="<center>" & If(IsBlankOrError(ThisItem.craf2_approveremail), "", Office365Users.UserProfile(ThisItem.craf2_approveremail).DisplayName)
+                    & "<br>" & ThisItem.craf2_decisiondate & "</center>"
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Width: =Header_TreatedBy_ACADM.Width
+                X: =Header_TreatedBy_ACADM.X
+                Y: =(lbl_FMBID_UFMB_1.Height - Self.Height) * 0.50
+                ZIndex: =17
+
+            lbl_ReviewOwner_UFMB_3 As htmlViewer:
+                AutoHeight: =true
+                BorderColor: =RGBA(0, 0, 0, 0)
+                Fill: =RGBA(0, 0, 0, 0)
+                Font: =FontStyle
+                Height: =20
+                HtmlText: ="<center>" & If(IsBlankOrError(ThisItem.craf2_isaccessrevoked) || Text(ThisItem.craf2_isaccessrevoked) = "No", "No", "Yes") & "</center>"
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Width: =Header_IsRevoked_ACADM.Width
+                X: =Header_IsRevoked_ACADM.X
+                Y: =(lbl_FMBID_UFMB_1.Height - Self.Height) * 0.50
+                ZIndex: =18
+
+        ctn_Headers_ACADM As groupContainer.manualLayoutContainer:
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            Height: =40
+            Width: =Parent.Width
+            ZIndex: =6
+
+            Back_Header_ACADM As button:
+                BorderColor: =Self.Fill
+                BorderStyle: =BorderStyle.None
+                BorderThickness: =0
+                DisabledBorderColor: =Self.BorderColor
+                DisabledColor: =Self.Color
+                DisabledFill: =Self.Fill
+                DisplayMode: =DisplayMode.Disabled
+                Fill: =ColorFade(BlueNaviHightLightBackground, 50%)
+                Font: =FontStyle
+                RadiusBottomLeft: |
+                    =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =20
+                RadiusTopRight: =20
+                Text: =""
+                Width: =Parent.Width
+                ZIndex: =1
+
+            Header_ApproveOrDecilne_ACADM As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =check_selectAll_ACADM.Height
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: ="Approve/ Decline"
+                Visible: =Self.Width <> 1
+                Width: |-
+                    =If(
+                        If("Read Access" = dpdn_AccessRequestType_ACA.Selected.name, CountRows(Filter(glry_Search_ReadOnly_ACA.AllItems, ThisRecord.check_Selected_ReadOnly.Value = true)) > 1, CountRows(Filter(glry_RequestedProducts_ACADM.AllItems, ThisRecord.check_Selected_UFMB_1.Value = true)) > 1),
+                        1,
+                        dpdn_RequestDecision_ACADM.Selected.Value = 'Decision (ReviewHub_RequestedProducts)'.Pending,
+                        140, 1
+                    )
+                X: =Header_RequestDate_ACADM.X + Header_RequestDate_ACADM.Width
+                ZIndex: =6
+
+            Header_RequestDate_ACADM As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =check_selectAll_ACADM.Height
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: ="Request Date"
+                Width: =Min(180, Parent.Width * 0.14)
+                X: =Header_Justification_ACADM.X + Header_Justification_ACADM.Width
+                ZIndex: =9
+
+            Header_Justification_ACADM As label:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =check_selectAll_ACADM.Height
+                PaddingBottom: =0
+                PaddingLeft: =10
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: ="Justification"
+                Width: =If(ctn_Approve_Decline_ACADM.Visible, 0, Parent.Width - (check_selectAll_ACADM.Width + Max(Header_ApproveOrDecilne_ACADM.Width, Header_TreatedBy_ACADM.Width) + Header_RequestDate_ACADM.Width  + Header_User_ACADM.Width + Header_Product_ACADM.Width + Header_ReviewType_ACADM.Width + Header_IsRevoked_ACADM.Width))
+                X: =Header_ReviewType_ACADM.X + Header_ReviewType_ACADM.Width
+                ZIndex: =10
+
+            Header_ReviewType_ACADM As label:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =check_selectAll_ACADM.Height
+                PaddingBottom: =0
+                PaddingLeft: =10
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: ="Review Type"
+                X: =Header_Product_ACADM.X+Header_Product_ACADM.Width
+                ZIndex: =11
+
+            Header_Product_ACADM As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =check_selectAll_ACADM.Height
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: ="Product"
+                Tooltip: ="FMB ID"
+                Width: =If(ctn_Approve_Decline_ACADM.Visible, (Parent.Width -  (check_selectAll_ACADM.Width + Header_ApproveOrDecilne_ACADM.Width + Header_RequestDate_ACADM.Width + Header_ReviewType_ACADM.Width + Header_User_ACADM.Width)), 250)
+                X: =Header_User_ACADM.X + Header_User_ACADM.Width
+                ZIndex: =12
+
+            Header_User_ACADM As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =check_selectAll_ACADM.Height
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: ="User"
+                Width: =250
+                X: =check_selectAll_ACADM.X + check_selectAll_ACADM.Width
+                ZIndex: =13
+
+            check_selectAll_ACADM As checkbox:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                CheckboxBorderColor: =Color.Black
+                CheckboxSize: =25
+                CheckmarkFill: =BlueControlDarkBackground
+                DisplayMode: =If(Text(First(glry_RequestedProducts_ACADM.AllItems).craf2_decision) = "Pending", DisplayMode.Edit, DisplayMode.Disabled)
+                Font: =FontStyle
+                Height: =Parent.Height
+                OnCheck: =Set(var_UFMB_SelectAll, true);
+                OnSelect: =
+                OnUncheck: =Set(var_UFMB_SelectAll, false);
+                PaddingLeft: =(Self.Width - Self.CheckboxSize) * 0.50
+                Reset: =true
+                Size: =10
+                Text: =""
+                Tooltip: ="Select All"
+                Width: =50
+                X: =
+                ZIndex: =14
+
+            Header_TreatedBy_ACADM As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =check_selectAll_ACADM.Height
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: ="Treated by"
+                Visible: =Self.Width <> 1
+                Width: |-
+                    =If(
+                    dpdn_RequestDecision_ACADM.Selected.Value <> 'Decision (ReviewHub_RequestedProducts)'.Pending,
+                        Header_RequestDate_ACADM.Width,
+                        0
+                    )
+                X: =Header_RequestDate_ACADM.X + Header_RequestDate_ACADM.Width
+                ZIndex: =15
+
+            Header_IsRevoked_ACADM As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =check_selectAll_ACADM.Height
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: ="IsRevoked?"
+                Visible: =Self.Width <> 1
+                Width: |-
+                    =If(
+                    dpdn_RequestDecision_ACADM.Selected.Value <> 'Decision (ReviewHub_RequestedProducts)'.Pending,
+                        100,
+                        1
+                    )
+                X: =Header_TreatedBy_ACADM.X + Header_TreatedBy_ACADM.Width
+                ZIndex: =16
+
+    ctn_Search_ReadOnly As groupContainer:
+        BorderColor: =
+        BorderStyle: =BorderStyle.None
+        Height: =App.Height- Self.Y - 15
+        Visible: ="Read Access" = dpdn_AccessRequestType_ACA.Selected.name
+        Width: |-
+            =If(
+                btn_BulkUpdate_ACADM.Visible,
+                App.Width - Self.X * 3 - btn_BulkUpdate_ACADM.Width,
+                If (
+                    !ctn_Approve_Decline_ACADM.Visible && !ctn_BulkUpdate_ACADM.Visible && !ctn_Add_User_ReadOnly.Visible,
+                    App.Width - Self.X * 2,
+                    App.Width * 0.70
+                )
+            )
+        X: =icon_Back_ACADM.X
+        Y: =icon_Search_ACADM.Y + icon_Search_ACADM.Height + 10
+        ZIndex: =10
+
+        glry_Search_ReadOnly_ACA As gallery.variableTemplateHeightGallery:
+            BorderColor: =Back_Header_ReadOnly.Fill
+            BorderThickness: =2
+            Height: =Parent.Height - Self.Y - 1
+            Items: |-
+                =Ungroup(//Ungroup function to add a Row Number column.
+                    ForAll(
+                        Sequence(
+                            CountRows(
+                                Search(
+                                    Filter(
+                                        clln_RequestedReadOnly_AC, Text(dpdn_RequestDecision_ACADM.Selected.Value) = Text(ThisRecord.chub_decision)
+                                    ),
+                                    Trim(ti_Search_ACADM.Text),
+                                    "craf2_name",
+                                    "craf2_email"
+                                )
+                            )
+                        ),
+                        {
+                            Record:Table(
+                                Last(
+                                    FirstN(
+                                        Search(
+                                            Filter(
+                                                clln_RequestedReadOnly_AC, Text(dpdn_RequestDecision_ACADM.Selected.Value) = Text(ThisRecord.chub_decision)
+                                            ),
+                                            Trim(ti_Search_ACADM.Text),
+                                            "craf2_name",
+                                            "craf2_email"
+                                        ),
+                                        Value
+                                    )
+                                )
+                            ),
+                            RowNumber:Value
+                        }
+                    ),
+                    "Record"
+                )
+            Layout: =Layout.Vertical
+            TemplateFill: |-
+                =If(
+                    Mod(ThisItem.RowNumber, 2) > 0,
+                    If(
+                        check_Selected_ReadOnly.Value || ThisItem.craf2_name = record_Edit_This_ACADM.craf2_name || ThisItem.IsSelected, 
+                        ColorFade(BlueNaviHightLightBackground, 80%), 
+                        RGBA(0, 0, 0, 0)
+                    ),
+                    If(
+                        check_Selected_ReadOnly.Value || ThisItem.craf2_name = record_Edit_This_ACADM.craf2_name || ThisItem.IsSelected, 
+                        ColorFade(BlueNaviHightLightBackground, 80%), 
+                        GrayCanvasBackground
+                    )
+                )
+            TemplatePadding: =0
+            TemplateSize: =60
+            Width: =Parent.Width
+            X: =1
+            Y: =ctn_Headers_ReadOnly_ACA.Y + ctn_Headers_ReadOnly_ACA.Height - 1
+            ZIndex: =1
+
+            btn_Reject_ReadOnly As icon.Edit:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Color: =If(ThisItem.RowNumber = record_Edit_This_ACADM.RowNumber && var_show_delete, RGBA(255, 255, 255, 1), REDWARNINGCOLOR)
+                DisplayMode: =If(Text(ThisItem.chub_decision) = "Pending", DisplayMode.Edit, DisplayMode.Disabled)
+                Fill: =If(ThisItem.RowNumber = record_Edit_This_ACADM.RowNumber && var_show_delete, REDWARNINGCOLOR, RGBA(0, 0, 0, 0))
+                Height: =btn_Approve_ReadOnly.Height + 5
+                HoverColor: =Color.White
+                HoverFill: =REDWARNINGCOLOR
+                Icon: =Icon.CancelBadge
+                OnSelect: |-
+                    =Concurrent(
+                        Set(record_Edit_This_ACADM, ThisItem),
+                        Select(btn_ACADM_Reset),
+                        UpdateContext({var_show_delete: true})
+                    )
+                Tooltip: ="Delete"
+                Visible: |-
+                    =If(
+                        Header_ApproveOrDecline_ReadOnly.Width = 1,
+                        false,
+                        true
+                    )
+                Width: |
+                    =btn_Approve_ReadOnly.Width + 5
+                X: |
+                    =btn_Approve_ReadOnly.X + btn_Approve_ReadOnly.Width + 15
+                Y: =btn_Approve_ReadOnly.Y - 2
+                ZIndex: =1
+
+            btn_Approve_ReadOnly As icon.Edit:
+                BorderColor: =Self.Color
+                BorderThickness: =2
+                Color: =If(ThisItem.RowNumber = record_Edit_This_ACADM.RowNumber && !var_show_delete, RGBA(255, 255, 255, 1), BlueControlDarkBackground)
+                DisplayMode: =If(Text(ThisItem.chub_decision) = "Pending", DisplayMode.Edit, DisplayMode.Disabled)
+                Fill: =If(ThisItem.RowNumber = record_Edit_This_ACADM.RowNumber && !var_show_delete, BlueControlDarkBackground, RGBA(0, 0, 0, 0))
+                Height: =25
+                HoverBorderColor: =Self.Color
+                HoverColor: =Color.White
+                HoverFill: =Self.Color
+                Icon: =Icon.Check
+                OnSelect: |-
+                    =Concurrent(
+                        Set(record_Edit_This_ACADM, ThisItem),
+                        Select(btn_ACADM_Reset),
+                        UpdateContext({var_show_delete: false})
+                    )
+                PaddingBottom: =3
+                PaddingLeft: =3
+                PaddingRight: =3
+                PaddingTop: =3
+                Tooltip: ="Edit"
+                Visible: |-
+                    =If(
+                        Header_ApproveOrDecline_ReadOnly.Width = 1,
+                        false,
+                        true
+                    )
+                Width: =25
+                X: =Header_ApproveOrDecline_ReadOnly.X + (Header_ApproveOrDecline_ReadOnly.Width - Self.Width - btn_Reject_ReadOnly.Width - 15) * 0.50
+                Y: =(check_Selected_ReadOnly.Height - Self.Height) * 0.50
+                ZIndex: =2
+
+            lbl_TreatedBy_ReadOnly As htmlViewer:
+                AutoHeight: =true
+                BorderColor: =RGBA(0, 0, 0, 0)
+                Fill: =RGBA(0, 0, 0, 0)
+                Font: =FontStyle
+                Height: =check_Selected_ReadOnly.Height
+                HtmlText: |-
+                    ="<center>" & If(IsBlankOrError(ThisItem.chub_approveremail), "", Office365Users.UserProfile(ThisItem.chub_approveremail).DisplayName)
+                    & "<br>" & ThisItem.chub_decisiondate & "</center>"
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Width: =Header_TreatedBy_ReadOnly.Width
+                X: =Header_TreatedBy_ReadOnly.X
+                Y: =(lbl_JustIfication_ReadOnly.Height - Self.Height) * 0.50
+                ZIndex: =3
+
+            lbl_RequestDate_ReadOnly As label:
+                Align: =Align.Center
+                AutoHeight: =true
+                Fill: =Parent.Fill
+                Font: =FontStyle
+                Height: =check_Selected_ReadOnly.Height
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =10
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: =ThisItem.createdon
+                Width: =Header_RequestDate_ReadOnly.Width
+                X: =Header_RequestDate_ReadOnly.X
+                Y: =(lbl_User_ReadOnly.Height - Self.Height) * 0.50
+                ZIndex: =4
+
+            lbl_JustIfication_ReadOnly As label:
+                Fill: =Parent.Fill
+                Font: =FontStyle
+                Height: =check_Selected_ReadOnly.Height
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =10
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: =ThisItem.craf2_justification
+                Width: =Header_Justification_ReadOnly.Width
+                X: =Header_Justification_ReadOnly.X
+                ZIndex: =5
+
+            check_Selected_ReadOnly As checkbox:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                CheckboxBorderColor: =check_selectAll_ReadOnly.CheckboxBorderColor
+                CheckboxSize: =check_selectAll_ReadOnly.CheckboxSize
+                CheckmarkFill: =check_selectAll_ReadOnly.CheckmarkFill
+                Default: =If(var_UFMB_SelectAll, true, false)
+                DisplayMode: =If(Text(ThisItem.chub_decision) = "Pending", DisplayMode.Edit, DisplayMode.Disabled)
+                Fill: =Parent.Fill
+                Font: =FontStyle
+                Height: =60
+                OnCheck: |-
+                    =Set(var_bulk_update_visible_UFMB, false);
+                    Set(record_Edit_This_ACADM, Blank());
+                OnSelect: =Select(Parent)
+                OnUncheck: |-
+                    =Set(var_bulk_update_visible_UFMB, false);
+                    Set(record_Edit_This_ACADM, Blank());
+                PaddingLeft: =(Self.Width - Self.CheckboxSize) * 0.50
+                Size: =11
+                Text: =""
+                Width: =check_selectAll_ReadOnly.Width
+                X: =
+                ZIndex: =6
+
+            lbl_User_ReadOnly As label:
+                Align: =Align.Center
+                Fill: =Parent.Fill
+                Font: =FontStyle
+                Height: =check_Selected_ReadOnly.Height
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: =ThisItem.craf2_email
+                Width: =Header_User_ReadOnly.Width
+                X: =Header_User_ReadOnly.X
+                ZIndex: =7
+
+        ctn_Headers_ReadOnly_ACA As groupContainer.manualLayoutContainer:
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            Height: =40
+            Width: =Parent.Width
+            ZIndex: =6
+
+            Back_Header_ReadOnly As button:
+                BorderColor: =Self.Fill
+                BorderStyle: =BorderStyle.None
+                BorderThickness: =0
+                DisabledBorderColor: =Self.BorderColor
+                DisabledColor: =Self.Color
+                DisabledFill: =Self.Fill
+                DisplayMode: =DisplayMode.Disabled
+                Fill: =ColorFade(BlueNaviHightLightBackground, 50%)
+                Font: =FontStyle
+                RadiusBottomLeft: |
+                    =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =20
+                RadiusTopRight: =20
+                Text: =""
+                Width: =Parent.Width + 1
+                ZIndex: =1
+
+            Header_ApproveOrDecline_ReadOnly As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =check_selectAll_ReadOnly.Height
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: ="Approve/ Decline"
+                Visible: =Self.Width <> 1
+                Width: |-
+                    =If(
+                        CountRows(Filter(glry_Search_ReadOnly_ACA.AllItems, ThisRecord.check_Selected_ReadOnly.Value = true)) > 1,
+                        1,
+                        dpdn_RequestDecision_ACADM.Selected.Value = 'Decision (ReviewHub_RequestedProducts)'.Pending,
+                        200, 1
+                    )
+                X: =Header_TreatedBy_ReadOnly.X + Header_TreatedBy_ReadOnly.Width
+                ZIndex: =2
+
+            Header_TreatedBy_ReadOnly As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =check_selectAll_ReadOnly.Height
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: ="Treated by"
+                Visible: =Self.Width <> 1
+                Width: |-
+                    =If(
+                    dpdn_RequestDecision_ACADM.Selected.Value <> 'Decision (ReviewHub_RequestedProducts)'.Pending,
+                        Header_RequestDate_ReadOnly.Width,
+                        0
+                    )
+                X: =Header_RequestDate_ReadOnly.X + Header_RequestDate_ReadOnly.Width
+                ZIndex: =3
+
+            Header_RequestDate_ReadOnly As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =check_selectAll_ACADM.Height
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: ="Request Date"
+                Width: =200
+                X: =Header_Justification_ReadOnly.X + Header_Justification_ReadOnly.Width
+                ZIndex: =4
+
+            Header_Justification_ReadOnly As label:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =check_selectAll_ReadOnly.Height
+                PaddingBottom: =0
+                PaddingLeft: =10
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: ="Justification"
+                Tooltip: ="FMB ID"
+                Width: =Parent.Width - (check_selectAll_ReadOnly.Width + Max(Header_ApproveOrDecline_ReadOnly.Width, Header_TreatedBy_ReadOnly.Width) + Header_RequestDate_ReadOnly.Width  + Header_User_ReadOnly.Width)
+                X: =Header_User_ReadOnly.X + Header_User_ReadOnly.Width
+                ZIndex: =5
+
+            Header_User_ReadOnly As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =check_selectAll_ReadOnly.Height
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: ="User"
+                Width: =300
+                X: =check_selectAll_ReadOnly.X + check_selectAll_ReadOnly.Width
+                ZIndex: =6
+
+            check_selectAll_ReadOnly As checkbox:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                CheckboxBorderColor: =Color.Black
+                CheckboxSize: =25
+                CheckmarkFill: =BlueControlDarkBackground
+                DisplayMode: =If(Text(First(glry_Search_ReadOnly_ACA.AllItems).chub_decision) = "Pending", DisplayMode.Edit, DisplayMode.Disabled)
+                Font: =FontStyle
+                Height: =Parent.Height
+                OnCheck: =Set(var_UFMB_SelectAll, true);
+                OnSelect: =
+                OnUncheck: =Set(var_UFMB_SelectAll, false);
+                PaddingLeft: =(Self.Width - Self.CheckboxSize) * 0.50
+                Reset: =true
+                Size: =10
+                Text: =""
+                Tooltip: ="Select All"
+                Width: =50
+                X: =
+                ZIndex: =7
+
+    lbl_ScreenTitle_ACADM As label:
+        DisabledColor: =BlueControlDarkBackground
+        DisabledFill: =Self.Fill
+        DisplayMode: =DisplayMode.Disabled
+        Fill: =GrayCanvasBackground
+        Font: =FontStyle
+        FontWeight: =FontWeight.Bold
+        Height: =55
+        PaddingLeft: =60
+        Size: =18
+        Text: ="Administration"
+        Width: =App.Width - Self.X
+        Y: =SS_AppHeader_ACADM.Y + SS_AppHeader_ACADM.Height
+        ZIndex: =11
+
+    icon_Back_ACADM As icon.BackArrow:
+        BorderColor: =RGBA(0, 0, 0, 0)
+        BorderStyle: =BorderStyle.None
+        Color: =BlueControlDarkBackground
+        Height: =30
+        HoverBorderColor: =Self.BorderColor
+        HoverColor: =Color.Purple
+        Icon: =Icon.BackArrow
+        OnSelect: =Back()
+        Tooltip: ="Back"
+        Width: =Self.Height
+        X: =15
+        Y: =lbl_ScreenTitle_ACADM.Y + (lbl_ScreenTitle_ACADM.Height - Self.Height) * 0.50
+        ZIndex: =12
+
+    btn_BulkStakeholderUpdate_ACADM As button:
+        BorderColor: =Self.Fill
+        Fill: =REDWARNINGCOLOR
+        Font: =FontStyle
+        FontWeight: =FontWeight.Bold
+        Height: =btn_BulkUpdate_ACADM.Height
+        HoverBorderColor: =Self.BorderColor
+        HoverColor: =Self.Fill
+        HoverFill: =Self.Color
+        OnSelect: |
+            =Clear(clln_ACMSrn_Stakeholders);
+            ForAll(
+                clln_BulkUpdate_RequestedProducts,
+                Collect(
+                    clln_ACMSrn_Stakeholders,
+                    {
+                        Department: Office365Users.UserProfile(ThisRecord.craf2_requesteremail).Department,
+                        DisplayName: Office365Users.UserProfile(ThisRecord.craf2_requesteremail).DisplayName,
+                        GivenName: Office365Users.UserProfile(ThisRecord.craf2_requesteremail).GivenName,
+                        Surname: Office365Users.UserProfile(ThisRecord.craf2_requesteremail).Surname, 
+                        Result: Office365Users.UserProfile(ThisRecord.craf2_requesteremail).UserPrincipalName,
+                        reqID_ToUpdate: ThisRecord.craf2_name, 
+                        btpID_ToUpdate: ThisRecord.craf2_BoardType.BoardTypeID,
+                        prdID_ToUpdate: ThisRecord.craf2_Product.ProductID
+                    }
+                )    
+            );
+            ForAll(
+                clln_ACMSrn_Stakeholders,
+                If(
+                    IsBlankOrError(LookUp(ReviewHub_Stakeholders, ThisRecord.craf2_Product.craf2_productid = prdID_ToUpdate && ThisRecord.craf2_BoardType.craf2_boardtypeid = btpID_ToUpdate)),
+                    Patch(
+                        ReviewHub_Stakeholders,
+                        Defaults(ReviewHub_Stakeholders),
+                        {
+                            craf2_title: LookUp(ReviewHub_BoardTypes, ThisRecord.craf2_boardtypeid=btpID_ToUpdate).craf2_boardtypeshortname & ": " & LookUp(ReviewHub_Products, ThisRecord.craf2_productid = prdID_ToUpdate).craf2_productname,
+                            craf2_BoardType: LookUp(ReviewHub_BoardTypes, ThisRecord.craf2_boardtypeid=btpID_ToUpdate),
+                            craf2_Product: LookUp(ReviewHub_Products, ThisRecord.craf2_productid = prdID_ToUpdate),
+                            ProductStakeholderEmails: 
+                                If(
+                                    IsBlankOrError(Result),
+                                    "",
+                                    Result
+                                ),
+                            TempStakeholders: 
+                                If(
+                                    IsBlankOrError(Result),
+                                    "",
+                                    Result
+                                ),
+                            StakeholderNames:
+                                If(
+                                    IsBlankOrError(DisplayName),
+                                    "",
+                                    DisplayName
+                                )
+                        }
+                    ),
+                    Patch(
+                        ReviewHub_Stakeholders,
+                        LookUp(
+                            ReviewHub_Stakeholders,
+                            ThisRecord.craf2_Product.craf2_productid = prdID_ToUpdate && ThisRecord.craf2_BoardType.craf2_boardtypeid = btpID_ToUpdate
+                        ),
+                        {
+                            ProductStakeholderEmails: 
+                                If(
+                                    IsBlankOrError(Result),
+                                    "",
+                                    LookUp(
+                            ReviewHub_Stakeholders,
+                            ThisRecord.craf2_Product.craf2_productid = prdID_ToUpdate && ThisRecord.craf2_BoardType.craf2_boardtypeid = btpID_ToUpdate
+                        ).ProductStakeholderEmails & "|" & Result
+                                ),
+                            TempStakeholders: 
+                                If(
+                                    IsBlankOrError(LookUp(
+                            ReviewHub_Stakeholders,
+                            ThisRecord.craf2_Product.craf2_productid = prdID_ToUpdate && ThisRecord.craf2_BoardType.craf2_boardtypeid = btpID_ToUpdate, TempStakeholders)) || IsBlankOrError(Result),
+                                    "",
+                                    LookUp(
+                            ReviewHub_Stakeholders,
+                            ThisRecord.craf2_Product.craf2_productid = prdID_ToUpdate && ThisRecord.craf2_BoardType.craf2_boardtypeid = btpID_ToUpdate
+                        ).TempStakeholders & "|" & Result
+                                ),
+                            StakeholderNames:
+                                If(
+                                    IsBlankOrError(DisplayName),
+                                    "",
+                                    LookUp(
+                            ReviewHub_Stakeholders,
+                            ThisRecord.craf2_Product.craf2_productid = prdID_ToUpdate && ThisRecord.craf2_BoardType.craf2_boardtypeid = btpID_ToUpdate
+                        ).StakeholderNames & "|" & DisplayName
+                                )
+                        }
+                    )
+                );
+            );
+            Clear(clln_BulkUpdate_RequestedProducts);
+            Clear(clln_ACMSrn_Stakeholders);
+        RadiusBottomLeft: =25
+        RadiusBottomRight: =25
+        RadiusTopLeft: =25
+        RadiusTopRight: =25
+        Size: =11
+        Text: ="Bulk Delete"
+        Visible: =false
+        Width: =btn_BulkUpdate_ACADM.Width
+        X: =1236
+        Y: =btn_BulkUpdate_ACADM.Y + btn_BulkUpdate_ACADM.Height + 30
+        ZIndex: =15
+
+    btn_GrantAccess_ACADM As button:
+        BorderColor: =BlueControlDarkBackground
+        DisplayMode: =If(ctn_BulkUpdate_ACADM.Visible || ctn_Approve_Decline_ACADM.Visible, DisplayMode.Disabled, DisplayMode.Edit)
+        Fill: =BlueControlDarkBackground
+        Font: =FontStyle
+        FontWeight: =FontWeight.Bold
+        Height: =25
+        HoverBorderColor: =Self.BorderColor
+        HoverColor: =Self.Fill
+        HoverFill: =Self.Color
+        OnSelect: =If("Read Access" = dpdn_AccessRequestType_ACA.Selected.name, Set(var_AddUserVisible, true)  ,Navigate(scn_AC_GrantAccess));
+        RadiusBottomLeft: =15
+        RadiusBottomRight: =15
+        RadiusTopLeft: =15
+        RadiusTopRight: =15
+        Size: =10
+        Text: ="Add new user"
+        Visible: =If(ctn_BulkUpdate_ACADM.Visible || ctn_Approve_Decline_ACADM.Visible || "Read Access" = dpdn_AccessRequestType_ACA.Selected.name, false, true)
+        Width: =120
+        X: =ctn_Search_ACADM.X + ctn_Search_ACADM.Width - Self.Width - 5
+        Y: =ti_Search_ACADM.Y// - Self.Height
+        ZIndex: =16
+
+    SS_AppHeader_ACADM As AppHeader:
+        DropDownSelection: =TrackRequestComponent_ACADM.HideTrackRequest
+        FeatureRequestUrl: =var_FeatureRequestURL
+        FeedbackButtonUrl: =var_SendFeedback_URL
+        inputAppDisplayName: =varAppHeaderText
+        ScorecardOnboardingFeatureUrl: =var_ScorecardOnboardingRequestURL
+        ShowSurveyButton: =false
+        Y: =0
+        ZIndex: =19
+
+    TrackRequestComponent_ACADM As TrackRequestComponent:
+        BlueControlDarkBackground: =BlueControlDarkBackground
+        BlueControlLightBackground: =BlueControlLightBackground
+        BlueNaviHightLightBackground: =BlueNaviHightLightBackground
+        DevOpsBaseUrl: =var_DevOpsBaseURL
+        DevOpsQueryID: =var_DevOpsQueryID
+        FontStyle: =FontStyle
+        GrayCanvasBackground: =GrayCanvasBackground
+        GRAYCOLOR: =GRAYCOLOR
+        GrayControlBackground: =GrayControlBackground
+        IsAdmin: =IsAdmin
+        Reset: =Self.Visible
+        Visible: =SS_AppHeader_ACADM.DisplayTrackRequest
+        X: =App.Width - Self.Width
+        Y: =SS_AppHeader_ACADM.Height
+        ZIndex: =20
+
+    grp_Filter_Clln_ACADM As group:
+        Height: =5
+        Width: =5
+        X: =60
+        Y: =60
+        ZIndex: =20
+
+        lbl_GlryRowCount_ACADM As label:
+            Align: =Align.Right
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            DisplayMode: =DisplayMode.View
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =35
+            PaddingLeft: =0
+            PaddingRight: =15
+            Size: =10
+            Text: |-
+                ="Records Count: " & CountRows(glry_RequestedProducts_ACADM.AllItems)
+            Visible: =false
+            Width: =140
+            X: =ctn_Search_ACADM.X + ctn_Search_ACADM.Width - Self.Width
+            Y: =ctn_Search_ACADM.Y - Self.Height
+            ZIndex: =6
+
+        ti_Search_ACADM As text:
+            BorderColor: =GRAYCOLOR
+            BorderThickness: =1
+            Clear: =true
+            Default: =""
+            DelayOutput: =true
+            FocusedBorderThickness: =2
+            Font: =FontStyle
+            Height: =25
+            HintText: ="Search by product name, board type name, user email"
+            HoverBorderColor: =Self.BorderColor
+            HoverFill: =GrayControlBackground
+            PaddingBottom: =0
+            PaddingTop: =0
+            RadiusBottomLeft: =20
+            RadiusBottomRight: =20
+            RadiusTopLeft: =20
+            RadiusTopRight: =20
+            Size: =9
+            Width: =Min(lbl_GlryRowCount_ACADM.X - Self.X - 30, 450)  //280
+            X: =icon_Search_ACADM.X + icon_Search_ACADM.Width + 5
+            Y: =icon_Search_ACADM.Y
+            ZIndex: =7
+
+        icon_Search_ACADM As icon.Search:
+            DisabledBorderColor: =RGBA(0, 0, 0, 0)
+            DisabledColor: =RGBA(0, 0, 0, 1)
+            DisplayMode: =DisplayMode.Disabled
+            Height: =ti_Search_ACADM.Height
+            Icon: =Icon.Search
+            PaddingBottom: =2
+            PaddingLeft: =2
+            PaddingRight: =2
+            PaddingTop: =2
+            Width: =ti_Search_ACADM.Height
+            X: =dpdn_RequestDecision_ACADM.X + dpdn_RequestDecision_ACADM.Width + 50
+            Y: =dpdn_RequestDecision_ACADM.Y
+            ZIndex: =8
+
+        dpdn_RequestDecision_ACADM As dropdown:
+            BorderColor: =
+            BorderThickness: =0
+            ChevronBackground: =Self.Fill
+            ChevronFill: =Color.Black
+            ChevronHoverBackground: =BlueControlLightBackground
+            ChevronHoverFill: =RGBA(0, 0, 0, 1)
+            Default: =First(clln_dropdown_ReviewMthYr).Month_Year
+            Fill: =GrayControlBackground
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =lbl_RequestDecision_ACADM.Height
+            HoverFill: =Self.ChevronHoverBackground
+            Items: =Choices(ReviewHub_RequestedProducts.Decision)
+            OnChange: =Reset(check_selectAll_ACADM); Set(var_UFMB_SelectAll, false); Select(btn_ItemInfo_Cancel_ACADM); Select(btn_BulkInfo_Cancel_ACADM);
+            PressedColor: =BlueControlDarkBackground
+            PressedFill: =BlueControlLightBackground
+            SelectionFill: =BlueNaviHightLightBackground
+            Size: =11
+            Width: =165
+            X: =lbl_RequestDecision_ACADM.X + lbl_RequestDecision_ACADM.Width
+            Y: =lbl_RequestDecision_ACADM.Y
+            ZIndex: =13
+
+        lbl_RequestDecision_ACADM As label:
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =25
+            PaddingRight: =0
+            Size: =11
+            Text: ="Filter by status"
+            Width: =115
+            X: =dpdn_AccessRequestType_ACA.X + dpdn_AccessRequestType_ACA.Width + 15
+            Y: =lbl_ScreenTitle_ACADM.Y + lbl_ScreenTitle_ACADM.Height + 10
+            ZIndex: =14
+
+        dpdn_AccessRequestType_ACA As dropdown:
+            BorderColor: =
+            BorderThickness: =0
+            ChevronBackground: =Self.Fill
+            ChevronFill: =Color.Black
+            ChevronHoverBackground: =BlueControlLightBackground
+            ChevronHoverFill: =RGBA(0, 0, 0, 1)
+            Default: =First(clln_dropdown_ReviewMthYr).Month_Year
+            Fill: =GrayControlBackground
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =lbl_AccessRequestType_ACA.Height
+            HoverFill: =Self.ChevronHoverBackground
+            Items: |-
+                =Table({name : "Read Access"}, {name: "Read Write Access"})
+            OnChange: =Reset(check_selectAll_ACADM); Set(var_UFMB_SelectAll, false); Select(btn_ItemInfo_Cancel_ACADM); Select(btn_BulkInfo_Cancel_ACADM);
+            PressedColor: =BlueControlDarkBackground
+            PressedFill: =BlueControlLightBackground
+            SelectionFill: =BlueNaviHightLightBackground
+            Size: =11
+            Width: =170
+            X: =lbl_AccessRequestType_ACA.X + lbl_AccessRequestType_ACA.Width
+            Y: =lbl_AccessRequestType_ACA.Y
+            ZIndex: =17
+
+        lbl_AccessRequestType_ACA As label:
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =25
+            PaddingLeft: =0
+            PaddingRight: =0
+            Size: =11
+            Text: ="Filter by Request Type"
+            Width: =160
+            X: |-
+                =
+                icon_Back_ACADM.X
+            Y: =lbl_ScreenTitle_ACADM.Y + lbl_ScreenTitle_ACADM.Height + 10
+            ZIndex: =18
+
+    ctn_IfGalleryLoaded_ACADM As groupContainer:
+        BorderColor: =RGBA(0, 0, 0, 0)
+        BorderStyle: =BorderStyle.None
+        Fill: =RGBA(255, 255, 255, 0.9)
+        Height: =Parent.Height - Self.Y
+        Visible: =ctx_IfGalleryLoaded
+        Width: =App.Width
+        ZIndex: =21
+
+        Label_ACAdmScrn_Loading As label:
+            Align: =Align.Center
+            Color: =LEFTNAVHIGLIGHTCOLOR
+            Font: =FONTNAME
+            Size: =18
+            Text: =If(ctx_savingData, "Saving data...", "Getting data...")
+            Width: =Image_ACAdmScrn_Loading.Width
+            X: =Image_ACAdmScrn_Loading.X
+            Y: =Image_ACAdmScrn_Loading.Y + Image_ACAdmScrn_Loading.Height - 10
+            ZIndex: =1
+
+        Image_ACAdmScrn_Loading As image:
+            Image: =boardsrn_loading
+            PaddingBottom: =20
+            PaddingRight: =10
+            PaddingTop: =10
+            Width: =300
+            X: =Parent.Width * 0.5 - Self.Width * 0.5
+            Y: =Parent.Height * 0.5 - Self.Height * 0.5 - 50
+            ZIndex: =2
+

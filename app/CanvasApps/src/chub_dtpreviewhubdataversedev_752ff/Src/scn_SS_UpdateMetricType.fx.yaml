@@ -1,0 +1,2985 @@
+scn_SS_UpdateMetricType As screen:
+    OnVisible: |
+        =Concurrent(
+            If(
+                IsCoordinator,
+                ClearCollect(
+                    clln_EditMT_Allowed_MetricTypeIDs,
+                    ShowColumns(
+                        Filter(
+                            clln_MetricTypeDetail,
+                            ThisRecord.mtd_BoardTypeID in IsCoordinator_BoardTypes
+                        ),
+                        "mtd_MetricTypeId"
+                    )
+                )
+            ),
+            ClearCollect(
+                clln_MetricTypeObjectives,
+                RenameColumns(
+                    ShowColumns(
+                        ReviewHub_MetricTypeObjectives,
+                        "craf2_mto_boardtypeid",
+                        "craf2_objectiveid",
+                        "craf2_objectivename"
+                    ),
+                    "craf2_mto_boardtypeid",
+                    "mto_BoardTypeID_selected",
+                    "craf2_objectiveid",
+                    "mto_ObjectiveID_selected",
+                    "craf2_objectivename",
+                    "mto_ObjectiveName_selected"
+                )
+            )
+        );
+
+    ctn_Edit_UMT As groupContainer.verticalAutoLayoutContainer:
+        BorderColor: =Top_UpdateMT_UMT.Fill
+        BorderThickness: =2
+        Height: =App.Height - Self.Y - 15
+        LayoutDirection: =LayoutDirection.Vertical
+        LayoutGap: =10
+        LayoutMode: =LayoutMode.Auto
+        LayoutOverflowY: =LayoutOverflow.Scroll
+        Visible: =!IsBlankOrError(record_Edit_This_MetricType)
+        Width: =Top_UpdateMT_UMT.Width - 2
+        X: =Top_UpdateMT_UMT.X + 1
+        Y: =Top_UpdateMT_UMT.Y + Top_UpdateMT_UMT.Height - 1
+        ZIndex: =1
+
+        ctn_EditMT As groupContainer:
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            FillPortions: =0
+            Height: |-
+                =If(
+                    lbl_Enum_UMT.Visible, 
+                    ti_Enum_UMT.Y + ti_Enum_UMT.Height + 5, 
+                    lbl_DeprecateDt_UMT.Y + lbl_DeprecateDt_UMT.Height + 5
+                )
+            LayoutMinHeight: =100
+            LayoutMinWidth: =250
+            Visible: =Parent.Visible
+            Width: =App.Width - Self.X - 15
+            X: =ctn_Search_MetricType.X + ctn_Search_MetricType.Width + 15
+            Y: =lbl_ScreenTitle_UMT.Y + lbl_ScreenTitle_UMT.Height + 5
+            ZIndex: =1
+
+            ti_Enum_UMT As text:
+                BorderColor: =GRAYCOLOR
+                BorderThickness: =1
+                Default: =record_Edit_This_MetricType.craf2_metrictypeenumerateoptions
+                DisplayMode: =If(Text(record_Edit_This_MetricType.craf2_valuetype)="Text", DisplayMode.Edit, DisplayMode.Disabled)
+                Font: =FontStyle
+                Height: =30
+                HintText: ="Separate each value by ''|''. For example, ""G|R|Y|W"""
+                HoverBorderColor: =Self.BorderColor
+                HoverFill: =ColorFade(BlueControlLightBackground, 75%)
+                OnChange: |-
+                    =UpdateContext(
+                        {
+                            var_MetricType_OnChange_UMT: true
+                        }
+                    )
+                PaddingLeft: =10
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Size: =11
+                Visible: =lbl_Enum_UMT.Visible
+                Width: =Parent.Width - Self.X * 2
+                X: =15
+                Y: =lbl_Enum_UMT.Y + lbl_Enum_UMT.Height
+                ZIndex: =2
+
+            lbl_Enum_UMT As label:
+                Font: =FontStyle
+                FontWeight: =FontWeight.Bold
+                Height: =30
+                PaddingLeft: =15
+                Size: =11
+                Text: |-
+                    ="This is a ""Text"" metric. Enumerate options: "
+                Visible: =If(Text(record_Edit_This_MetricType.craf2_valuetype)="Text", true, false)
+                Width: =Parent.Width
+                Y: =btn_DeprecateDt_UMT.Y + btn_DeprecateDt_UMT.Height + 10
+                ZIndex: =3
+
+            DatePicker_DeprecateDt_UMT As datepicker:
+                BorderColor: =GRAYCOLOR
+                BorderThickness: =1
+                DefaultDate: =record_Edit_This_MetricType.craf2_metrictypedeprecateddate
+                DisabledColor: =RGBA(237, 237, 237, 1)
+                Font: =FontStyle
+                Height: =lbl_EffectiveDt_UMT.Height
+                IconBackground: =GrayControlBackground
+                IconFill: =RGBA(0, 0, 0, 1)
+                IsEditable: =true
+                OnChange: |-
+                    =If(
+                        !IsBlankOrError(record_Edit_This_MetricType) 
+                            && Self.SelectedDate <> record_Edit_This_MetricType.craf2_metrictypedeprecateddate, 
+                        UpdateContext({var_MetricType_OnChange_UMT: true})
+                    )
+                PaddingBottom: =3
+                PaddingLeft: =8
+                PaddingRight: =3
+                PaddingTop: =3
+                Size: =11
+                Visible: =var_Display_EditMT_Deprecate || !IsBlankOrError(record_Edit_This_MetricType.craf2_metrictypedeprecateddate)
+                Width: =DatePicker_EffectiveDt_UMT.Width
+                X: =lbl_DeprecateDt_UMT.X + lbl_DeprecateDt_UMT.Width
+                Y: =lbl_DeprecateDt_UMT.Y
+                ZIndex: =4
+
+            btn_DeprecateDt_UMT As button:
+                Align: =Align.Left
+                BorderStyle: =BorderStyle.None
+                BorderThickness: =0
+                Color: =BlueControlDarkBackground
+                Fill: =RGBA(0, 0, 0, 0)
+                Font: =FontStyle
+                FontWeight: =FontWeight.Normal
+                Height: =30
+                HoverColor: =Color.Purple
+                HoverFill: =Self.Fill
+                OnSelect: =Set(var_Display_EditMT_Deprecate, true)
+                PaddingLeft: =0
+                PressedColor: =Self.Color
+                PressedFill: =Self.Fill
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Size: =11
+                Text: |-
+                    =If(
+                        IsBlankOrError(record_Edit_This_MetricType.craf2_metrictypedeprecateddate), 
+                        "(No value. Click to Edit)", 
+                        Text(record_Edit_This_MetricType.craf2_metrictypedeprecateddate, "mm/dd/yyyy")
+                    )
+                Underline: =true
+                Visible: |-
+                    =If(
+                        DatePicker_DeprecateDt_UMT.Visible,
+                        false,
+                        IsBlankOrError(record_Edit_This_MetricType.craf2_metrictypedeprecateddate)
+                    )
+                Width: =180
+                X: =lbl_DeprecateDt_UMT.X + lbl_DeprecateDt_UMT.Width
+                Y: =lbl_DeprecateDt_UMT.Y
+                ZIndex: =5
+
+            lbl_DeprecateDt_UMT As label:
+                Font: =FontStyle
+                FontWeight: =FontWeight.Bold
+                Height: =30
+                PaddingLeft: =15
+                PaddingRight: =0
+                Size: =11
+                Text: |-
+                    ="Deprecated Date:"
+                X: |
+                    =0
+                Y: =lbl_EffectiveDt_UMT.Y + lbl_EffectiveDt_UMT.Height + 10
+                ZIndex: =6
+
+            DatePicker_EffectiveDt_UMT As datepicker:
+                BorderColor: =GRAYCOLOR
+                BorderThickness: =1
+                DefaultDate: =record_Edit_This_MetricType.craf2_metrictypeeffectivedate
+                Font: =FontStyle
+                Height: =lbl_EffectiveDt_UMT.Height
+                IconBackground: =GrayControlBackground
+                IconFill: =RGBA(0, 0, 0, 1)
+                OnChange: |-
+                    =If(
+                        !IsBlankOrError(record_Edit_This_MetricType) 
+                            && Self.SelectedDate <> record_Edit_This_MetricType.craf2_metrictypeeffectivedate, 
+                        UpdateContext({var_MetricType_OnChange_UMT: true})
+                    )
+                PaddingBottom: =3
+                PaddingLeft: =8
+                PaddingRight: =3
+                PaddingTop: =3
+                Size: =11
+                Width: =130
+                X: =lbl_EffectiveDt_UMT.X + lbl_EffectiveDt_UMT.Width
+                Y: =lbl_EffectiveDt_UMT.Y
+                ZIndex: =7
+
+            lbl_EffectiveDt_UMT As label:
+                Font: =FontStyle
+                FontWeight: =FontWeight.Bold
+                Height: =30
+                PaddingLeft: =15
+                PaddingRight: =0
+                Size: =11
+                Text: |-
+                    ="Effective Date:"
+                Width: =130
+                Y: =lbl_IsTrendDown_UMT.Y + lbl_IsTrendDown_UMT.Height + 10
+                ZIndex: =8
+
+            Toggle_IsTrendDown_UMT As toggleSwitch:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Default: =If(Text(record_Edit_This_MetricType.craf2_metrictypeistrenddown) = "Yes", true, false)
+                FalseFill: =GRAYCOLOR
+                FalseText: ="No"
+                Font: =FontStyle
+                OnChange: |-
+                    =If(
+                        !IsBlankOrError(record_Edit_This_MetricType) 
+                            && If(Self.Value, "Yes", "No") <> Text(record_Edit_This_MetricType.craf2_metrictypeistrenddown), 
+                        UpdateContext({var_MetricType_OnChange_UMT: true})
+                    )
+                Size: =11
+                TrueFill: =BlueControlDarkBackground
+                TrueText: ="Yes"
+                X: =lbl_IsTrendDown_UMT.X  + lbl_IsTrendDown_UMT.Width
+                Y: =lbl_IsTrendDown_UMT.Y
+                ZIndex: =9
+
+            lbl_IsTrendDown_UMT As label:
+                Font: =FontStyle
+                FontWeight: =FontWeight.Bold
+                Height: =30
+                PaddingLeft: =15
+                Size: =11
+                Text: ="Is Metric Value Smaller The Better?"
+                Width: =270
+                Y: =dpdn_Stage_UMT.Y + dpdn_Stage_UMT.Height + 10
+                ZIndex: =10
+
+            dpdn_Stage_UMT As dropdown:
+                BorderColor: =GRAYCOLOR
+                BorderThickness: =1
+                ChevronBackground: =GrayControlBackground
+                ChevronFill: =Color.Black
+                ChevronHoverBackground: =ColorFade(Self.ChevronBackground, -20%)
+                ChevronHoverFill: =RGBA(0, 0, 0, 1)
+                Default: =record_Edit_This_MetricType.craf2_metrictypestage
+                Font: =FontStyle
+                Height: =lbl_Stage_UMT.Height
+                HoverBorderColor: =Self.BorderColor
+                HoverFill: =ColorFade(BlueControlLightBackground, 75%)
+                Items: =Choices(ReviewHub_MetricTypes.MetricTypeStage)
+                OnChange: |-
+                    =If(
+                        !IsBlankOrError(record_Edit_This_MetricType) 
+                            && Self.Selected.Value <> record_Edit_This_MetricType.craf2_metrictypestage, 
+                        UpdateContext({var_MetricType_OnChange_UMT: true})
+                    )
+                PressedColor: =BlueControlDarkBackground
+                PressedFill: =BlueControlLightBackground
+                SelectionFill: =BlueNaviHightLightBackground
+                Size: =11
+                Width: =Parent.Width - Self.X * 2
+                X: =15
+                Y: =lbl_Stage_UMT.Y + lbl_Stage_UMT.Height
+                ZIndex: =11
+
+            lbl_Stage_UMT As label:
+                Font: =FontStyle
+                FontWeight: =FontWeight.Bold
+                Height: =30
+                PaddingLeft: =15
+                PaddingRight: =0
+                Size: =11
+                Text: |-
+                    ="Stage / Category:"
+                Width: =Parent.Width
+                Y: =lbl_UpdateWeight_UMT.Y + lbl_UpdateWeight_UMT.Height + 10
+                ZIndex: =12
+
+            ti_UpdateWeight_UMT As text:
+                BorderColor: =GRAYCOLOR
+                BorderThickness: =1
+                Default: =record_Edit_This_MetricType.craf2_metrictypehealthweight
+                Font: =FontStyle
+                Format: =TextFormat.Number
+                Height: =lbl_MTName_UMT.Height
+                HintText: |-
+                    ="Defalut: 5"
+                HoverBorderColor: =Self.BorderColor
+                HoverFill: =ColorFade(BlueControlLightBackground, 75%)
+                OnChange: |-
+                    =If(
+                        !IsBlankOrError(record_Edit_This_MetricType) 
+                            && Trim(Self.Text)<>Trim(record_Edit_This_MetricType.craf2_metrictypehealthweight), 
+                        UpdateContext({var_MetricType_OnChange_UMT: true})
+                    )
+                PaddingLeft: =10
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Size: =11
+                Width: =85
+                X: =lbl_UpdateWeight_UMT.X + lbl_UpdateWeight_UMT.Width
+                Y: =lbl_UpdateWeight_UMT.Y
+                ZIndex: =13
+
+            lbl_UpdateWeight_UMT As label:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Font: =FontStyle
+                FontWeight: =FontWeight.Bold
+                Height: =30
+                PaddingLeft: =15
+                PaddingRight: =0
+                Size: =11
+                Text: |-
+                    ="Health Weight:"
+                Width: =130
+                Y: =lbl_DataSource_UMT.Y + lbl_DataSource_UMT.Height + 10
+                ZIndex: =14
+
+            ti_DataSource_UMT As text:
+                BorderColor: =GRAYCOLOR
+                BorderThickness: =1
+                Default: =record_Edit_This_MetricType.craf2_metrictypesource
+                Font: =FontStyle
+                Height: =lbl_DataSource_UMT.Height
+                HintText: ="Where does the data come from?"
+                HoverBorderColor: =Self.BorderColor
+                HoverFill: =ColorFade(BlueControlLightBackground, 75%)
+                OnChange: |-
+                    =If(
+                        !IsBlankOrError(record_Edit_This_MetricType) 
+                            && Trim(Self.Text)<>Trim(record_Edit_This_MetricType.craf2_metrictypesource), 
+                        UpdateContext({var_MetricType_OnChange_UMT: true})
+                    )
+                PaddingLeft: =10
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Size: =11
+                Width: =Parent.Width - lbl_DataSource_UMT.Width - 15
+                X: =lbl_DataSource_UMT.X + lbl_DataSource_UMT.Width
+                Y: =lbl_DataSource_UMT.Y
+                ZIndex: =15
+
+            lbl_DataSource_UMT As label:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Font: =FontStyle
+                FontWeight: =FontWeight.Bold
+                Height: =30
+                PaddingLeft: =15
+                PaddingRight: =0
+                Size: =11
+                Text: |-
+                    ="Data Source:"
+                Width: =115
+                Y: |
+                    =ti_Desc_UMT.Y + ti_Desc_UMT.Height + 10
+                ZIndex: =16
+
+            ti_Desc_UMT As text:
+                BorderColor: =GRAYCOLOR
+                BorderThickness: =1
+                Default: =record_Edit_This_MetricType.craf2_metrictypedescription
+                Font: =FontStyle
+                Height: =90
+                HintText: ="Metric Type Description"
+                HoverBorderColor: =Self.BorderColor
+                HoverFill: =ColorFade(BlueControlLightBackground, 75%)
+                Mode: =TextMode.MultiLine
+                OnChange: |-
+                    =If(
+                        !IsBlankOrError(record_Edit_This_MetricType) 
+                            && Trim(Self.Text)<>Trim(record_Edit_This_MetricType.craf2_metrictypedescription), 
+                        UpdateContext({var_MetricType_OnChange_UMT: true})
+                    )
+                PaddingLeft: =10
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Size: =11
+                Width: =ti_MTName_UMT.Width
+                X: =15
+                Y: =lbl_Desc_UMT.Y + lbl_Desc_UMT.Height
+                ZIndex: =17
+
+            lbl_Desc_UMT As label:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Font: =FontStyle
+                FontWeight: =FontWeight.Bold
+                Height: =30
+                PaddingLeft: =15
+                Size: =11
+                Text: |-
+                    ="Description:"
+                Width: =Parent.Width
+                Y: =lbl_ShortNameTip_UMT.Y + lbl_ShortNameTip_UMT.Height + 5
+                ZIndex: =18
+
+            lbl_ShortNameTip_UMT As label:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Color: =ti_ShortName_UMT.BorderColor
+                Font: =FontStyle
+                Height: =20
+                Size: =10
+                Text: |-
+                    ="# Letters: " & Len(ti_ShortName_UMT.Text)
+                Width: =ti_ShortName_UMT.Width
+                X: =ti_ShortName_UMT.X
+                Y: =ti_ShortName_UMT.Y + ti_ShortName_UMT.Height
+                ZIndex: =19
+
+            ti_ShortName_UMT As text:
+                BorderColor: =If(Len(Trim(Self.Text)) <= 25, GRAYCOLOR, REDWARNINGCOLOR)
+                BorderThickness: =1
+                Default: =record_Edit_This_MetricType.craf2_metrictypeshortname
+                Font: =FontStyle
+                Height: =lbl_MTName_UMT.Height
+                HintText: ="Metric Type Short Name"
+                HoverBorderColor: =Self.BorderColor
+                HoverFill: =ColorFade(BlueControlLightBackground, 75%)
+                OnChange: |-
+                    =If(
+                        !IsBlankOrError(record_Edit_This_MetricType) 
+                            && Trim(Self.Text)<>Trim(record_Edit_This_MetricType.craf2_metrictypeshortname), 
+                        UpdateContext({var_MetricType_OnChange_UMT: true})
+                    )
+                PaddingLeft: =10
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Size: =11
+                Width: =ti_MTName_UMT.Width
+                X: =15
+                Y: =lbl_ShortName_UMT.Y + lbl_ShortName_UMT.Height
+                ZIndex: =20
+
+            lbl_ShortName_UMT As label:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Font: =FontStyle
+                FontWeight: =FontWeight.Bold
+                Height: =30
+                PaddingLeft: =15
+                Size: =11
+                Text: |-
+                    ="Short Name (no more than 25 letters):"
+                Width: =Parent.Width
+                Y: =ti_MTName_UMT.Y + ti_MTName_UMT.Height + 10
+                ZIndex: =21
+
+            ti_MTName_UMT As text:
+                BorderColor: =GRAYCOLOR
+                BorderThickness: =1
+                Default: =record_Edit_This_MetricType.craf2_metrictypename
+                Font: =FontStyle
+                Height: =lbl_MTName_UMT.Height
+                HintText: ="Metric Type Name"
+                HoverBorderColor: =Self.BorderColor
+                HoverFill: =ColorFade(BlueControlLightBackground, 75%)
+                OnChange: |-
+                    =If(
+                        !IsBlankOrError(record_Edit_This_MetricType) 
+                            && Trim(Self.Text) <> Trim(record_Edit_This_MetricType.craf2_metrictypename), 
+                        UpdateContext({var_MetricType_OnChange_UMT: true})
+                    )
+                PaddingLeft: =10
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Size: =11
+                Width: =Parent.Width - Self.X * 2
+                X: |
+                    =15
+                Y: =lbl_MTName_UMT.Y + lbl_MTName_UMT.Height
+                ZIndex: =22
+
+            lbl_MTName_UMT As label:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Font: =FontStyle
+                FontWeight: =FontWeight.Bold
+                Height: =30
+                PaddingLeft: =15
+                Size: =11
+                Text: |-
+                    ="Metric Type Name:"
+                Width: =Parent.Width
+                ZIndex: =23
+
+        ctn_EditMTD As groupContainer:
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            FillPortions: =0
+            Height: =btn_Submit_UMT.Y + btn_Submit_UMT.Height + 5
+            LayoutMinHeight: =100
+            LayoutMinWidth: =250
+            Width: =ctn_EditMT.Width
+            X: =ctn_Search_MetricType.X + ctn_Search_MetricType.Width + 10
+            Y: =ctn_EditMT.Y+ctn_EditMT.Height + 35
+            ZIndex: =2
+
+            btn_Cancel_UMT As button:
+                BorderColor: =Self.Fill
+                Fill: =GRAYCOLOR
+                Font: =FontStyle
+                FontWeight: =FontWeight.Bold
+                Height: =btn_Submit_UMT.Height
+                HoverColor: =Self.Fill
+                HoverFill: =Self.Color
+                OnSelect: |
+                    =Set(
+                        record_Edit_This_MetricType,
+                        Blank()
+                    );
+                    Concurrent(
+                        Clear(clln_ss_AddToTemplate_Edit_MetricType),
+                        Select(btn_Reset_UMT)
+                    );
+                    UpdateContext(
+                        {
+                            var_MetricType_OnChange_UMT: false,
+                            var_MetricTypeDetail_OnChange_UMTD: false
+                        }
+                    );
+                PaddingBottom: =0
+                PaddingTop: =0
+                RadiusBottomLeft: =15
+                RadiusBottomRight: =15
+                RadiusTopLeft: =15
+                RadiusTopRight: =15
+                Size: =10
+                Text: ="Cancel"
+                Width: =90
+                X: =btn_Submit_UMT.X + btn_Submit_UMT.Width + 30
+                Y: =btn_Submit_UMT.Y
+                ZIndex: =3
+
+            btn_Submit_UMT As button:
+                BorderColor: =Self.Fill
+                DisplayMode: |-
+                    =If(
+                        (var_MetricType_OnChange_UMT || var_MetricTypeDetail_OnChange_UMTD) 
+                            && (
+                                (CountRows(glry_Template_UMTD.AllItems) > 0 && !IsBlankOrError(dpdn_Objective_UMTD.Selected.mto_ObjectiveName_selected)) 
+                                || CountRows(glry_Template_UMTD.AllItems) = 0
+                            ),
+                        DisplayMode.Edit,
+                        DisplayMode.Disabled
+                    )
+                Fill: =BlueControlDarkBackground
+                Font: =FontStyle
+                FontWeight: =FontWeight.Bold
+                Height: =25
+                HoverBorderColor: =Self.BorderColor
+                HoverColor: =Self.Fill
+                HoverFill: =Self.Color
+                OnSelect: |
+                    =If(
+                        var_MetricType_OnChange_UMT,
+                        Patch(
+                            ReviewHub_MetricTypes,
+                            LookUp(
+                                ReviewHub_MetricTypes,
+                                ThisRecord.craf2_metrictypeid = record_Edit_This_MetricType.craf2_metrictypeid
+                            ),
+                            {
+                                craf2_metrictypename: Trim(ti_MTName_UMT.Text),
+                                craf2_metrictypedescription: Trim(ti_Desc_UMT.Text),
+                                craf2_metrictypesource: Trim(ti_DataSource_UMT.Text),
+                                craf2_metrictypestage: dpdn_Stage_UMT.Selected.Value,
+                                craf2_metrictypeshortname: Trim(ti_ShortName_UMT.Text),
+                                craf2_metrictypehealthweight: Value(ti_UpdateWeight_UMT.Text),
+                                craf2_metrictypeenumerateoptions: Trim(ti_Enum_UMT.Text),
+                                craf2_metrictypeistrenddown: Toggle_IsTrendDown_UMT.Value,
+                                craf2_metrictypeeffectivedate: DatePicker_EffectiveDt_UMT.SelectedDate,
+                                craf2_metrictypedeprecateddate: DatePicker_DeprecateDt_UMT.SelectedDate
+                            }
+                        );
+                        Set(
+                            record_Edit_This_MetricType,
+                            LookUp(
+                                ReviewHub_MetricTypes,
+                                ThisRecord.craf2_metrictypeid = record_Edit_This_MetricTypeID
+                            )
+                        )
+                    );
+                    If(
+                        var_MetricTypeDetail_OnChange_UMTD,
+                        If(
+                            dpdn_NewTemplate_UMTD.Visible,//Link this metric type to a new template
+                            Patch(
+                                ReviewHub_MetricTypeDetails,
+                                Defaults(ReviewHub_MetricTypeDetails),
+                                {
+                                    craf2_MetricType: LookUp(
+                                        ReviewHub_MetricTypes,
+                                        ThisRecord.craf2_metrictypeid = record_Edit_This_MetricType.craf2_metrictypeid
+                                    ),
+                                    craf2_metrictypedetailupdatemethod: dpdn_U_MTDUpdateMethod.Selected.Value,
+                                    craf2_metrictypequaterlycalcmethod: dpdn_QuarterlYCalcMethod_UMTD.Selected.Value,
+                                    craf2_metrictypedetailpowerbiurl: Trim(ti_PBI_UMTD.Text),
+                                    craf2_MetricTypeDetailTemplate: LookUp(
+                                        ReviewHub_MetricTemplates,
+                                        ThisRecord.craf2_templateid = dpdn_NewTemplate_UMTD.Selected.mt_TemplateID
+                                    ),
+                                    craf2_mtd_BoardType: LookUp(
+                                        ReviewHub_MetricTemplates,
+                                        ThisRecord.craf2_templateid = dpdn_NewTemplate_UMTD.Selected.mt_TemplateID
+                                    ).craf2_TemplateBoardType,
+                                    craf2_mtd_displayorder: Max(
+                                        Filter(
+                                            ReviewHub_MetricTypeDetails,
+                                            ThisRecord.craf2_MetricTypeDetailTemplate.craf2_templateid = dpdn_NewTemplate_UMTD.Selected.mt_TemplateID && ThisRecord.craf2_MetricType.craf2_metrictypestage = dpdn_Stage_UMT.Selected.Value
+                                        ),
+                                        craf2_mtd_displayorder
+                                    ) + 1,
+                                    craf2_mtd_Objective: LookUp(
+                                        ReviewHub_MetricTypeObjectives,
+                                        ThisRecord.craf2_mto_boardtypeid = dpdn_NewTemplate_UMTD.Selected.TemplateBoardTypeID && ThisRecord.craf2_objectivename = dpdn_Objective_UMTD.Selected.mto_ObjectiveName_selected
+                                    )
+                                }
+                            ),
+                            Concurrent(
+                                Patch(//Update in existing linked templates.
+                                    ReviewHub_MetricTypeDetails,
+                                    LookUp(
+                                        ReviewHub_MetricTypeDetails,
+                                        ThisRecord.craf2_MetricTypeDetailTemplate.craf2_templateid = glry_Template_UMTD.Selected.Edit_TemplateID && ThisRecord.craf2_MetricType.craf2_metrictypeid = record_Edit_This_MetricType.craf2_metrictypeid
+                                    ),
+                                    {
+                                        craf2_mtd_Objective: LookUp(
+                                            ReviewHub_MetricTypeObjectives,
+                                            ThisRecord.craf2_mto_boardtypeid = glry_Template_UMTD.Selected.Edit_TemplateBoardTypeID && ThisRecord.craf2_objectivename = Trim(dpdn_Objective_UMTD.Selected.mto_ObjectiveName_selected)
+                                        ),
+                                        craf2_metrictypedetailpowerbiurl: Trim(ti_PBI_UMTD.Text),
+                                        craf2_metrictypedetailupdatemethod: dpdn_U_MTDUpdateMethod.Selected.Value,
+                                        craf2_metrictypequaterlycalcmethod: dpdn_QuarterlYCalcMethod_UMTD.Selected.Value
+                                    }
+                                ),
+                                Patch(
+                                    clln_MetricTypeDetail,
+                                    LookUp(
+                                        clln_MetricTypeDetail,
+                                        ThisRecord.mtd_TemplateID = glry_Template_UMTD.Selected.Edit_TemplateID && ThisRecord.mtd_MetricTypeId = record_Edit_This_MetricType.craf2_metrictypeid
+                                    ),
+                                    {
+                                        mtd_MetricTypeSubgroup: Trim(dpdn_Objective_UMTD.Selected.mto_ObjectiveName_selected),
+                                        mtd_MetricPowerBIUrl: Trim(ti_PBI_UMTD.Text),
+                                        mtd_UpdateMethod: Text(dpdn_U_MTDUpdateMethod.Selected.Value),
+                                        mtd_MetricTypeQuaterlyCalcMethod: Text(dpdn_QuarterlYCalcMethod_UMTD.Selected.Value)
+                                    }
+                                )
+                                /*;
+                                Patch(
+                                    clln_MetricTypeDetail,
+                                    LookUp(
+                                        clln_MetricTypeDetail,
+                                        ThisRecord.mtd_TemplateID = glry_Template_UMTD.Selected.Edit_TemplateID && ThisRecord.mtd_MetricTypeId = record_Edit_This_MetricType.craf2_metrictypeid
+                                    ),
+                                    {
+                                        mtd_MetricTypeQuaterlyCalcMethod: Text(dpdn_QuarterlYCalcMethod_UMTD.Selected.Value)
+                                    }
+                                );
+                                */
+                            )
+                        )
+                    );
+                    
+                    
+                    
+                    Set(record_Edit_This_MetricType, Blank());
+                    
+                    Concurrent(
+                        UpdateContext(
+                            {
+                                var_MetricType_OnChange_UMT: false,
+                                var_MetricTypeDetail_OnChange_UMTD: false
+                            }
+                        ),
+                        Clear(clln_ss_AddToTemplate_Edit_MetricType),
+                        Select(btn_Reset_UMT);
+                    );
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                RadiusBottomLeft: =15
+                RadiusBottomRight: =15
+                RadiusTopLeft: =15
+                RadiusTopRight: =15
+                Size: =10
+                Text: ="Submit"
+                Width: =90
+                X: =(Parent.Width - (Self.Width*2 + 30)) * 0.50
+                Y: =ctn_UpdateInTemplate_UMTD.Y + ctn_UpdateInTemplate_UMTD.Height + 15
+                ZIndex: =4
+
+            ctn_UpdateInTemplate_UMTD As groupContainer.manualLayoutContainer:
+                Height: =html_QuarterlyCalcMethod_UMTD.Y + html_QuarterlyCalcMethod_UMTD.Height + 15
+                Width: =Parent.Width - Self.X * 2
+                X: =15
+                Y: |-
+                    =If(
+                        dpdn_NewTemplate_UMTD.Visible,
+                        dpdn_NewTemplate_UMTD.Y + dpdn_NewTemplate_UMTD.Height + 10,
+                        If(
+                            CountRows(Filter(ReviewHub_MetricTypeDetails, ThisRecord.craf2_MetricType.craf2_metrictypeid = record_Edit_This_MetricType.craf2_metrictypeid)) = 0,
+                            btn_AddToTemp_UMTD.Y + btn_AddToTemp_UMTD.Height + 10,
+                            glry_Template_UMTD.Y + glry_Template_UMTD.Height + 10
+                        )
+                    )
+                ZIndex: =5
+
+                Back_UpdateInTemplate_UMTD As button:
+                    Align: =Align.Left
+                    BorderColor: =Top_UpdateInTemplate_UMTD.Fill
+                    DisabledBorderColor: =Self.BorderColor
+                    DisabledColor: =Color.Black
+                    DisabledFill: =Self.Fill
+                    DisplayMode: =DisplayMode.Disabled
+                    Fill: =Color.White
+                    Font: =FontStyle
+                    FontWeight: =FontWeight.Bold
+                    Height: =Parent.Height - Self.Y - 1
+                    HoverFill: =Self.Fill
+                    PaddingLeft: =20
+                    RadiusBottomLeft: |
+                        =0
+                    RadiusBottomRight: =0
+                    RadiusTopLeft: =0
+                    RadiusTopRight: =0
+                    Size: =14
+                    Text: =""
+                    Visible: =ctn_Edit_UMT.Visible
+                    Width: =Parent.Width - 2
+                    X: =1
+                    Y: =Top_UpdateInTemplate_UMTD.Y + Top_UpdateInTemplate_UMTD.Height - 1
+                    ZIndex: =1
+
+                dpdn_QuarterlYCalcMethod_UMTD As dropdown:
+                    BorderColor: =GRAYCOLOR
+                    BorderThickness: =1
+                    ChevronBackground: =GrayControlBackground
+                    ChevronFill: =Color.Black
+                    ChevronHoverBackground: =ColorFade(RGBA(255, 255, 255, 1), -20%)
+                    Default: |-
+                        =LookUp(
+                                ReviewHub_MetricTypeDetails, 
+                                ThisRecord.craf2_MetricTypeDetailTemplate.craf2_templateid = glry_Template_UMTD.Selected.Edit_TemplateID 
+                                    && ThisRecord.craf2_MetricType.craf2_metrictypeid = record_Edit_This_MetricType.craf2_metrictypeid
+                        ).craf2_metrictypequaterlycalcmethod
+                    Font: =FontStyle
+                    Height: =dpdn_U_MTDUpdateMethod.Height
+                    HoverBorderColor: =Self.BorderColor
+                    HoverFill: =ColorFade(BlueControlLightBackground, 75%)
+                    Items: =Choices(ReviewHub_QuaterlyCalculationMethod)
+                    OnChange: |-
+                        =If(
+                            !IsBlankOrError(record_Edit_This_MetricType) && Self.Selected.Value <> LookUp(
+                                ReviewHub_MetricTypeDetails,
+                                ThisRecord.craf2_MetricTypeDetailTemplate.craf2_templateid = glry_Template_UMTD.Selected.Edit_TemplateID && ThisRecord.craf2_MetricType.craf2_metrictypeid = record_Edit_This_MetricType.craf2_metrictypeid
+                            ).craf2_metrictypequaterlycalcmethod,
+                            UpdateContext({var_MetricTypeDetail_OnChange_UMTD: true})
+                        )
+                    PressedColor: =Self.Color
+                    PressedFill: =Self.Fill
+                    SelectionFill: =BlueNaviHightLightBackground
+                    Size: =11
+                    Width: =dpdn_U_MTDUpdateMethod.Width
+                    X: =html_QuarterlyCalcMethod_UMTD.X + html_QuarterlyCalcMethod_UMTD.Width
+                    Y: =html_QuarterlyCalcMethod_UMTD.Y + (html_QuarterlyCalcMethod_UMTD.Height / 3)
+                    ZIndex: =2
+
+                html_QuarterlyCalcMethod_UMTD As htmlViewer:
+                    AutoHeight: =true
+                    Font: =FontStyle
+                    Height: =31
+                    HtmlText: |-
+                        ="<b>Quarterly Calculation Method:</b><font color=red>*</font>"
+                    OnSelect: =
+                    PaddingLeft: =15
+                    PaddingRight: =0
+                    Width: =label_U_MTDUpdateMethod.Width
+                    Y: =label_U_MTDUpdateMethod.Y + label_U_MTDUpdateMethod.Height + 5
+                    ZIndex: =3
+
+                dpdn_U_MTDUpdateMethod As dropdown:
+                    BorderColor: =GRAYCOLOR
+                    BorderThickness: =1
+                    ChevronBackground: =GrayControlBackground
+                    ChevronFill: =Color.Black
+                    ChevronHoverBackground: =ColorFade(Self.ChevronBackground, -20%)
+                    ChevronHoverFill: =RGBA(0, 0, 0, 1)
+                    Default: |-
+                        =LookUp(
+                                ReviewHub_MetricTypeDetails, 
+                                ThisRecord.craf2_MetricTypeDetailTemplate.craf2_templateid = glry_Template_UMTD.Selected.Edit_TemplateID 
+                                    && ThisRecord.craf2_MetricType.craf2_metrictypeid = record_Edit_This_MetricType.craf2_metrictypeid
+                        ).craf2_metrictypedetailupdatemethod
+                    Font: =FontStyle
+                    Height: =label_U_MTDUpdateMethod.Height
+                    HoverFill: =ColorFade(BlueControlLightBackground, 75%)
+                    Items: =Choices(ReviewHub_MetricTypeDetails.MetricTypeDetailUpdateMethod)
+                    OnChange: |-
+                        =If(
+                            !IsBlankOrError(record_Edit_This_MetricType) && Self.Selected.Value <> LookUp(
+                                ReviewHub_MetricTypeDetails,
+                                ThisRecord.craf2_MetricTypeDetailTemplate.craf2_templateid = glry_Template_UMTD.Selected.Edit_TemplateID && ThisRecord.craf2_MetricType.craf2_metrictypeid = record_Edit_This_MetricType.craf2_metrictypeid
+                            ).craf2_metrictypedetailupdatemethod,
+                            UpdateContext({var_MetricTypeDetail_OnChange_UMTD: true})
+                        )
+                    PressedColor: =BlueControlDarkBackground
+                    PressedFill: =BlueControlLightBackground
+                    SelectionFill: =BlueNaviHightLightBackground
+                    Size: =11
+                    Width: =185
+                    X: =label_U_MTDUpdateMethod.X + label_U_MTDUpdateMethod.Width
+                    Y: =label_U_MTDUpdateMethod.Y
+                    ZIndex: =4
+
+                label_U_MTDUpdateMethod As label:
+                    Font: =FontStyle
+                    FontWeight: =FontWeight.Bold
+                    Height: =30
+                    PaddingLeft: =15
+                    Size: =11
+                    Text: |-
+                        ="Update Method:"
+                    Width: =145
+                    Y: =ti_PBI_UMTD.Y + ti_PBI_UMTD.Height + 10
+                    ZIndex: =5
+
+                ti_PBI_UMTD As text:
+                    BorderColor: =GRAYCOLOR
+                    BorderThickness: =1
+                    Clear: =true
+                    Default: |-
+                        =LookUp(
+                                clln_MetricTypeDetail, 
+                                ThisRecord.mtd_TemplateID = glry_Template_UMTD.Selected.Edit_TemplateID 
+                                    && ThisRecord.mtd_MetricTypeId = record_Edit_This_MetricType.craf2_metrictypeid
+                        ).mtd_MetricPowerBIUrl
+                    Font: =FontStyle
+                    Height: =lbl_PBI_UMTD.Height*1.5
+                    HintText: |-
+                        ="Power BI URL Link. Please starts with https://"
+                    HoverBorderColor: =Self.BorderColor
+                    HoverFill: =ColorFade(BlueControlLightBackground, 75%)
+                    Mode: =TextMode.MultiLine
+                    OnChange: |-
+                        =If(
+                            !IsBlankOrError(record_Edit_This_MetricType) && Trim(Self.Text) <> Trim(
+                                LookUp(
+                                    clln_MetricTypeDetail,
+                                    ThisRecord.mtd_TemplateID = glry_Template_UMTD.Selected.Edit_TemplateID && ThisRecord.mtd_MetricTypeId = record_Edit_This_MetricType.craf2_metrictypeid
+                                ).mtd_MetricPowerBIUrl
+                            ),
+                            UpdateContext({var_MetricTypeDetail_OnChange_UMTD: true})
+                        )
+                    PaddingLeft: =5
+                    RadiusBottomLeft: =0
+                    RadiusBottomRight: =0
+                    RadiusTopLeft: =0
+                    RadiusTopRight: =0
+                    Size: =11
+                    Width: =Parent.Width - Self.X * 2
+                    X: =15
+                    Y: =lbl_PBI_UMTD.Y + lbl_PBI_UMTD.Height
+                    ZIndex: =6
+
+                lbl_PBI_UMTD As label:
+                    BorderColor: =RGBA(0, 0, 0, 0)
+                    BorderStyle: =BorderStyle.None
+                    Font: =FontStyle
+                    FontWeight: =FontWeight.Bold
+                    Height: =30
+                    PaddingLeft: =15
+                    Size: =11
+                    Text: |-
+                        ="Power BI URL:"
+                    Width: =Parent.Width
+                    Y: =dpdn_Objective_UMTD.Y + dpdn_Objective_UMTD.Height + 10
+                    ZIndex: =7
+
+                icon_ManageObjective_UMTD As icon.Add:
+                    BorderColor: =RGBA(0, 0, 0, 0)
+                    BorderStyle: =BorderStyle.None
+                    Color: =RGBA(255, 255, 255, 1)
+                    DisabledColor: =Self.Color
+                    Fill: =BlueControlDarkBackground
+                    Height: =dpdn_Objective_UMTD.Height
+                    HoverColor: =Self.Color
+                    Icon: =Icon.Settings
+                    OnSelect: |-
+                        =UpdateContext(
+                            {
+                                var_Show_ManageMTObjective: true,
+                                var_AddNew_ManageMTObjective: false,
+                                var_Edit_ManageMTObjective: false,
+                                var_Delete_ManageMTObjective: false
+                            }
+                        )
+                    PaddingBottom: =4
+                    PaddingLeft: =4
+                    PaddingRight: =4
+                    PaddingTop: =4
+                    PressedBorderColor: =Self.BorderColor
+                    PressedColor: =Self.Fill
+                    PressedFill: =Self.Color
+                    Tooltip: ="Manage Subgroup / Metric Objective"
+                    Width: =Self.Height
+                    X: =Parent.Width - Self.Width - 15
+                    Y: =dpdn_Objective_UMTD.Y
+                    ZIndex: =8
+
+                dpdn_Objective_UMTD As combobox:
+                    BorderColor: =If(IsBlankOrError(Self.Selected.mto_ObjectiveName_selected) || CountRows(Self.SelectedItems) = 0, REDWARNINGCOLOR, GRAYCOLOR)
+                    BorderThickness: =1
+                    ChevronBackground: =GrayControlBackground
+                    ChevronFill: =Color.Black
+                    ChevronHoverBackground: =
+                    ChevronHoverFill: =Color.Black
+                    DefaultSelectedItems: |-
+                        ={
+                            mto_ObjectiveName_selected: 
+                            LookUp(
+                                clln_MetricTypeDetail, 
+                                ThisRecord.mtd_MetricTypeId = record_Edit_This_MetricType.craf2_metrictypeid 
+                                && ThisRecord.mtd_TemplateID = glry_Template_UMTD.Selected.Edit_TemplateID
+                            ).mtd_MetricTypeSubgroup
+                        }
+                    DisplayFields: =["mto_ObjectiveName_selected"]
+                    Font: =FontStyle
+                    Height: =30
+                    HoverBorderColor: =
+                    HoverFill: =BlueControlLightBackground
+                    InputTextPlaceholder: ="Select a metric type objective / subgroup"
+                    IsSearchable: =false
+                    Items: |-
+                        =SortByColumns(
+                            DropColumns(
+                                GroupBy(
+                                    Filter(
+                                        clln_MetricTypeObjectives,
+                                        ThisRecord.mto_BoardTypeID_selected 
+                                            in 
+                                            Filter(clln_MetricTypeDetail, ThisRecord.mtd_MetricTypeId = record_Edit_This_MetricType.craf2_metrictypeid).mtd_BoardTypeID
+                                    ),
+                                    "mto_ObjectiveName_selected",
+                                    "DummyGroup"
+                                ),
+                                "DummyGroup"
+                            ),
+                            "mto_ObjectiveName_selected",
+                            SortOrder.Ascending
+                        )
+                    OnChange: |-
+                        =If(
+                            !IsBlankOrError(record_Edit_This_MetricType) && Self.Selected.mto_ObjectiveName_selected <> LookUp(
+                                clln_MetricTypeDetail,
+                                ThisRecord.mtd_MetricTypeId = record_Edit_This_MetricType.craf2_metrictypeid && ThisRecord.mtd_TemplateID = glry_Template_UMTD.Selected.Edit_TemplateID
+                            ).mtd_MetricTypeSubgroup,
+                            UpdateContext({var_MetricTypeDetail_OnChange_UMTD: true})
+                        )
+                    PaddingBottom: =0
+                    PaddingRight: =8
+                    PaddingTop: =0
+                    PressedColor: =BlueControlDarkBackground
+                    PressedFill: =BlueControlLightBackground
+                    Reset: =
+                    SearchFields: =["mto_ObjectiveName_selected"]
+                    SearchItems: =[]
+                    SelectionFill: =BlueNaviHightLightBackground
+                    SelectMultiple: =false
+                    Size: =11
+                    Tooltip: ="Select Metric Type Objective"
+                    Width: =icon_ManageObjective_UMTD.X - Self.X - 5
+                    X: =15
+                    Y: =lbl_Objective_UMTD.Y + lbl_Objective_UMTD.Height
+                    ZIndex: =9
+
+                lbl_Objective_UMTD As label:
+                    Font: =FontStyle
+                    FontWeight: =FontWeight.Bold
+                    Height: =30
+                    PaddingLeft: =15
+                    Size: =11
+                    Text: |-
+                        ="Metric Objective:"
+                    Width: =Parent.Width
+                    Y: =html_TemplateBoardType_UMTD.Y + html_TemplateBoardType_UMTD.Height + 5
+                    ZIndex: =10
+
+                html_TemplateBoardType_UMTD As htmlViewer:
+                    AutoHeight: =true
+                    Font: =FontStyle
+                    HtmlText: |-
+                        ="<b>Associated Board Type: </b>" & 
+                        If(
+                            dpdn_NewTemplate_UMTD.Visible,
+                            dpdn_NewTemplate_UMTD.Selected.TemplateBoardTypeName,
+                            glry_Template_UMTD.Selected.Edit_TemplateBoardTypeName
+                        )
+                    PaddingLeft: =15
+                    PaddingRight: =0
+                    Width: =Parent.Width
+                    Y: =Top_UpdateInTemplate_UMTD.Y + Top_UpdateInTemplate_UMTD.Height + 5
+                    ZIndex: =11
+
+                Top_UpdateInTemplate_UMTD As button:
+                    Align: =Align.Left
+                    BorderColor: =Self.Fill
+                    BorderStyle: =BorderStyle.None
+                    BorderThickness: =0
+                    DisabledBorderColor: =Self.BorderColor
+                    DisabledColor: =Color.Black
+                    DisabledFill: =Self.Fill
+                    DisplayMode: =DisplayMode.Disabled
+                    Fill: =GrayBorderLight
+                    Font: =FontStyle
+                    FontWeight: =FontWeight.Bold
+                    Height: =html_UpdateInTemplate_UMTD.Height
+                    HoverFill: =Self.Fill
+                    PaddingLeft: =20
+                    RadiusBottomLeft: |
+                        =0
+                    RadiusBottomRight: =0
+                    RadiusTopLeft: |
+                        =25
+                    RadiusTopRight: |
+                        =25
+                    Size: =14
+                    Text: =""
+                    Visible: =ctn_Edit_UMT.Visible
+                    Width: =Parent.Width
+                    ZIndex: =12
+
+                html_UpdateInTemplate_UMTD As htmlViewer:
+                    AutoHeight: =true
+                    Fill: =RGBA(0,0,0,0)
+                    Font: =FontStyle
+                    HtmlText: |-
+                        =If(
+                            dpdn_NewTemplate_UMTD.Visible,
+                            "<center>Add this metric type to the <b>" & dpdn_NewTemplate_UMTD.Selected.mt_TemplateName & "</b> template</center>",
+                            "<center>Update properties below for the <b>" & glry_Template_UMTD.Selected.Edit_TemplateName & "</b> template</center>"
+                        )
+                    PaddingBottom: =7
+                    PaddingTop: =7
+                    Width: =Parent.Width
+                    ZIndex: =13
+
+            glry_Template_UMTD As gallery.galleryHorizontal:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Height: |-
+                    =If(
+                        CountRows(glry_Template_UMTD.AllItems) = 0,
+                        0,
+                        RoundUp(CountRows(glry_Template_UMTD.AllItems) * 170 / (Self.Width + 0.00001),  0) * 40
+                    )
+                Items: |-
+                    =ShowColumns(
+                        AddColumns(
+                            Filter(
+                                ReviewHub_MetricTypeDetails, 
+                                ThisRecord.craf2_MetricType.craf2_metrictypeid = record_Edit_This_MetricType.craf2_metrictypeid
+                            ),
+                            "Edit_TemplateID", ThisRecord.craf2_MetricTypeDetailTemplate.craf2_templateid,
+                            "Edit_TemplateName", ThisRecord.craf2_MetricTypeDetailTemplate.craf2_templatename,
+                            "Edit_TemplateBoardTypeID", ThisRecord.craf2_mtd_BoardType.craf2_boardtypeid,
+                            "Edit_TemplateBoardTypeName", ThisRecord.craf2_mtd_BoardType.craf2_boardtypename
+                        ),
+                        "Edit_TemplateID", "Edit_TemplateName", "Edit_TemplateBoardTypeID", "Edit_TemplateBoardTypeName"
+                    )
+                OnSelect: =
+                ShowScrollbar: =false
+                TemplateFill: =
+                TemplateSize: =btn_Template_UMT.Width + 10
+                Transition: =Transition.Push
+                Visible: =IsEmpty(clln_ss_AddToTemplate_Edit_MetricType)
+                Width: =Parent.Width - Self.X - 15
+                WrapCount: =RoundUp(CountRows(glry_Template_UMTD.AllItems) * 170 / (Self.Width + 0.00001),  0)
+                X: =btn_AddToTemp_UMTD.X + btn_AddToTemp_UMTD.Width + 5
+                Y: =lbl_Template_UMTD.Y + lbl_Template_UMTD.Height + 2.5
+                ZIndex: =6
+
+                btn_Template_UMT As button:
+                    BorderColor: =BlueControlDarkBackground
+                    Color: =If(ThisItem.IsSelected, Color.White, BlueControlDarkBackground)
+                    Fill: =If(ThisItem.IsSelected, BlueControlDarkBackground, Color.White)
+                    Font: =FontStyle
+                    FontWeight: =FontWeight.Normal
+                    Height: =25
+                    HoverBorderColor: =Self.BorderColor
+                    HoverColor: =Self.Color
+                    HoverFill: =Self.Fill
+                    OnSelect: =
+                    PaddingBottom: =0
+                    PaddingLeft: =0
+                    PaddingRight: =0
+                    PaddingTop: =0
+                    PressedBorderColor: =Self.PressedFill
+                    PressedColor: =Self.Color
+                    PressedFill: =ColorFade(Self.Fill, -20%)
+                    RadiusBottomLeft: =20
+                    RadiusBottomRight: =20
+                    RadiusTopLeft: =20
+                    RadiusTopRight: =20
+                    Size: =10
+                    Text: =ThisItem.Edit_TemplateName
+                    Width: =150
+                    ZIndex: =2
+
+            dpdn_NewTemplate_UMTD As dropdown:
+                BorderColor: =GRAYCOLOR
+                BorderThickness: =1
+                ChevronBackground: =GrayControlBackground
+                ChevronFill: =Color.Black
+                ChevronHoverBackground: =ColorFade(Self.ChevronBackground, -20%)
+                ChevronHoverFill: =RGBA(0, 0, 0, 1)
+                Font: =FontStyle
+                Height: =30
+                HoverBorderColor: =Self.BorderColor
+                Items: |-
+                    =Sort(
+                        Filter(
+                            clln_ss_AddToTemplate_Edit_MetricType,
+                            (IsAdmin || (IsCoordinator && ThisRecord.TemplateBoardTypeID in IsCoordinator_BoardTypes))
+                            && ThisRecord.mt_TemplateID in var_DisplayMetricTemplateID.TemplateID
+                        ),
+                        mt_TemplateID
+                    )
+                PaddingBottom: =8
+                PaddingTop: =8
+                PressedColor: =BlueControlDarkBackground
+                PressedFill: =BlueControlLightBackground
+                SelectionFill: =BlueNaviHightLightBackground
+                Size: =11
+                Tooltip: ="Select a template."
+                Visible: =!IsEmpty(clln_ss_AddToTemplate_Edit_MetricType)
+                Width: =200
+                X: =btn_AddToTemp_UMTD.X + btn_AddToTemp_UMTD.Width + 20
+                Y: =btn_AddToTemp_UMTD.Y
+                ZIndex: =7
+
+            btn_AddToTemp_UMTD As icon.AddDocument:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Color: =RGBA(255, 255, 255, 1)
+                Fill: =BlueControlDarkBackground
+                Height: =30
+                HoverBorderColor: =Self.BorderColor
+                HoverColor: =Self.Color
+                Icon: =Icon.Add
+                OnSelect: |-
+                    =ClearCollect(
+                        clln_ss_AddToTemplate_Edit_MetricType,
+                        Filter(
+                            RenameColumns(
+                                AddColumns(
+                                ShowColumns(
+                                    ReviewHub_MetricTemplates,
+                                    "craf2_templateid",
+                                    "craf2_templatename",
+                                    "craf2_TemplateBoardType"
+                                ),
+                                "TemplateBoardTypeID", ThisRecord.craf2_TemplateBoardType.craf2_boardtypeid,
+                                "TemplateBoardTypeName", ThisRecord.craf2_TemplateBoardType.craf2_boardtypename
+                                ),
+                                "craf2_templateid",
+                                "mt_TemplateID",
+                                "craf2_templatename",
+                                "mt_TemplateName"
+                            ),
+                            !(ThisRecord.mt_TemplateID in glry_Template_UMTD.AllItems.Edit_TemplateID)
+                        )
+                    );
+                    UpdateContext(
+                        {
+                            var_MetricTypeDetail_OnChange_UMTD: true
+                        }
+                    );
+                PaddingBottom: =3
+                PaddingTop: =3
+                PressedBorderColor: =Self.BorderColor
+                PressedColor: =Self.Fill
+                PressedFill: =Self.Color
+                Tooltip: ="Add this metric type to a template."
+                Width: =30
+                X: =15
+                Y: =lbl_Template_UMTD.Y + lbl_Template_UMTD.Height + 5
+                ZIndex: =8
+
+            lbl_Template_UMTD As label:
+                Font: =FontStyle
+                FontWeight: =FontWeight.Bold
+                Height: =30
+                PaddingLeft: =15
+                Size: =11
+                Text: |-
+                    ="Linked Templates (Groups):" & If(CountRows(glry_Template_UMTD.AllItems) = 0, " (No Value)")
+                Width: =Parent.Width
+                Y: =html_Header_UMTD.Y + html_Header_UMTD.Height + 5
+                ZIndex: =9
+
+            html_Header_UMTD As htmlViewer:
+                AutoHeight: =true
+                BorderColor: =RGBA(0, 0, 0, 0)
+                Fill: =Top_UpdateInTemplate_UMTD.Fill
+                Font: =FontStyle
+                Height: =35
+                HtmlText: |-
+                    ="<font style='font-weight:600'>This metric type is linked to <font color=#0072C6>" & CountRows(Filter(ReviewHub_MetricTypeDetails, ThisRecord.craf2_MetricType.craf2_metrictypeid = record_Edit_This_MetricType.craf2_metrictypeid)) 
+                    & " template(s)</font>. " & 
+                    If(
+                        CountRows(Filter(ReviewHub_MetricTypeDetails, ThisRecord.craf2_MetricType.craf2_metrictypeid = record_Edit_This_MetricType.craf2_metrictypeid))=0,
+                        "Click ""+"" to add this metric type to a template.",
+                        "The following properties can vary among different templates. Please select a template to update."
+                    )
+                PaddingBottom: =10
+                PaddingLeft: =15
+                PaddingTop: =10
+                Size: =12
+                Width: =Parent.Width
+                ZIndex: =10
+
+        html_LastModified_UMT As htmlViewer:
+            AlignInContainer: =AlignInContainer.Stretch
+            AutoHeight: =true
+            BorderColor: =RGBA(0, 0, 0, 0)
+            DisabledBorderColor: =RGBA(0, 0, 0, 0)
+            DisabledFill: =RGBA(0, 0, 0, 0)
+            Font: =FontStyle
+            HtmlText: |-
+                ="<center><font style='font-weight:100'>Last Modified By " & record_Edit_This_MetricType.modifiedby.'Full Name' & " (" & record_Edit_This_MetricType.modifiedby.'Primary Email' & ")<br>Last Modified On " & Text(record_Edit_This_MetricType.modifiedon) & "</font></center>"
+            PaddingBottom: =0
+            PaddingTop: =0
+            Size: =10
+            Width: =Parent.Width
+            X: =23
+            Y: =508
+            ZIndex: =3
+
+    Top_UpdateMT_UMT As button:
+        Align: =Align.Left
+        BorderColor: =Self.Fill
+        BorderStyle: =BorderStyle.None
+        BorderThickness: =0
+        DisabledBorderColor: =Self.BorderColor
+        DisabledColor: =Color.Black
+        DisabledFill: =Self.Fill
+        DisplayMode: =DisplayMode.Disabled
+        Fill: =SUBGROUPCOLOR
+        Font: =FontStyle
+        FontWeight: =FontWeight.Bold
+        Height: =60
+        HoverFill: =Self.Fill
+        PaddingLeft: =20
+        RadiusBottomLeft: |
+            =0
+        RadiusBottomRight: =0
+        RadiusTopLeft: |
+            =25
+        RadiusTopRight: |
+            =25
+        Size: =14
+        Text: |-
+            ="Update Metric Type ID: " & record_Edit_This_MetricType.craf2_metrictypeid 
+        Visible: =ctn_Edit_UMT.Visible
+        Width: =App.Width - Self.X - 15
+        X: =ctn_Search_MetricType.X + ctn_Search_MetricType.Width + 15
+        Y: =lbl_ScreenTitle_UMT.Y + lbl_ScreenTitle_UMT.Height + 5
+        ZIndex: =2
+
+    btn_Reset_UMT As button:
+        BorderStyle: =BorderStyle.None
+        BorderThickness: =0
+        Color: =BlueControlDarkBackground
+        Fill: =RGBA(0, 0, 0, 0)
+        Font: =FontStyle
+        HoverColor: =Color.Purple
+        HoverFill: =Self.Fill
+        OnSelect: |-
+            =Concurrent(
+                Reset(ti_MTName_UMT),
+                Reset(ti_Desc_UMT),
+                Reset(ti_DataSource_UMT),
+                Reset(dpdn_Stage_UMT),
+                Reset(ti_ShortName_UMT),
+                Reset(ti_Enum_UMT),
+                Reset(ti_UpdateWeight_UMT),
+                Reset(Toggle_IsTrendDown_UMT),
+                Reset(DatePicker_EffectiveDt_UMT),
+                Reset(DatePicker_DeprecateDt_UMT),
+                Set(var_Display_EditMT_Deprecate, false),
+                Clear(clln_ss_AddToTemplate_Edit_MetricType),
+                UpdateContext({var_MetricType_OnChange_UMT: false, var_MetricTypeDetail_OnChange_UMTD: false}),
+                Reset(glry_Template_UMTD),
+                Reset(dpdn_Objective_UMTD),
+                Reset(dpdn_U_MTDUpdateMethod),
+                Reset(dpdn_QuarterlYCalcMethod_UMTD),
+                Reset(ti_PBI_UMTD)
+            )
+        PressedColor: =Self.Color
+        PressedFill: =Self.Fill
+        RadiusBottomLeft: =0
+        RadiusBottomRight: =0
+        RadiusTopLeft: =0
+        RadiusTopRight: =0
+        Size: =12
+        Text: ="Reset"
+        Underline: =true
+        Visible: =ctn_Edit_UMT.Visible
+        Width: =55
+        X: =Top_UpdateMT_UMT.X + Top_UpdateMT_UMT.Width - Self.Width - 10
+        Y: =Top_UpdateMT_UMT.Y + (Top_UpdateMT_UMT.Height - Self.Height) * 0.50
+        ZIndex: =3
+
+    ctn_Search_MetricType As groupContainer:
+        BorderColor: =RGBA(0, 0, 0, 0)
+        BorderStyle: =BorderStyle.None
+        Height: =App.Height - Self.Y - 15
+        Width: =If(ctn_Edit_UMT.Visible, App.Width * 0.65, App.Width - Self.X * 2)
+        X: =15
+        Y: =lbl_ScreenTitle_UMT.Y + lbl_ScreenTitle_UMT.Height + 5
+        ZIndex: =4
+
+        glry_Search_UMT As gallery.variableTemplateHeightGallery:
+            BorderColor: =Back_Header_UMT.Fill
+            BorderThickness: =2
+            Height: =Parent.Height - Self.Y - 1
+            Items: |-
+                =/*
+                Filter(
+                    Sort(
+                        Search(
+                            ReviewHub_MetricTypes,
+                            Trim(ti_Search_UMT.Text), "craf2_metrictypename", "craf2_metrictypeshortname"
+                        ),
+                        craf2_metrictypeid,
+                        Ascending
+                    ),
+                    IsAdmin || (IsCoordinator && ThisRecord.craf2_metrictypeid in clln_EditMT_Allowed_MetricTypeIDs.mtd_MetricTypeId)
+                )*/
+                
+                Ungroup( //Ungroup function to add a Row Number column.
+                    ForAll(
+                        Sequence(
+                            CountRows(
+                                Filter(
+                                    Sort(
+                                        Search(
+                                            ReviewHub_MetricTypes,
+                                            Trim(ti_Search_UMT.Text),
+                                            "craf2_metrictypename",
+                                            "craf2_metrictypeshortname"
+                                        ),
+                                        craf2_metrictypeid,
+                                        SortOrder.Ascending
+                                    ),
+                                    IsAdmin || (IsCoordinator && ThisRecord.craf2_metrictypeid in clln_EditMT_Allowed_MetricTypeIDs.mtd_MetricTypeId)
+                                )
+                            )
+                        ),
+                        {
+                            Record: Table(
+                                Last(
+                                    FirstN(
+                                        Filter(
+                                            Sort(
+                                                ShowColumns(
+                                                Search(
+                                                    ReviewHub_MetricTypes,
+                                                    Trim(ti_Search_UMT.Text),
+                                                    "craf2_metrictypename",
+                                                    "craf2_metrictypeshortname"
+                                                ),
+                                                "craf2_metrictypename", "craf2_metrictypeid", "craf2_metrictypeshortname", "craf2_valuetype", "craf2_metrictypehealthweight", "craf2_metrictypeeffectivedate", "craf2_metrictypedeprecateddate", "craf2_metrictypeistrenddown", "craf2_metrictypedescription", "modifiedby", "modifiedon", "craf2_metrictypesource", "craf2_metrictypestage"
+                                                ),
+                                                craf2_metrictypeid,
+                                                SortOrder.Ascending
+                                            ),
+                                            IsAdmin || (IsCoordinator && ThisRecord.craf2_metrictypeid in clln_EditMT_Allowed_MetricTypeIDs.mtd_MetricTypeId)
+                                        ),
+                                        Value
+                                    )
+                                )
+                            ),
+                            RowNumber: Value
+                        }
+                    ),
+                    "Record"
+                )
+            Layout: =Layout.Vertical
+            TemplateFill: |-
+                =//If(ThisItem.IsSelected, RGBA(215, 223, 240, 1), RGBA(0, 0, 0, 0))
+                
+                If(
+                    Mod(ThisItem.RowNumber, 2) > 0,
+                    If(
+                        ThisItem.craf2_metrictypeid = record_Edit_This_MetricType.craf2_metrictypeid || ThisItem.IsSelected, 
+                        ColorFade(BlueNaviHightLightBackground, 80%), 
+                        RGBA(0, 0, 0, 0)
+                    ),
+                    If(
+                        ThisItem.craf2_metrictypeid = record_Edit_This_MetricType.craf2_metrictypeid || ThisItem.IsSelected, 
+                        ColorFade(BlueNaviHightLightBackground, 80%), 
+                        GrayCanvasBackground
+                    )
+                )
+            TemplatePadding: =0
+            TemplateSize: |
+                =100
+            Width: =Parent.Width - 2
+            X: =1
+            Y: =ctn_GlryHeader_UMT.Y + ctn_GlryHeader_UMT.Height - 1
+            ZIndex: =1
+
+            lbl_RowHeight_UMT As label:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Color: =RGBA(0, 0, 0, 0)
+                DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                DisabledColor: =RGBA(0, 0, 0, 0)
+                DisplayMode: =DisplayMode.Disabled
+                Height: =20
+                OnSelect: =Select(Parent)
+                Size: =9
+                Text: =Max(html_Name_UMT.Height, html_Templates_UMT.Height, 60)
+                Width: =25
+                ZIndex: =1
+
+            bttn_Delete_UMT As icon.Edit:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Color: =REDWARNINGCOLOR
+                DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                DisabledColor: =GrayBorderDark
+                DisabledFill: =RGBA(0,0,0,0)
+                DisplayMode: |-
+                    =If(
+                        Self.Visible, 
+                        DisplayMode.Edit, 
+                        DisplayMode.Disabled
+                    )
+                Height: =bttn_Edit_UMT.Height + 5
+                HoverColor: =Color.White
+                HoverFill: =REDWARNINGCOLOR
+                Icon: =Icon.Trash
+                OnSelect: |-
+                    =Set(record_Delete_This_MT, ThisItem);
+                    UpdateContext({var_show_delete: true});
+                Tooltip: ="Delete"
+                Visible: |-
+                    =If(
+                        ("(No Value)" in html_Templates_UMT.HtmlText && "(No Value)" in html_Scorecards_UMT.HtmlText) || IsBlankOrError(html_Scorecards_UMT.HtmlText), 
+                        true, 
+                        false
+                    )
+                Width: =bttn_Edit_UMT.Width + 5
+                X: =bttn_Edit_UMT.X + bttn_Edit_UMT.Width + 15
+                Y: =bttn_Edit_UMT.Y - 2
+                ZIndex: =2
+
+            bttn_Edit_UMT As icon.Edit:
+                BorderColor: =Self.Color
+                BorderThickness: =2
+                Color: =BlueControlDarkBackground
+                Height: =25
+                HoverBorderColor: =Self.Color
+                HoverColor: =Color.White
+                HoverFill: =Self.Color
+                Icon: =Icon.Edit
+                OnSelect: |-
+                    =Concurrent(
+                        Set(record_Edit_This_MetricType, ThisItem),
+                        Set(record_Edit_This_MetricTypeID, ThisItem.craf2_metrictypeid),
+                        Set(var_Display_EditMT_Deprecate, false),
+                        UpdateContext({var_MetricType_OnChange_UMT: false, var_MetricTypeDetail_OnChange_UMTD: false}),
+                        Reset(glry_Template_UMTD),
+                        Clear(clln_ss_AddToTemplate_Edit_MetricType)
+                    )
+                PaddingBottom: =3
+                PaddingLeft: =3
+                PaddingRight: =3
+                PaddingTop: =3
+                Tooltip: ="Edit"
+                Width: =25
+                X: |-
+                    =If(
+                        bttn_Delete_UMT.Visible,
+                        Header_Edit_UMT.X + (Header_Edit_UMT.Width - Self.Width - bttn_Edit_UMT.Width - 15) * 0.50,
+                        Header_Edit_UMT.X + (Header_Edit_UMT.Width - Self.Width) * 0.50
+                    )
+                Y: =(Value(lbl_RowHeight_UMT.Text) - Self.Height) * 0.50
+                ZIndex: =3
+
+            html_Scorecards_UMT As htmlViewer:
+                AutoHeight: =true
+                BorderColor: =RGBA(0, 0, 0, 0)
+                DisplayMode: =DisplayMode.View
+                Font: =FontStyle
+                Height: =20
+                HtmlText: |-
+                    =If(
+                        !IsBlankOrError(
+                            Concat(
+                                Filter(
+                                    ReviewHub_MetricTypeDetails,
+                                    ThisRecord.craf2_MetricType.craf2_metrictypeid = ThisItem.craf2_metrictypeid
+                                ),
+                                craf2_mtd_BoardType.craf2_boardtypeshortname & "; "
+                            )
+                        ),
+                        "<center>" &
+                        Left(
+                            Concat(
+                                ForAll(Distinct(
+                                    Filter(
+                                        ReviewHub_MetricTypeDetails,
+                                        ThisRecord.craf2_MetricType.craf2_metrictypeid = ThisItem.craf2_metrictypeid
+                                    ), 
+                                    ThisRecord.mtd_BoardType.BoardTypeShortName
+                                ), {Result: ThisRecord.Value}),
+                                "&bull; " & ThisRecord.Result & "<br>"
+                            ),
+                            Len(
+                                Concat(
+                                    ForAll(Distinct(
+                                        Filter(
+                                            ReviewHub_MetricTypeDetails,
+                                            ThisRecord.craf2_MetricType.craf2_metrictypeid = ThisItem.craf2_metrictypeid
+                                        ),
+                                        ThisRecord.mtd_BoardType.BoardTypeShortName
+                                    ), {Result: ThisRecord.Value}),
+                                    "&bull; " & ThisRecord.Result & "<br>"
+                                )
+                            ) - 4
+                        ) & "</center>",
+                        "<center>(No Value)</center>"
+                    )
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Width: =Header_Scorecards_UMT.Width
+                X: =Header_Scorecards_UMT.X
+                Y: =(Value(lbl_RowHeight_UMT.Text) - Self.Height) * 0.50
+                ZIndex: =4
+
+            html_Templates_UMT As htmlViewer:
+                AutoHeight: =true
+                BorderColor: =RGBA(0, 0, 0, 0)
+                DisplayMode: =DisplayMode.View
+                Font: =FontStyle
+                Height: =20
+                HtmlText: |-
+                    =If(
+                        !IsBlankOrError(
+                            Concat(
+                                Filter(
+                                    ReviewHub_MetricTypeDetails,
+                                    ThisRecord.craf2_MetricType.craf2_metrictypeid = ThisItem.craf2_metrictypeid
+                                ),
+                                craf2_MetricTypeDetailTemplate.craf2_templatename & "; "
+                            )
+                        ),
+                        "<center>" &
+                        Left(
+                            Concat(
+                                Filter(
+                                    ReviewHub_MetricTypeDetails,
+                                    ThisRecord.craf2_MetricType.craf2_metrictypeid = ThisItem.craf2_metrictypeid
+                                ),
+                                "&bull; " & craf2_MetricTypeDetailTemplate.craf2_templatename & "<br>"
+                            ),
+                            Len(
+                                Concat(
+                                    Filter(
+                                        ReviewHub_MetricTypeDetails,
+                                        ThisRecord.craf2_MetricType.craf2_metrictypeid = ThisItem.craf2_metrictypeid
+                                    ),
+                                    "&bull; " & craf2_MetricTypeDetailTemplate.craf2_templatename & "<br>"
+                                )
+                            ) - 4
+                        ) & "</center>",
+                        "<center>(No Value)</center>"
+                    )
+                OnSelect: =Select(Parent)
+                PaddingRight: =0
+                Size: =10
+                Width: =Header_Templates_UMT.Width
+                X: =Header_Templates_UMT.X
+                Y: =(Value(lbl_RowHeight_UMT.Text) - Self.Height) * 0.50
+                ZIndex: =5
+
+            lbl_Deprecated_UMT As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Fill: =Parent.Fill
+                Font: =FontStyle
+                Height: =Value(lbl_RowHeight_UMT.Text)
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: =If(IsBlankOrError(ThisItem.craf2_metrictypedeprecateddate), "(No Value)", ThisItem.craf2_metrictypedeprecateddate)
+                Width: =Header_Deprecated_UMT.Width
+                X: =Header_Deprecated_UMT.X
+                ZIndex: =6
+
+            lbl_Effective_UMT As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Fill: =Parent.Fill
+                Font: =FontStyle
+                Height: =Value(lbl_RowHeight_UMT.Text)
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: =ThisItem.craf2_metrictypeeffectivedate
+                Width: =Header_Effective_UMT.Width
+                X: =Header_Effective_UMT.X
+                ZIndex: =7
+
+            lbl_HealthWeight_UMT As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Fill: =Parent.Fill
+                Font: =FontStyle
+                Height: =Value(lbl_RowHeight_UMT.Text)
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: =ThisItem.craf2_metrictypehealthweight
+                Width: =Header_HealthWeight_UMT.Width
+                X: =Header_HealthWeight_UMT.X
+                ZIndex: =8
+
+            lbl_ValueType_UMT As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Fill: =Parent.Fill
+                Font: =FontStyle
+                Height: =Value(lbl_RowHeight_UMT.Text)
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: =ThisItem.craf2_valuetype
+                Width: =Header_ValueType_UMT.Width
+                X: =Header_ValueType_UMT.X
+                ZIndex: =9
+
+            html_Name_UMT As htmlViewer:
+                AutoHeight: =true
+                BorderColor: =RGBA(0, 0, 0, 0)
+                DisplayMode: =DisplayMode.View
+                Font: =FontStyle
+                Height: =20
+                HtmlText: |-
+                    =If(
+                        Text(ThisItem.craf2_metrictypeistrenddown) = "Yes",
+                        "&emsp; ",
+                        ""
+                    )
+                    & ThisItem.craf2_metrictypename & "<br>"
+                    & "#" & ThisItem.craf2_metrictypeshortname 
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =10
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Width: =Header_Name_UMT.Width
+                X: =Header_Name_UMT.X
+                Y: =(Value(lbl_RowHeight_UMT.Text) - Self.Height) * 0.50
+                ZIndex: =10
+
+            Img_IsTrendDown_UMT As image:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Height: =25
+                Image: =TrendingDown
+                OnSelect: =Select(Parent)
+                PaddingLeft: =3
+                PaddingRight: =3
+                Visible: =Text(ThisItem.craf2_metrictypeistrenddown) = "Yes"
+                Width: =25
+                X: =html_Name_UMT.X
+                Y: =html_Name_UMT.Y //Label_MetricType_Title.Height*0.5 - Self.Height*0.5
+                ZIndex: =11
+
+            lbl_MTID_UMT As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Fill: =Parent.Fill
+                Font: =FontStyle
+                Height: =Value(lbl_RowHeight_UMT.Text)
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: =ThisItem.craf2_metrictypeid
+                Width: =Header_MTID_UMT.Width
+                X: =Header_MTID_UMT.X
+                ZIndex: =12
+
+        ctn_GlryHeader_UMT As groupContainer.manualLayoutContainer:
+            Height: =40
+            Width: =Parent.Width
+            Y: =icon_Search_UMT.Y + icon_Search_UMT.Height + 5
+            ZIndex: =2
+
+            Back_Header_UMT As button:
+                BorderColor: =Self.Fill
+                BorderStyle: =BorderStyle.None
+                BorderThickness: =0
+                DisabledBorderColor: =Self.BorderColor
+                DisabledColor: =Self.Color
+                DisabledFill: =Self.Fill
+                DisplayMode: =DisplayMode.Disabled
+                Fill: =ColorFade(BlueNaviHightLightBackground, 50%)
+                Font: =FontStyle
+                Height: =Parent.Height
+                RadiusBottomLeft: |
+                    =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =20
+                RadiusTopRight: =20
+                Text: =""
+                Width: =Parent.Width
+                ZIndex: =1
+
+            Header_Edit_UMT As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =Parent.Height
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: ="Edit / Delete"
+                Width: =120
+                X: =Header_Scorecards_UMT.X + Header_Scorecards_UMT.Width
+                ZIndex: =2
+
+            Header_Scorecards_UMT As htmlViewer:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                DisplayMode: =DisplayMode.View
+                Font: =FontStyle
+                Height: =Parent.Height
+                HtmlText: |-
+                    ="<center><font style='font-weight:600'>Linked<br>Scorecards</font></center>"
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =1
+                Size: =10
+                Width: =If(ctn_Edit_UMT.Visible, 140, 160)
+                X: =Header_Templates_UMT.X + Header_Templates_UMT.Width
+                ZIndex: =4
+
+            Header_Templates_UMT As htmlViewer:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                DisplayMode: =DisplayMode.View
+                Font: =FontStyle
+                Height: =Parent.Height
+                HtmlText: |-
+                    ="<center><font style='font-weight:600'>Linked<br>Templates</font></center>"
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =1
+                Size: =10
+                Width: =If(ctn_Edit_UMT.Visible, 140, 160)
+                X: =Header_Deprecated_UMT.X + Header_Deprecated_UMT.Width
+                ZIndex: =5
+
+            Header_Deprecated_UMT As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =Parent.Height
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: ="Deprecated Date"
+                Width: =If(ctn_Edit_UMT.Visible, 78, 85)
+                X: =Header_Effective_UMT.X + Header_Effective_UMT.Width
+                ZIndex: =6
+
+            Header_Effective_UMT As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =Parent.Height
+                PaddingBottom: =0
+                PaddingTop: =0
+                Size: =10
+                Text: ="Effective Date"
+                Width: =If(ctn_Edit_UMT.Visible, 78, 85)
+                X: =Header_HealthWeight_UMT.X + Header_HealthWeight_UMT.Width
+                ZIndex: =7
+
+            Header_HealthWeight_UMT As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =Parent.Height
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: ="Health Weight"
+                Width: =If(ctn_Edit_UMT.Visible, 55, 75)
+                X: =Header_ValueType_UMT.X + Header_ValueType_UMT.Width
+                ZIndex: =8
+
+            Header_ValueType_UMT As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =Parent.Height
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: ="Value Type"
+                Width: =If(App.Width > 1275, 90, 0)
+                X: =Header_Name_UMT.X + Header_Name_UMT.Width
+                ZIndex: =9
+
+            Header_Name_UMT As label:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =Parent.Height
+                PaddingBottom: =0
+                PaddingLeft: =10
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: |-
+                    ="Metric Type Name, #Short Name"
+                Width: =Parent.Width - Header_MTID_UMT.Width - Header_ValueType_UMT.Width - Header_HealthWeight_UMT.Width - Header_Effective_UMT.Width - Header_Deprecated_UMT.Width - Header_Templates_UMT.Width - Header_Scorecards_UMT.Width - Header_Edit_UMT.Width
+                X: =Header_MTID_UMT.X + Header_MTID_UMT.Width
+                ZIndex: =10
+
+            Header_MTID_UMT As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =Parent.Height
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: ="MT ID"
+                Width: =60
+                ZIndex: =11
+
+        lbl_GlryRowCount_UMT As label:
+            Align: =Align.Right
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            DisplayMode: =DisplayMode.View
+            Font: =FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =ctn_GlryHeader_UMT.Y
+            PaddingLeft: =0
+            PaddingRight: =15
+            Size: =10
+            Text: |-
+                ="Records Count: " & CountRows(glry_Search_UMT.AllItems)
+            Width: =140
+            X: =ctn_GlryHeader_UMT.Width - Self.Width
+            Y: |
+                =0
+            ZIndex: =3
+
+        ti_Search_UMT As text:
+            BorderColor: =GRAYCOLOR
+            BorderThickness: =1
+            Clear: =true
+            Default: =""
+            DelayOutput: =true
+            FocusedBorderThickness: =2
+            Font: =FontStyle
+            Height: =25
+            HintText: ="Search By Metric Type Name / Short Name"
+            HoverBorderColor: =Self.BorderColor
+            HoverFill: =GrayControlBackground
+            PaddingBottom: =0
+            PaddingTop: =0
+            RadiusBottomLeft: =20
+            RadiusBottomRight: =20
+            RadiusTopLeft: =20
+            RadiusTopRight: =20
+            Size: =9
+            Width: =(ctn_GlryHeader_UMT.Width - Self.X) * 0.65
+            X: =icon_Search_UMT.X + icon_Search_UMT.Width + 5
+            Y: =icon_Search_UMT.Y
+            ZIndex: =4
+
+        icon_Search_UMT As icon.Search:
+            DisabledBorderColor: =RGBA(0, 0, 0, 0)
+            DisabledColor: =RGBA(0, 0, 0, 1)
+            DisplayMode: =DisplayMode.Disabled
+            Height: =ti_Search_UMT.Height
+            Icon: =Icon.Search
+            PaddingBottom: =2
+            PaddingLeft: =2
+            PaddingRight: =2
+            PaddingTop: =2
+            Width: =ti_Search_UMT.Height
+            X: =1
+            Y: =2
+            ZIndex: =5
+
+    lbl_ScreenTitle_UMT As label:
+        DisabledColor: =BlueControlDarkBackground
+        DisabledFill: =Self.Fill
+        DisplayMode: =DisplayMode.Disabled
+        Fill: =GrayCanvasBackground
+        Font: =FontStyle
+        FontWeight: =FontWeight.Bold
+        Height: =55
+        PaddingLeft: =60
+        Size: =18
+        Text: ="Update Existing Metric Type"
+        Width: =App.Width - Self.X
+        Y: =SS_AppHeader_UMT.Height
+        ZIndex: =5
+
+    icon_Back_UMT As icon.BackArrow:
+        BorderColor: =RGBA(0, 0, 0, 0)
+        BorderStyle: =BorderStyle.None
+        Color: =BlueControlDarkBackground
+        Height: =30
+        HoverBorderColor: =Self.BorderColor
+        HoverColor: =Color.Purple
+        Icon: =Icon.BackArrow
+        OnSelect: |-
+            =Navigate(scn_SelfService);
+            
+            // Update Two Cache Tables
+            ClearCollect(
+                clln_MetricTypeDetail, 
+                    ShowColumns(
+                        AddColumns(
+                            AddColumns(
+                                ReviewHub_MetricTypeDetails,
+                                "TemplateRec", ThisRecord.MetricTypeDetailTemplate
+                                // "MetricTemplateRec", LookUp(ReviewHub_MetricTemplates, ReviewHub_MetricTypeDetails[@MetricTypeDetailTemplate].TemplateID=ThisRecord.TemplateID)
+                            ),
+                            "mtd_TemplateID", TemplateRec.TemplateID, 
+                            "mtd_TemplateName", TemplateRec.TemplateName,
+                            "mtd_MetricTypeId", ThisRecord.MetricType.MetricTypeID,
+                            "mtd_MetricTypeName", ThisRecord.MetricType.MetricTypeName,
+                            "mtd_UpdateMethod", Text(ThisRecord.MetricTypeDetailUpdateMethod),
+                            "mtd_MetricDeprecatedDate", ThisRecord.MetricType.MetricTypeDeprecatedDate,
+                            "mtd_MetricCreatedDate", ThisRecord.MetricType.MetricTypeEffectiveDate,
+                            "mtd_MetricShortName", ThisRecord.MetricType.MetricTypeShortName,
+                            "mtd_BoardTypeID", ThisRecord.mtd_BoardType.BoardTypeID, //MetricTemplateRec.TemplateBoardType.BoardTypeID,
+                            "mtd_BoardTypeName", ThisRecord.mtd_BoardType.BoardTypeName, //MetricTemplateRec.TemplateBoardType.BoardTypeName,
+                            "mtd_MetricDisplayOrder", ThisRecord.mtd_DisplayOrder,
+                            "mtd_MetricStage", Text(ThisRecord.MetricType.MetricTypeStage),
+                            "mtd_MetricTypeSubgroup", ThisRecord.mtd_Objective.mto_ObjectiveName, //Text(ThisRecord.MetricType.MetricTypeSubgroup),
+                            "mtd_MetricValueType", Text(ThisRecord.MetricType.ValueType),
+                            "mtd_IsTrendDown", ThisRecord.MetricType.MetricTypeIsTrendDown,
+                            "mtd_MetricTypeEnumerateOptions", ThisRecord.MetricType.MetricTypeEnumerateOptions,
+                            "mtd_MetricTypeSource", ThisRecord.MetricType.MetricTypeSource,
+                            "mtd_MetricTypeHealthWeight", ThisRecord.MetricType.MetricTypeHealthWeight,
+                            "mtd_MetricPowerBIUrl", ThisRecord.MetricTypeDetailPowerBIUrl,
+                            "mtd_MetricTypeDescription", ThisRecord.MetricType.MetricTypeDescription
+                        ),
+                        "mtd_TemplateID", "mtd_TemplateName", "mtd_BoardTypeID", "mtd_BoardTypeName",
+                        "mtd_MetricTypeId", "mtd_MetricTypeName","mtd_MetricShortName","mtd_MetricDeprecatedDate", "mtd_MetricCreatedDate",
+                        "mtd_UpdateMethod", "mtd_MetricPowerBIUrl", "mtd_MetricDisplayOrder", "mtd_MetricStage", "mtd_MetricTypeSubgroup",
+                        "mtd_MetricValueType", "mtd_IsTrendDown", "mtd_MetricTypeEnumerateOptions", "mtd_MetricTypeSource", "mtd_MetricTypeHealthWeight", "mtd_MetricTypeDescription"
+                    )
+            );
+            
+            ClearCollect(
+                colStageOrder,
+                DropColumns(
+                    AddColumns(
+                        GroupBy(
+                            Sort(
+                                clln_MetricTypeDetail,
+                                mtd_MetricDisplayOrder
+                            ),
+                            "mtd_BoardTypeID",
+                            "mtd_TemplateID",
+                            "mtd_MetricStage",
+                            "MetricGroup"
+                        ),
+                        "FirstDisplayOrder_ByStage",
+                        First(ThisRecord.MetricGroup).mtd_MetricDisplayOrder
+                    ),
+                    "MetricGroup"
+                )
+            );
+            
+            Set(record_Edit_This_MetricType, Blank());
+            Reset(ti_Search_UMT);
+            UpdateContext({var_MetricType_OnChange_UMT: false, var_MetricTypeDetail_OnChange_UMTD: false})
+        Tooltip: ="Back"
+        Width: =Self.Height
+        X: =15
+        Y: =lbl_ScreenTitle_UMT.Y + (lbl_ScreenTitle_UMT.Height - Self.Height) * 0.50
+        ZIndex: =6
+
+    SS_AppHeader_UMT As AppHeader:
+        DropDownSelection: =TrackRequestComponent_UMT.HideTrackRequest
+        FeatureRequestUrl: =var_FeatureRequestURL
+        FeedbackButtonUrl: =var_SendFeedback_URL
+        inputAppDisplayName: =varAppHeaderText
+        ScorecardOnboardingFeatureUrl: =var_ScorecardOnboardingRequestURL
+        ShowSurveyButton: =false
+        Y: =0
+        ZIndex: =7
+
+    ctn_Confirm_Delete_UMT As groupContainer:
+        Fill: =RGBA(255, 255, 255, 0.95)
+        Height: =App.Height
+        Visible: =var_show_delete
+        Width: =App.Width
+        ZIndex: =8
+
+        Card_ConfirmDelete_UMT As button:
+            BorderColor: =hdr_ConfirmDel_UMT.Fill
+            Color: =RGBA(0, 0, 0, 0)
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =RGBA(0, 0, 0, 0)
+            DisabledFill: =RGBA(0, 0, 0, 0)
+            DisplayMode: =DisplayMode.Disabled
+            Fill: =RGBA(0, 0, 0, 0)
+            Font: =FontStyle
+            Height: =hdr_ConfirmDel_UMT.Height + html_ConfirmDelete_UMT.Height + 10 + btn_ConfirmDelete_UMT.Height + 20
+            HoverBorderColor: =
+            HoverColor: =RGBA(0, 0, 0, 0)
+            HoverFill: =
+            OnSelect: =
+            PressedBorderColor: =
+            PressedColor: =
+            PressedFill: =
+            Text: =""
+            Width: =App.Width * 0.35
+            X: =App.Width * 0.5 - Self.Width*0.5
+            Y: =App.Height*0.5 - Self.Height*0.5 - 60
+            ZIndex: =1
+
+        btn_CancelDelete_UMT As button:
+            BorderColor: =Self.Fill
+            Fill: =GRAYCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =25
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Self.Fill
+            HoverFill: =Self.Color
+            OnSelect: |-
+                =UpdateContext({var_show_delete: false});
+                Set(record_Delete_This_FMB, Blank());
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Size: =10
+            Text: ="Cancel"
+            Width: =90
+            X: |-
+                =If(
+                    btn_ConfirmDelete_UMT.Visible, 
+                    btn_ConfirmDelete_UMT.X + btn_ConfirmDelete_UMT.Width + 50, 
+                    Card_ConfirmDelete_UMT.X + (Card_ConfirmDelete_UMT.X - Self.Width) * 0.50  // horizontally centered to Card_SS_Product item.
+                )
+            Y: =btn_ConfirmDelete_UMT.Y
+            ZIndex: =3
+
+        btn_ConfirmDelete_UMT As button:
+            BorderColor: =Self.Fill
+            Fill: =REDWARNINGCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =25
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Self.Fill
+            HoverFill: =Self.Color
+            OnSelect: |-
+                =UpdateContext({var_show_delete: false});
+                
+                If(
+                    CountRows(Filter(glry_Search_UFMB.AllItems, ThisRecord.check_Selected_UFMB.Value = true)) > 1,
+                    ForAll(
+                        RenameColumns(
+                            Filter(glry_Search_UFMB.AllItems, ThisRecord.check_Selected_UFMB.Value = true),
+                            "fmb_ID", "fmb_ID_ToDelete"
+                        ),
+                        Concurrent(
+                            RemoveIf(
+                                ReviewHub_FactMetricBoards,
+                                ThisRecord.FactMetricBoardID = fmb_ID_ToDelete
+                            ),
+                            RemoveIf(
+                                clln_factMetricBoard,
+                                ThisRecord.fmb_ID = fmb_ID_ToDelete
+                            )
+                        );
+                    ),
+                
+                    Concurrent(
+                        RemoveIf(
+                            ReviewHub_FactMetricBoards,
+                            ThisRecord.FactMetricBoardID = record_Delete_This_FMB.fmb_ID
+                        ),
+                        RemoveIf(
+                            clln_factMetricBoard,
+                            ThisRecord.fmb_ID = record_Delete_This_FMB.fmb_ID
+                        )
+                    )
+                );
+                
+                Set(record_Delete_This_FMB, Blank());
+                Reset(check_selectAll_UFMB);
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Size: =10
+            Text: ="Yes, Delete"
+            Width: =90
+            X: =html_ConfirmDelete_UMT.X + html_ConfirmDelete_UMT.Width * 0.5 - Self.Width - 20
+            Y: =html_ConfirmDelete_UMT.Y + html_ConfirmDelete_UMT.Height + 15
+            ZIndex: =4
+
+        html_ConfirmDelete_UMT As htmlViewer:
+            AutoHeight: =true
+            Font: =FontStyle
+            HtmlText: |-
+                ="<span style=''><b>Metric Type ID:</b></span> " & record_Delete_This_MT.craf2_metrictypeid & "<br>"
+                & "<span style=''><b>Metric Type Name:</b></span> " & record_Delete_This_MT.craf2_metrictypename & "<br>"
+                & "<span style=''><b>Value Type:</b></span> " & record_Delete_This_MT.craf2_valuetype & "<br>"
+                & "<span style=''><b>Effective Date:</b></span> " & record_Delete_This_MT.craf2_metrictypeeffectivedate & "<br>"
+                & "<span style=''><b>Deprecated Date:</b></span> " & If(IsBlankOrError(record_Delete_This_MT.craf2_metrictypedeprecateddate), "(No Value)",  record_Delete_This_MT.craf2_metrictypedeprecateddate)& "<br>"
+                & "<span style=''><b>Description:</b></span> " & record_Delete_This_MT.craf2_metrictypedescription & "<br>"
+                & "<span style=''><b>Linked Templates:</b></span> (No Value)<br><span style=''><b>Linked Scorecards:</b></span> (No Value)<br>"
+            PaddingBottom: =10
+            PaddingLeft: =30
+            PaddingRight: =10
+            PaddingTop: =15
+            Size: =12
+            Width: =Card_ConfirmDelete_UMT.Width
+            X: =App.Width * 0.5 - Self.Width*0.5
+            Y: =hdr_ConfirmDel_UMT.Y + hdr_ConfirmDel_UMT.Height
+            ZIndex: =5
+
+        hdr_ConfirmDel_UMT As button:
+            BorderThickness: =0
+            Color: =RGBA(0, 0, 0, 1)
+            DisabledBorderColor: =Self.Fill
+            DisabledColor: =RGBA(0, 0, 0, 1)
+            DisabledFill: =Self.Fill
+            DisplayMode: =DisplayMode.Disabled
+            Fill: =SUBGROUPCOLOR
+            FocusedBorderThickness: =0
+            Font: =FontStyle
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Self.Color
+            HoverFill: =Self.Fill
+            PressedBorderColor: =Self.BorderColor
+            PressedColor: =Self.Color
+            PressedFill: =Self.Fill
+            RadiusBottomLeft: =
+            RadiusBottomRight: =
+            Size: =14
+            Text: ="Confirm Delete Metric Type"
+            Width: =Card_ConfirmDelete_UMT.Width
+            X: =Card_ConfirmDelete_UMT.X
+            Y: =Card_ConfirmDelete_UMT.Y
+            ZIndex: =6
+
+    ctn_ManageMTObjective_UMT As groupContainer.manualLayoutContainer:
+        BorderColor: =RGBA(0, 0, 0, 0)
+        BorderStyle: =BorderStyle.None
+        Fill: =RGBA(255, 255, 255, 0.95)
+        Height: =App.Height
+        Visible: =var_Show_ManageMTObjective = true
+        Width: =App.Width
+        ZIndex: =9
+
+        Back_MangeMTObjective_UMT As button:
+            BorderColor: =Self.Fill
+            DisabledBorderColor: =Top_ManageObjective_UMT.Fill
+            DisabledColor: =RGBA(255, 255, 255, 1)
+            DisabledFill: =RGBA(255, 255, 255, 1)
+            DisplayMode: =DisplayMode.Disabled
+            Height: |-
+                =//Parent.Height - Top_ManageObjective_NMT.Height - Top_ManageObjective_NMT.Y * 2
+                If(
+                    btn_SaveMTObjective_UMT.Visible && var_Delete_ManageMTObjective,
+                    261 + ctn_ManageObj_Inputs_UMT.Height + btn_SaveMTObjective_UMT.Height + 50, //btn_SaveMTObjective_NMT.Y + btn_SaveMTObjective_NMT.Height - Self.Y + 25,
+                    If(
+                        btn_SaveMTObjective_UMT.Visible && (var_AddNew_ManageMTObjective || var_Edit_ManageMTObjective),
+                        403,
+                        271
+                    )
+                )
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Text: =""
+            Width: =Parent.Width * 0.60
+            X: =Top_ManageObjective_UMT.X
+            Y: =(App.Height - Self.Height) * 0.50 - 40 //Top_ManageObjective_NMT.Y + Top_ManageObjective_NMT.Height - 1
+            ZIndex: =2
+
+        btn_CancelMTObjective_UMT As button:
+            BorderColor: =Self.Fill
+            Fill: =GRAYCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =25
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Self.Fill
+            HoverFill: =Self.Color
+            OnSelect: |
+                =Concurrent(
+                    UpdateContext(
+                        {
+                            var_Show_ManageMTObjective: false,
+                            var_AddNew_ManageMTObjective: false,
+                            var_Edit_ManageMTObjective: false,
+                            var_Delete_ManageMTObjective: false
+                        }
+                    ),
+                    Reset(combo_ManageObj_BoardType_UMT)
+                )
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Size: =10
+            Text: ="Cancel"
+            Visible: =btn_SaveMTObjective_UMT.Visible
+            Width: =90
+            X: =btn_SaveMTObjective_UMT.X + btn_SaveMTObjective_UMT.Width + 30
+            Y: =btn_SaveMTObjective_UMT.Y 
+            ZIndex: =3
+
+        btn_SaveMTObjective_UMT As button:
+            BorderColor: =Self.Fill
+            DisplayMode: |-
+                =If(
+                    ("Warning" in html_ManageObj_Inputs_UMT.HtmlText && var_Delete_ManageMTObjective)
+                        || (Trim(ti_ManageObj_Value_UMT.Text) = "" && (var_AddNew_ManageMTObjective || var_Edit_ManageMTObjective))
+                        || Len(html_ManageObj_Inputs_UMT.HtmlText) = 0,
+                    DisplayMode.Disabled,
+                    DisplayMode.Edit
+                )
+            Fill: =If(var_Delete_ManageMTObjective, REDWARNINGCOLOR, BlueControlDarkBackground)
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =25
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Self.Fill
+            HoverFill: =Self.Color
+            OnSelect: |-
+                =If(
+                    var_AddNew_ManageMTObjective,
+                    ForAll(
+                        combo_ManageObj_BoardType_UMT.SelectedItems,
+                        Patch(
+                            clln_MetricTypeObjectives,
+                            Defaults(clln_MetricTypeObjectives),
+                            {
+                                mto_BoardTypeID_selected: BoardTypeID_Selected,
+                                mto_ObjectiveID_selected: Max(clln_MetricTypeObjectives, ThisRecord.mto_ObjectiveID_selected) + 1,
+                                mto_ObjectiveName_selected: Trim(ti_ManageObj_Value_UMT.Text)
+                            }
+                        );
+                        Patch(
+                            ReviewHub_MetricTypeObjectives,
+                            Defaults(ReviewHub_MetricTypeObjectives),
+                            {
+                                mto_BoardTypeID: BoardTypeID_Selected,
+                                mto_ObjectiveID: Max(clln_MetricTypeObjectives, ThisRecord.mto_ObjectiveID_selected),
+                                mto_ObjectiveName: Trim(ti_ManageObj_Value_UMT.Text)
+                            }
+                        )
+                    )
+                );
+                
+                If(
+                    var_Delete_ManageMTObjective,
+                    ForAll(
+                        combo_ManageObj_BoardType_UMT.SelectedItems, 
+                        RemoveIf(
+                            clln_MetricTypeObjectives,
+                            Trim(ThisRecord.mto_ObjectiveName_selected) = Trim(combo_ManageObj_ExistingValues_UMT.Selected.mto_ObjectiveName_selected)
+                                && ThisRecord.mto_BoardTypeID_selected = BoardTypeID_Selected
+                        );
+                        RemoveIf(
+                            ReviewHub_MetricTypeObjectives,
+                            Trim(ThisRecord.mto_ObjectiveName) = Trim(combo_ManageObj_ExistingValues_UMT.Selected.mto_ObjectiveName_selected)
+                                && ThisRecord.mto_BoardTypeID = BoardTypeID_Selected
+                        )
+                    )
+                );
+                
+                If(
+                    var_Edit_ManageMTObjective,
+                    ForAll(
+                        combo_ManageObj_BoardType_UMT.SelectedItems,
+                        Patch(
+                            clln_MetricTypeObjectives,
+                            LookUp(
+                                clln_MetricTypeObjectives, 
+                                ThisRecord.mto_BoardTypeID_selected = BoardTypeID_Selected 
+                                    && Trim(ThisRecord.mto_ObjectiveName_selected) = Trim(combo_ManageObj_ExistingValues_UMT.Selected.mto_ObjectiveName_selected)
+                        ),
+                        {
+                            mto_ObjectiveName_selected: Trim(ti_ManageObj_Value_UMT.Text)
+                        }
+                        );
+                        Patch(
+                            ReviewHub_MetricTypeObjectives,
+                            LookUp(
+                                ReviewHub_MetricTypeObjectives,
+                                ThisRecord.mto_BoardTypeID = BoardTypeID_Selected
+                                    && ThisRecord.mto_ObjectiveName = Trim(combo_ManageObj_ExistingValues_UMT.Selected.mto_ObjectiveName_selected)
+                            ),
+                            {
+                                mto_ObjectiveName: Trim(ti_ManageObj_Value_UMT.Text)
+                            }
+                        )
+                    )
+                );
+                
+                Concurrent(
+                    UpdateContext(
+                        {
+                            var_AddNew_ManageMTObjective: false,
+                            var_Edit_ManageMTObjective: false,
+                            var_Delete_ManageMTObjective: false
+                        }
+                    ),
+                    Reset(ti_ManageObj_Value_UMT),
+                    Reset(combo_ManageObj_ExistingValues_UMT)
+                )
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Size: =10
+            Text: =If(var_Delete_ManageMTObjective, "Delete", "Save")
+            Visible: |-
+                =(var_AddNew_ManageMTObjective 
+                    || var_Edit_ManageMTObjective 
+                    || var_Delete_ManageMTObjective) 
+                    && html_ManageObj_Inputs_UMT.Visible
+            Width: =90
+            X: =Top_ManageObjective_UMT.X + Top_ManageObjective_UMT.Width - Self.Width*2 - 60
+            Y: |-
+                =If(
+                    ti_ManageObj_Value_UMT.Visible,
+                    ti_ManageObj_Value_UMT.Y + ti_ManageObj_Value_UMT.Height + 25,
+                    If(
+                        var_Delete_ManageMTObjective,
+                        ctn_ManageObj_Inputs_UMT.Y + ctn_ManageObj_Inputs_UMT.Height + 25
+                    )
+                )
+            ZIndex: =4
+
+        ti_ManageObj_Value_UMT As text:
+            BorderColor: =GRAYCOLOR
+            BorderThickness: =1
+            Default: |-
+                =If(
+                    var_AddNew_ManageMTObjective,
+                    "",
+                    If(
+                        var_Edit_ManageMTObjective,
+                        combo_ManageObj_ExistingValues_UMT.Selected.mto_ObjectiveName_selected
+                    )
+                )
+            DelayOutput: =true
+            DisplayMode: =Parent.DisplayMode
+            Font: =FontStyle
+            Height: =html_ManageObj_Value_UMT.Height
+            HoverBorderColor: =Self.BorderColor
+            HoverFill: =ColorFade(BlueControlLightBackground, 75%)
+            LineHeight: =1
+            PaddingBottom: =0
+            PaddingLeft: =5
+            PaddingTop: =0
+            PressedBorderColor: =Self.BorderColor
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Size: =10
+            Tooltip: ="Only Manual metrics are editable through this app"
+            Visible: =html_ManageObj_Value_UMT.Visible
+            Width: =Top_ManageObjective_UMT.Width - html_ManageObj_Value_UMT.Width - 15
+            X: =html_ManageObj_Value_UMT.X + html_ManageObj_Value_UMT.Width
+            Y: =html_ManageObj_Value_UMT.Y
+            ZIndex: =5
+
+        html_ManageObj_Value_UMT As htmlViewer:
+            AutoHeight: =true
+            BorderColor: =RGBA(0, 0, 0, 0)
+            Font: =FontStyle
+            Height: =30
+            HtmlText: |-
+                =If(
+                    var_AddNew_ManageMTObjective,
+                    "<font style='font-weight:600'>Enter New Value: </font><font color=red>*</font>",
+                    If(
+                        var_Edit_ManageMTObjective, 
+                        "<font style='font-weight:600'>Update The Value: </font><font color=red>*</font>"
+                    )
+                )
+            PaddingLeft: =15
+            Visible: =(var_AddNew_ManageMTObjective || var_Edit_ManageMTObjective) && html_ManageObj_Inputs_UMT.Visible
+            Width: =160
+            X: =Top_ManageObjective_UMT.X
+            Y: =ctn_ManageObj_Inputs_UMT.Y + ctn_ManageObj_Inputs_UMT.Height + 5
+            ZIndex: =6
+
+        ctn_ManageObj_Inputs_UMT As groupContainer.verticalAutoLayoutContainer:
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            Height: =Min(300, html_ManageObj_Inputs_UMT.Height)
+            LayoutDirection: =LayoutDirection.Vertical
+            LayoutMode: =LayoutMode.Auto
+            LayoutOverflowY: =LayoutOverflow.Scroll
+            Width: =Top_ManageObjective_UMT.Width - 2
+            X: =Top_ManageObjective_UMT.X
+            Y: =btn_ManageObj_AddNew_UMT.Y + btn_ManageObj_AddNew_UMT.Height + 15
+            ZIndex: =7
+
+            html_ManageObj_Inputs_UMT As htmlViewer:
+                AutoHeight: =true
+                BorderColor: =RGBA(0, 0, 0, 0)
+                DisplayMode: =DisplayMode.View
+                Font: =FontStyle
+                Height: =30
+                HtmlText: |-
+                    =If(
+                        var_AddNew_ManageMTObjective,
+                        "<b>Step 3. Provide new objective value for <u>" & Left(
+                            Concat(
+                                combo_ManageObj_BoardType_UMT.SelectedItems,
+                                ThisRecord.BoardTypeName_Selected & ", "
+                            ),
+                            Len(
+                                Concat(
+                                    combo_ManageObj_BoardType_UMT.SelectedItems,
+                                    ThisRecord.BoardTypeName_Selected & ", "
+                                )
+                            ) - 2
+                        ) & "</u></b>",
+                        If(
+                            var_Edit_ManageMTObjective,
+                            "<b>Step 3. Update the value and then save</b>",
+                            If(
+                                var_Delete_ManageMTObjective
+                                    && 
+                                    CountRows(Filter(ReviewHub_MetricTypeDetails, ThisRecord.mtd_Objective.mto_ObjectiveName = combo_ManageObj_ExistingValues_UMT.Selected.mto_ObjectiveName_selected)) = 0,
+                                "<b>Step 3. Confirm delete ''" & combo_ManageObj_ExistingValues_UMT.Selected.mto_ObjectiveName_selected & "'' for <u>" & Left(
+                            Concat(
+                                combo_ManageObj_BoardType_UMT.SelectedItems,
+                                ThisRecord.BoardTypeName_Selected & ", "
+                            ),
+                            Len(
+                                Concat(
+                                    combo_ManageObj_BoardType_UMT.SelectedItems,
+                                    ThisRecord.BoardTypeName_Selected & ", "
+                                )
+                            ) - 2
+                        ) & "</u>?</b>",
+                                "<font color=red><b>Warning: </b>You cannot delete this value. This value is used by <b>" 
+                                    & CountRows(
+                                        ForAll(Distinct(
+                                            Filter(clln_MetricTypeDetail, ThisRecord.mtd_MetricTypeSubgroup = combo_ManageObj_ExistingValues_UMT.Selected.mto_ObjectiveName_selected).mtd_MetricTypeId,
+                                            ThisRecord.mtd_MetricTypeId
+                                        ), {Result: ThisRecord.Value})
+                                    ) 
+                                    & "</b> metric type(s):<br>"
+                                    & Concat(
+                                        GroupBy(
+                                            Filter(
+                                                clln_MetricTypeDetail,
+                                                ThisRecord.mtd_MetricTypeSubgroup = combo_ManageObj_ExistingValues_UMT.Selected.mto_ObjectiveName_selected
+                                            ),
+                                            "mtd_MetricTypeId",
+                                            "mtd_MetricTypeGroup"
+                                        ),
+                                        //Filter(ReviewHub_MetricTypeDetails, ThisRecord.mtd_Objective.mto_ObjectiveName = combo_ManageObj_ExistingValues.Selected.mto_ObjectiveName_selected), 
+                                        "&emsp; <b>&#8226; Metric Type: </b>" & First(ThisRecord.mtd_MetricTypeGroup).mtd_MetricTypeName & "<br>"
+                                        )
+                            )
+                        )
+                    )
+                PaddingLeft: =15
+                PaddingRight: =15
+                Visible: =(var_AddNew_ManageMTObjective || var_Edit_ManageMTObjective || var_Delete_ManageMTObjective) && html_ManageObj_ExistingValues_UMT.Visible
+                Width: =Top_ManageObjective_UMT.Width
+                X: =Top_ManageObjective_UMT.X
+                Y: =btn_ManageObj_AddNew_UMT.Y + btn_ManageObj_AddNew_UMT.Height + 15
+                ZIndex: =1
+
+        btn_ManageObj_Delete_UMT As button:
+            BorderColor: =Self.Fill
+            DisplayMode: =btn_ManageObj_Modify_UMT.DisplayMode
+            Fill: =BlueControlDarkBackground
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =25
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Self.Fill
+            HoverFill: =Self.Color
+            OnSelect: |-
+                =UpdateContext(
+                    {
+                        var_AddNew_ManageMTObjective: false,
+                        var_Edit_ManageMTObjective: false,
+                        var_Delete_ManageMTObjective: true
+                    }
+                )
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Size: =10
+            Text: ="Delete This Value"
+            Visible: =html_ManageObj_ExistingValues_UMT.Visible
+            Width: =btn_ManageObj_AddNew_UMT.Width
+            X: =btn_ManageObj_Modify_UMT.X + btn_ManageObj_Modify_UMT.Width + 30
+            Y: =btn_ManageObj_AddNew_UMT.Y
+            ZIndex: =8
+
+        btn_ManageObj_Modify_UMT As button:
+            BorderColor: =Self.Fill
+            DisplayMode: |-
+                =If(
+                    IsBlankOrError(combo_ManageObj_ExistingValues_UMT.Selected.mto_ObjectiveName_selected) || CountRows(combo_ManageObj_ExistingValues_UMT.SelectedItems) = 0,
+                    DisplayMode.Disabled,
+                    DisplayMode.Edit
+                )
+            Fill: =BlueControlDarkBackground
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =25
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Self.Fill
+            HoverFill: =Self.Color
+            OnSelect: |-
+                =UpdateContext(
+                    {
+                        var_AddNew_ManageMTObjective: false,
+                        var_Edit_ManageMTObjective: true,
+                        var_Delete_ManageMTObjective: false
+                    }
+                )
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Size: =10
+            Text: ="Modify This Value"
+            Visible: =html_ManageObj_ExistingValues_UMT.Visible
+            Width: =btn_ManageObj_AddNew_UMT.Width
+            X: =btn_ManageObj_AddNew_UMT.X +btn_ManageObj_AddNew_UMT.Width + 30
+            Y: =btn_ManageObj_AddNew_UMT.Y
+            ZIndex: =9
+
+        btn_ManageObj_AddNew_UMT As button:
+            BorderColor: =Self.Fill
+            Fill: =BlueControlDarkBackground
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =25
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Self.Fill
+            HoverFill: =Self.Color
+            OnSelect: |-
+                =UpdateContext(
+                    {
+                        var_AddNew_ManageMTObjective: true,
+                        var_Edit_ManageMTObjective: false,
+                        var_Delete_ManageMTObjective: false
+                    }
+                )
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Size: =10
+            Text: ="Add A New Value"
+            Visible: =html_ManageObj_ExistingValues_UMT.Visible
+            Width: =175
+            X: =Top_ManageObjective_UMT.X + (Top_ManageObjective_UMT.Width - Self.Width*3 - 60) * 0.50
+            Y: =combo_ManageObj_ExistingValues_UMT.Y + combo_ManageObj_ExistingValues_UMT.Height + 10
+            ZIndex: =10
+
+        combo_ManageObj_ExistingValues_UMT As combobox:
+            BorderColor: =If(IsBlankOrError(Self.Selected.mto_ObjectiveName_selected) || CountRows(Self.SelectedItems) = 0, REDWARNINGCOLOR, GRAYCOLOR)
+            BorderThickness: =1
+            ChevronBackground: =GrayControlBackground
+            ChevronFill: =Color.Black
+            ChevronHoverBackground: =
+            ChevronHoverFill: =Color.Black
+            DefaultSelectedItems: |-
+                =First(
+                    SortByColumns(
+                        ShowColumns(
+                            GroupBy(
+                                Filter(
+                                    clln_MetricTypeObjectives,
+                                    ThisRecord.mto_BoardTypeID_selected in combo_ManageObj_BoardType_UMT.SelectedItems.BoardTypeID_Selected
+                                ),
+                                "mto_ObjectiveName_selected",
+                                "DummyGroup"
+                            ),
+                            "mto_ObjectiveName_selected"
+                        ),
+                        "mto_ObjectiveName_selected",
+                        SortOrder.Ascending
+                    )
+                )
+            DisplayFields: =["mto_ObjectiveName_selected"]
+            Font: =FontStyle
+            Height: =30
+            HoverBorderColor: =
+            HoverFill: =BlueControlLightBackground
+            InputTextPlaceholder: ="Search for a metric type objective / subgroup"
+            Items: |-
+                =SortByColumns(
+                    ShowColumns(
+                        GroupBy(
+                            Filter(
+                                clln_MetricTypeObjectives,
+                                ThisRecord.mto_BoardTypeID_selected in combo_ManageObj_BoardType_UMT.SelectedItems.BoardTypeID_Selected
+                            ),
+                            "mto_ObjectiveName_selected",
+                            "DummyGroup"
+                        ),
+                        "mto_ObjectiveName_selected"
+                    ),
+                    "mto_ObjectiveName_selected",
+                    SortOrder.Ascending
+                )
+            OnChange: |-
+                =UpdateContext(
+                    {
+                        var_AddNew_ManageMTObjective: false,
+                        var_Edit_ManageMTObjective: false,
+                        var_Delete_ManageMTObjective: false
+                    }
+                )
+            PaddingBottom: =0
+            PaddingRight: =8
+            PaddingTop: =0
+            PressedColor: =BlueControlDarkBackground
+            PressedFill: =BlueControlLightBackground
+            Reset: =
+            SearchFields: =["mto_ObjectiveName_selected"]
+            SearchItems: |-
+                =Search(SortByColumns(
+                    ShowColumns(
+                        GroupBy(
+                            Filter(
+                                clln_MetricTypeObjectives,
+                                ThisRecord.mto_BoardTypeID_selected in combo_ManageObj_BoardType_UMT.SelectedItems.BoardTypeID_Selected
+                            ),
+                            "mto_ObjectiveName_selected",
+                            "DummyGroup"
+                        ),
+                        "mto_ObjectiveName_selected"
+                    ),
+                    "mto_ObjectiveName_selected",
+                    SortOrder.Ascending
+                ),combo_ManageObj_ExistingValues_UMT.SearchText,"mto_ObjectiveName_selected")
+            SelectionFill: =BlueNaviHightLightBackground
+            SelectMultiple: =false
+            Size: =11
+            Tooltip: ="Select Metric Type Objective"
+            Visible: =html_ManageObj_ExistingValues_UMT.Visible
+            Width: =Top_ManageObjective_UMT.Width - 30
+            X: =combo_ManageObj_BoardType_UMT.X
+            Y: =html_ManageObj_ExistingValues_UMT.Y + html_ManageObj_ExistingValues_UMT.Height
+            ZIndex: =11
+
+        html_ManageObj_ExistingValues_UMT As htmlViewer:
+            AutoHeight: =true
+            BorderColor: =RGBA(0, 0, 0, 0)
+            Font: =FontStyle
+            Height: =30
+            HtmlText: ="<b>Step 2. Select an existing objective, and then select an action"
+            PaddingLeft: =15
+            Visible: =!(IsBlankOrError(combo_ManageObj_BoardType_UMT.SelectedItems) || CountRows(combo_ManageObj_BoardType_UMT.SelectedItems) = 0)
+            Width: =Top_ManageObjective_UMT.Width
+            X: =Top_ManageObjective_UMT.X
+            Y: =html_ManageObj_BTSubheader_UMT.Y + html_ManageObj_BTSubheader_UMT.Height + 10
+            ZIndex: =12
+
+        html_ManageObj_BTSubheader_UMT As htmlViewer:
+            AutoHeight: =true
+            BorderColor: =RGBA(0, 0, 0, 0)
+            Font: =FontStyle
+            Height: =30
+            HtmlText: |-
+                =If(
+                    CountRows(combo_ManageObj_BoardType_UMT.SelectedItems) = 0 || IsBlankOrError(combo_ManageObj_BoardType_UMT.SelectedItems),
+                    " ",
+                    "You've selected <font style='font-weight: 600'>" & Left(
+                        Concat(combo_ManageObj_BoardType_UMT.SelectedItems, ThisRecord.BoardTypeName_Selected & ", "),
+                        Len(Concat(combo_ManageObj_BoardType_UMT.SelectedItems, ThisRecord.BoardTypeName_Selected & ", ")) - 2
+                    ) & "</font>."
+                )
+            PaddingLeft: =22
+            Width: =html_ManageObj_BTHeader_UMT.Width
+            X: =html_ManageObj_BTHeader_UMT.X
+            Y: =combo_ManageObj_BoardType_UMT.Y + combo_ManageObj_BoardType_UMT.Height
+            ZIndex: =13
+
+        combo_ManageObj_BoardType_UMT As combobox:
+            BorderColor: =If(IsBlankOrError(Self.SelectedItems) || CountRows(Self.SelectedItems) = 0, REDWARNINGCOLOR, GRAYCOLOR)
+            BorderThickness: =1
+            ChevronBackground: =GrayControlBackground
+            ChevronFill: =Color.Black
+            ChevronHoverBackground: =
+            ChevronHoverFill: =Color.Black
+            DefaultSelectedItems: |-
+                =Filter(
+                    RenameColumns(
+                        Filter(
+                            AddColumns(
+                                ShowColumns(
+                                    ReviewHub_BoardTypes,
+                                    "craf2_boardtypeid",
+                                    "craf2_boardtypename",
+                                    "craf2_isdisplayinapp"
+                                ),
+                                "IsDisplayInApp",
+                                If(
+                                    Text(craf2_isdisplayinapp) = "Yes",
+                                    true,
+                                    false
+                                )
+                            ),
+                            ThisRecord.IsDisplayInApp = true && (IsAdmin || (IsCoordinator && ThisRecord.craf2_boardtypeid in IsCoordinator_BoardTypes))
+                        ),
+                        "craf2_boardtypeid",
+                        "BoardTypeID_Selected",
+                        "craf2_boardtypename",
+                        "BoardTypeName_Selected"
+                    ),
+                    ThisRecord.BoardTypeID_Selected = If(
+                        dpdn_NewTemplate_UMTD.Visible,
+                        dpdn_NewTemplate_UMTD.Selected.TemplateBoardTypeID,
+                        glry_Template_UMTD.Selected.Edit_TemplateBoardTypeID
+                    )
+                )
+            DisplayFields: =["BoardTypeName_Selected"]
+            Font: =FontStyle
+            Height: =30
+            HoverBorderColor: =
+            HoverFill: =BlueControlLightBackground
+            InputTextPlaceholder: ="Select scorecard types"
+            IsSearchable: =false
+            Items: |-
+                =RenameColumns(
+                    Filter(
+                        AddColumns(
+                            ShowColumns(
+                                ReviewHub_BoardTypes,
+                                "craf2_boardtypeid",
+                                "craf2_boardtypename",
+                                "craf2_isdisplayinapp"
+                            ),
+                            "IsDisplayInApp",
+                            If(
+                                Text(craf2_isdisplayinapp) = "Yes",
+                                true,
+                                false
+                            )
+                        ),
+                        ThisRecord.IsDisplayInApp = true 
+                            && (IsAdmin || (IsCoordinator && ThisRecord.craf2_boardtypeid in IsCoordinator_BoardTypes))
+                    ),
+                    "craf2_boardtypeid",
+                    "BoardTypeID_Selected",
+                    "craf2_boardtypename",
+                    "BoardTypeName_Selected"
+                )
+            OnChange: =Reset(combo_ManageObj_ExistingValues_UMT)
+            PaddingBottom: =0
+            PaddingTop: =0
+            PressedColor: =BlueControlDarkBackground
+            PressedFill: =BlueControlLightBackground
+            Reset: =
+            SearchFields: =["BoardTypeName_Selected"]
+            SearchItems: =[]
+            SelectionFill: =BlueNaviHightLightBackground
+            Size: =11
+            Tooltip: ="Select scorecard types"
+            Width: |-
+                =If(
+                    CountRows(Self.SelectedItems) = 0 || IsBlankOrError(Self.SelectedItems),
+                    200,
+                    Min(160 * CountRows(Self.SelectedItems), Top_ManageObjective_UMT.Width - 30)
+                )
+            X: =Top_ManageObjective_UMT.X + 15
+            Y: =html_ManageObj_BTHeader_UMT.Y + html_ManageObj_BTHeader_UMT.Height
+            ZIndex: =14
+
+        html_ManageObj_BTHeader_UMT As htmlViewer:
+            AutoHeight: =true
+            BorderColor: =RGBA(0, 0, 0, 0)
+            Font: =FontStyle
+            Height: =30
+            HtmlText: |-
+                ="<b>Step 1. Select scorecard types for this objective (allow multi-selection): </b><font color=red>*</font>"
+            PaddingLeft: =15
+            Width: =Top_ManageObjective_UMT.Width
+            X: =Top_ManageObjective_UMT.X
+            Y: =Top_ManageObjective_UMT.Y + Top_ManageObjective_UMT.Height + 10
+            ZIndex: =15
+
+        Top_ManageObjective_UMT As button:
+            BorderColor: =Self.Fill
+            Color: =RGBA(0, 0, 0, 1)
+            DisabledBorderColor: =Self.Fill
+            DisabledColor: =Self.Color
+            DisabledFill: =Self.Fill
+            DisplayMode: =DisplayMode.Disabled
+            Fill: =ColorFade(BlueNaviHightLightBackground, 50%)
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Size: =11
+            Text: ="Manage Metric Type - Objective (Subgroup)"
+            Width: =Back_MangeMTObjective_UMT.Width
+            X: =(Parent.Width - Self.Width) * 0.50
+            Y: =Back_MangeMTObjective_UMT.Y
+            ZIndex: =16
+
+        btn_Close_ManageObj_UMT As icon.Add:
+            BorderColor: =
+            BorderStyle: =BorderStyle.None
+            Color: =RGBA(0, 0, 0, 1)
+            Height: =Top_ManageObjective_UMT.Height
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =BlueControlDarkBackground
+            Icon: =Icon.Cancel
+            OnSelect: =Select(btn_CancelMTObjective_UMT);
+            PaddingBottom: =7
+            PaddingLeft: =7
+            PaddingRight: =7
+            PaddingTop: =7
+            PressedColor: =Color.Purple
+            Tooltip: ="Close"
+            Width: =Self.Height + 3
+            X: =Top_ManageObjective_UMT.X + Top_ManageObjective_UMT.Width - Self.Width
+            Y: =Top_ManageObjective_UMT.Y
+            ZIndex: =17
+
+    TrackRequestComponent_UMT As TrackRequestComponent:
+        BlueControlDarkBackground: =BlueControlDarkBackground
+        BlueControlLightBackground: =BlueControlLightBackground
+        BlueNaviHightLightBackground: =BlueNaviHightLightBackground
+        DevOpsBaseUrl: =var_DevOpsBaseURL
+        DevOpsQueryID: =var_DevOpsQueryID
+        FontStyle: =FontStyle
+        GrayCanvasBackground: =GrayCanvasBackground
+        GRAYCOLOR: =GRAYCOLOR
+        GrayControlBackground: =GrayControlBackground
+        IsAdmin: =IsAdmin
+        Reset: =Self.Visible
+        Visible: =SS_AppHeader_UMT.DisplayTrackRequest
+        X: =App.Width - Self.Width
+        Y: =SS_AppHeader_UMT.Height
+        ZIndex: =10
+

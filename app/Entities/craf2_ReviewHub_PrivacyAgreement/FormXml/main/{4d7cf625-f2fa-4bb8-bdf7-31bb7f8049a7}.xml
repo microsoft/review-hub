@@ -1,0 +1,124 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <systemform>
+    <formid>{4d7cf625-f2fa-4bb8-bdf7-31bb7f8049a7}</formid>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <FormPresentation>1</FormPresentation>
+    <FormActivationState>1</FormActivationState>
+    <form headerdensity="HighWithControls">
+      <tabs>
+        <tab verticallayout="true" id="{f9e1e29e-381e-4015-b7df-5c9d7fe16b1c}" IsUserDefined="1">
+          <labels>
+            <label description="General" languagecode="1033" />
+          </labels>
+          <columns>
+            <column width="100%">
+              <sections>
+                <section showlabel="false" showbar="false" IsUserDefined="0" id="{2af3a818-a547-45d1-b281-1919518a2132}">
+                  <labels>
+                    <label description="General" languagecode="1033" />
+                  </labels>
+                  <rows>
+                    <row>
+                      <cell id="{91dfaee1-130a-4511-9381-ab20c8a3b75b}">
+                        <labels>
+                          <label description="UserPrincipalEmail" languagecode="1033" />
+                        </labels>
+                        <control id="craf2_userprincipalemail" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="craf2_userprincipalemail" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{6c030dab-a11b-4749-9067-c4090ba2b35e}" visible="false">
+                        <labels>
+                          <label description="Owner" languagecode="1033" />
+                        </labels>
+                        <control id="ownerid" classid="{270BD3DB-D9AF-4782-9025-509E298DEC0A}" datafieldname="ownerid" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{63150509-4922-4129-9ecd-20cbaba6ca93}" locklevel="0" colspan="1" rowspan="1">
+                        <labels>
+                          <label description="UserDisplayName" languagecode="1033" />
+                        </labels>
+                        <control id="craf2_userdisplayname" classid="{4273EDBD-AC1D-40D3-9FB2-095C621B552D}" datafieldname="craf2_userdisplayname" disabled="false" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{50dab01c-421f-4bf5-a711-3aebef2e0c5a}" locklevel="0" colspan="1" rowspan="1">
+                        <labels>
+                          <label description="CurrentAgreementDateTime" languagecode="1033" />
+                        </labels>
+                        <control id="craf2_currentagreementdatetime" classid="{5B773807-9FB2-42DB-97C3-7A91EFF8ADFF}" datafieldname="craf2_currentagreementdatetime" disabled="false" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{db1515a5-86eb-40c6-a820-012e8991f685}" locklevel="0" colspan="1" rowspan="1">
+                        <labels>
+                          <label description="NextAgreementDateTime" languagecode="1033" />
+                        </labels>
+                        <control id="craf2_nextagreementdatetime" classid="{5B773807-9FB2-42DB-97C3-7A91EFF8ADFF}" datafieldname="craf2_nextagreementdatetime" disabled="false" />
+                      </cell>
+                    </row>
+                  </rows>
+                </section>
+              </sections>
+            </column>
+          </columns>
+        </tab>
+      </tabs>
+      <header id="{b75b67b2-538d-4fdc-a5a1-a8dd0c9d6b8e}" celllabelposition="Top" columns="111" labelwidth="115" celllabelalignment="Left">
+        <rows>
+          <row>
+            <cell id="{8ea56b8b-66be-4e24-8429-44b2a9d190bb}" showlabel="false">
+              <labels>
+                <label description="" languagecode="1033" />
+              </labels>
+            </cell>
+            <cell id="{728b88b4-a699-4abf-bc0d-42fe58cf99a7}" showlabel="false">
+              <labels>
+                <label description="" languagecode="1033" />
+              </labels>
+            </cell>
+            <cell id="{55d8f144-2025-454a-823c-931b8877aacf}" showlabel="false">
+              <labels>
+                <label description="" languagecode="1033" />
+              </labels>
+            </cell>
+          </row>
+        </rows>
+      </header>
+      <footer id="{9dea2346-eeeb-46ec-8571-74ae0ff4d571}" celllabelposition="Top" columns="111" labelwidth="115" celllabelalignment="Left">
+        <rows>
+          <row>
+            <cell id="{2453c473-4ab8-44ae-a014-650539df9512}" showlabel="false">
+              <labels>
+                <label description="" languagecode="1033" />
+              </labels>
+            </cell>
+            <cell id="{78d41e22-0318-41aa-b2ac-32f44ef9380a}" showlabel="false">
+              <labels>
+                <label description="" languagecode="1033" />
+              </labels>
+            </cell>
+            <cell id="{0351fb31-a5ad-45d6-8eee-529de50cbc47}" showlabel="false">
+              <labels>
+                <label description="" languagecode="1033" />
+              </labels>
+            </cell>
+          </row>
+        </rows>
+      </footer>
+      <DisplayConditions Order="0" FallbackForm="true">
+        <Everyone />
+      </DisplayConditions>
+    </form>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>1</CanBeDeleted>
+    <LocalizedNames>
+      <LocalizedName description="Information" languagecode="1033" />
+    </LocalizedNames>
+    <Descriptions>
+      <Description description="A form for this entity." languagecode="1033" />
+    </Descriptions>
+  </systemform>
+</forms>

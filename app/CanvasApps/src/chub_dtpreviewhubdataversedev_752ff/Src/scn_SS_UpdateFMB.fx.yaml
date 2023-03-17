@@ -1,0 +1,1507 @@
+scn_SS_UpdateFMB As screen:
+
+    btn_BulkDelete_UFMB As button:
+        BorderColor: =Self.Fill
+        Fill: =REDWARNINGCOLOR
+        Font: =FontStyle
+        FontWeight: =FontWeight.Bold
+        Height: =btn_BulkUpdate_UFMB.Height
+        HoverBorderColor: =Self.BorderColor
+        HoverColor: =Self.Fill
+        HoverFill: =Self.Color
+        OnSelect: |-
+            =UpdateContext({var_show_delete: true});
+        RadiusBottomLeft: =25
+        RadiusBottomRight: =25
+        RadiusTopLeft: =25
+        RadiusTopRight: =25
+        Size: =11
+        Text: ="Bulk Delete"
+        Visible: =btn_BulkUpdate_UFMB.Visible
+        Width: =btn_BulkUpdate_UFMB.Width
+        X: =btn_BulkUpdate_UFMB.X
+        Y: =btn_BulkUpdate_UFMB.Y + btn_BulkUpdate_UFMB.Height + 30
+        ZIndex: =1
+
+    btn_BulkUpdate_UFMB As button:
+        BorderColor: =Self.Fill
+        Fill: =BlueControlDarkBackground
+        Font: =FontStyle
+        FontWeight: =FontWeight.Bold
+        Height: =35
+        HoverColor: =Self.Fill
+        HoverFill: =Self.Color
+        OnSelect: =Set(var_bulk_update_visible_UFMB, true)
+        RadiusBottomLeft: =25
+        RadiusBottomRight: =25
+        RadiusTopLeft: =25
+        RadiusTopRight: =25
+        Size: =11
+        Text: ="Bulk Update"
+        Visible: |-
+            =CountRows(Filter(glry_Search_UFMB.AllItems, ThisRecord.check_Selected_UFMB.Value = true)) > 1 
+            && var_bulk_update_visible_UFMB <> true
+        Width: =130
+        X: =ctn_Search_UFMB.X + ctn_Search_UFMB.Width + 17 + (ctn_Edit_UFMB.Width - Self.Width) * 0.50
+        Y: =ctn_Search_UFMB.Y + (ctn_Search_UFMB.Height - Self.Height*2 - 30) * 0.50 
+        ZIndex: =2
+
+    ctn_Edit_UFMB As groupContainer:
+        Height: =btn_UFMB_Submit.Y + btn_UFMB_Submit.Height + 25
+        Visible: |-
+            =If(
+                var_UFMB_SelectAll || CountRows(Filter(glry_Search_UFMB.AllItems, ThisRecord.check_Selected_UFMB.Value = true)) > 1 ,
+                false,
+                !IsBlankOrError(record_Edit_This_FMB)
+            )
+        Width: =App.Width - Self.X - 15
+        X: =ctn_Search_UFMB.X + ctn_Search_UFMB.Width + 20
+        Y: =ctn_Search_UFMB.Y
+        ZIndex: =3
+
+        Back_EditFMB_UFMB As button:
+            BorderColor: =Top_EditFMB_UFMB.Fill
+            DisabledBorderColor: =Self.BorderColor
+            DisabledFill: =RGBA(0, 0, 0, 0)
+            DisplayMode: =DisplayMode.Disabled
+            Font: =FontStyle
+            Height: =Parent.Height - Self.Y - 1
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Text: =""
+            Width: =Parent.Width - 2
+            X: =1
+            Y: =Top_EditFMB_UFMB.Height - 1
+            ZIndex: =1
+
+        bttn_UFMB_ReviewOwner As button:
+            Align: =Align.Left
+            BorderThickness: =0
+            Color: =BlueControlDarkBackground
+            Fill: =RGBA(0, 0, 0, 0)
+            Font: =FontStyle
+            FontWeight: =FontWeight.Normal
+            Height: =label_UFMB_ReviewOwner.Height
+            HoverColor: =Color.Purple
+            HoverFill: =Self.Fill
+            OnSelect: =Set(var_Display_UFMB_ReviewOwner_Combo, true)
+            PaddingLeft: =0
+            PaddingTop: =0
+            PressedColor: =Self.Color
+            PressedFill: =Self.Fill
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Size: =12
+            Text: =record_Edit_This_FMB.fmb_ReviewOwnerName & "  (Click to edit)"
+            Underline: =true
+            Width: =Parent.Width - Self.X * 2
+            X: =15
+            Y: =label_UFMB_ReviewOwner.Y + label_UFMB_ReviewOwner.Height
+            ZIndex: =2
+
+        img_UFMB_ReviewOwner As image:
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            Height: =80
+            Image: |-
+                =If(
+                    var_Display_UFMB_ReviewOwner_Combo, 
+                    If(
+                        !IsBlankOrError(combo_UFMB_ReviewOwner.Selected.UserPrincipalName),
+                    Office365Users.UserPhotoV2(combo_UFMB_ReviewOwner.Selected.UserPrincipalName), Blank()),
+                    If(
+                        IsBlankOrError(record_Edit_This_FMB.fmb_ReviewOwnerClaims),
+                        Blank(),
+                        Office365Users.UserPhotoV2(record_Edit_This_FMB.fmb_ReviewOwnerClaims)
+                    )
+                    
+                )
+            RadiusBottomLeft: =10
+            RadiusBottomRight: =10
+            RadiusTopLeft: =10
+            RadiusTopRight: =10
+            Width: =Self.Height
+            X: =label_UFMB_ReviewOwnerPic.X
+            Y: =label_UFMB_ReviewOwnerPic.Y + label_UFMB_ReviewOwnerPic.Height
+            ZIndex: =3
+
+        label_UFMB_ReviewOwnerPic As label:
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =30
+            PaddingLeft: =0
+            Size: =12
+            Text: ="Review Owner's Photo"
+            Width: =190
+            X: =label_UFMB_ReviewOwner.X
+            Y: |-
+                =If(
+                    combo_UFMB_ReviewOwner.Visible, 
+                    combo_UFMB_ReviewOwner.Y+combo_UFMB_ReviewOwner.Height + 10, 
+                    bttn_UFMB_ReviewOwner.Y + bttn_UFMB_ReviewOwner.Height + 10
+                )
+            ZIndex: =4
+
+        combo_UFMB_ReviewOwner As combobox:
+            BorderColor: =GRAYCOLOR
+            BorderThickness: =1
+            ChevronBackground: =GrayControlBackground
+            ChevronFill: =RGBA(0, 0, 0, 1)
+            ChevronHoverBackground: =BlueControlLightBackground
+            ChevronHoverFill: =Self.ChevronFill
+            Default: |-
+                ={
+                    UserPrincipalName: record_Edit_This_FMB.fmb_ReviewOwnerClaims,
+                
+                    DisplayName: record_Edit_This_FMB.fmb_ReviewOwnerName
+                
+                } 
+            DefaultSelectedItems: |-
+                ={
+                    UserPrincipalName: record_Edit_This_FMB.fmb_ReviewOwnerClaims,
+                
+                    DisplayName: record_Edit_This_FMB.fmb_ReviewOwnerName
+                
+                } 
+            DisplayFields: =["DisplayName","UserPrincipalName","Picture"]
+            Font: =FontStyle
+            Height: =30
+            HoverFill: =BlueControlLightBackground
+            InputTextPlaceholder: ="(Search by name or principal email alias)"
+            Items: |-
+                =Office365Users.SearchUserV2({searchTerm: Trim(Self.SearchText)}).value
+            PaddingBottom: =0
+            PaddingTop: =0
+            PressedColor: =Color.White
+            PressedFill: =BlueNaviHightLightBackground
+            SearchFields: =["UserPrincipalName", "DisplayName"]
+            SearchItems: |-
+                =Search(Office365Users.SearchUserV2({searchTerm: Trim(Self.SearchText)}).value,combo_UFMB_ReviewOwner.SearchText,"UserPrincipalName","DisplayName")
+            SelectionFill: =BlueNaviHightLightBackground
+            SelectMultiple: =false
+            Size: =12
+            Template: =ListItemTemplate.Double
+            Tooltip: =
+            Visible: =var_Display_UFMB_ReviewOwner_Combo
+            Width: =Parent.Width - Self.X * 2
+            X: =lbl_ReviewOwnerNew_UFMB.X
+            Y: =lbl_ReviewOwnerNew_UFMB.Y + lbl_ReviewOwnerNew_UFMB.Height 
+            ZIndex: =5
+
+        lbl_ReviewOwnerNew_UFMB As label:
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =30
+            PaddingLeft: =0
+            PaddingRight: =0
+            Size: =12
+            Text: |-
+                ="Review Owner will change to:"
+            Visible: =combo_UFMB_ReviewOwner.Visible
+            Width: =Parent.Width - Self.X * 2
+            X: =15
+            Y: =bttn_UFMB_ReviewOwner.Y + bttn_UFMB_ReviewOwner.Height + 10
+            ZIndex: =6
+
+        lbl_UHealthScore_UFMB As label:
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =30
+            PaddingLeft: =0
+            Size: =12
+            Text: ="Health Score (0.0 ~ 1.0)"
+            Width: =220
+            X: =label_UFMB_ReviewOwner.X
+            Y: =img_UFMB_ReviewOwner.Y + img_UFMB_ReviewOwner.Height + 10
+            ZIndex: =7
+
+        ti_UFMB_HealthScore As text:
+            BorderColor: =GRAYCOLOR
+            BorderThickness: =1
+            Default: =record_Edit_This_FMB.fmb_HealthScore
+            Font: =FontStyle
+            Format: =TextFormat.Number
+            Height: =lbl_UHealthScore_UFMB.Height
+            HoverBorderColor: =Self.BorderColor
+            HoverFill: =ColorFade(BlueControlLightBackground, 75%)
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Size: =12
+            Width: =145
+            X: =lbl_UHealthScore_UFMB.X
+            Y: =lbl_UHealthScore_UFMB.Y + lbl_UHealthScore_UFMB.Height
+            ZIndex: =8
+
+        btn_UFMB_Submit As button:
+            BorderColor: =BlueControlDarkBackground
+            DisplayMode: =If(html_UpdateWarning_UFMB.Visible, DisplayMode.Disabled, DisplayMode.Edit)
+            Fill: =BlueControlDarkBackground
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =25
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Self.Fill
+            HoverFill: =Self.Color
+            OnSelect: |-
+                =Concurrent(
+                    Patch(
+                        ReviewHub_FactMetricBoards,
+                        LookUp(
+                            ReviewHub_FactMetricBoards, 
+                            ThisRecord.FactMetricBoardID = record_Edit_This_FMB.fmb_ID 
+                        ),
+                        {
+                            fmb_ReviewOwnerName: If(var_Display_UFMB_ReviewOwner_Combo, combo_UFMB_ReviewOwner.Selected.DisplayName, record_Edit_This_FMB.fmb_ReviewOwnerName),
+                            fmb_ReviewOwnerPrincipal: If(var_Display_UFMB_ReviewOwner_Combo, combo_UFMB_ReviewOwner.Selected.UserPrincipalName, record_Edit_This_FMB.fmb_ReviewOwnerClaims),
+                            fmb_HealthScore: If(IsBlankOrError(ti_UFMB_HealthScore.Text), Blank(), Value(ti_UFMB_HealthScore.Text)),
+                            fmb_ReviewLockDate: dp_UFMB_LockDate.SelectedDate
+                        }
+                    ),
+                    Patch(
+                        clln_factMetricBoard,
+                        LookUp(clln_factMetricBoard, ThisRecord.fmb_ID=record_Edit_This_FMB.fmb_ID),
+                        {
+                            fmb_ReviewOwnerName: If(var_Display_UFMB_ReviewOwner_Combo, combo_UFMB_ReviewOwner.Selected.DisplayName, record_Edit_This_FMB.fmb_ReviewOwnerName),
+                            fmb_ReviewOwnerClaims: If(var_Display_UFMB_ReviewOwner_Combo, combo_UFMB_ReviewOwner.Selected.UserPrincipalName, record_Edit_This_FMB.fmb_ReviewOwnerClaims),
+                            fmb_HealthScore: If(IsBlankOrError(ti_UFMB_HealthScore.Text), Blank(), Value(ti_UFMB_HealthScore.Text)),
+                            fmb_BoardHealthRating: LookUp(clln_MetricBoardHealth, (IsBlankOrError(Value(ti_UFMB_HealthScore.Text)) && MinScore<=-999) || (!IsBlankOrError(Value(ti_UFMB_HealthScore.Text)) && (Value(ti_UFMB_HealthScore.Text)>=MinScore && Value(ti_UFMB_HealthScore.Text)<MaxScore))).Rating,
+                            fmb_BoardHealthImage: LookUp(clln_MetricBoardHealth, (IsBlankOrError(Value(ti_UFMB_HealthScore.Text)) && MinScore<=-999) || (!IsBlankOrError(Value(ti_UFMB_HealthScore.Text)) && (Value(ti_UFMB_HealthScore.Text)>=MinScore && Value(ti_UFMB_HealthScore.Text)<MaxScore))).Image,
+                            fmb_BoardHealthDisplayOrder: LookUp(clln_MetricBoardHealth, (IsBlankOrError(Value(ti_UFMB_HealthScore.Text)) && MinScore<=-999) || (!IsBlankOrError(Value(ti_UFMB_HealthScore.Text)) && (Value(ti_UFMB_HealthScore.Text)>=MinScore && Value(ti_UFMB_HealthScore.Text)<MaxScore))).DisplayOrder,
+                            fmb_ReviewLockDate: dp_UFMB_LockDate.SelectedDate
+                        }
+                    ),
+                
+                    Set(IsFmbEditedByAdmin, true)
+                );
+                
+                Set(record_Edit_This_FMB, Blank());
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Size: =10
+            Text: ="Save"
+            Width: =90
+            X: =lbl_UFMB_LockDate.X
+            Y: =ti_UFMB_HealthScore.Y + ti_UFMB_HealthScore.Height + 20
+            ZIndex: =9
+
+        btn_UFMB_Cancel As button:
+            BorderColor: =GRAYCOLOR
+            Fill: =GRAYCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =25
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Self.Fill
+            HoverFill: =Self.Color
+            OnSelect: =Set(record_Edit_This_FMB, Blank())
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Size: =10
+            Text: ="Cancel"
+            Width: =90
+            X: =btn_UFMB_Submit.X + btn_UFMB_Submit.Width + 30
+            Y: =btn_UFMB_Submit.Y
+            ZIndex: =10
+
+        label_UFMB_ReviewOwner As label:
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =30
+            PaddingLeft: =0
+            Size: =12
+            Text: ="Review Owner"
+            X: =15
+            Y: |-
+                =If(
+                    html_UpdateWarning_UFMB.Visible,
+                    html_UpdateWarning_UFMB.Y + html_UpdateWarning_UFMB.Height + 10,
+                    dp_UFMB_LockDate.Y + dp_UFMB_LockDate.Height + 10
+                )
+            ZIndex: =11
+
+        html_UpdateWarning_UFMB As htmlViewer:
+            AutoHeight: =true
+            Font: =FontStyle
+            HtmlText: |-
+                ="<font color=red><b>Warning: </b> You cannot update Review Lock Date to a date in another month. Please select a date in <b>" & dpdn_ReviewMonth_FMB.Selected.Month_Year & "</b>.</font>"
+            PaddingLeft: =0
+            Size: =12
+            Visible: |-
+                =Month(dp_UFMB_LockDate.SelectedDate) <> dpdn_ReviewMonth_FMB.Selected.MonthNum 
+                    || Year(dp_UFMB_LockDate.SelectedDate) <> dpdn_ReviewMonth_FMB.Selected.Year 
+            Width: =Parent.Width - Self.X - 15
+            X: =dp_UFMB_LockDate.X
+            Y: =dp_UFMB_LockDate.Y + dp_UFMB_LockDate.Height 
+            ZIndex: =12
+
+        dp_UFMB_LockDate As datepicker:
+            BorderColor: =GRAYCOLOR
+            BorderThickness: =1
+            DefaultDate: =record_Edit_This_FMB.fmb_ReviewLockDate
+            Font: =FontStyle
+            Height: =30
+            IconBackground: =GrayControlBackground
+            IconFill: =RGBA(0, 0, 0, 1)
+            PaddingBottom: =0
+            PaddingLeft: =10
+            Size: =12
+            Width: =145
+            X: =lbl_UFMB_LockDate.X
+            Y: =lbl_UFMB_LockDate.Y + lbl_UFMB_LockDate.Height
+            ZIndex: =13
+
+        lbl_UFMB_LockDate As label:
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =30
+            PaddingLeft: =0
+            Size: =12
+            Text: ="Review Lock Date"
+            X: =15
+            Y: =html_EditInfo_UFMB.Y + html_EditInfo_UFMB.Height + 10
+            ZIndex: =14
+
+        html_EditInfo_UFMB As htmlViewer:
+            AutoHeight: =true
+            Font: =FontStyle
+            HtmlText: |-
+                ="<font style='font-weight: 900;'>Business Unit: </font>" & record_Edit_This_FMB.fmb_ProductName
+            PaddingLeft: =15
+            Size: =12
+            Width: =Parent.Width - Self.X
+            Y: |
+                =Top_EditFMB_UFMB.Y + Top_EditFMB_UFMB.Height + 5
+            ZIndex: =15
+
+        Top_EditFMB_UFMB As button:
+            Align: =Align.Left
+            BorderColor: =Self.Fill
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =0
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =Color.Black
+            DisabledFill: =Self.Fill
+            DisplayMode: =DisplayMode.Disabled
+            Fill: =SUBGROUPCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =60
+            HoverFill: =Self.Fill
+            PaddingLeft: =20
+            RadiusBottomLeft: |
+                =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: |
+                =25
+            RadiusTopRight: |
+                =25
+            Size: =14
+            Text: |-
+                ="Edit - FMB ID: " & record_Edit_This_FMB.fmb_ID
+            Width: =Parent.Width
+            ZIndex: =16
+
+        btn_UFMB_Reset As button:
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =0
+            Color: =BlueControlDarkBackground
+            Fill: =RGBA(0, 0, 0, 0)
+            Font: =FontStyle
+            HoverColor: =Color.Purple
+            HoverFill: =Self.Fill
+            OnSelect: |-
+                =Concurrent(
+                    Reset(combo_UFMB_ReviewOwner), Reset(ti_UFMB_HealthScore), Reset(DatePicker_BulkUpdate_UFMB),
+                    Reset(dp_UFMB_LockDate),
+                    Set(var_Display_UFMB_ReviewOwner_Combo, false),
+                    Set(var_UFMB_SelectAll, false)
+                )
+            PressedColor: =Self.Color
+            PressedFill: =Self.Fill
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Size: =12
+            Text: ="Reset"
+            Underline: =true
+            Width: =55
+            X: =Parent.Width - Self.Width - 10
+            Y: =(Top_EditFMB_UFMB.Height - Self.Height) * 0.50
+            ZIndex: =17
+
+    ctn_UFMB_BulkUpdate As groupContainer:
+        Height: =btn_BulkCancel_UFMB.Y + btn_BulkCancel_UFMB.Height + 30
+        Visible: =var_bulk_update_visible_UFMB && CountRows(Filter(glry_Search_UFMB.AllItems, ThisRecord.check_Selected_UFMB.Value = true)) > 1
+        Width: =App.Width - Self.X - 15
+        X: =ctn_Search_UFMB.X + ctn_Search_UFMB.Width + 20
+        Y: =ctn_Search_UFMB.Y
+        ZIndex: =4
+
+        Back_BulkEdit_UFMB As button:
+            BorderColor: =Top_EditFMB_UFMB.Fill
+            DisabledBorderColor: =Self.BorderColor
+            DisabledFill: =RGBA(0, 0, 0, 0)
+            DisplayMode: =DisplayMode.Disabled
+            Font: =FontStyle
+            Height: =Parent.Height - Self.Y - 1
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Text: =""
+            Width: =Parent.Width - 2
+            X: =1
+            Y: =Top_BulkEdit_UFMB.Height - 1
+            ZIndex: =1
+
+        btn_BulkCancel_UFMB As button:
+            BorderColor: =Self.Fill
+            Fill: =GRAYCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =30
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Self.Fill
+            HoverFill: =Self.Color
+            OnSelect: |-
+                =Reset(check_selectAll_UFMB);
+                Set(var_UFMB_SelectAll, false);
+                Set(record_Edit_This_FMB, Blank());
+                Set(var_bulk_update_visible_UFMB, false);
+            RadiusBottomLeft: =20
+            RadiusBottomRight: =20
+            RadiusTopLeft: =20
+            RadiusTopRight: =20
+            Size: =10
+            Text: ="Cancel"
+            Width: =90
+            X: =btn_BulkSubmit_UFMB.X + btn_BulkSubmit_UFMB.Width - Self.Width
+            Y: |
+                =btn_BulkSubmit_UFMB.Y + btn_BulkSubmit_UFMB.Height + 20
+            ZIndex: =2
+
+        btn_BulkSubmit_UFMB As button:
+            BorderColor: =Self.Fill
+            DisplayMode: =If(html_BulkUpdateWarning_UFMB.Visible, DisplayMode.Disabled, DisplayMode.Edit)
+            Fill: =BlueControlDarkBackground
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =55
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Self.Fill
+            HoverFill: =Self.Color
+            OnSelect: |-
+                =Set(var_bulk_update_visible_UFMB, false);
+                ClearCollect(
+                    clln_BulkUpdate_Scorecards,
+                    AddColumns(
+                        Filter(glry_Search_UFMB.AllItems, ThisRecord.check_Selected_UFMB.Value = true),
+                        "fmb_ID_ToUpdate", ThisRecord.fmb_ID
+                    )
+                );
+                Concurrent(
+                    Reset(check_selectAll_UFMB), Set(var_UFMB_SelectAll, false)
+                );
+                ForAll(
+                    clln_BulkUpdate_Scorecards,
+                    Concurrent(
+                        //Update backend table
+                        Patch(
+                            ReviewHub_FactMetricBoards,
+                            LookUp(ReviewHub_FactMetricBoards, ThisRecord.craf2_factmetricboardid = fmb_ID_ToUpdate),
+                            {
+                                craf2_fmb_reviewlockdate: DatePicker_BulkUpdate_UFMB.SelectedDate
+                            }
+                        ),
+                        //Update cache table
+                        Patch(
+                            clln_factMetricBoard,
+                            LookUp(clln_factMetricBoard, ThisRecord.fmb_ID = fmb_ID_ToUpdate),
+                            {
+                                fmb_ReviewLockDate: DatePicker_BulkUpdate_UFMB.SelectedDate
+                            }
+                        )
+                    )
+                );
+                
+                Set(record_Edit_This_FMB, Blank());
+            PaddingLeft: =8
+            PaddingRight: =8
+            RadiusBottomLeft: =30
+            RadiusBottomRight: =30
+            RadiusTopLeft: =30
+            RadiusTopRight: =30
+            Size: =11
+            Text: ="Bulk Update Review Lock Date To ''" & Text(DatePicker_BulkUpdate_UFMB.SelectedDate, "mmmm dd, yyyy") & "''"
+            Width: =Parent.Width - 50
+            X: =30
+            Y: |
+                =If (
+                    html_BulkUpdateWarning_UFMB.Visible,
+                    html_BulkUpdateWarning_UFMB.Y + html_BulkUpdateWarning_UFMB.Height + 20,
+                    DatePicker_BulkUpdate_UFMB.Y + DatePicker_BulkUpdate_UFMB.Height + 20
+                )
+            ZIndex: =3
+
+        html_BulkUpdateWarning_UFMB As htmlViewer:
+            AutoHeight: =true
+            Font: =FontStyle
+            HtmlText: |-
+                ="<font color=red><b>Warning: </b> You cannot update Review Lock Date to a date in another month. Please select a date in <b>" & dpdn_ReviewMonth_FMB.Selected.Month_Year & "</b>.</font>"
+            PaddingLeft: =0
+            Size: =12
+            Visible: |-
+                =Month(DatePicker_BulkUpdate_UFMB.SelectedDate) <> dpdn_ReviewMonth_FMB.Selected.MonthNum 
+                    || Year(DatePicker_BulkUpdate_UFMB.SelectedDate) <> dpdn_ReviewMonth_FMB.Selected.Year 
+            Width: =Parent.Width - Self.X - 15
+            X: =15
+            Y: =DatePicker_BulkUpdate_UFMB.Y + DatePicker_BulkUpdate_UFMB.Height 
+            ZIndex: =4
+
+        DatePicker_BulkUpdate_UFMB As datepicker:
+            BorderColor: =GRAYCOLOR
+            BorderThickness: =1
+            Font: =FontStyle
+            Height: =lbl_BulkLockDate_UFMB.Height
+            IconBackground: =GrayControlBackground
+            IconFill: =RGBA(0, 0, 0, 1)
+            PaddingLeft: =10
+            PaddingTop: =5
+            Size: =12
+            Width: =145
+            X: =lbl_BulkLockDate_UFMB.X 
+            Y: =lbl_BulkLockDate_UFMB.Y + lbl_BulkLockDate_UFMB.Height
+            ZIndex: =5
+
+        lbl_BulkLockDate_UFMB As label:
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =30
+            PaddingLeft: =0
+            Size: =12
+            Text: ="Review Lock Date"
+            Width: =175
+            X: =15
+            Y: =lbl_BulkSelected_UFMB.Y + lbl_BulkSelected_UFMB.Height + 10
+            ZIndex: =6
+
+        lbl_BulkSelected_UFMB As label:
+            AutoHeight: =true
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =48
+            PaddingLeft: =15
+            Size: =12
+            Text: |-
+                ="Number of Selected Scorecards: " & CountRows(Filter(glry_Search_UFMB.AllItems, ThisRecord.check_Selected_UFMB.Value = true))
+            Width: =Parent.Width
+            Y: =Top_BulkEdit_UFMB.Y + Top_BulkEdit_UFMB.Height + 5
+            ZIndex: =7
+
+        Top_BulkEdit_UFMB As button:
+            Align: =Align.Left
+            BorderColor: =Self.Fill
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =0
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =Color.Black
+            DisabledFill: =Self.Fill
+            DisplayMode: =DisplayMode.Disabled
+            Fill: =SUBGROUPCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =60
+            HoverFill: =Self.Fill
+            PaddingLeft: =20
+            RadiusBottomLeft: |
+                =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: |
+                =25
+            RadiusTopRight: |
+                =25
+            Size: =14
+            Text: ="Bulk Update Review Lock Date"
+            Width: =Parent.Width
+            ZIndex: =8
+
+    ctn_Search_UFMB As groupContainer:
+        BorderColor: =
+        BorderStyle: =BorderStyle.None
+        Height: =App.Height- Self.Y - 15
+        Width: |-
+            =If(
+                btn_BulkUpdate_UFMB.Visible,
+                App.Width - Self.X * 3 - btn_BulkUpdate_UFMB.Width,
+                If (
+                    !ctn_Edit_UFMB.Visible && !ctn_UFMB_BulkUpdate.Visible,
+                    App.Width - Self.X * 2,
+                    App.Width * 0.70
+                )
+            )
+        X: =icon_Back_FMB.X
+        Y: =lbl_ReviewMonth_FMB.Y + lbl_ReviewMonth_FMB.Height + 10
+        ZIndex: =5
+
+        glry_Search_UFMB As gallery.variableTemplateHeightGallery:
+            BorderColor: =Back_Header_UFMB.Fill
+            BorderThickness: =2
+            Height: =Parent.Height - Self.Y - 1
+            Items: |-
+                =Ungroup(//Ungroup function to add a Row Number column.
+                    ForAll(
+                        Sequence(
+                            CountRows(
+                                Search(
+                                    Filter(
+                                        clln_factMetricBoard,
+                                        ThisRecord.fmb_ReviewYear = dpdn_ReviewMonth_FMB.Selected.Year && ThisRecord.fmb_ReviewMonth = dpdn_ReviewMonth_FMB.Selected.MonthNum && ThisRecord.fmb_MetricBoardTypeID = dpdn_BoardType_FMB.Selected.filter_BoardTypeID && (IsAdmin || (IsCoordinator && ThisRecord.fmb_MetricBoardTypeID in IsCoordinator_BoardTypes))
+                                    ),
+                                    Trim(ti_Search_FMB.Text),
+                                    "fmb_ProductName",
+                                    "fmb_ReviewOwnerName",
+                                    "fmb_ReviewOwnerClaims"
+                                )
+                            )
+                        ),
+                        {
+                            Record: Table(
+                                Last(
+                                    FirstN(
+                                        Search(
+                                            Filter(
+                                                clln_factMetricBoard,
+                                                ThisRecord.fmb_ReviewYear = dpdn_ReviewMonth_FMB.Selected.Year && ThisRecord.fmb_ReviewMonth = dpdn_ReviewMonth_FMB.Selected.MonthNum && ThisRecord.fmb_MetricBoardTypeID = dpdn_BoardType_FMB.Selected.filter_BoardTypeID && (IsAdmin || (IsCoordinator && ThisRecord.fmb_MetricBoardTypeID in IsCoordinator_BoardTypes))
+                                            ),
+                                            Trim(ti_Search_FMB.Text),
+                                            "fmb_ProductName",
+                                            "fmb_ReviewOwnerName",
+                                            "fmb_ReviewOwnerClaims"
+                                        ),
+                                        Value
+                                    )
+                                )
+                            ),
+                            RowNumber: Value
+                        }
+                    ),
+                    "Record"
+                )
+            Layout: =Layout.Vertical
+            TemplateFill: |-
+                =If(
+                    Mod(ThisItem.RowNumber, 2) > 0,
+                    If(
+                        check_Selected_UFMB.Value || ThisItem.fmb_ID = record_Edit_This_FMB.fmb_ID || ThisItem.IsSelected, 
+                        ColorFade(BlueNaviHightLightBackground, 80%), 
+                        RGBA(0, 0, 0, 0)
+                    ),
+                    If(
+                        check_Selected_UFMB.Value || ThisItem.fmb_ID = record_Edit_This_FMB.fmb_ID || ThisItem.IsSelected, 
+                        ColorFade(BlueNaviHightLightBackground, 80%), 
+                        GrayCanvasBackground
+                    )
+                )
+            TemplatePadding: =0
+            TemplateSize: =60
+            Width: =Parent.Width - 2
+            X: =1
+            Y: =ctn_Headers_UFMB.Y + ctn_Headers_UFMB.Height - 1
+            ZIndex: =1
+
+            btn_Delete_UFMB As icon.Edit:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                Color: =REDWARNINGCOLOR
+                Height: =btn_Edit_UFMB.Height + 5
+                HoverColor: =Color.White
+                HoverFill: =REDWARNINGCOLOR
+                Icon: =Icon.Trash
+                OnSelect: |-
+                    =Set(record_Delete_This_FMB, ThisItem);
+                    UpdateContext({var_show_delete: true});
+                Tooltip: ="Delete"
+                Visible: =btn_Edit_UFMB.Visible
+                Width: |
+                    =btn_Edit_UFMB.Width + 5
+                X: |
+                    =btn_Edit_UFMB.X + btn_Edit_UFMB.Width + 15
+                Y: =btn_Edit_UFMB.Y - 2
+                ZIndex: =1
+
+            btn_Edit_UFMB As icon.Edit:
+                BorderColor: =Self.Color
+                BorderThickness: =2
+                Color: =BlueControlDarkBackground
+                Height: =25
+                HoverBorderColor: =Self.Color
+                HoverColor: =Color.White
+                HoverFill: =Self.Color
+                Icon: =Icon.Edit
+                OnSelect: |-
+                    =Concurrent(
+                        Set(record_Edit_This_FMB, ThisItem),
+                        Select(btn_UFMB_Reset)
+                    )
+                PaddingBottom: =3
+                PaddingLeft: =3
+                PaddingRight: =3
+                PaddingTop: =3
+                Tooltip: ="Edit"
+                Visible: |-
+                    =If(
+                        Header_Conrol_UFMB.Width = 1,
+                        false,
+                        true
+                    )
+                Width: =25
+                X: =Header_Conrol_UFMB.X + (Header_Conrol_UFMB.Width - Self.Width - btn_Delete_UFMB.Width - 15) * 0.50
+                Y: =(check_Selected_UFMB.Height - Self.Height) * 0.50
+                ZIndex: =2
+
+            html_CreatedBy_UFMB As htmlViewer:
+                AutoHeight: =true
+                BorderColor: =RGBA(0, 0, 0, 0)
+                Fill: =RGBA(0, 0, 0, 0)
+                Font: =FontStyle
+                Height: =20
+                HtmlText: |-
+                    ="<center>" & LookUp(ReviewHub_FactMetricBoards, ThisRecord.craf2_factmetricboardid=ThisItem.fmb_ID).'Modified By'.fullname 
+                    & "<br>" & LookUp(ReviewHub_FactMetricBoards, ThisRecord.craf2_factmetricboardid=ThisItem.fmb_ID).'Modified On' & "</center>"
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Width: =Header_CreatedBy_UFMB.Width
+                X: =Header_CreatedBy_UFMB.X
+                Y: =check_Selected_UFMB.Y + (check_Selected_UFMB.Height - Self.Height) * 0.50
+                ZIndex: =8
+
+            lbl_HealthScore_UFMB As label:
+                Align: =Align.Center
+                Fill: =Parent.Fill
+                Font: =FontStyle
+                Height: =check_Selected_UFMB.Height
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: =If(IsBlankOrError(ThisItem.fmb_HealthScore), "(No Value)", ThisItem.fmb_HealthScore)
+                Width: =Header_HealthScore_UFMB.Width
+                X: =Header_HealthScore_UFMB.X
+                ZIndex: =9
+
+            lbl_ReviewOwner_UFMB As label:
+                Align: =Align.Center
+                AutoHeight: =true
+                Fill: =Parent.Fill
+                Font: =FontStyle
+                Height: =0
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =10
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: =ThisItem.fmb_ReviewOwnerName
+                Width: =Header_ReviewOwner_UFMB.Width
+                X: =Header_ReviewOwner_UFMB.X
+                Y: =(lbl_FMBID_UFMB.Height - Self.Height) * 0.50
+                ZIndex: =10
+
+            html_BoardTypeTemplate_UFMB As htmlViewer:
+                AutoHeight: =true
+                BorderColor: =RGBA(0, 0, 0, 0)
+                Fill: =RGBA(0, 0, 0, 0)
+                Font: =FontStyle
+                Height: =20
+                HtmlText: |-
+                    ="B: " & ThisItem.fmb_MetricBoardTypeValue & "<br>T: " & ThisItem.fmb_TemplateName 
+                OnSelect: =Select(Parent)
+                PaddingLeft: =10
+                Size: =10
+                Width: =Header_BoardType_UFMB.Width
+                X: =Header_BoardType_UFMB.X
+                Y: =check_Selected_UFMB.Y + (check_Selected_UFMB.Height - Self.Height) * 0.50
+                ZIndex: =11
+
+            lbl_Product_UFMB As label:
+                AutoHeight: =true
+                Fill: =Parent.Fill
+                Font: =FontStyle
+                Height: =50
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =10
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: =ThisItem.fmb_ProductName
+                Width: =Header_Product_UFMB.Width
+                X: =Header_Product_UFMB.X
+                Y: =(lbl_FMBID_UFMB.Height - Self.Height) * 0.50
+                ZIndex: =12
+
+            lbl_FMBID_UFMB As label:
+                Align: =Align.Center
+                Fill: =Parent.Fill
+                Font: =FontStyle
+                Height: =check_Selected_UFMB.Height
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: =ThisItem.fmb_ID
+                Width: =Header_FMBID_UFMB.Width
+                X: =Header_FMBID_UFMB.X
+                ZIndex: =13
+
+            lbl_LockDate_UFMB As label:
+                Align: =Align.Center
+                Fill: =Parent.Fill
+                Font: =FontStyle
+                Height: =check_Selected_UFMB.Height
+                OnSelect: =Select(Parent)
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: =ThisItem.fmb_ReviewLockDate
+                Width: =Header_LockDate_UFMB.Width
+                X: =Header_LockDate_UFMB.X
+                ZIndex: =14
+
+            check_Selected_UFMB As checkbox:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                CheckboxBorderColor: =check_selectAll_UFMB.CheckboxBorderColor
+                CheckboxSize: =check_selectAll_UFMB.CheckboxSize
+                CheckmarkFill: =check_selectAll_UFMB.CheckmarkFill
+                Default: =If(var_UFMB_SelectAll, true, false)
+                Fill: =Parent.Fill
+                Font: =FontStyle
+                Height: =60
+                OnCheck: |-
+                    =Set(var_bulk_update_visible_UFMB, false);
+                    Set(record_Edit_This_FMB, Blank());
+                OnSelect: =Select(Parent)
+                OnUncheck: |-
+                    =Set(var_bulk_update_visible_UFMB, false);
+                    Set(record_Edit_This_FMB, Blank());
+                PaddingLeft: =(Self.Width - Self.CheckboxSize) * 0.50
+                Size: =11
+                Text: =""
+                Width: =check_selectAll_UFMB.Width
+                X: =
+                ZIndex: =15
+
+        ctn_Headers_UFMB As groupContainer.manualLayoutContainer:
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            Height: =40
+            Width: =Parent.Width
+            ZIndex: =6
+
+            Back_Header_UFMB As button:
+                BorderColor: =Self.Fill
+                BorderStyle: =BorderStyle.None
+                BorderThickness: =0
+                DisabledBorderColor: =Self.BorderColor
+                DisabledColor: =Self.Color
+                DisabledFill: =Self.Fill
+                DisplayMode: =DisplayMode.Disabled
+                Fill: =ColorFade(BlueNaviHightLightBackground, 50%)
+                Font: =FontStyle
+                RadiusBottomLeft: |
+                    =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =20
+                RadiusTopRight: =20
+                Text: =""
+                Width: =Parent.Width
+                ZIndex: =1
+
+            Header_Conrol_UFMB As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =check_selectAll_UFMB.Height
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: ="Edit / Delete"
+                Visible: =Self.Width <> 1
+                Width: |-
+                    =If(
+                        CountRows(Filter(glry_Search_UFMB.AllItems, ThisRecord.check_Selected_UFMB.Value = true)) > 1,
+                        1,
+                        140
+                    )
+                X: =Header_CreatedBy_UFMB.X + Header_CreatedBy_UFMB.Width
+                ZIndex: =6
+
+            Header_CreatedBy_UFMB As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =check_selectAll_UFMB.Height
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: ="Last Updated By"
+                Width: =Min(170, Parent.Width * 0.15)
+                X: =Header_HealthScore_UFMB.X + Header_HealthScore_UFMB.Width
+                ZIndex: =7
+
+            Header_HealthScore_UFMB As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =check_selectAll_UFMB.Height
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: ="Health Score"
+                Width: =Min(90, Parent.Width * 0.15)
+                X: =Header_ReviewOwner_UFMB.X + Header_ReviewOwner_UFMB.Width
+                ZIndex: =8
+
+            Header_ReviewOwner_UFMB As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =check_selectAll_UFMB.Height
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: ="Review Owner"
+                Width: =Min(180, Parent.Width * 0.14)
+                X: =Header_BoardType_UFMB.X + Header_BoardType_UFMB.Width
+                ZIndex: =9
+
+            Header_BoardType_UFMB As label:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =check_selectAll_UFMB.Height
+                PaddingBottom: =0
+                PaddingLeft: =10
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: ="Board Type & Template"
+                Width: =Min(140, Parent.Width * 0.14)
+                X: =Header_Product_UFMB.X + Header_Product_UFMB.Width
+                ZIndex: =10
+
+            Header_Product_UFMB As label:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =check_selectAll_UFMB.Height
+                PaddingBottom: =0
+                PaddingLeft: =10
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: ="Product / Business Unit"
+                Width: =Parent.Width - Header_LockDate_UFMB.Width - Header_BoardType_UFMB.Width - Header_FMBID_UFMB.Width - Header_HealthScore_UFMB.Width - Header_ReviewOwner_UFMB.Width - check_selectAll_UFMB.Width - Header_CreatedBy_UFMB.Width - Header_Conrol_UFMB.Width
+                X: =Header_FMBID_UFMB.X+Header_FMBID_UFMB.Width
+                ZIndex: =11
+
+            Header_FMBID_UFMB As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =check_selectAll_UFMB.Height
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: ="FMB ID"
+                Tooltip: ="FMB ID"
+                Width: =If(App.Width < 1200, 1, 70)
+                X: =Header_LockDate_UFMB.X + Header_LockDate_UFMB.Width
+                ZIndex: =12
+
+            Header_LockDate_UFMB As label:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                DisplayMode: =DisplayMode.View
+                Font: =FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =check_selectAll_UFMB.Height
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: ="Review Lock Date"
+                Width: =100
+                X: =check_selectAll_UFMB.X + check_selectAll_UFMB.Width
+                ZIndex: =13
+
+            check_selectAll_UFMB As checkbox:
+                BorderColor: =RGBA(0, 0, 0, 0)
+                BorderStyle: =BorderStyle.None
+                CheckboxBorderColor: =Color.Black
+                CheckboxSize: =25
+                CheckmarkFill: =BlueControlDarkBackground
+                Font: =FontStyle
+                Height: =Parent.Height
+                OnCheck: =Set(var_UFMB_SelectAll, true);
+                OnSelect: =
+                OnUncheck: =Set(var_UFMB_SelectAll, false);
+                PaddingLeft: =(Self.Width - Self.CheckboxSize) * 0.50
+                Reset: =true
+                Size: =10
+                Text: =""
+                Tooltip: ="Select All"
+                Width: =50
+                X: =
+                ZIndex: =14
+
+    lbl_UFMB_GlryRowCount As label:
+        Align: =Align.Right
+        BorderColor: =RGBA(0, 0, 0, 0)
+        BorderStyle: =BorderStyle.None
+        DisplayMode: =DisplayMode.View
+        Font: =FontStyle
+        FontWeight: =FontWeight.Semibold
+        Height: =35
+        PaddingLeft: =0
+        PaddingRight: =15
+        Size: =10
+        Text: |-
+            ="Records Count: " & CountRows(glry_Search_UFMB.AllItems)
+        Width: =140
+        X: =ctn_Search_UFMB.X + ctn_Search_UFMB.Width - Self.Width
+        Y: =ctn_Search_UFMB.Y - Self.Height
+        ZIndex: =6
+
+    ti_Search_FMB As text:
+        BorderColor: =GRAYCOLOR
+        BorderThickness: =1
+        Clear: =true
+        Default: =""
+        DelayOutput: =true
+        FocusedBorderThickness: =2
+        Font: =FontStyle
+        Height: =25
+        HintText: ="Search by product name, review owner name, review owner principal alias."
+        HoverBorderColor: =Self.BorderColor
+        HoverFill: =GrayControlBackground
+        PaddingBottom: =0
+        PaddingTop: =0
+        RadiusBottomLeft: =20
+        RadiusBottomRight: =20
+        RadiusTopLeft: =20
+        RadiusTopRight: =20
+        Size: =9
+        Width: =Min(lbl_UFMB_GlryRowCount.X - Self.X - 30, 450)  //280
+        X: =icon_Search_FMB.X + icon_Search_FMB.Width + 5
+        Y: =icon_Search_FMB.Y
+        ZIndex: =7
+
+    icon_Search_FMB As icon.Search:
+        DisabledBorderColor: =RGBA(0, 0, 0, 0)
+        DisabledColor: =RGBA(0, 0, 0, 1)
+        DisplayMode: =DisplayMode.Disabled
+        Height: =ti_Search_FMB.Height
+        Icon: =Icon.Search
+        PaddingBottom: =2
+        PaddingLeft: =2
+        PaddingRight: =2
+        PaddingTop: =2
+        Width: =ti_Search_FMB.Height
+        X: =dpdn_BoardType_FMB.X + dpdn_BoardType_FMB.Width + 25
+        Y: =dpdn_BoardType_FMB.Y
+        ZIndex: =8
+
+    dpdn_BoardType_FMB As dropdown:
+        BorderColor: =
+        BorderThickness: =0
+        ChevronBackground: =Self.Fill
+        ChevronFill: =Color.Black
+        ChevronHoverBackground: =BlueControlLightBackground
+        ChevronHoverFill: =RGBA(0, 0, 0, 1)
+        Default: ="Product Review"
+        Fill: =GrayControlBackground
+        Font: =FontStyle
+        FontWeight: =FontWeight.Semibold
+        Height: =lbl_ReviewMonth_FMB.Height
+        HoverFill: =Self.ChevronHoverBackground
+        Items: |-
+            =Filter(
+            RenameColumns(
+                AddColumns(
+                    ForAll(Distinct(clln_factMetricBoard, fmb_MetricBoardTypeID), {Result: ThisRecord.Value}).Result, 
+                    "filter_BoardTypeName", LookUp(ReviewHub_BoardTypes, ThisRecord.BoardTypeID = Result).BoardTypeName
+                ),
+                "Result", "filter_BoardTypeID"
+            ),
+                IsAdmin || (IsCoordinator && ThisRecord.filter_BoardTypeID in IsCoordinator_BoardTypes)
+            )
+        OnChange: =Reset(check_selectAll_UFMB); Set(var_UFMB_SelectAll, false); 
+        PressedColor: =BlueControlDarkBackground
+        PressedFill: =BlueControlLightBackground
+        SelectionFill: =BlueNaviHightLightBackground
+        Size: =11
+        Width: =165
+        X: =lbl_BoardType_FMB.X + lbl_BoardType_FMB.Width
+        Y: =lbl_ReviewMonth_FMB.Y
+        ZIndex: =9
+
+    lbl_BoardType_FMB As label:
+        Font: =FontStyle
+        FontWeight: =FontWeight.Semibold
+        Height: =lbl_ReviewMonth_FMB.Height
+        PaddingBottom: =0
+        PaddingRight: =0
+        PaddingTop: =0
+        Size: =11
+        Text: ="Scorecard (Board)"
+        Width: =135
+        X: =dpdn_ReviewMonth_FMB.X + dpdn_ReviewMonth_FMB.Width + 30
+        Y: =lbl_ReviewMonth_FMB.Y
+        ZIndex: =10
+
+    dpdn_ReviewMonth_FMB As dropdown:
+        BorderColor: =
+        BorderThickness: =0
+        ChevronBackground: =Self.Fill
+        ChevronFill: =Color.Black
+        ChevronHoverBackground: =BlueControlLightBackground
+        ChevronHoverFill: =RGBA(0, 0, 0, 1)
+        Default: =First(clln_dropdown_ReviewMthYr).Month_Year
+        Fill: =GrayControlBackground
+        Font: =FontStyle
+        FontWeight: =FontWeight.Semibold
+        Height: =lbl_ReviewMonth_FMB.Height
+        HoverFill: =Self.ChevronHoverBackground
+        Items: =FirstN(clln_dropdown_ReviewMthYr, 12)
+        OnChange: =Reset(check_selectAll_UFMB); Set(var_UFMB_SelectAll, false); 
+        PressedColor: =BlueControlDarkBackground
+        PressedFill: =BlueControlLightBackground
+        SelectionFill: =BlueNaviHightLightBackground
+        Size: =11
+        Width: =165
+        X: =lbl_ReviewMonth_FMB.X + lbl_ReviewMonth_FMB.Width
+        Y: =lbl_ReviewMonth_FMB.Y
+        ZIndex: =11
+
+    lbl_ReviewMonth_FMB As label:
+        Font: =FontStyle
+        FontWeight: =FontWeight.Semibold
+        Height: =25
+        PaddingRight: =0
+        Size: =11
+        Text: ="Review Month"
+        Width: =115
+        X: =icon_Back_FMB.X
+        Y: =lbl_ScreenTitle_FMB.Y + lbl_ScreenTitle_FMB.Height + 10
+        ZIndex: =12
+
+    lbl_ScreenTitle_FMB As label:
+        DisabledColor: =BlueControlDarkBackground
+        DisabledFill: =Self.Fill
+        DisplayMode: =DisplayMode.Disabled
+        Fill: =GrayCanvasBackground
+        Font: =FontStyle
+        FontWeight: =FontWeight.Bold
+        Height: =55
+        PaddingLeft: =60
+        Size: =18
+        Text: ="Update/Delete Existing Scorecards"
+        Width: =App.Width - Self.X
+        Y: =SS_AppHeader_FMB.Y + SS_AppHeader_FMB.Height
+        ZIndex: =13
+
+    icon_Back_FMB As icon.BackArrow:
+        BorderColor: =RGBA(0, 0, 0, 0)
+        BorderStyle: =BorderStyle.None
+        Color: =BlueControlDarkBackground
+        Height: =30
+        HoverBorderColor: =Self.BorderColor
+        HoverColor: =Color.Purple
+        Icon: =Icon.BackArrow
+        OnSelect: |-
+            =Navigate(scn_SelfService);
+            Set(record_Edit_This_FMB, Blank()); Select(btn_UFMB_Reset);
+            ClearCollect(
+                    clln_factMetricBoard,
+                    RenameColumns(
+                    ShowColumns(
+                        AddColumns(
+                            AddColumns(
+                                ReviewHub_FactMetricBoards,
+                                "fmb_MetricBoardTypeID", fmb_BoardType.BoardTypeID,
+                                "fmb_MetricBoardTypeValue", fmb_BoardType.BoardTypeName,
+                                "fmb_ProductArray", fmb_Product,
+                                "fmb_ProductID", fmb_Product.ProductID,
+                                "fmb_ProductName", fmb_Product.ProductName,
+                                "fmb_ReviewMonth", Month(fmb_ReviewLockDate),
+                                "fmb_ReviewYear", Year(fmb_ReviewLockDate),
+                                "fmb_ReviewOwnerClaims", fmb_ReviewOwnerPrincipal,
+                                "fmb_TemplateID", fmb_Template.TemplateID, 
+                                "fmb_TemplateName", fmb_Template.TemplateName,
+                                "DateValue_ReviewLockDate", DateValue(Text(fmb_ReviewLockDate, DateTimeFormat.ShortDate)),
+                                "fmb_BoardHealth", 
+                                LookUp(
+                                    clln_MetricBoardHealth, 
+                                    (IsBlankOrError(fmb_HealthScore) && MinScore<=-999) || (!IsBlankOrError(fmb_HealthScore) && (fmb_HealthScore>=MinScore && fmb_HealthScore<MaxScore))
+                                )
+                            ), 
+                            "fmb_BoardHealthRating", fmb_BoardHealth.Rating, "fmb_BoardHealthImage", fmb_BoardHealth.Image, "fmb_BoardHealthDisplayOrder", fmb_BoardHealth.DisplayOrder
+                        ),
+                        "craf2_factmetricboardid", "fmb_MetricBoardTypeID", "fmb_MetricBoardTypeValue", "fmb_ProductArray", "fmb_ProductID", "fmb_ProductName",
+                        "DateValue_ReviewLockDate", "fmb_ReviewMonth", "fmb_ReviewYear", "craf2_fmb_reviewownername", "fmb_ReviewOwnerClaims", "craf2_fmb_healthscore", 
+                        "fmb_BoardHealthRating", "fmb_BoardHealthImage", "fmb_BoardHealthDisplayOrder",
+                        "fmb_TemplateID", "fmb_TemplateName"
+                    ),
+                    "craf2_factmetricboardid", "fmb_ID", "DateValue_ReviewLockDate", "fmb_ReviewLockDate", "craf2_fmb_reviewownername", "fmb_ReviewOwnerName", "craf2_fmb_healthscore", "fmb_HealthScore"
+                    )
+                );
+        Tooltip: ="Back"
+        Width: =Self.Height
+        X: =15
+        Y: =lbl_ScreenTitle_FMB.Y + (lbl_ScreenTitle_FMB.Height - Self.Height) * 0.50
+        ZIndex: =14
+
+    SS_AppHeader_FMB As AppHeader:
+        DropDownSelection: =TrackRequestComponent_UFMB.HideTrackRequest
+        FeatureRequestUrl: =var_FeatureRequestURL
+        FeedbackButtonUrl: =var_SendFeedback_URL
+        inputAppDisplayName: =varAppHeaderText
+        ScorecardOnboardingFeatureUrl: =var_ScorecardOnboardingRequestURL
+        ShowSurveyButton: =false
+        Y: =0
+        ZIndex: =15
+
+    TrackRequestComponent_UFMB As TrackRequestComponent:
+        BlueControlDarkBackground: =BlueControlDarkBackground
+        BlueControlLightBackground: =BlueControlLightBackground
+        BlueNaviHightLightBackground: =BlueNaviHightLightBackground
+        DevOpsBaseUrl: =var_DevOpsBaseURL
+        DevOpsQueryID: =var_DevOpsQueryID
+        FontStyle: =FontStyle
+        GrayCanvasBackground: =GrayCanvasBackground
+        GRAYCOLOR: =GRAYCOLOR
+        GrayControlBackground: =GrayControlBackground
+        IsAdmin: =IsAdmin
+        Reset: =Self.Visible
+        Visible: =SS_AppHeader_FMB.DisplayTrackRequest
+        X: =App.Width - Self.Width
+        Y: =SS_AppHeader_FMB.Height
+        ZIndex: =16
+
+    ctn_Confirm_Delete_UFMB As groupContainer:
+        Fill: =RGBA(255, 255, 255, 0.95)
+        Height: =App.Height
+        Visible: =var_show_delete
+        Width: =App.Width
+        ZIndex: =17
+
+        Card_SS_UFMB As button:
+            BorderColor: =hdr_ConfirmDel_UFMB.Fill
+            Color: =RGBA(0, 0, 0, 0)
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =RGBA(0, 0, 0, 0)
+            DisabledFill: =RGBA(0, 0, 0, 0)
+            DisplayMode: =DisplayMode.Disabled
+            Fill: =RGBA(0, 0, 0, 0)
+            Font: =FontStyle
+            Height: =hdr_ConfirmDel_UFMB.Height + html_ConfirmDeleteUFMB.Height + 10 + btn_ConfirmDeleteUFMB.Height + 20
+            HoverBorderColor: =
+            HoverColor: =RGBA(0, 0, 0, 0)
+            HoverFill: =
+            OnSelect: =
+            PressedBorderColor: =
+            PressedColor: =
+            PressedFill: =
+            Text: =""
+            Width: =App.Width * 0.35
+            X: =App.Width * 0.5 - Self.Width*0.5
+            Y: =App.Height*0.5 - Self.Height*0.5 - 60
+            ZIndex: =1
+
+        btn_CancelDeleteUFMB As button:
+            BorderColor: =Self.Fill
+            Fill: =GRAYCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =25
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Self.Fill
+            HoverFill: =Self.Color
+            OnSelect: |-
+                =UpdateContext({var_show_delete: false});
+                Set(record_Delete_This_FMB, Blank());
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Size: =10
+            Text: ="Cancel"
+            Width: =90
+            X: |-
+                =If(
+                    btn_ConfirmDeleteUFMB.Visible, 
+                    btn_ConfirmDeleteUFMB.X + btn_ConfirmDeleteUFMB.Width + 50, 
+                    Card_SS_UFMB.X + (Card_SS_UFMB.X - Self.Width) * 0.50  // horizontally centered to Card_SS_Product item.
+                )
+            Y: =btn_ConfirmDeleteUFMB.Y
+            ZIndex: =3
+
+        btn_ConfirmDeleteUFMB As button:
+            BorderColor: =Self.Fill
+            Fill: =REDWARNINGCOLOR
+            Font: =FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =25
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Self.Fill
+            HoverFill: =Self.Color
+            OnSelect: |-
+                =UpdateContext({var_show_delete: false});
+                
+                If(
+                    CountRows(Filter(glry_Search_UFMB.AllItems, ThisRecord.check_Selected_UFMB.Value = true)) > 1,
+                    ForAll(
+                        RenameColumns(
+                            Filter(glry_Search_UFMB.AllItems, ThisRecord.check_Selected_UFMB.Value = true),
+                            "fmb_ID", "fmb_ID_ToDelete"
+                        ),
+                        Concurrent(
+                            RemoveIf(
+                                ReviewHub_FactMetricBoards,
+                                ThisRecord.FactMetricBoardID = fmb_ID_ToDelete
+                            ),
+                            RemoveIf(
+                                clln_factMetricBoard,
+                                ThisRecord.fmb_ID = fmb_ID_ToDelete
+                            )
+                        );
+                    ),
+                
+                    Concurrent(
+                        RemoveIf(
+                            ReviewHub_FactMetricBoards,
+                            ThisRecord.FactMetricBoardID = record_Delete_This_FMB.fmb_ID
+                        ),
+                        RemoveIf(
+                            clln_factMetricBoard,
+                            ThisRecord.fmb_ID = record_Delete_This_FMB.fmb_ID
+                        )
+                    )
+                );
+                
+                Set(record_Delete_This_FMB, Blank());
+                Reset(check_selectAll_UFMB);
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Size: =10
+            Text: ="Yes, Delete"
+            Width: =90
+            X: =html_ConfirmDeleteUFMB.X + html_ConfirmDeleteUFMB.Width * 0.5 - Self.Width - 20
+            Y: =html_ConfirmDeleteUFMB.Y + html_ConfirmDeleteUFMB.Height + 15
+            ZIndex: =4
+
+        html_ConfirmDeleteUFMB As htmlViewer:
+            AutoHeight: =true
+            Font: =FontStyle
+            HtmlText: |-
+                =If(
+                    !btn_BulkDelete_UFMB.Visible,
+                "<span style=''><b>FactMetricBoard ID</b></span><span style='margin-left:76px'>: " & record_Delete_This_FMB.fmb_ID & "</span><br>"
+                & "<span style=''><b>Board Type</b></span><span style='margin-left:136px'>: " & record_Delete_This_FMB.fmb_MetricBoardTypeValue & "</span><br>"
+                & "<span style=''><b>Review Month (MM-YYYY)</b></span><span style='margin-left:20px'>: " & record_Delete_This_FMB.fmb_ReviewMonth & "-" & record_Delete_This_FMB.fmb_ReviewYear & "</span><br>"
+                & "<span style=''><b>Product</b></span><span style='margin-left:161px'>: "& record_Delete_This_FMB.fmb_ProductName& "</span><br>"
+                & "<span style=''><b>Review Owner</b></span><span style='margin-left:113px'>: " & record_Delete_This_FMB.fmb_ReviewOwnerName & "</span>",
+                
+                    "<center><font color = red><b>Warning: </b>Delete <b>" & CountRows(Filter(glry_Search_UFMB.AllItems, ThisRecord.check_Selected_UFMB.Value = true)) & "</b> selected scorecards for <b>" & dpdn_ReviewMonth_FMB.Selected.Month_Year & "</b>.</font></center>"
+                )
+            PaddingBottom: =10
+            PaddingLeft: =30
+            PaddingRight: =10
+            PaddingTop: =15
+            Size: =12
+            Width: =Card_SS_UFMB.Width
+            X: =App.Width * 0.5 - Self.Width*0.5
+            Y: =hdr_ConfirmDel_UFMB.Y + hdr_ConfirmDel_UFMB.Height
+            ZIndex: =5
+
+        hdr_ConfirmDel_UFMB As button:
+            BorderThickness: =0
+            Color: =RGBA(0, 0, 0, 1)
+            DisabledBorderColor: =Self.Fill
+            DisabledColor: =RGBA(0, 0, 0, 1)
+            DisabledFill: =Self.Fill
+            DisplayMode: =DisplayMode.Disabled
+            Fill: =SUBGROUPCOLOR
+            FocusedBorderThickness: =0
+            Font: =FontStyle
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Self.Color
+            HoverFill: =Self.Fill
+            PressedBorderColor: =Self.BorderColor
+            PressedColor: =Self.Color
+            PressedFill: =Self.Fill
+            RadiusBottomLeft: =
+            RadiusBottomRight: =
+            Size: =14
+            Text: ="Confirm Delete"
+            Width: =Card_SS_UFMB.Width
+            X: =Card_SS_UFMB.X
+            Y: =Card_SS_UFMB.Y
+            ZIndex: =6
+

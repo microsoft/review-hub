@@ -1,0 +1,132 @@
+[
+  {
+    "CdsFCBContext": "{\"FileType\":true,\"ImageExternalStorage\":true}",
+    "EntitySetName": "craf2_reviewhub_boardtypes",
+    "IsHidden": false,
+    "IsSampleData": false,
+    "IsWritable": true,
+    "LogicalName": "craf2_reviewhub_boardtype",
+    "MaxGetRowsCount": 2000,
+    "Name": "ReviewHub_BoardTypes",
+    "NativeCDSDataSourceInfoNameMapping": {
+      "_ownerid_value": "Owner",
+      "chub_chub_reviewhub_metricuploadlog_mul_BoardT": "ReviewHub_MetricUploadLogs",
+      "chub_reviewlockday": "ReviewLockDay",
+      "craf2_boardtypedescription": "BoardTypeDescription",
+      "craf2_boardtypeid": "BoardTypeID",
+      "craf2_boardtypename": "BoardTypeName",
+      "craf2_boardtypeshortname": "BoardTypeShortName",
+      "craf2_bt_displayorder": "bt_DisplayOrder",
+      "craf2_coordinator": "Coordinator",
+      "craf2_craf2_reviewhub_requestedproduct_BoardTyp": "ReviewHub_RequestedProducts",
+      "craf2_expectedautoloaddaypermonth": "ExpectedAutoLoadDayPerMonth",
+      "craf2_isdisplayinapp": "IsDisplayInApp",
+      "craf2_reviewhub_boardtype_AsyncOperations": "System Jobs",
+      "craf2_reviewhub_boardtype_BulkDeleteFailures": "Bulk Delete Failures",
+      "craf2_reviewhub_boardtype_DuplicateBaseRecord": "Duplicate Records (craf2_reviewhub_boardtype_DuplicateBaseRecord)",
+      "craf2_reviewhub_boardtype_DuplicateMatchingRecord": "Duplicate Records (craf2_reviewhub_boardtype_DuplicateMatchingRecord)",
+      "craf2_reviewhub_boardtype_MailboxTrackingFolders": "Mailbox Auto Tracking Folders",
+      "craf2_reviewhub_boardtype_PrincipalObjectAttributeAccesses": "Field Sharing",
+      "craf2_reviewhub_boardtype_ProcessSession": "Process Sessions",
+      "craf2_reviewhub_boardtype_SyncErrors": "Sync Errors",
+      "craf2_reviewhub_boardtypeid": "ReviewHub_BoardType",
+      "craf2_ReviewHub_FactMetricBoard_fmb_Board": "ReviewHub_FactMetricBoards",
+      "craf2_ReviewHub_MetricTemplate_TemplateBo": "ReviewHub_MetricTemplates",
+      "craf2_ReviewHub_MetricTypeDetail_mtd_Boar": "ReviewHub_MetricTypeDetails",
+      "craf2_ReviewHub_ScorecardAutomation_Board": "ReviewHub_ScorecardAutomations",
+      "craf2_ReviewHub_Stakeholder_BoardType_cra": "ReviewHub_Stakeholders",
+      "createdby": "Created By",
+      "createdon": "Created On",
+      "createdonbehalfby": "Created By (Delegate)",
+      "importsequencenumber": "Import Sequence Number",
+      "modifiedby": "Modified By",
+      "modifiedon": "Modified On",
+      "modifiedonbehalfby": "Modified By (Delegate)",
+      "overriddencreatedon": "Record Created On",
+      "owningbusinessunit": "Owning Business Unit",
+      "owningteam": "Owning Team",
+      "owninguser": "Owning User",
+      "statecode": "Status",
+      "statuscode": "Status Reason",
+      "timezoneruleversionnumber": "Time Zone Rule Version Number",
+      "utcconversiontimezonecode": "UTC Conversion Time Zone Code",
+      "versionnumber": "Version Number"
+    },
+    "PreferredName": "ReviewHub_BoardTypes",
+    "Type": "NativeCDSDataSourceInfo"
+  },
+  {
+    "DisplayName": "ReviewHub_BoardTypes (Views)",
+    "Name": "_craf2_reviewhub_boardtype_views",
+    "RelatedEntityName": "ReviewHub_BoardTypes",
+    "TrimmedViewName": true,
+    "Type": "ViewInfo",
+    "ViewInfoNameMapping": {
+      "26918be0-afa8-46ad-9166-d198a3cd625e": "Inactive ReviewHub_BoardTypes",
+      "26c2dbf8-980f-4dbf-9c70-42cba36b8a50": "ReviewHub_BoardType Associated View",
+      "909ca2c1-6da7-486e-b42f-152fdfc38fc9": "ReviewHub_BoardType Advanced Find View",
+      "a9800ec4-1ba2-4678-874f-ef2dcf2409ff": "ReviewHub_BoardType Lookup View",
+      "c426fc6a-2bae-4a36-a7bd-f6cdb05f77d7": "Active ReviewHub_BoardTypes"
+    }
+  },
+  {
+    "DisplayName": "IsDisplayInApp (ReviewHub_BoardTypes)",
+    "Name": "craf2_craf2_reviewhub_boardtype_isdisplayinapp",
+    "OptionSetInfoNameMapping": {
+      "0": "No",
+      "1": "Yes"
+    },
+    "OptionSetIsBooleanValued": true,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "craf2_isdisplayinapp",
+        "OptionSetReferenceEntityName": "ReviewHub_BoardTypes"
+      }
+    },
+    "OptionSetTypeKey": "BooleanType",
+    "RelatedColumnInvariantName": "craf2_isdisplayinapp",
+    "RelatedEntityName": "ReviewHub_BoardTypes",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Status (ReviewHub_BoardTypes)",
+    "Name": "craf2_reviewhub_boardtype_statecode",
+    "OptionSetInfoNameMapping": {
+      "0": "Active",
+      "1": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statecode",
+        "OptionSetReferenceEntityName": "ReviewHub_BoardTypes"
+      }
+    },
+    "OptionSetTypeKey": "StateType",
+    "RelatedColumnInvariantName": "statecode",
+    "RelatedEntityName": "ReviewHub_BoardTypes",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Status Reason (ReviewHub_BoardTypes)",
+    "Name": "craf2_reviewhub_boardtype_statuscode",
+    "OptionSetInfoNameMapping": {
+      "1": "Active",
+      "2": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statuscode",
+        "OptionSetReferenceEntityName": "ReviewHub_BoardTypes"
+      }
+    },
+    "OptionSetTypeKey": "StatusType",
+    "RelatedColumnInvariantName": "statuscode",
+    "RelatedEntityName": "ReviewHub_BoardTypes",
+    "Type": "OptionSetInfo"
+  }
+]

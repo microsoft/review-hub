@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Workflow WorkflowId="{bded368a-f121-ed11-9db2-000d3a36b7e4}" Name="Review Hub - Feature Request Notification" Description="This flow sends a notification to both the Review Hub Feature Team and the individual who made the request using Review Hub when the state of the Request is updated to a point that is relevant to either party.&#xA;&#xA;Flow failure would prevent either party from receiving updates on the feature request." xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <JsonFileName>/Workflows/ReviewHub-FeatureRequestNotification-BDED368A-F121-ED11-9DB2-000D3A36B7E4.json</JsonFileName>
+  <Type>1</Type>
+  <Subprocess>0</Subprocess>
+  <Category>5</Category>
+  <Mode>0</Mode>
+  <Scope>4</Scope>
+  <OnDemand>0</OnDemand>
+  <TriggerOnCreate>0</TriggerOnCreate>
+  <TriggerOnDelete>0</TriggerOnDelete>
+  <AsyncAutodelete>0</AsyncAutodelete>
+  <SyncWorkflowLogOnFailure>0</SyncWorkflowLogOnFailure>
+  <StateCode>0</StateCode>
+  <StatusCode>1</StatusCode>
+  <RunAs>1</RunAs>
+  <IsTransacted>1</IsTransacted>
+  <IntroducedVersion>1.0.0.0</IntroducedVersion>
+  <IsCustomizable>1</IsCustomizable>
+  <IsCustomProcessingStepAllowedForOtherPublishers>1</IsCustomProcessingStepAllowedForOtherPublishers>
+  <PrimaryEntity>none</PrimaryEntity>
+  <LocalizedNames>
+    <LocalizedName languagecode="1033" description="Review Hub - Feature Request Notification" />
+  </LocalizedNames>
+  <Descriptions>
+    <Description languagecode="1033" description="This flow sends a notification to both the Review Hub Feature Team and the individual who made the request using Review Hub when the state of the Request is updated to a point that is relevant to either party.&#xA;&#xA;Flow failure would prevent either party from receiving updates on the feature request." />
+  </Descriptions>
+</Workflow>

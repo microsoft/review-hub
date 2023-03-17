@@ -1,0 +1,690 @@
+TrackRequestComponent As CanvasComponent:
+    BlueControlDarkBackground: =RGBA(0, 114, 198, 1)
+    BlueControlLightBackground: =RGBA(218, 240, 250, 1)
+    BlueNaviHightLightBackground: =RGBA(121, 181, 222, 1)
+    DevOpsBaseUrl: =""
+    DevOpsQueryID: =""
+    Fill: =RGBA(211,211,211,0.3)
+    FontStyle: =Font.'Segoe UI'
+    GrayCanvasBackground: =RGBA(248, 248, 248, 1)
+    GRAYCOLOR: =RGBA(166, 166, 166, 1)
+    GrayControlBackground: =RGBA(236, 236, 236, 1)
+    Height: =App.Height - 40
+    HideTrackRequest: =var_visible
+    IsAdmin: =false
+    OnReset: |+
+        =Set(var_visible, false);
+        
+    Reset: =true
+    Width: =App.Width
+    X: =0
+    Y: =0
+    ZIndex: =1
+
+    BackGround As groupContainer.manualLayoutContainer:
+        Fill: =Color.White
+        Height: =Parent.Height
+        Width: |-
+            =If(App.Width < 800, 
+                If(TrackRequestComponent.IsAdmin, App.Width * 0.6, App.Width * 0.43),
+                If(TrackRequestComponent.IsAdmin, App.Width * 0.5, App.Width * 0.32)
+            )
+        X: =Parent.Width - Self.Width
+        ZIndex: =1
+
+        btn_GetData_TRC As button:
+            Fill: =RGBA(99, 139, 44, 1)
+            Height: =55
+            OnSelect: =
+            Text: ="Hidden button - Get Date"
+            Visible: =false
+            Width: =184
+            X: =456
+            Y: =75
+            ZIndex: =1
+
+        lbl_TRC_GlryRowCount As label:
+            Align: =Align.Right
+            Font: =TrackRequestComponent.FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =35
+            PaddingRight: =15
+            Size: =10
+            Text: |-
+                ="Records Count: " & CountRows(glry_Search_TRC.AllItems)
+            Width: =140
+            X: =Back_Header_TRC.Width + 15 - Self.Width
+            Y: =ctn_Search_TRC.Y - Self.Height
+            ZIndex: =2
+
+        ctn_Search_TRC As groupContainer:
+            Height: =Parent.Height - Self.Y - 15
+            Width: =Parent.Width - 30
+            X: =icon_Back_TRC.X
+            Y: =icon_SearchRequest_TRC.Y + icon_SearchRequest_TRC.Height + 5
+            ZIndex: =3
+
+            glry_Search_TRC As gallery.variableTemplateHeightGallery:
+                BorderColor: =Back_Header_TRC.Fill
+                BorderThickness: =2
+                Height: =Parent.Height - Self.Y - 1
+                Items: |-
+                    =Ungroup(//Ungroup function to add a Row Number column.
+                        ForAll(
+                            Sequence(
+                                CountRows(
+                                    Search(
+                                        clln_AzureDevOps,
+                                        Trim(ti_Search_Request_TRC),
+                                        "DisplayName",
+                                        "UserPrincipalEmail"
+                    
+                                    )
+                                )
+                            ),
+                            {
+                                Record: Table(
+                                    Last(
+                                        FirstN(
+                                            Search(
+                                                clln_AzureDevOps,
+                                                Trim(ti_Search_Request_TRC),
+                                                "DisplayName",
+                                                "UserPrincipalEmail"
+                                            ),
+                                            Value
+                                        )
+                                    )
+                                ),
+                                RowNumber: Value
+                            }
+                        ),
+                        "Record"
+                    )
+                Layout: =Layout.Vertical
+                OnSelect: =Launch(TrackRequestComponent.DevOpsBaseUrl + "/_workitems/edit/" + ThisItem.'System.Id')
+                TemplateFill: |-
+                    =If(
+                        Mod(ThisItem.RowNumber, 2) > 0,
+                        If(ThisItem.IsSelected, ColorFade(TrackRequestComponent.BlueNaviHightLightBackground, 85%), RGBA(0, 0, 0, 0)),
+                        If(ThisItem.IsSelected, ColorFade(TrackRequestComponent.BlueNaviHightLightBackground, 85%), TrackRequestComponent.GrayCanvasBackground)
+                    )
+                TemplatePadding: =0
+                TemplateSize: =50
+                Visible: =true 
+                Width: =Back_Header_TRC.Width - 2 
+                X: =1
+                Y: =Back_Header_TRC.Height - 1
+                ZIndex: =1
+
+                btn_ViewMore_TRC As button:
+                    BorderStyle: =BorderStyle.None
+                    BorderThickness: =0
+                    Color: =RGBA(0, 114, 198, 1)
+                    Fill: =RGBA(0, 0, 0, 0)
+                    FocusedBorderThickness: =0
+                    Font: =Font.'Segoe UI'
+                    FontWeight: =FontWeight.Bold
+                    Height: |
+                        =25
+                    HoverColor: =Self.Color
+                    HoverFill: =Self.Fill
+                    OnSelect: =If(IsBlankOrError(ThisItem.'System.Id'), false, Launch(TrackRequestComponent.DevOpsBaseUrl & "/_workitems/edit/" & ThisItem.'System.Id'))
+                    PaddingBottom: =0
+                    PaddingLeft: =0
+                    PaddingRight: =0
+                    PaddingTop: =0
+                    PressedBorderColor: =Self.BorderColor
+                    PressedColor: =Self.Color
+                    PressedFill: =Self.Fill
+                    RadiusBottomLeft: =12
+                    RadiusBottomRight: =12
+                    RadiusTopLeft: =12
+                    RadiusTopRight: =12
+                    Size: =10
+                    Text: ="View More"
+                    Underline: =true
+                    Width: =105
+                    X: =Header_Comments_TRC.X + (Header_Comments_TRC.Width - 30) * 0.25
+                    Y: =(lbl_NoPhoto_TRC.Height - Self.Height) * 0.48
+                    ZIndex: =1
+
+                txt_State_TRC As label:
+                    Fill: =Parent.Fill
+                    Font: =TrackRequestComponent.FontStyle
+                    FontWeight: =If(ThisItem.IsSelected, FontWeight.Bold, FontWeight.Normal)
+                    Height: =30
+                    OnSelect: =Select(Parent)
+                    PaddingBottom: =0
+                    PaddingLeft: =10
+                    PaddingRight: =0
+                    PaddingTop: =0
+                    Size: =10
+                    Text: =If(IsBlankOrError(ThisItem.'System.State'), "(No Value)", Text(ThisItem.'System.State'))
+                    Width: =Header_State_TRC.Width
+                    X: =Header_State_TRC.X
+                    Y: =(lbl_NoPhoto_TRC.Height - Self.Height) * 0.50
+                    ZIndex: =2
+
+                txt_Title_TRC As label:
+                    AutoHeight: =true
+                    Fill: =Parent.Fill
+                    Font: =TrackRequestComponent.FontStyle
+                    FontWeight: =If(ThisItem.IsSelected, FontWeight.Bold, FontWeight.Normal)
+                    Height: =30
+                    OnSelect: =Select(Parent)
+                    PaddingBottom: =0
+                    PaddingLeft: =10
+                    PaddingRight: =0
+                    PaddingTop: =0
+                    Size: =10
+                    Text: =ThisItem.'System.Title'
+                    Width: =Header_Title_TRC.Width
+                    X: =Header_Title_TRC.X
+                    Y: =(lbl_NoPhoto_TRC.Height - Self.Height) * 0.50
+                    ZIndex: =3
+
+                txt_TaskID_TRC As label:
+                    Fill: =Parent.Fill
+                    Font: =TrackRequestComponent.FontStyle
+                    FontWeight: =If(ThisItem.IsSelected, FontWeight.Bold, FontWeight.Normal)
+                    Height: =30
+                    OnSelect: =Select(Parent)
+                    PaddingBottom: =0
+                    PaddingLeft: =10
+                    PaddingRight: =0
+                    PaddingTop: =0
+                    Size: =10
+                    Text: =If(IsBlankOrError(ThisItem.'System.Id'), "(No Value)", Text(ThisItem.'System.Id'))
+                    Width: =Header_TaskID_TRC.Width
+                    X: =Header_TaskID_TRC.X
+                    Y: =(lbl_NoPhoto_TRC.Height - Self.Height) * 0.50
+                    ZIndex: =4
+
+                html_User_TRC As htmlViewer:
+                    AutoHeight: =true
+                    DisplayMode: =DisplayMode.View
+                    Font: =TrackRequestComponent.FontStyle
+                    HtmlText: |-
+                        =If(
+                            !IsError(ThisItem.DisplayName) && !IsError(ThisItem.UserPrincipalEmail),
+                            If(ThisItem.IsSelected, "<strong>", "") &
+                                ThisItem.DisplayName 
+                                & "<br>E: " & ThisItem.UserPrincipalEmail
+                                & If(ThisItem.IsSelected, "</strong>", ""),
+                            "<font color=gray><b>" & ThisItem.UserPrincipalEmail & "</b> is not valid.</font>",
+                            "(No Value)"
+                        )
+                    OnSelect: =Select(Parent)
+                    Size: =10
+                    Width: =Header_User_TRC.Width
+                    X: =Header_User_TRC.X
+                    Y: =(lbl_NoPhoto_TRC.Height - Self.Height) * 0.50
+                    ZIndex: =7
+
+                lbl_NoPhoto_TRC As label:
+                    Align: =Align.Center
+                    Color: =RGBA(0, 134, 208, 1)
+                    Font: =TrackRequestComponent.FontStyle
+                    FontWeight: =FontWeight.Semibold
+                    Height: =50
+                    OnSelect: =Select(Parent)
+                    Size: =18
+                    Text: |-
+                        =If(
+                            !IsBlankOrError(ThisItem.UserPrincipalEmail) && !IsError(Office365Users.UserProfileV2(ThisItem.UserPrincipalEmail)),
+                            Left(Office365Users.UserProfileV2(ThisItem.UserPrincipalEmail).givenName, 1) 
+                                & Left(Office365Users.UserProfileV2(ThisItem.UserPrincipalEmail).surname, 1)
+                        )
+                    Visible: |-
+                        =TrackRequestComponent.IsAdmin
+                        /*
+                        If(
+                            IsBlankOrError(ThisItem.craf2_userprincipalemail),
+                            false,
+                            !Office365Users.UserPhotoMetadata(ThisItem.craf2_userprincipalemail).HasPhoto
+                        ) */
+                    Width: =50
+                    ZIndex: =8
+
+                img_glry_TRC As image:
+                    BorderColor: =RGBA(0, 0, 0, 0)
+                    BorderStyle: =BorderStyle.None
+                    Height: =lbl_NoPhoto_TRC.Height - 10
+                    Image: |-
+                        =If(
+                            !IsError(Office365Users.UserPhotoMetadata(ThisItem.UserPrincipalEmail)),
+                            If(
+                                !IsBlankOrError(ThisItem.UserPrincipalEmail) && Office365Users.UserPhotoMetadata(ThisItem.UserPrincipalEmail).HasPhoto,
+                                Office365Users.UserPhotoV2(ThisItem.UserPrincipalEmail)
+                            )
+                        )
+                    OnSelect: =Select(Parent)
+                    RadiusBottomLeft: =10
+                    RadiusBottomRight: =10
+                    RadiusTopLeft: =10
+                    RadiusTopRight: =10
+                    Visible: |-
+                        =If(
+                            !IsBlankOrError(ThisItem.UserPrincipalEmail) && !IsError(Office365Users.UserPhotoMetadata(ThisItem.UserPrincipalEmail)),
+                            Office365Users.UserPhotoMetadata(ThisItem.UserPrincipalEmail).HasPhoto && TrackRequestComponent.IsAdmin
+                        )
+                    Width: =Self.Height
+                    X: =5
+                    Y: =(lbl_NoPhoto_TRC.Height - Self.Height) * 0.50
+                    ZIndex: =9
+
+            Back_Header_TRC As button:
+                BorderColor: =Self.Fill
+                BorderStyle: =BorderStyle.None
+                BorderThickness: =0
+                DisabledBorderColor: =Self.BorderColor
+                DisabledColor: =Self.Color
+                DisabledFill: =Self.Fill
+                DisplayMode: =DisplayMode.Disabled
+                Fill: =ColorFade(TrackRequestComponent.BlueNaviHightLightBackground, 50%)
+                Font: =TrackRequestComponent.FontStyle
+                RadiusBottomLeft: |
+                    =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =20
+                RadiusTopRight: =20
+                Text: =""
+                Width: |-
+                    =//Header_Comments_TR.X + Header_Comments_TR.Width
+                    Parent.Width
+                ZIndex: =2
+
+            Header_Comments_TRC As label:
+                Align: =Align.Center
+                DisplayMode: =DisplayMode.View
+                Font: =TrackRequestComponent.FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =Back_Header_TRC.Height
+                OnSelect: =
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: ="View Comments/ Discussion"
+                Width: =170
+                X: =Header_State_TRC.X + Header_State_TRC.Width
+                ZIndex: =3
+
+            Header_State_TRC As label:
+                DisplayMode: =DisplayMode.View
+                Font: =TrackRequestComponent.FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =Back_Header_TRC.Height
+                OnSelect: =
+                PaddingBottom: =0
+                PaddingLeft: =12
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: ="State"
+                Width: =90
+                X: =Header_Title_TRC.X + Header_Title_TRC.Width + 2
+                Y: =Back_Header_TRC.Y
+                ZIndex: =4
+
+            Header_Title_TRC As label:
+                DisplayMode: =DisplayMode.View
+                Font: =TrackRequestComponent.FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =Back_Header_TRC.Height
+                OnSelect: =
+                PaddingBottom: =0
+                PaddingLeft: =10
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: ="Title"
+                Width: =If(TrackRequestComponent.IsAdmin, 250, Parent.Width * 0.4)
+                X: =Header_TaskID_TRC.X + Header_TaskID_TRC.Width
+                Y: =Back_Header_TRC.Y
+                ZIndex: =5
+
+            Header_TaskID_TRC As label:
+                DisplayMode: =DisplayMode.View
+                Font: =TrackRequestComponent.FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =Back_Header_TRC.Height
+                OnSelect: =
+                PaddingBottom: =0
+                PaddingLeft: =10
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: ="Task ID"
+                Width: =90
+                X: =Header_User_TRC.X + Header_User_TRC.Width + 2
+                Y: =Back_Header_TRC.Y
+                ZIndex: =6
+
+            Header_User_TRC As label:
+                DisplayMode: =DisplayMode.View
+                Font: =TrackRequestComponent.FontStyle
+                FontWeight: =FontWeight.Semibold
+                Height: =Back_Header_TRC.Height
+                OnSelect: =
+                PaddingBottom: =0
+                PaddingLeft: =10
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =10
+                Text: ="Requester Name, Email"
+                Width: =If (TrackRequestComponent.IsAdmin, Parent.Width - Self.X - Header_TaskID_TRC.Width - Header_Title_TRC.Width - Header_Comments_TRC.Width - Header_State_TRC.Width, 0 )
+                X: =If(TrackRequestComponent.IsAdmin, 60, 0)
+                Y: =Back_Header_TRC.Y
+                ZIndex: =7
+
+        ti_Search_Request_TRC As text:
+            BorderColor: =TrackRequestComponent.GRAYCOLOR
+            BorderThickness: =1
+            Clear: =true
+            Default: =""
+            FocusedBorderThickness: =2
+            Font: =TrackRequestComponent.FontStyle
+            Height: =25
+            HintText: ="Search by Name, Email, Task ID, Title"
+            HoverBorderColor: =Self.BorderColor
+            HoverFill: =TrackRequestComponent.GrayControlBackground
+            PaddingBottom: =0
+            PaddingTop: =0
+            RadiusBottomLeft: =20
+            RadiusBottomRight: =20
+            RadiusTopLeft: =20
+            RadiusTopRight: =20
+            Size: =9
+            Width: =280
+            X: =icon_SearchRequest_TRC.X + icon_SearchRequest_TRC.Width + 5
+            Y: =dpdn_RequestTypeTRC.Y + dpdn_RequestTypeTRC.Height + 10
+            ZIndex: =4
+
+        icon_SearchRequest_TRC As icon.Search:
+            DisabledBorderColor: =RGBA(0, 0, 0, 0)
+            DisabledColor: =RGBA(0, 0, 0, 1)
+            DisplayMode: =DisplayMode.Disabled
+            Height: =ti_Search_Request_TRC.Height
+            Icon: =Icon.Search
+            PaddingBottom: =2
+            PaddingLeft: =2
+            PaddingRight: =2
+            PaddingTop: =2
+            Width: =ti_Search_Request_TRC.Height
+            X: |
+                =lbl_RequestType_TRC.X
+            Y: =ti_Search_Request_TRC.Y
+            ZIndex: =5
+
+        dpdn_State_TRC As dropdown:
+            BorderColor: =
+            BorderThickness: =0
+            ChevronBackground: =Self.Fill
+            ChevronFill: =Color.Black
+            ChevronHoverBackground: =TrackRequestComponent.BlueControlLightBackground
+            ChevronHoverFill: =RGBA(0, 0, 0, 1)
+            Default: =If(TrackRequestComponent.Reset, "Select All", "")
+            Fill: =TrackRequestComponent.GrayControlBackground
+            Font: =TrackRequestComponent.FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =25
+            HoverFill: =Self.ChevronHoverBackground
+            Items: |-
+                =Table(
+                    {
+                        name: "Select All",
+                        option: ""
+                    },
+                    {
+                        name: "New",
+                        option: "New"
+                    },
+                    {
+                        name: "Active",
+                        option: "Active"
+                    },
+                    {
+                        name: "Approved",
+                        option: "Committed"
+                    },
+                    {
+                        name: "Rejected",
+                        option: "Rejected"
+                    },
+                    {
+                        name: "In Progress",
+                        option: "In Progress"
+                    },
+                    {
+                        name: "In Review",
+                        option: "In Review"
+                    }
+                    /*,
+                    {
+                        name: "Done",
+                        option: "Done"
+                    }
+                    */
+                )
+            OnChange: =Select(Icon_Refresh_TRC);
+            PressedColor: =TrackRequestComponent.BlueControlDarkBackground
+            PressedFill: =TrackRequestComponent.BlueControlLightBackground
+            SelectionFill: =TrackRequestComponent.BlueNaviHightLightBackground
+            Size: =11
+            Width: =135
+            X: =Back_Header_TRC.Width + 15 - Self.Width
+            Y: =lbl_State_TRC.Y
+            ZIndex: =6
+
+        lbl_State_TRC As label:
+            Font: =TrackRequestComponent.FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =25
+            PaddingBottom: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =11
+            Text: |-
+                ="State:"
+            Width: =55
+            X: =Back_Header_TRC.X + Back_Header_TRC.Width - Self.Width - dpdn_State_TRC.Width
+            Y: =Header_TRC.Y + Header_TRC.Height + 5
+            ZIndex: =7
+
+        dpdn_RequestTypeTRC As dropdown:
+            BorderColor: =
+            BorderThickness: =0
+            ChevronBackground: =Self.Fill
+            ChevronFill: =Color.Black
+            ChevronHoverBackground: =TrackRequestComponent.BlueControlLightBackground
+            ChevronHoverFill: =RGBA(0, 0, 0, 1)
+            Default: =If(TrackRequestComponent.Reset, "Select All", "")
+            Fill: =TrackRequestComponent.GrayControlBackground
+            Font: =TrackRequestComponent.FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =25
+            HoverFill: =Self.ChevronHoverBackground
+            Items: |-
+                =Table(
+                    {
+                        name: "Select All"
+                    },
+                    {
+                        name: "Scorecard Type Onboarding"
+                        
+                    },
+                    {
+                        name: "Feature Request"
+                        
+                    }
+                )
+            OnChange: =Select(Icon_Refresh_TRC);
+            PressedColor: =TrackRequestComponent.BlueControlDarkBackground
+            PressedFill: =TrackRequestComponent.BlueControlLightBackground
+            SelectionFill: =TrackRequestComponent.BlueNaviHightLightBackground
+            Size: =11
+            Width: =230
+            X: =lbl_RequestType_TRC.X + lbl_RequestType_TRC.Width
+            Y: =lbl_RequestType_TRC.Y
+            ZIndex: =8
+
+        lbl_RequestType_TRC As label:
+            Font: =TrackRequestComponent.FontStyle
+            FontWeight: =FontWeight.Semibold
+            Height: =25
+            PaddingBottom: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =11
+            Text: |-
+                ="Request Type:"
+            Width: =105
+            X: =icon_Back_TRC.X
+            Y: =Header_TRC.Y + Header_TRC.Height + 5
+            ZIndex: =9
+
+        Header_TRC As label:
+            DisabledColor: =TrackRequestComponent.BlueControlDarkBackground
+            DisabledFill: =Self.Fill
+            DisplayMode: =DisplayMode.Disabled
+            Fill: =TrackRequestComponent.GrayCanvasBackground
+            Font: =TrackRequestComponent.FontStyle
+            FontWeight: =FontWeight.Bold
+            Height: =55
+            PaddingLeft: =60
+            Size: =18
+            Text: ="Track Requests"
+            Width: =Parent.Width
+            ZIndex: =10
+
+        icon_Back_TRC As icon.BackArrow:
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            Color: =TrackRequestComponent.BlueControlDarkBackground
+            Height: =30
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =Color.Purple
+            Icon: =Icon.BackArrow
+            OnSelect: =Set(var_visible, !var_visible)
+            Rotation: =180
+            Tooltip: ="Back"
+            Width: =Self.Height
+            X: =15
+            Y: =Header_TRC.Y + (Header_TRC.Height - Self.Height) * 0.50
+            ZIndex: =11
+
+        Icon_Refresh_TRC As icon.Reload:
+            Color: =TrackRequestComponent.BlueControlDarkBackground
+            Height: =25
+            HoverColor: =Color.Purple
+            Icon: =Icon.Reload
+            OnSelect: |
+                =If(
+                    !IsBlankOrError(
+                        AzureDevOps.GetQueryResultsV2(
+                            "one",
+                            TrackRequestComponent.DevOpsQueryID,
+                            "msazure"
+                        ).value
+                    ),
+                    ClearCollect(
+                        clln_AzureDevOps,
+                        ShowColumns(
+                            Filter(
+                                AddColumns(
+                                    AzureDevOps.GetQueryResultsV2(
+                                        "one",
+                                        TrackRequestComponent.DevOpsQueryID,
+                                        "msazure"
+                                    ).value,
+                                    "UserPrincipalEmail",
+                                    Match(
+                                        'System.CreatedBy',
+                                        "<(?<email>.+)>"
+                                    ).email,
+                                    "DisplayName",
+                                    First(
+                                        ForAll(
+                                            Split(
+                                                'System.CreatedBy',
+                                                "<"
+                                            ),
+                                            {Result: ThisRecord.Value}
+                                        )
+                                    ).Result
+                                ),
+                                'System.State' = dpdn_State_TRC.Selected.name || 'System.State' = dpdn_State_TRC.Selected.option || dpdn_State_TRC.Selected.name in "Select All",
+                                Lower(dpdn_RequestTypeTRC.Selected.name) in Lower('System.Title') || dpdn_RequestTypeTRC.Selected.name in "Select All",
+                                TrackRequestComponent.IsAdmin || UserPrincipalEmail = User().Email
+                            ),
+                            "UserPrincipalEmail",
+                            "DisplayName",
+                            "System.Id",
+                            "System.State",
+                            "System.Title"
+                        )
+                    );
+                    
+                );
+            Width: =25
+            X: =Parent.Width - Self.Width - 15
+            Y: =Header_TRC.Y + (Header_TRC.Height - Self.Height) * 0.50
+            ZIndex: =12
+
+    Timer1 As timer:
+        AutoStart: =true
+        Duration: =500
+        OnTimerEnd: |-
+            =If(
+                !IsBlankOrError(
+                    AzureDevOps.GetQueryResultsV2(
+                        "one",
+                        TrackRequestComponent.DevOpsQueryID,
+                        "msazure"
+                    ).value
+                ),
+                ClearCollect(
+                    clln_AzureDevOps,
+                    ShowColumns(
+                        Filter(
+                            AddColumns(
+                                AzureDevOps.GetQueryResultsV2(
+                                    "one",
+                                    TrackRequestComponent.DevOpsQueryID,
+                                    "msazure"
+                                ).value,
+                                "UserPrincipalEmail",
+                                Match(
+                                    'System.CreatedBy',
+                                    "<(?<email>.+)>"
+                                ).email,
+                                "DisplayName",
+                                First(
+                                    ForAll(
+                                        Split(
+                                            'System.CreatedBy',
+                                            "<"
+                                        ),
+                                        {Result: ThisRecord.Value}
+                                    )
+                                ).Result
+                            ),
+                            TrackRequestComponent.IsAdmin || UserPrincipalEmail = User().Email
+                        ),
+                        "UserPrincipalEmail",
+                        "DisplayName",
+                        "System.Id",
+                        "System.State",
+                        "System.Title"
+                    )
+                );
+                
+            );
+        Visible: =false
+        X: =40
+        Y: =40
+        ZIndex: =2
+

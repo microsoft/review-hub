@@ -1,0 +1,1218 @@
+App As appinfo:
+    BackEnabled: =false
+    OnStart: |
+        =Trace(
+            "On Start Beginning",
+            TraceSeverity.Information
+        );
+        ClearCollect(
+            clln_AppPerf,
+            {
+                RunID: 100,
+                Description: "1st Concurrent",
+                StartTime: Now(),
+                EndTime: Now()
+            }
+        );
+        //Get displayed metric boardtype ID.
+                //Set(var_DisplayBoardTypeID, Filter(ReviewHub_BoardTypes, ThisRecord.IsDisplayInApp).BoardTypeID);
+        
+        Concurrent(
+        
+            Set(
+                var_TeamEmail,
+                LookUp(
+                    'Environment Variable Values',
+                    'Environment Variable Definition'.'Schema Name' = "chub_EnvVarReviewHubTeamEmail"
+                ).Value
+            ),
+            Set(
+                var_AccessControlWiki,
+                LookUp(
+                    'Environment Variable Values',
+                    'Environment Variable Definition'.'Schema Name' = "chub_EnvVarReviewHubAccessControlWiki"
+                ).Value
+            ),
+            Set(
+                ReadOnlyAccessGroup,
+                LookUp(
+                    'Environment Variable Values',
+                    'Environment Variable Definition'.'Schema Name' = "chub_EnvVarReviewHubReadOnlyAccess"
+                ).Value
+            ),
+            Set(
+                ReadWriteAccessGroup,
+                LookUp(
+                    'Environment Variable Values',
+                    'Environment Variable Definition'.'Schema Name' = "chub_EnvVarReviewHubReadWriteAccessGroup"
+                ).Value
+            )
+        );        
+        Concurrent(
+            Set(
+                varAppHeaderText,
+                "Review Hub - Beta V3.9.2023"
+            ),
+            Clear(clln_LoadedBoardTypes),
+            Clear(clln_FactMetric_Quarterly),
+            Clear(clln_factMetrics_Graphs),
+            Clear(clln_factMetrics_Graphs_BS),
+            Clear(clln_factMetrics_HM),
+            Clear(clln_ProductMetrics_HM),
+            Clear(clln_factMetrics_Historical),
+            ClearCollect(
+                clln_Quarters,
+                Table(
+                    {
+                        Q1: 7,
+                        Q2: 10,
+                        Q3: 1,
+                        Q4: 4
+                    },
+                    {
+                        Q1: 8,
+                        Q2: 11,
+                        Q3: 2,
+                        Q4: 5
+                    },
+                    {
+                        Q1: 9,
+                        Q2: 12,
+                        Q3: 3,
+                        Q4: 6
+                    }
+                )
+            ),
+            ClearCollect(
+                clln_BoardSrn_Header,
+                Table(
+                    {
+                        StageName: "Stage",
+                        SubgroupName: "Subgroup",
+                        MetricName: "Metric",
+                        TargetName: "Target",
+                        ValueName: "Value",
+                        CommentName: "Comment"
+                    }
+                )
+            ),
+            //variables for popup visibility control
+            Set(
+                var_TRCVisible,
+                false
+            ),
+            Set(
+                var_ICVisible,
+                true
+            ),
+            //confirm access for current user
+            
+            ClearCollect(
+                testC,
+                AzureAD.CheckMemberGroupsV2(
+                    User().Email,
+                    [ReadOnlyAccessGroup]
+                ).value,// Read only group
+                AzureAD.CheckMemberGroupsV2(
+                    User().Email,
+                    [ReadWriteAccessGroup]
+                ).value//  Read Write Group
+            );
+            ClearCollect(
+                clln_UserAccess,
+                {hasAccess: CountRows(testC) > 0}
+            );
+            ,
+            Set(
+                var_UserGetAccess,
+                Last(
+                    Filter(
+                        ReviewHub_UserRequests,
+                        User().Email = ThisRecord.Email
+                    )
+                )
+            ),
+            //Variables for Left Navigation bar.
+            Set(
+                varSelectedBoardId,
+                -1
+            ),
+            Set(
+                var_LeftNavi_Width,
+                51
+            ),//Default Width, when app opens.
+            Set(
+                var_LeftNavi_ExpandWidth,
+                265
+            ),
+            Set(
+                var_LeftNavi_CollapseWidth,
+                51
+            ),
+            //If the Privacy Agreement would display.
+            Set(
+                Record_CheckPrivacyAgreement,
+                LookUp(
+                    ReviewHub_PrivacyAgreements,
+                    ThisRecord.UserPrincipalEmail = User().Email
+                )
+            );
+            If(
+                IsBlank(Record_CheckPrivacyAgreement.UserPrincipalEmail),//No record found
+                Set(
+                    var_IsPrivacyRecFound_and_IsInTimeRange,
+                    0
+                ),
+                If(//Record found and check if in the 90 days period.
+                    Record_CheckPrivacyAgreement.CurrentAgreementDateTime <= Now() && Record_CheckPrivacyAgreement.NextAgreementDateTime > Now(),
+                    Set(
+                        var_IsPrivacyRecFound_and_IsInTimeRange,
+                        11
+                    ),//Record found and In Range
+                    Set(
+                        var_IsPrivacyRecFound_and_IsInTimeRange,
+                        10
+                    )////Record found and Out of Range
+                )
+            );
+            Set(
+                var_ctn_IfGalleryLoaded_home_Visible,
+                true
+            ),
+            //New Collect: for the static left-hand Navigation Pane.
+            ClearCollect(
+                varLeftNavOptions,//Modifying ID column in a record is not recommended.
+                Table(
+                    {
+                        Title: "Home",
+                        Screen: HomeScreen,
+                        ImagePath: icon_Home,
+                        ID: -1,
+                        PID: Blank(),
+                        ReviewDate: Blank()
+                    },
+                    //{Title: "Heat Map", Screen: scn_HeatMap, ImagePath: icon_HeatMap, ID: -2, PID: Blank(), ReviewDate: Blank()},
+                    {
+                        Title: "Health Rating",
+                        Screen: scn_HRating,
+                        ImagePath: icon_HealthRating,
+                        ID: -5,
+                        PID: Blank(),
+                        ReviewDate: Blank()
+                    },
+                    {
+                        Title: "Executive Summary",
+                        Screen: scn_ExecSummary,
+                        ImagePath: icon_ExecSummary,
+                        ID: -6,
+                        PID: Blank(),
+                        ReviewDate: Blank()
+                    },
+                    {
+                        Title: "We need your feedback",
+                        Screen: scn_Survey,
+                        ImagePath: icon_Survey,
+                        ID: -7,
+                        PID: Blank(),
+                        ReviewDate: Blank()
+                    },
+                    {
+                        Title: "Resources",
+                        Screen: scn_Resources,
+                        ImagePath: Resources,
+                        ID: -8,
+                        PID: Blank(),
+                        ReviewDate: Blank()
+                    },
+                    {
+                        Title: "How to Navigate",
+                        Screen: scn_HowTo,
+                        ImagePath: Icon_TutorialSVGBlue,
+                        ID: -9,
+                        PID: Blank(),
+                        ReviewDate: Blank()
+                    }
+                )
+            );
+            //Lookup User Role from the [Users] list.
+        Set(
+                UserRole,
+                Text(
+                    LookUp(
+                        ReviewHub_Users,
+                        craf2_userprincipalemail = User().Email
+                    ).craf2_userrole
+                )
+            );
+            Switch(
+                UserRole,
+                "Administrator",
+                Set(
+                    IsAdmin,
+                    true
+                );
+                Set(
+                    IsOperator,
+                    false
+                ),
+                "Operator",
+                Set(
+                    IsOperator,
+                    true
+                );
+                Set(
+                    IsAdmin,
+                    false
+                ),
+                "",
+                Set(
+                    IsOperator,
+                    false
+                );
+                Set(
+                    IsAdmin,
+                    false
+                )
+            ),
+            Set(
+                IsAppStart,
+                true
+            ),
+            Set(
+                IsFactMetricsFullyLoaded,
+                false
+            ),
+            Set(
+                IsProductMetricsFullyLoaded,
+                false
+            ),
+            Set(
+                TEMPLATE_PADDING,
+                25
+            ),
+            Set(
+                CARD_FRAME_WIDTH,
+                300
+            ),
+            Set(
+                var_Home_HealthRating_Selected_DisplayOrder,
+                0
+            ),
+            Set(
+                FONTNAME,
+                Font.'Open Sans'
+            ),
+            Set(
+                FontStyle,
+                Font.'Segoe UI'
+            ),
+            //Define All Color Codes
+            Set(
+                GreenFontColor,
+                RGBA(
+                    0,
+                    158,
+                    73,
+                    1
+                )
+            ),
+            Set(
+                YellowFontColor,
+                RGBA(
+                    204,
+                    112,
+                    0,
+                    1
+                )
+            ),
+            Set(
+                RedFontColor,
+                RGBA(
+                    204,
+                    65,
+                    37,
+                    1
+                )
+            ),
+            Set(
+                LEFTNAVBKGDCOLOR,
+                RGBA(
+                    0,
+                    114,
+                    198,
+                    1
+                )
+            ),//Set(LEFTNAVBKGDCOLOR, RGBA(0,102,119,1)),
+            Set(
+                LEFTNAVHIGLIGHTCOLOR,
+                RGBA(
+                    121,
+                    181,
+                    222,
+                    1
+                )
+            ),//Set(LEFTNAVHIGLIGHTCOLOR, RGBA(33,150,166,1)),
+            Set(
+                REDCOLOR,
+                RGBA(
+                    253,
+                    230,
+                    232,
+                    1
+                )
+            ),
+            Set(
+                REDWARNINGCOLOR,
+                RGBA(
+                    253,
+                    71,
+                    96,
+                    1
+                )
+            ),
+            Set(
+                BLUECOLOR,
+                RGBA(
+                    0,
+                    134,
+                    208,
+                    1
+                )
+            ),
+            Set(
+                BlueControlLightBackground,
+                RGBA(
+                    218,
+                    240,
+                    250,
+                    1
+                )
+            ),
+            Set(
+                BlueControlDarkBackground,
+                RGBA(
+                    0,
+                    114,
+                    198,
+                    1
+                )
+            ),
+            Set(
+                BlueNaviHightLightBackground,
+                RGBA(
+                    121,
+                    181,
+                    222,
+                    1
+                )
+            ),
+            Set(
+                GREENCOLOR,
+                RGBA(
+                    229,
+                    245,
+                    236,
+                    1
+                )
+            ),
+            Set(
+                GRAYCOLOR,
+                RGBA(
+                    166,
+                    166,
+                    166,
+                    1
+                )
+            ),
+            Set(
+                GrayControlBackground,
+                RGBA(
+                    236,
+                    236,
+                    236,
+                    1
+                )
+            ),
+            Set(
+                GrayCanvasBackground,
+                RGBA(
+                    248,
+                    248,
+                    248,
+                    1
+                )
+            ),
+            Set(
+                GrayBorderDark,
+                RGBA(
+                    220,
+                    220,
+                    220,
+                    1
+                )
+            ),
+            Set(
+                GrayBorderLight,
+                RGBA(
+                    234,
+                    234,
+                    234,
+                    1
+                )
+            ),
+            Set(
+                TABLEHEADERCOLOR,
+                RGBA(
+                    48,
+                    141,
+                    207,
+                    1
+                )
+            ),//RGBA(93,189,210,1)),
+            Set(
+                SUBGROUPCOLOR,
+                RGBA(
+                    215,
+                    226,
+                    248,
+                    1
+                )
+            ),
+            Set(
+                RowHoverOverColor,
+                RGBA(
+                    1,
+                    1,
+                    1,
+                    0.05
+                )
+            ),
+            Set(
+                RowSelectedColor,
+                RGBA(
+                    1,
+                    1,
+                    1,
+                    0.1
+                )
+            ),
+            Set(
+                YellowTargetColor,
+                RGBA(
+                    255,
+                    255,
+                    0,
+                    0.4
+                )
+            ),
+            Set(
+                YellowRangeHealthWeight,
+                0.80
+            ),
+            Set(
+                var_IsDeveloper,
+                User().Email in LookUp(
+                    'Environment Variable Values',
+                    'Environment Variable Definition'.'Schema Name' = "chub_EnvVarReviewHubDevelopers"
+                ).Value
+            ),
+            Set(
+                var_SendFeedback_URL,
+                LookUp(
+                    'Environment Variable Values',
+                    'Environment Variable Definition'.'Schema Name' = "chub_EnvVarReviewHubFeedbackURL"
+                ).Value
+            ),
+            Set(
+                var_BulkImportSharepoint,
+                LookUp(
+                    'Environment Variable Values',
+                    'Environment Variable Definition'.'Schema Name' = "chub_EnvVarReviewHubBulkImportSharepointFile"
+                ).Value
+            ),
+            Set(
+                var_DevOpsBaseURL,
+                LookUp(
+                    'Environment Variable Values',
+                    'Environment Variable Definition'.'Schema Name' = "chub_EnvVarReviewHubDevOpsBaseURL"
+                ).Value
+            ),
+            Set(
+                var_DevOpsQueryID,
+                LookUp(
+                    'Environment Variable Values',
+                    'Environment Variable Definition'.'Schema Name' = "chub_EnvVarReviewHubDevOpsQueryID"
+                ).Value
+            ),
+            Set(
+                var_FeatureRequestURL,
+                LookUp(
+                    'Environment Variable Values',
+                    'Environment Variable Definition'.'Schema Name' = "chub_EnvVarReviewHubFeatureRequestURL"
+                ).Value
+            ),
+            Set(
+                var_HowToVideo,
+                LookUp(
+                    'Environment Variable Values',
+                    'Environment Variable Definition'.'Schema Name' = "chub_EnvVarReviewHubHowToVideo"
+                ).Value
+            ),
+            Set(
+                var_ScorecardOnboardingRequestURL,
+                LookUp(
+                    'Environment Variable Values',
+                    'Environment Variable Definition'.'Schema Name' = "chub_EnvVarReviewHubScorecardOnboardingRequestURL"
+                ).Value
+            ),
+            Set(
+                var_Wiki,
+                LookUp(
+                    'Environment Variable Values',
+                    'Environment Variable Definition'.'Schema Name' = "chub_EnvVarReviewHubWiki"
+                ).Value
+            ),
+            Set(
+                var_BlobStorageURL,
+                LookUp(
+                    'Environment Variable Values',
+                    'Environment Variable Definition'.'Schema Name' = "chub_EnvVarReviewHubBlobStorageURL"
+                ).Value
+            ),
+            Set(
+                var_ReviewHubSurvey,
+                LookUp(
+                    'Environment Variable Values',
+                    'Environment Variable Definition'.'Schema Name' = "chub_EnvVarReviewHubSurvey"
+                ).Value
+            ),
+            ClearCollect(
+                clln_AppPerf_110,
+                {
+                    RunID: 110,
+                    Description: "1st Concurrent - Child - Pull ReviewHub_BoardHealths, ReviewHub_FactMetricBoards, distinct ProductID collection based on FactMetricBoards.",
+                    StartTime: Now(),
+                    EndTime: Now()
+                }
+            );
+            Concurrent(
+                ////////// Smiley Face MetricBoardHealth Reference. ([To] is mostly exclusive) //////////
+                ClearCollect(
+                    clln_MetricBoardHealth,
+                    RenameColumns(
+                        ShowColumns(
+                            ReviewHub_BoardHealths,
+                            "craf2_healthrating",
+                            "craf2_lowerboundscore",
+                            "craf2_upperboundscore",
+                            "craf2_img",
+                            "craf2_displayorder"
+                        ),
+                        "craf2_healthrating",
+                        "Rating",
+                        "craf2_lowerboundscore",
+                        "MinScore",
+                        "craf2_upperboundscore",
+                        "MaxScore",
+                        "craf2_img",
+                        "Image",
+                        "craf2_displayorder",
+                        "DisplayOrder"
+                    )
+                ),
+                //Get displayed metric template ID.
+                Set(
+                    var_DisplayMetricTemplateID,
+                    Filter(
+                        ReviewHub_MetricTemplates,
+                        ThisRecord.IsDisplayInApp
+                    ).TemplateID
+                )
+            );
+            //Get a flat table from the [factMetricBoard] list. 
+        ClearCollect(
+                clln_factMetricBoard,
+                RenameColumns(
+                    ShowColumns(
+                        AddColumns(
+                            Filter(
+                                AddColumns(
+                                    ReviewHub_FactMetricBoards,
+                                    "fmb_MetricBoardTypeID",
+                                    fmb_BoardType.BoardTypeID,
+                                    "fmb_MetricBoardTypeValue",
+                                    fmb_BoardType.BoardTypeShortName,
+                                    "fmb_ProductArray",
+                                    fmb_Product,
+                                    "fmb_ProductID",
+                                    fmb_Product.ProductID,
+                                    "fmb_ProductName",
+                                    fmb_Product.ProductName,
+                                    "fmb_ReviewMonth",
+                                    Month(fmb_ReviewLockDate),
+                                    "fmb_ReviewYear",
+                                    Year(fmb_ReviewLockDate),
+                                    "fmb_ReviewOwnerClaims",
+                                    fmb_ReviewOwnerPrincipal,
+                                    "fmb_TemplateID",
+                                    fmb_Template.TemplateID,
+                                    "fmb_TemplateName",
+                                    fmb_Template.TemplateName,
+                                    "DateValue_ReviewLockDate",
+                                    DateValue(
+                                        Text(
+                                            fmb_ReviewLockDate,
+                                            DateTimeFormat.ShortDate
+                                        )
+                                    ),
+                                    "fmb_BoardHealth",
+                                    LookUp(
+                                        clln_MetricBoardHealth,
+                                        (IsBlankOrError(fmb_HealthScore) && MinScore <= -999) || (!IsBlankOrError(fmb_HealthScore) && (fmb_HealthScore >= MinScore && fmb_HealthScore < MaxScore))
+                                    )
+                                ),
+                                ThisRecord.fmb_TemplateID in var_DisplayMetricTemplateID.TemplateID
+                            ),
+                            "fmb_BoardHealthRating",
+                            fmb_BoardHealth.Rating,
+                            "fmb_BoardHealthImage",
+                            fmb_BoardHealth.Image,
+                            "fmb_BoardHealthDisplayOrder",
+                            fmb_BoardHealth.DisplayOrder
+                        ),
+                        "craf2_factmetricboardid",
+                        "fmb_MetricBoardTypeID",
+                        "fmb_MetricBoardTypeValue",
+                        "fmb_ProductArray",
+                        "fmb_ProductID",
+                        "fmb_ProductName",
+                        "DateValue_ReviewLockDate",
+                        "fmb_ReviewMonth",
+                        "fmb_ReviewYear",
+                        "craf2_fmb_reviewownername",
+                        "fmb_ReviewOwnerClaims",
+                        "craf2_fmb_healthscore",
+                        "fmb_BoardHealthRating",
+                        "fmb_BoardHealthImage",
+                        "fmb_BoardHealthDisplayOrder",
+                        "fmb_TemplateID",
+                        "fmb_TemplateName"
+                    ),
+                    "craf2_factmetricboardid",
+                    "fmb_ID",
+                    "DateValue_ReviewLockDate",
+                    "fmb_ReviewLockDate",
+                    "craf2_fmb_reviewownername",
+                    "fmb_ReviewOwnerName",
+                    "craf2_fmb_healthscore",
+                    "fmb_HealthScore"
+                )
+            );
+            Set(
+                var_MostRecentReviewLockDate,
+                First(
+                    Sort(
+                        clln_factMetricBoard,
+                        fmb_ReviewLockDate,
+                        SortOrder.Descending
+                    )
+                ).fmb_ReviewLockDate
+            );
+            ////////Home Screen: Pre-load Month_Year dropdown filter data.////////
+            //Get the dropdown_ReviewMthYr (HomeScreen) data ready.
+        Set(
+                var_CurrentMiddleMonthDate,
+                Date(
+                    Year(var_MostRecentReviewLockDate),
+                    Month(var_MostRecentReviewLockDate),
+                    16
+                )
+            );
+            ClearCollect(
+                clln_dropdown_ReviewMthYr,
+                AddColumns(
+                    SortByColumns(
+                        ForAll(
+                            Sequence(
+                                12,
+                                0,
+                                -1
+                            ),
+                            DateAdd(
+                                var_CurrentMiddleMonthDate,
+                                Value,
+                                TimeUnit.Months
+                            )
+                        ),
+                        "Value",
+                        SortOrder.Descending
+                    ),
+                    "MonthNum",
+                    Month(Value),
+                    "Year",
+                    Year(Value),
+                    "Month_Year",
+                    Text(
+                        Value,
+                        "[$-en-US]mmmm yyyy"
+                    ),
+                    "LastMonthStart",
+                    Date(
+                        Year(
+                            DateAdd(
+                                Value,
+                                -1,
+                                TimeUnit.Months
+                            )
+                        ),
+                        Month(
+                            DateAdd(
+                                Value,
+                                -1,
+                                TimeUnit.Months
+                            )
+                        ),
+                        1
+                    ),
+                    "NextMonthStart",
+                    Date(
+                        Year(
+                            DateAdd(
+                                Value,
+                                1,
+                                TimeUnit.Months
+                            )
+                        ),
+                        Month(
+                            DateAdd(
+                                Value,
+                                1,
+                                TimeUnit.Months
+                            )
+                        ),
+                        1
+                    ),
+                    "displayMonthYear",
+                    Text(
+                        DateAdd(
+                            Value,
+                            -1,
+                            TimeUnit.Months
+                        ),
+                        "[$-en-US]mmmm yyyy"
+                    )
+                )
+            );
+            //Get the dropdown_ValueMthYr filter (factMetrics, for Heatmaps) data ready. 
+        ClearCollect(
+                clln_dpdn_MetricsValueMthYr,
+                clln_dropdown_ReviewMthYr
+            );
+            //Set the default review Month & Year to be the current latest Month & Year.
+        Set(
+                varReviewMonthNum,
+                Month(var_MostRecentReviewLockDate)
+            );
+            Set(
+                var_PSR_MonthNum,
+                varReviewMonthNum
+            );
+            Set(
+                varReviewYear,
+                Year(var_MostRecentReviewLockDate)
+            );
+            Set(
+                var_PSR_Year,
+                varReviewYear
+            );
+            //Set the default review Month & Year to be the current latest Month & Year.
+        Set(
+                var_HMPS_FilterDate,
+                DateValue(Month(var_MostRecentReviewLockDate) & "/16/" & Year(var_MostRecentReviewLockDate))
+            );
+            //Get All distinct ProductID from the [factMetricBoard] list.
+        ClearCollect(
+                clln_Products,
+                ForAll(
+                    Distinct(
+                        clln_factMetricBoard,
+                        fmb_ProductArray
+                    ),
+                    {Result: ThisRecord.Value}
+                ).Result
+            );
+            Patch(
+                clln_AppPerf_110,
+                LookUp(
+                    clln_AppPerf_110,
+                    ThisRecord.RunID = 110
+                ),
+                {
+                    Description: "1st Concurrent - Child - Pull ReviewHub_BoardHealths (Records: " & CountRows(clln_MetricBoardHealth) & "), ReviewHub_FactMetricBoards (Records: " & CountRows(clln_factMetricBoard) & "), distinct ProductID collection based on FactMetricBoards (Records: " & CountRows(clln_factMetricBoard) & ").",
+                    EndTime: Now()
+                }
+            ),
+            ClearCollect(
+                clln_AppPerf_120,
+                {
+                    RunID: 120,
+                    Description: "1st Concurrent - Child - Get Loader_ProductMetrics ready.",
+                    StartTime: Now(),
+                    EndTime: Now()
+                }
+            );
+            Clear(clln_ProductMetrics);
+            /*
+            Concurrent(
+                //Get the pilot table for loading the big table - clln_ProductMetrics.
+                Clear(clln_ProductMetrics), //This collection will be loaded on HomeScreen.OnVisible.
+                Clear(clln_ProductMetrics_BS) 
+            );
+            */
+        Patch(
+                clln_AppPerf_120,
+                LookUp(
+                    clln_AppPerf_120,
+                    ThisRecord.RunID = 120
+                ),
+                {EndTime: Now()}
+            ),
+            ClearCollect(
+                clln_AppPerf_130,
+                {
+                    RunID: 130,
+                    Description: "1st Concurrent - Child - Get Loader_FactMetrics ready.",
+                    StartTime: Now(),
+                    EndTime: Now()
+                }
+            );
+            Clear(clln_factMetrics);
+           /* Concurrent(
+            //Get the pilot table for loading the big table - clln_factMetrics.
+                Clear(clln_factMetrics),  //This collection will be loaded on HomeScreen.OnVisible.
+                Clear(clln_factMetrics_BS)
+            ); */
+        Patch(
+                clln_AppPerf_130,
+                LookUp(
+                    clln_AppPerf_130,
+                    ThisRecord.RunID = 130
+                ),
+                {EndTime: Now()}
+            ),
+            ClearCollect(
+                clln_AppPerf_140,
+                {
+                    RunID: 140,
+                    Description: "1st Concurrent - Child - Pull ReviewHub_MetricTypeDetails, , and load colStageOrder for the board screen.",
+                    StartTime: Now(),
+                    EndTime: Now()
+                }
+            );
+            //Metric Template Feature. 
+            //If you update this part, you also need to update codes in scn_SS_NewMetricType and scn_SS_UpdateMetricType screens BACK button - OnSelect.
+        ClearCollect(
+                clln_MetricTypeDetail,
+                ShowColumns(
+                    AddColumns(
+                        AddColumns(
+                            ReviewHub_MetricTypeDetails,
+                            "TemplateRec",
+                            ThisRecord.MetricTypeDetailTemplate
+                            // "MetricTemplateRec", LookUp(ReviewHub_MetricTemplates, ReviewHub_MetricTypeDetails[@MetricTypeDetailTemplate].TemplateID=ThisRecord.TemplateID)
+                        ),
+                        "mtd_TemplateID",
+                        TemplateRec.TemplateID,
+                        "mtd_TemplateName",
+                        TemplateRec.TemplateName,
+                        "mtd_MetricTypeId",
+                        ThisRecord.MetricType.MetricTypeID,
+                        "mtd_MetricTypeName",
+                        ThisRecord.MetricType.MetricTypeName,
+                        "mtd_UpdateMethod",
+                        Text(ThisRecord.MetricTypeDetailUpdateMethod),
+                        "mtd_MetricDeprecatedDate",
+                        ThisRecord.MetricType.MetricTypeDeprecatedDate,
+                        "mtd_MetricCreatedDate",
+                        ThisRecord.MetricType.MetricTypeEffectiveDate,
+                        "mtd_MetricShortName",
+                        ThisRecord.MetricType.MetricTypeShortName,
+                        "mtd_BoardTypeID",
+                        ThisRecord.mtd_BoardType.BoardTypeID,//MetricTemplateRec.TemplateBoardType.BoardTypeID,
+                        "mtd_BoardTypeName",
+                        ThisRecord.mtd_BoardType.BoardTypeName,//MetricTemplateRec.TemplateBoardType.BoardTypeName,
+                        "mtd_MetricDisplayOrder",
+                        ThisRecord.mtd_DisplayOrder,
+                        "mtd_MetricStage",
+                        Text(ThisRecord.MetricType.MetricTypeStage),
+                        "mtd_MetricTypeSubgroup",
+                        ThisRecord.mtd_Objective.mto_ObjectiveName,//Text(ThisRecord.MetricType.MetricTypeSubgroup),
+                        "mtd_MetricValueType",
+                        Text(ThisRecord.MetricType.ValueType),
+                        "mtd_IsTrendDown",
+                        ThisRecord.MetricType.MetricTypeIsTrendDown,
+                        "mtd_MetricTypeEnumerateOptions",
+                        ThisRecord.MetricType.MetricTypeEnumerateOptions,
+                        "mtd_MetricTypeSource",
+                        ThisRecord.MetricType.MetricTypeSource,
+                        "mtd_MetricTypeHealthWeight",
+                        ThisRecord.MetricType.MetricTypeHealthWeight,
+                        "mtd_MetricPowerBIUrl",
+                        ThisRecord.MetricTypeDetailPowerBIUrl,
+                        "mtd_MetricTypeDescription",
+                        ThisRecord.MetricType.MetricTypeDescription,
+                        "mtd_MetricTypeQuaterlyCalcMethod",
+                        If(
+                            IsBlank(ThisRecord.MetricTypeQuaterlyCalcMethod),
+                            "Average",
+                            Text(ThisRecord.MetricTypeQuaterlyCalcMethod)
+                        )
+                    ),
+                    "mtd_TemplateID",
+                    "mtd_TemplateName",
+                    "mtd_BoardTypeID",
+                    "mtd_BoardTypeName",
+                    "mtd_MetricTypeId",
+                    "mtd_MetricTypeName",
+                    "mtd_MetricShortName",
+                    "mtd_MetricDeprecatedDate",
+                    "mtd_MetricCreatedDate",
+                    "mtd_UpdateMethod",
+                    "mtd_MetricPowerBIUrl",
+                    "mtd_MetricDisplayOrder",
+                    "mtd_MetricStage",
+                    "mtd_MetricTypeSubgroup",
+                    "mtd_MetricValueType",
+                    "mtd_IsTrendDown",
+                    "mtd_MetricTypeEnumerateOptions",
+                    "mtd_MetricTypeSource",
+                    "mtd_MetricTypeHealthWeight",
+                    "mtd_MetricTypeDescription",
+                    "mtd_MetricTypeQuaterlyCalcMethod"
+                )
+            );
+            ////Load BoardScreen: only the top 1 stage value per stage group will show the banner.
+        ClearCollect(
+                colStageOrder,
+                DropColumns(
+                    AddColumns(
+                        GroupBy(
+                            Sort(
+                                clln_MetricTypeDetail,
+                                mtd_MetricDisplayOrder
+                            ),
+                            "mtd_BoardTypeID",
+                            "mtd_TemplateID",
+                            "mtd_MetricStage",
+                            "MetricGroup"
+                        ),
+                        "FirstDisplayOrder_ByStage",
+                        First(ThisRecord.MetricGroup).mtd_MetricDisplayOrder
+                    ),
+                    "MetricGroup"
+                )
+            );
+            Patch(
+                clln_AppPerf_140,
+                LookUp(
+                    clln_AppPerf_140,
+                    ThisRecord.RunID = 140
+                ),
+                {
+                    Description: "1st Concurrent - Child - Pull ReviewHub_MetricTypeDetails (Records: " & CountRows(clln_MetricTypeDetail) & "), and load colStageOrder for the board screen.",
+                    EndTime: Now()
+                }
+            ),
+            ClearCollect(
+                clln_AppPerf_150,
+                {
+                    RunID: 150,
+                    Description: "1st Concurrent - Child - Pull ReviewHub_BoardTypes, and detect if this is a coordinator.",
+                    StartTime: Now(),
+                    EndTime: Now()
+                }
+            );
+            ClearCollect(
+                clln_BoardTypes,
+                RenameColumns(
+                    ShowColumns(
+                        ReviewHub_BoardTypes,
+                        "craf2_boardtypename",
+                        "craf2_boardtypeid",
+                        "craf2_boardtypeshortname",
+                        "craf2_boardtypedescription",
+                        "craf2_isdisplayinapp",
+                        "craf2_bt_displayorder",
+                        "craf2_coordinator",
+                        "craf2_expectedautoloaddaypermonth",
+                        "chub_reviewlockday"
+                    ),
+                    "craf2_boardtypename",
+                    "bt_BoardTypeName",
+                    "craf2_boardtypeid",
+                    "bt_BoardTypeID",
+                    "craf2_boardtypeshortname",
+                    "bt_BoardTypeShortName",
+                    "craf2_boardtypedescription",
+                    "bt_BoardTypeDescription",
+                    "craf2_isdisplayinapp",
+                    "bt_IsDisplayInApp",
+                    "craf2_bt_displayorder",
+                    "bt_DisplayOrder",
+                    "craf2_coordinator",
+                    "Coordinator",
+                    "craf2_expectedautoloaddaypermonth",
+                    "bt_ExpectedAutoLoadDay",
+                    "chub_reviewlockday",
+                    "bt_ReviewLockDay"
+                )
+            );
+            If(
+                IsBlankOrError(
+                    LookUp(
+                        clln_BoardTypes,
+                        IsMatch(
+                            ThisRecord.Coordinator,
+                            User().Email,
+                            MatchOptions.Contains & MatchOptions.IgnoreCase
+                        )
+                    ).bt_BoardTypeID
+                ),
+                Set(
+                    IsCoordinator,
+                    false
+                ),
+                Set(
+                    IsCoordinator,
+                    true
+                );
+                Set(
+                    IsCoordinator_BoardTypes,
+                    Concat(
+                        Filter(
+                            clln_BoardTypes,
+                            IsMatch(
+                                ThisRecord.Coordinator,
+                                User().Email,
+                                MatchOptions.Contains & MatchOptions.IgnoreCase
+                            )
+                        ).bt_BoardTypeID,
+                        ThisRecord.bt_BoardTypeID & "|"
+                    )
+                )
+            );
+            Patch(
+                clln_AppPerf_150,
+                LookUp(
+                    clln_AppPerf_150,
+                    ThisRecord.RunID = 150
+                ),
+                {
+                    Description: "1st Concurrent - Child - Pull ReviewHub_BoardTypes (Records: " & CountRows(clln_BoardTypes) & "), and detect if this is a coordinator.",
+                    EndTime: Now()
+                }
+            )
+        );
+        //End of First Concurrent
+        Patch(
+            clln_AppPerf,
+            LookUp(
+                clln_AppPerf,
+                ThisRecord.RunID = 100
+            ),
+            {EndTime: Now()}
+        );
+        Collect(
+            clln_AppPerf,
+            {
+                RunID: 200,
+                Description: "2nd Part Data Loading - Home Screen Insight Gallery, and Heat Map screen.",
+                StartTime: Now(),
+                EndTime: Now()
+            }
+        );
+        //Start of Second Part
+            //Load data for home screen - insight gallery.
+        ClearCollect(
+            clln_FMB_GroupByBoardType,
+            AddColumns(
+                GroupBy(
+                    Filter(
+                        clln_factMetricBoard,
+                        fmb_ReviewYear = varReviewYear && fmb_ReviewMonth = varReviewMonthNum
+                    ),
+                    "fmb_MetricBoardTypeID",
+                    "GroupByBoardTypeID"
+                ),
+                "CountByBoardTypeID",
+                CountA(ThisRecord.GroupByBoardTypeID.fmb_ID)
+            )
+        );
+        ClearCollect(
+            clln_InsightsGallery_Home,
+            AddColumns(
+                RenameColumns(
+                    ShowColumns(
+                        Filter(
+                            ReviewHub_BoardTypes,
+                            ThisRecord.IsDisplayInApp
+                        ),
+                        "craf2_boardtypeid",
+                        "craf2_boardtypeshortname",
+                        "craf2_bt_displayorder"
+                    ),
+                    "craf2_boardtypeid",
+                    "bt_BoardTypeID",
+                    "craf2_boardtypeshortname",
+                    "bt_BoardTypeShortName",
+                    "craf2_bt_displayorder",
+                    "bt_DisplayOrder"
+                ),
+                "BoardNumberCount",
+                LookUp(
+                    clln_FMB_GroupByBoardType,
+                    ThisRecord.fmb_MetricBoardTypeID = bt_BoardTypeID
+                ).CountByBoardTypeID
+            )
+        );
+        Collect(
+            clln_InsightsGallery_Home,
+            {
+                bt_BoardTypeID: 0,
+                bt_BoardTypeShortName: "My Reviews",
+                bt_DisplayOrder: 0,
+                BoardNumberCount: CountRows(
+                    Filter(
+                        Filter(
+                            clln_factMetricBoard,
+                            fmb_ReviewYear = varReviewYear && fmb_ReviewMonth = varReviewMonthNum
+                        ),
+                        IsMatch(
+                            fmb_ReviewOwnerClaims,
+                            User().Email,
+                            MatchOptions.Contains & MatchOptions.IgnoreCase
+                        ) || fmb_ReviewOwnerClaims = User().Email
+                    )
+                )
+            }
+        );
+        //End of Second Concurrent.
+        Patch(
+            clln_AppPerf,
+            LookUp(
+                clln_AppPerf,
+                ThisRecord.RunID = 200
+            ),
+            {EndTime: Now()}
+        );
+        Set(
+            var_ctn_IfGalleryLoaded_home_Visible,
+            false
+        );
+        Trace(
+            "On Start Finished",
+            TraceSeverity.Information
+        );
+    StartScreen: |
+        =If(true in clln_UserAccess.hasAccess,  HomeScreen, AccessScreen)
+

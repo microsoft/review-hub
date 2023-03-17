@@ -1,0 +1,101 @@
+[
+  {
+    "CdsFCBContext": "{\"FileType\":true,\"ImageExternalStorage\":true}",
+    "EntitySetName": "craf2_reviewhub_accessrequests",
+    "IsHidden": false,
+    "IsSampleData": false,
+    "IsWritable": true,
+    "LogicalName": "craf2_reviewhub_accessrequest",
+    "MaxGetRowsCount": 2000,
+    "Name": "ReviewHub_AccessRequests",
+    "NativeCDSDataSourceInfoNameMapping": {
+      "_ownerid_value": "Owner",
+      "craf2_craf2_reviewhub_requestedproduct_AccessRe": "ReviewHub_RequestedProducts",
+      "craf2_justification": "Justification",
+      "craf2_name": "ID",
+      "craf2_requestdate": "RequestDate",
+      "craf2_requesteremail": "RequesterEmail",
+      "craf2_reviewhub_accessrequest_AsyncOperations": "System Jobs",
+      "craf2_reviewhub_accessrequest_BulkDeleteFailures": "Bulk Delete Failures",
+      "craf2_reviewhub_accessrequest_DuplicateBaseRecord": "Duplicate Records (craf2_reviewhub_accessrequest_DuplicateBaseRecord)",
+      "craf2_reviewhub_accessrequest_DuplicateMatchingRecord": "Duplicate Records (craf2_reviewhub_accessrequest_DuplicateMatchingRecord)",
+      "craf2_reviewhub_accessrequest_MailboxTrackingFolders": "Mailbox Auto Tracking Folders",
+      "craf2_reviewhub_accessrequest_PrincipalObjectAttributeAccesses": "Field Sharing",
+      "craf2_reviewhub_accessrequest_ProcessSession": "Process Sessions",
+      "craf2_reviewhub_accessrequest_SyncErrors": "Sync Errors",
+      "craf2_reviewhub_accessrequestid": "ReviewHub_AccessRequest",
+      "createdby": "Created By",
+      "createdon": "Created On",
+      "createdonbehalfby": "Created By (Delegate)",
+      "importsequencenumber": "Import Sequence Number",
+      "modifiedby": "Modified By",
+      "modifiedon": "Modified On",
+      "modifiedonbehalfby": "Modified By (Delegate)",
+      "overriddencreatedon": "Record Created On",
+      "owningbusinessunit": "Owning Business Unit",
+      "owningteam": "Owning Team",
+      "owninguser": "Owning User",
+      "statecode": "Status",
+      "statuscode": "Status Reason",
+      "timezoneruleversionnumber": "Time Zone Rule Version Number",
+      "utcconversiontimezonecode": "UTC Conversion Time Zone Code",
+      "versionnumber": "Version Number"
+    },
+    "PreferredName": "ReviewHub_AccessRequests",
+    "Type": "NativeCDSDataSourceInfo"
+  },
+  {
+    "DisplayName": "ReviewHub_AccessRequests (Views)",
+    "Name": "_craf2_reviewhub_accessrequest_views",
+    "RelatedEntityName": "ReviewHub_AccessRequests",
+    "TrimmedViewName": true,
+    "Type": "ViewInfo",
+    "ViewInfoNameMapping": {
+      "538e8cca-564f-4062-bbc4-dd0512e0c939": "Inactive ReviewHub_AccessRequests",
+      "71e3dd64-5a58-431e-bff6-583b5255342a": "ReviewHub_AccessRequest Associated View",
+      "898f56b1-7504-4a8c-b80e-9e6882a3dbdb": "Active ReviewHub_AccessRequests",
+      "da262fcf-7678-4a29-90c4-4402f72d8918": "ReviewHub_AccessRequest Lookup View",
+      "f80c9110-0b11-4982-84c3-d6edf3a3a09c": "ReviewHub_AccessRequest Advanced Find View"
+    }
+  },
+  {
+    "DisplayName": "Status (ReviewHub_AccessRequests)",
+    "Name": "craf2_reviewhub_accessrequest_statecode",
+    "OptionSetInfoNameMapping": {
+      "0": "Active",
+      "1": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statecode",
+        "OptionSetReferenceEntityName": "ReviewHub_AccessRequests"
+      }
+    },
+    "OptionSetTypeKey": "StateType",
+    "RelatedColumnInvariantName": "statecode",
+    "RelatedEntityName": "ReviewHub_AccessRequests",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Status Reason (ReviewHub_AccessRequests)",
+    "Name": "craf2_reviewhub_accessrequest_statuscode",
+    "OptionSetInfoNameMapping": {
+      "1": "Active",
+      "2": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statuscode",
+        "OptionSetReferenceEntityName": "ReviewHub_AccessRequests"
+      }
+    },
+    "OptionSetTypeKey": "StatusType",
+    "RelatedColumnInvariantName": "statuscode",
+    "RelatedEntityName": "ReviewHub_AccessRequests",
+    "Type": "OptionSetInfo"
+  }
+]

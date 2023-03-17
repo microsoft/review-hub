@@ -1,0 +1,577 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_sharepointonline": {
+        "runtimeSource": "invoker",
+        "connection": {
+          "connectionReferenceLogicalName": "new_sharedsharepointonline_da547"
+        },
+        "api": {
+          "name": "shared_sharepointonline"
+        }
+      },
+      "shared_excelonlinebusiness_1": {
+        "runtimeSource": "invoker",
+        "connection": {
+          "connectionReferenceLogicalName": "new_sharedexcelonlinebusiness_0a366"
+        },
+        "api": {
+          "name": "shared_excelonlinebusiness"
+        }
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        },
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        }
+      },
+      "triggers": {
+        "manual": {
+          "metadata": {
+            "operationMetadataId": "0a61f823-31f3-4baa-a6b7-b82a1affe9f2"
+          },
+          "type": "Request",
+          "kind": "PowerApp",
+          "inputs": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "ReviewType_Value": {
+                  "type": "string",
+                  "description": "Enter initial value",
+                  "x-ms-powerflows-param-ispartial": false
+                },
+                "ActionType_Value": {
+                  "type": "string",
+                  "description": "Enter initial value",
+                  "x-ms-powerflows-param-ispartial": false
+                },
+                "MetricTypeCollection_Content": {
+                  "type": "any",
+                  "x-ms-powerflows-param-ispartial": false
+                }
+              },
+              "required": [
+                "ReviewType_Value",
+                "ActionType_Value",
+                "MetricTypeCollection_Content"
+              ]
+            }
+          }
+        }
+      },
+      "actions": {
+        "Get_file_content_using_path": {
+          "runAfter": {
+            "Initialize_variable": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "9e8052c4-61e5-44df-a5da-3a6b5a2cda86"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "connectionName": "shared_sharepointonline",
+              "operationId": "GetFileContentByPath"
+            },
+            "parameters": {
+              "dataset": "https://microsoft.sharepoint.com/teams/MetricsBoardDevelopment",
+              "path": "/Review Hub Bulk Metric Upload/Data Collection Example.xlsx",
+              "inferContentType": true
+            },
+            "authentication": {
+              "value": "@json(decodeBase64(triggerOutputs().headers['X-MS-APIM-Tokens']))['$ConnectionKey']",
+              "type": "Raw"
+            }
+          }
+        },
+        "Create_file": {
+          "runAfter": {
+            "Get_file_content_using_path": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "6b894ef6-a8c0-4616-a54e-635c94c5730b"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "connectionName": "shared_sharepointonline",
+              "operationId": "CreateFile"
+            },
+            "parameters": {
+              "dataset": "https://microsoft.sharepoint.com/teams/MetricsBoardDevelopment",
+              "folderPath": "/Review Hub Bulk Metric Upload/Uploads",
+              "name": "@variables('Filename')",
+              "body": "@body('Get_file_content_using_path')"
+            },
+            "authentication": {
+              "value": "@json(decodeBase64(triggerOutputs().headers['X-MS-APIM-Tokens']))['$ConnectionKey']",
+              "type": "Raw"
+            }
+          },
+          "runtimeConfiguration": {
+            "contentTransfer": {
+              "transferMode": "Chunked"
+            }
+          }
+        },
+        "Respond_to_a_PowerApp_or_flow": {
+          "runAfter": {
+            "Create_sharing_link_for_a_file_or_folder": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "b8da74fa-5a8b-4d30-9687-96e9e5191b5b"
+          },
+          "type": "Response",
+          "kind": "PowerApp",
+          "inputs": {
+            "statusCode": 200,
+            "body": {
+              "sharablelink": "@outputs('Create_sharing_link_for_a_file_or_folder')?['body/link/webUrl']",
+              "path": "@outputs('Create_file')?['body/Path']",
+              "filename": "@outputs('Create_file')?['body/Name']"
+            },
+            "schema": {
+              "type": "object",
+              "properties": {
+                "sharablelink": {
+                  "title": "sharableLink",
+                  "x-ms-dynamically-added": true,
+                  "type": "string"
+                },
+                "path": {
+                  "title": "path",
+                  "x-ms-dynamically-added": true,
+                  "type": "string"
+                },
+                "filename": {
+                  "title": "filename",
+                  "x-ms-dynamically-added": true,
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "ReviewType": {
+          "runAfter": {},
+          "metadata": {
+            "operationMetadataId": "1af5ab46-e177-4669-a1c5-399e3b13dadc"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "ReviewType",
+                "type": "string",
+                "value": "@triggerBody()['ReviewType_Value']"
+              }
+            ]
+          }
+        },
+        "Create_sharing_link_for_a_file_or_folder": {
+          "runAfter": {
+            "If_Action_Type_is_Update": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "17d2929c-f9b3-420d-bdae-294d47407cfd"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "connectionName": "shared_sharepointonline",
+              "operationId": "CreateSharingLink"
+            },
+            "parameters": {
+              "dataset": "https://microsoft.sharepoint.com/teams/MetricsBoardDevelopment",
+              "table": "d9ebcdd0-02cf-4b0a-bba8-c03e85b5d369",
+              "id": "@outputs('Create_file')?['body/ItemId']",
+              "permission/type": "edit",
+              "permission/scope": "organization"
+            },
+            "authentication": {
+              "value": "@json(decodeBase64(triggerOutputs().headers['X-MS-APIM-Tokens']))['$ConnectionKey']",
+              "type": "Raw"
+            }
+          }
+        },
+        "ActionType": {
+          "runAfter": {
+            "ReviewType": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "fffec6b0-aeb4-4d04-b462-751817412231"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "ActionType",
+                "type": "string",
+                "value": "@{triggerBody()['ActionType_Value']}"
+              }
+            ]
+          }
+        },
+        "Initialize_filename": {
+          "runAfter": {
+            "ActionType": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "481d838f-c460-4193-8d74-5084bbc207b2"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "Filename",
+                "type": "string",
+                "value": "@{concat(variables('ActionType'),'_' ,variables('ReviewType'), ' ' ,utcNow(), '.xlsx')}"
+              }
+            ]
+          }
+        },
+        "If_Action_Type_is_Update": {
+          "actions": {
+            "Add_Metric_Data": {
+              "foreach": "@body('FilteredMetricTypes')",
+              "actions": {
+                "Add_a_row_into_a_table": {
+                  "runAfter": {
+                    "MetricDetails": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "8e75aead-a914-4bd2-a8ac-84246e61cbe4",
+                    "tableId": "Table3"
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness",
+                      "connectionName": "shared_excelonlinebusiness_1",
+                      "operationId": "AddRowV2"
+                    },
+                    "parameters": {
+                      "source": "groups/95527e4b-b958-4bca-abc7-b3b15e4ef88c",
+                      "drive": "b!Za8lWTXqxEOP8PI-AWUin1uHVTUMjdpBrxPWsgBrMIjQzevZzwIKS7uowD6FtdNp",
+                      "file": "@outputs('Create_file')?['body/Id']",
+                      "table": "Table3",
+                      "item": "@outputs('MetricDetails')"
+                    },
+                    "authentication": {
+                      "value": "@json(decodeBase64(triggerOutputs().headers['X-MS-APIM-Tokens']))['$ConnectionKey']",
+                      "type": "Raw"
+                    }
+                  }
+                },
+                "MetricDetails": {
+                  "runAfter": {},
+                  "metadata": {
+                    "operationMetadataId": "1560cc89-d798-4b72-9f27-e63ca6d6ceaf"
+                  },
+                  "type": "Compose",
+                  "inputs": {
+                    "ID": "@items('Add_Metric_Data')?['mtd_MetricTypeId']",
+                    "MetricName": "@items('Add_Metric_Data')?['mtd_MetricTypeName']",
+                    "ShortName": "@items('Add_Metric_Data')?['mtd_MetricShortName']",
+                    "Stage": "@items('Add_Metric_Data')?['mtd_MetricStage']",
+                    "UpdateMethod": "@items('Add_Metric_Data')?['mtd_UpdateMethod']",
+                    "PowerBIUrl": "@items('Add_Metric_Data')?['mtd_MetricPowerBIUrl']",
+                    "ValueType": "@items('Add_Metric_Data')?['mtd_MetricValueType']",
+                    "Objective": "@items('Add_Metric_Data')?['mtd_MetricTypeSubgroup']",
+                    "HealthWeight": "@items('Add_Metric_Data')?['mtd_MetricTypeHealthWeight']",
+                    "EnumerateOptions": "@items('Add_Metric_Data')?['mtd_MetricTypeEnumerateOptions']",
+                    "IsTrendDown": "@if(items('Add_Metric_Data')?['mtd_IsTrendDown'], 'Yes', 'No')",
+                    "MetricDescription": "@items('Add_Metric_Data')?['mtd_MetricTypeDescription']",
+                    "EffectiveDate": "@formatDateTime(items('Add_Metric_Data')?['mtd_MetricCreatedDate'], 'yyyy/MM/dd')",
+                    "QuarterlyCalculationMethod": "@items('Add_Metric_Data')?['mtd_MetricTypeQuaterlyCalcMethod']",
+                    "DataSource": "@items('Add_Metric_Data')?['mtd_MetricTypeSource']"
+                  }
+                }
+              },
+              "runAfter": {
+                "FilteredMetricTypes": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "801fba54-30ae-4a03-80ba-961ea0c4c178"
+              },
+              "type": "Foreach",
+              "runtimeConfiguration": {
+                "concurrency": {
+                  "repetitions": 50
+                }
+              }
+            },
+            "MetricTypeCollection": {
+              "runAfter": {},
+              "metadata": {
+                "operationMetadataId": "3b080f17-507b-4cc6-bb0e-32ab8338840c"
+              },
+              "type": "ParseJson",
+              "inputs": {
+                "content": "@triggerBody()['MetricTypeCollection_Content']",
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "mtd_BoardTypeID": {
+                        "type": "integer"
+                      },
+                      "mtd_BoardTypeName": {
+                        "type": "string"
+                      },
+                      "mtd_IsTrendDown": {
+                        "type": "boolean"
+                      },
+                      "mtd_MetricCreatedDate": {
+                        "type": "string"
+                      },
+                      "mtd_MetricDeprecatedDate": {},
+                      "mtd_MetricDisplayOrder": {
+                        "type": "integer"
+                      },
+                      "mtd_MetricPowerBIUrl": {},
+                      "mtd_MetricShortName": {
+                        "type": "string"
+                      },
+                      "mtd_MetricStage": {
+                        "type": "string"
+                      },
+                      "mtd_MetricTypeDescription": {
+                        "type": "string"
+                      },
+                      "mtd_MetricTypeEnumerateOptions": {},
+                      "mtd_MetricTypeHealthWeight": {},
+                      "mtd_MetricTypeId": {
+                        "type": "integer"
+                      },
+                      "mtd_MetricTypeName": {
+                        "type": "string"
+                      },
+                      "mtd_MetricTypeQuaterlyCalcMethod": {
+                        "type": "string"
+                      },
+                      "mtd_MetricTypeSource": {},
+                      "mtd_MetricTypeSubgroup": {
+                        "type": "string"
+                      },
+                      "mtd_MetricValueType": {
+                        "type": "string"
+                      },
+                      "mtd_TemplateID": {
+                        "type": "integer"
+                      },
+                      "mtd_TemplateName": {
+                        "type": "string"
+                      },
+                      "mtd_UpdateMethod": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "mtd_BoardTypeID",
+                      "mtd_BoardTypeName",
+                      "mtd_IsTrendDown",
+                      "mtd_MetricCreatedDate",
+                      "mtd_MetricDeprecatedDate",
+                      "mtd_MetricDisplayOrder",
+                      "mtd_MetricPowerBIUrl",
+                      "mtd_MetricShortName",
+                      "mtd_MetricStage",
+                      "mtd_MetricTypeDescription",
+                      "mtd_MetricTypeEnumerateOptions",
+                      "mtd_MetricTypeHealthWeight",
+                      "mtd_MetricTypeId",
+                      "mtd_MetricTypeName",
+                      "mtd_MetricTypeQuaterlyCalcMethod",
+                      "mtd_MetricTypeSource",
+                      "mtd_MetricTypeSubgroup",
+                      "mtd_MetricValueType",
+                      "mtd_TemplateID",
+                      "mtd_TemplateName",
+                      "mtd_UpdateMethod"
+                    ]
+                  }
+                }
+              }
+            },
+            "FilteredMetricTypes": {
+              "runAfter": {
+                "MetricTypeCollection": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "850d63c6-8f2c-443c-914c-5eaba529d951"
+              },
+              "type": "Query",
+              "inputs": {
+                "from": "@body('MetricTypeCollection')",
+                "where": "@and(equals(item()['mtd_BoardTypeName'], variables('ReviewType')), equals(item()['mtd_MetricDeprecatedDate'], null))"
+              }
+            }
+          },
+          "runAfter": {
+            "Create_file": [
+              "Succeeded"
+            ]
+          },
+          "else": {
+            "actions": {
+              "Create_Empty_Rows": {
+                "foreach": "@variables('Loop')",
+                "actions": {
+                  "Add_empty_row_into_a_table": {
+                    "runAfter": {
+                      "MetricDetails_Empty": [
+                        "Succeeded"
+                      ]
+                    },
+                    "metadata": {
+                      "operationMetadataId": "8e75aead-a914-4bd2-a8ac-84246e61cbe4",
+                      "tableId": "Table3"
+                    },
+                    "type": "OpenApiConnection",
+                    "inputs": {
+                      "host": {
+                        "apiId": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness",
+                        "connectionName": "shared_excelonlinebusiness_1",
+                        "operationId": "AddRowV2"
+                      },
+                      "parameters": {
+                        "source": "groups/95527e4b-b958-4bca-abc7-b3b15e4ef88c",
+                        "drive": "b!Za8lWTXqxEOP8PI-AWUin1uHVTUMjdpBrxPWsgBrMIjQzevZzwIKS7uowD6FtdNp",
+                        "file": "@outputs('Create_file')?['body/Id']",
+                        "table": "Table3",
+                        "item": "@outputs('MetricDetails_Empty')"
+                      },
+                      "authentication": {
+                        "value": "@json(decodeBase64(triggerOutputs().headers['X-MS-APIM-Tokens']))['$ConnectionKey']",
+                        "type": "Raw"
+                      }
+                    }
+                  },
+                  "MetricDetails_Empty": {
+                    "runAfter": {},
+                    "metadata": {
+                      "operationMetadataId": "1560cc89-d798-4b72-9f27-e63ca6d6ceaf"
+                    },
+                    "type": "Compose",
+                    "inputs": {
+                      "ID": "N/A",
+                      "MetricName": "",
+                      "ShortName": "",
+                      "Stage": "",
+                      "UpdateMethod": "",
+                      "PowerBIUrl": "",
+                      "ValueType": "",
+                      "Objective": "",
+                      "HealthWeight": "",
+                      "EnumerateOptions": "",
+                      "IsTrendDown": "",
+                      "MetricDescription": "",
+                      "EffectiveDate": "",
+                      "QuarterlyCalculationMethod": "",
+                      "DataSource": ""
+                    }
+                  }
+                },
+                "runAfter": {},
+                "metadata": {
+                  "operationMetadataId": "801fba54-30ae-4a03-80ba-961ea0c4c178"
+                },
+                "type": "Foreach",
+                "runtimeConfiguration": {
+                  "concurrency": {
+                    "repetitions": 50
+                  }
+                }
+              }
+            }
+          },
+          "expression": {
+            "contains": [
+              "@variables('ActionType')",
+              "Update"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "d83db821-6c74-4912-9b56-d45fae4f87df"
+          },
+          "type": "If"
+        },
+        "Initialize_variable": {
+          "runAfter": {
+            "Initialize_filename": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "7c6ef8f4-bfd7-4cab-98d7-42f2afbd44fc"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "Loop",
+                "type": "array",
+                "value": [
+                  1,
+                  2,
+                  3,
+                  4,
+                  5,
+                  6,
+                  7,
+                  8,
+                  9,
+                  10,
+                  11,
+                  12,
+                  13,
+                  14,
+                  15,
+                  16,
+                  17,
+                  18,
+                  19,
+                  20
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+}

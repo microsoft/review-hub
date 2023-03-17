@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<savedqueries xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <savedquery>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>0</CanBeDeleted>
+    <isquickfindquery>0</isquickfindquery>
+    <isprivate>0</isprivate>
+    <isdefault>1</isdefault>
+    <savedqueryid>{97da89ff-d2dd-48c2-8bdd-f0a5ed1f664f}</savedqueryid>
+    <layoutxml>
+      <grid name="resultset" jump="craf2_factmetrictitle" select="1" icon="1" preview="1">
+        <row name="result" id="craf2_reviewhub_factmetric_stagingid">
+          <cell name="craf2_factmetrictitle" width="152" />
+          <cell name="createdon" width="125" />
+          <cell name="craf2_fm_boardtypeid" width="100" />
+          <cell name="craf2_fm_productmetricid" width="100" />
+          <cell name="craf2_fm_valuedate" width="100" />
+          <cell name="craf2_fm_reviewlockdate" width="100" />
+          <cell name="craf2_fm_productid" width="100" />
+          <cell name="craf2_fm_valuenumber" width="100" />
+        </row>
+      </grid>
+    </layoutxml>
+    <querytype>0</querytype>
+    <fetchxml>
+      <fetch version="1.0" mapping="logical">
+        <entity name="craf2_reviewhub_factmetric_staging">
+          <attribute name="craf2_reviewhub_factmetric_stagingid" />
+          <attribute name="craf2_factmetrictitle" />
+          <attribute name="createdon" />
+          <order attribute="craf2_factmetrictitle" descending="false" />
+          <filter type="and">
+            <condition attribute="statecode" operator="eq" value="0" />
+          </filter>
+          <attribute name="craf2_fm_boardtypeid" />
+          <attribute name="craf2_fm_productmetricid" />
+          <attribute name="craf2_fm_valuedate" />
+          <attribute name="craf2_fm_reviewlockdate" />
+          <attribute name="craf2_fm_productid" />
+          <attribute name="craf2_fm_valuenumber" />
+        </entity>
+      </fetch>
+    </fetchxml>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <LocalizedNames>
+      <LocalizedName description="Active ReviewHub_FactMetric_Stagings" languagecode="1033" />
+    </LocalizedNames>
+  </savedquery>
+</savedqueries>

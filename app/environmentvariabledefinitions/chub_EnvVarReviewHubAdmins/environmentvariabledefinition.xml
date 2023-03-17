@@ -1,0 +1,13 @@
+<environmentvariabledefinition schemaname="chub_EnvVarReviewHubAdmins">
+  <description default="Admin emails separated by a semi colon ';', expected to receive the notifications when an access request is submitted">
+    <label description="Admin emails separated by a semi colon ';', expected to receive the notifications when an access request is submitted" languagecode="1033" />
+  </description>
+  <displayname default="EnvVar - ReviewHub - Admins">
+    <label description="EnvVar - ReviewHub - Admins" languagecode="1033" />
+  </displayname>
+  <introducedversion>1.0.0.12082022</introducedversion>
+  <iscustomizable>1</iscustomizable>
+  <isrequired>0</isrequired>
+  <secretstore>0</secretstore>
+  <type>100000000</type>
+</environmentvariabledefinition>

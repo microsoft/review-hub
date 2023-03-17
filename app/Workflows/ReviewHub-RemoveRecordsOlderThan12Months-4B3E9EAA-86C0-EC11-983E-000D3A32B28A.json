@@ -1,0 +1,430 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_commondataserviceforapps_1": {
+        "impersonation": {},
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "chub_sharedcommondataserviceforapps_72f86"
+        },
+        "api": {
+          "name": "shared_commondataserviceforapps"
+        }
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        },
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        }
+      },
+      "triggers": {
+        "Recurrence": {
+          "recurrence": {
+            "frequency": "Month",
+            "interval": 1,
+            "timeZone": "Pacific Standard Time",
+            "startTime": "2022-05-15T23:00:00Z"
+          },
+          "metadata": {
+            "operationMetadataId": "6d111b26-cfa8-40a3-810b-ad89af6430ba"
+          },
+          "type": "Recurrence"
+        }
+      },
+      "actions": {
+        "Remove_All_Records_Before_This_Review_Lock_Date": {
+          "runAfter": {},
+          "metadata": {
+            "operationMetadataId": "47243d02-2ca4-46c8-8967-e02313fba44d"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "RemoveBeforeThisReviewLockDate",
+                "type": "string",
+                "value": "@{addToTime(startOfMonth(utcNow()), -12, 'month')}"
+              }
+            ]
+          }
+        },
+        "Remove_For_FactMetrics": {
+          "actions": {
+            "List_FM": {
+              "runAfter": {},
+              "metadata": {
+                "operationMetadataId": "4c60eafe-a962-476c-8eee-5491042da328"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "connectionName": "shared_commondataserviceforapps_1",
+                  "operationId": "ListRecords"
+                },
+                "parameters": {
+                  "entityName": "craf2_reviewhub_factmetrics",
+                  "$filter": "craf2_fm_reviewlockdate lt @{variables('RemoveBeforeThisReviewLockDate')}"
+                },
+                "authentication": "@parameters('$authentication')"
+              },
+              "runtimeConfiguration": {
+                "paginationPolicy": {
+                  "minimumItemCount": 100000
+                }
+              }
+            },
+            "BulkDelete_FactMetric": {
+              "runAfter": {
+                "Show_how_many_rows_to_delete_1": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "b7461a13-a242-49d1-ae02-245b3f5ee6bb"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "connectionName": "shared_commondataserviceforapps_1",
+                  "operationId": "PerformUnboundAction"
+                },
+                "parameters": {
+                  "actionName": "BulkDelete",
+                  "item/QuerySet": [
+                    {
+                      "EntityName": "craf2_reviewhub_factmetric",
+                      "Criteria": {
+                        "Conditions": [
+                          {
+                            "AttributeName": "craf2_fm_reviewlockdate",
+                            "Operator": "LessThan",
+                            "Values": [
+                              {
+                                "Value": "@{variables('RemoveBeforeThisReviewLockDate')}",
+                                "Type": "System.DateTime"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ],
+                  "item/JobName": "BulkDelete FactMetric",
+                  "item/SendEmailNotification": false,
+                  "item/ToRecipients": [],
+                  "item/CCRecipients": [],
+                  "item/RecurrencePattern": "@base64ToString('')",
+                  "item/StartDateTime": "@utcNow()",
+                  "item/RunNow": false
+                },
+                "retryPolicy": {
+                  "type": "none"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "Show_how_many_rows_to_delete_1": {
+              "runAfter": {
+                "List_FM": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "92f4b4b7-f962-433a-9e7f-2293893d3f69"
+              },
+              "type": "SetVariable",
+              "inputs": {
+                "name": "Deleted_FM_Rows",
+                "value": "@length(outputs('List_FM')?['body/value'])"
+              }
+            }
+          },
+          "runAfter": {
+            "Initialize_variable_3": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "b1a78985-be04-482d-9560-f201039493e2"
+          },
+          "type": "Scope"
+        },
+        "Remove_For_FactMetricBoard": {
+          "actions": {
+            "List_FMB": {
+              "runAfter": {},
+              "metadata": {
+                "operationMetadataId": "f2556684-fae7-4f7c-bdf5-96c3ba85f910"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "connectionName": "shared_commondataserviceforapps_1",
+                  "operationId": "ListRecords"
+                },
+                "parameters": {
+                  "entityName": "craf2_reviewhub_factmetricboards",
+                  "$filter": "craf2_fmb_reviewlockdate lt @{variables('RemoveBeforeThisReviewLockDate')}"
+                },
+                "authentication": "@parameters('$authentication')"
+              },
+              "runtimeConfiguration": {
+                "paginationPolicy": {
+                  "minimumItemCount": 100000
+                }
+              }
+            },
+            "Show_how_many_rows_to_delete_2": {
+              "runAfter": {
+                "List_FMB": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "72fa2ff2-5b31-4ac9-ac1a-1566456654c9"
+              },
+              "type": "SetVariable",
+              "inputs": {
+                "name": "Deleted_FMB_Rows",
+                "value": "@length(outputs('List_FMB')?['body/value'])"
+              }
+            },
+            "BulkDelete_FactMetricBoard": {
+              "runAfter": {
+                "Show_how_many_rows_to_delete_2": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "b7461a13-a242-49d1-ae02-245b3f5ee6bb"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "connectionName": "shared_commondataserviceforapps_1",
+                  "operationId": "PerformUnboundAction"
+                },
+                "parameters": {
+                  "actionName": "BulkDelete",
+                  "item/QuerySet": [
+                    {
+                      "EntityName": "craf2_reviewhub_factmetricboard",
+                      "Criteria": {
+                        "Conditions": [
+                          {
+                            "AttributeName": "craf2_fmb_reviewlockdate",
+                            "Operator": "LessThan",
+                            "Values": [
+                              {
+                                "Value": "@{variables('RemoveBeforeThisReviewLockDate')}",
+                                "Type": "System.DateTime"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ],
+                  "item/JobName": "BulkDelete FactMetricBoard",
+                  "item/SendEmailNotification": false,
+                  "item/ToRecipients": [],
+                  "item/CCRecipients": [],
+                  "item/RecurrencePattern": "@base64ToString('')",
+                  "item/StartDateTime": "@utcNow()",
+                  "item/RunNow": false
+                },
+                "retryPolicy": {
+                  "type": "none"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            }
+          },
+          "runAfter": {
+            "Initialize_variable_3": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "6d7a693f-b175-4a17-b8e7-47e6bd4942e6"
+          },
+          "type": "Scope"
+        },
+        "Remove_For_FactExecutiveSummary": {
+          "actions": {
+            "List_FES": {
+              "runAfter": {},
+              "metadata": {
+                "operationMetadataId": "116ab388-a475-43de-b93a-9602b8e122df"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "connectionName": "shared_commondataserviceforapps_1",
+                  "operationId": "ListRecords"
+                },
+                "parameters": {
+                  "entityName": "craf2_reviewhub_factexecutivesummaries",
+                  "$filter": "craf2_reviewlockdate lt @{variables('RemoveBeforeThisReviewLockDate')}"
+                },
+                "authentication": "@parameters('$authentication')"
+              },
+              "runtimeConfiguration": {
+                "paginationPolicy": {
+                  "minimumItemCount": 100000
+                }
+              }
+            },
+            "Show_how_many_rows_to_delete_3": {
+              "runAfter": {
+                "List_FES": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "61ac5f9c-c146-4443-95db-069581309a6a"
+              },
+              "type": "SetVariable",
+              "inputs": {
+                "name": "Deleted_FES_Rows",
+                "value": "@length(outputs('List_FES')?['body/value'])"
+              }
+            },
+            "BulkDelete_FactExecutiveSummary": {
+              "runAfter": {
+                "Show_how_many_rows_to_delete_3": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "b7461a13-a242-49d1-ae02-245b3f5ee6bb"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "connectionName": "shared_commondataserviceforapps_1",
+                  "operationId": "PerformUnboundAction"
+                },
+                "parameters": {
+                  "actionName": "BulkDelete",
+                  "item/QuerySet": [
+                    {
+                      "EntityName": "craf2_reviewhub_factexecutivesummary",
+                      "Criteria": {
+                        "Conditions": [
+                          {
+                            "AttributeName": "craf2_reviewlockdate",
+                            "Operator": "LessThan",
+                            "Values": [
+                              {
+                                "Value": "@{variables('RemoveBeforeThisReviewLockDate')}",
+                                "Type": "System.DateTime"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ],
+                  "item/JobName": "BulkDelete FactExecutiveSummary",
+                  "item/SendEmailNotification": false,
+                  "item/ToRecipients": [],
+                  "item/CCRecipients": [],
+                  "item/RecurrencePattern": "@base64ToString('')",
+                  "item/StartDateTime": "@utcNow()",
+                  "item/RunNow": false
+                },
+                "retryPolicy": {
+                  "type": "none"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            }
+          },
+          "runAfter": {
+            "Initialize_variable_3": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "5d1fa22d-7362-4eab-ab1c-943f70261486"
+          },
+          "type": "Scope"
+        },
+        "Initialize_variable": {
+          "runAfter": {
+            "Remove_All_Records_Before_This_Review_Lock_Date": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "47243d02-2ca4-46c8-8967-e02313fba44d"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "Deleted_FM_Rows",
+                "type": "integer"
+              }
+            ]
+          }
+        },
+        "Initialize_variable_2": {
+          "runAfter": {
+            "Initialize_variable": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "23eacd1e-7e16-45d1-8ad8-e8774feb7ff4"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "Deleted_FMB_Rows",
+                "type": "integer"
+              }
+            ]
+          }
+        },
+        "Initialize_variable_3": {
+          "runAfter": {
+            "Initialize_variable_2": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "fc62c502-e14b-4b09-b4db-10a464b63e4e"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "Deleted_FES_Rows",
+                "type": "integer"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+}

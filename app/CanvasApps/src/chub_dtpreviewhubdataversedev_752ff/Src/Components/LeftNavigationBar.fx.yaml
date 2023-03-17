@@ -1,0 +1,266 @@
+LeftNavigationBar As CanvasComponent:
+    BlobStorageBaseURL: ="Blob Storage URL"
+    CollapsedMenuWidth: =51
+    Fill: =RGBA(255, 255, 255, 1)
+    FontColor: =RGBA(0, 0, 0, 1)
+    FontSize: =9
+    FullMenuWidth: =265
+    Height: =Max(App.Height, App.DesignHeight)
+    IconColor: =RGBA(32, 54, 71, 1)
+    InitialSelectedID: =LookUp(LeftNavigationBar.NavItems, Screen=App.ActiveScreen).ID
+    IsMenuOpen: =varOpenMenu
+    MenuOpen: =false
+    MenuWidth: =If(varOpenMenu, Self.FullMenuWidth, rect_IsSelected.Width + img_Icon.Width)
+    NavItems: |-
+        =Table(
+            {
+                Title: "Home",
+                Screen: App.ActiveScreen,
+                Icon: Icon.Home,
+                ID: -1
+            },
+            {
+                // Example with no icon and no image
+                Title: "Task",
+                Screen: App.ActiveScreen,
+                ID: -2,
+                Icon: icon_Home,
+                ImagePath: LeftNavigationBar.BlobStorageBaseURL & "/icons/3444.png"
+            },
+            {
+                // Example with no icon and image
+                Title: "Sermes",
+                Screen: App.ActiveScreen,
+                ID: -3,
+                ImagePath: LeftNavigationBar.BlobStorageBaseURL & "/icons/17130371.png",
+                BoardTypeID: 2,
+                PID: 88,
+                ReviewDate: DateValue("01/01/2021"),
+                TemplateID: 1
+            }
+        )
+        
+        //#1 Replace Screen by Screen Name 
+        //#2 Icon is optional. If Icon is not provided we will use first 2 letters of Title as icon. 
+        //#3 ID:unique Id Per Screen. This is overloaded for filtering within a screen..i.e.You can have many id's pointing to 1 screen and use the output select id to filter inside the screen. Hence creating the illusion of many screens.
+    OnChange: =
+    OnReset: =Set(varOpenMenu, LeftNavigationBar.MenuOpen)
+    OutSelectedID: =glry_Navigation.Selected.ID
+    SelectBackgroundColor: =RGBA(242, 234, 250, 1)
+    SelectedColor: =Color.White
+    Width: =Self.MenuWidth
+    X: =0
+    Y: =0
+    ZIndex: =1
+
+    glry_Navigation As gallery.galleryVertical:
+        BorderColor: =RGBA(32, 54, 71, 1)
+        Default: =LookUp(LeftNavigationBar.NavItems, ID=LeftNavigationBar.InitialSelectedID)
+        DisabledBorderColor: =glry_Navigation.BorderColor
+        DisabledFill: =glry_Navigation.Fill
+        Fill: =RGBA(0, 114, 198, 1)
+        Height: =Parent.Height-glry_Navigation.Y
+        HoverBorderColor: =glry_Navigation.BorderColor
+        HoverFill: =glry_Navigation.Fill
+        Items: =LeftNavigationBar.NavItems
+        Layout: =Layout.Vertical
+        LoadingSpinnerColor: =glry_Navigation.BorderColor
+        OnSelect: |
+            =//Set(varOpenMenu, false);
+            //comp_LeftNavigation.OnChange();
+            
+            Navigate(ThisItem.Screen);
+        PressedBorderColor: =glry_Navigation.BorderColor
+        PressedFill: =glry_Navigation.Fill
+        ShowScrollbar: =false
+        TemplateFill: |-
+            =If(
+                ThisItem.IsSelected,
+                ColorFade(Parent.Fill, 20%), 
+                RGBA(0,0,0,0)
+            )
+        TemplatePadding: =0
+        TemplateSize: =45 //Min(comp_LeftNavigation.Width, rect_IsSelected.Width + img_Icon.Width)
+        Width: =Parent.Width
+        Y: =icon_Hamburger.Y+icon_Hamburger.Height
+        ZIndex: =1
+
+        html_Title_BoadType As htmlViewer:
+            Color: =RGBA(255, 255, 255, 1)
+            Fill: =RGBA(0, 0, 0, 0)
+            Font: =Font.'Segoe UI'
+            Height: =45
+            HtmlText: |-
+                ="<span style='background-color: #79b5de; color: #FFFFFF; display: inline-block; padding: 0px 8px; font-weight: " 
+                & If(ThisItem.IsSelected, "600", "400") & "; border-radius: 3px;'>"
+                & LookUp(clln_BoardTypes, ThisRecord.bt_BoardTypeID = ThisItem.BoardTypeID).bt_BoardTypeShortName
+                & "</span></font>"
+            OnSelect: =Select(Parent)
+            PaddingBottom: =0
+            PaddingLeft: =lbl_Title.PaddingLeft
+            PaddingRight: =lbl_Title.PaddingRight
+            PaddingTop: =22
+            Size: =lbl_Title.Size
+            Visible: =If(IsBlank(ThisItem.BoardTypeID), false, true)
+            Width: =lbl_Title.Width
+            X: =lbl_Title.X
+            ZIndex: =2
+
+        lbl_Title As label:
+            BorderColor: =RGBA(32, 54, 71, 1)
+            Color: |-
+                =If(
+                    ThisItem.IsSelected,
+                    LeftNavigationBar.SelectedColor,
+                    LeftNavigationBar.FontColor
+                )
+            FocusedBorderColor: =lbl_Title.BorderColor
+            Font: =Font.'Segoe UI'
+            FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
+            Height: |
+                =45
+            HoverBorderColor: =lbl_Title.BorderColor
+            HoverColor: =lbl_Title.Color
+            HoverFill: =lbl_Title.Fill
+            LineHeight: =1
+            OnSelect: =Select(Parent)
+            PaddingBottom: =0
+            PaddingTop: =If(IsBlank(ThisItem.BoardTypeID), 0, 4)
+            PressedBorderColor: =lbl_Title.BorderColor
+            PressedColor: =lbl_Title.Color
+            PressedFill: =lbl_Title.Fill
+            Size: =LeftNavigationBar.FontSize
+            Text: =ThisItem.Title
+            Tooltip: =ThisItem.Title
+            VerticalAlign: =If(IsBlank(ThisItem.BoardTypeID), VerticalAlign.Middle, VerticalAlign.Top)
+            Width: =Parent.Width - Self.X
+            Wrap: =false
+            X: =img_Icon.X + img_Icon.Width
+            ZIndex: =3
+
+        Icon_Default As label:
+            Align: =Align.Center
+            FocusedBorderThickness: =1
+            Font: =Font.'Segoe UI'
+            Height: =img_Icon.Height
+            OnSelect: =Select(Parent)
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Text: =Upper(Left(ThisItem.Title,2))
+            Tooltip: =ThisItem.Title
+            Visible: |-
+                =If(
+                    IsBlank(ThisItem.Icon) && IsBlank(img_Icon.Image),
+                    true,
+                    false
+                )
+            Width: =img_Icon.Width
+            X: =rect_IsSelected.X + rect_IsSelected.Width
+            ZIndex: =4
+
+        circle_img_icon As circle:
+            Fill: =RGBA(255, 255, 255, 0.90)
+            Height: =40
+            OnSelect: =Select(Parent)
+            Visible: =If(IsBlank(ThisItem.BoardTypeID), false, true)
+            Width: =Self.Height
+            X: =img_Icon.X + (img_Icon.Width - Self.Width) * 0.5 
+            Y: =(Parent.TemplateHeight - Self.Height) * 0.5
+            ZIndex: =5
+
+        img_Icon As image:
+            Height: =Self.Width
+            Image: =ThisItem.ImagePath
+            OnSelect: =Select(Parent)
+            PaddingBottom: =If(IsBlank(ThisItem.BoardTypeID), 3, 9)
+            PaddingLeft: =If(IsBlank(ThisItem.BoardTypeID), 3, 8)
+            PaddingRight: =If(IsBlank(ThisItem.BoardTypeID), 3, 8)
+            PaddingTop: =If(IsBlank(ThisItem.BoardTypeID), 3, 9)
+            Tooltip: =ThisItem.Title
+            Width: =Parent.TemplateHeight
+            X: =rect_IsSelected.X + rect_IsSelected.Width
+            ZIndex: =6
+
+        Item_Splitter_Btm As rectangle:
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            DisplayMode: =DisplayMode.View
+            Fill: =RGBA(0, 91, 159, 0.30)
+            Height: =1
+            OnSelect: =Select(Parent)
+            Width: =Parent.Width
+            Y: =Parent.TemplateHeight
+            ZIndex: =7
+
+        Item_Splitter_Top As rectangle:
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            DisplayMode: =DisplayMode.View
+            Fill: =RGBA(0, 91, 159, 0.30)
+            Height: =1
+            OnSelect: =Select(Parent)
+            Width: =Parent.Width
+            ZIndex: =8
+
+        rect_IsSelected As rectangle:
+            BorderColor: =RGBA(32, 54, 71, 1)
+            DisabledFill: =rect_IsSelected.Fill
+            Fill: =If(ThisItem.IsSelected, RGBA(121, 181, 222, 1), RGBA(48, 141, 207,1))
+            FocusedBorderColor: =rect_IsSelected.BorderColor
+            Height: =Parent.TemplateHeight - Self.Y
+            HoverFill: =rect_IsSelected.Fill
+            OnSelect: =Select(Parent)
+            PressedFill: =rect_IsSelected.Fill
+            Tooltip: =ThisItem.Title
+            Width: =6
+            Y: =1
+            ZIndex: =9
+
+        LeftNavi_Btn As button:
+            AutoDisableOnSelect: =false
+            BorderColor: =
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =0
+            Color: =RGBA(0, 0, 0, 0)
+            DisabledBorderColor: =RGBA(0, 0, 0, 0)
+            DisabledColor: =RGBA(0, 0, 0, 0)
+            DisabledFill: =RGBA(0, 0, 0, 0)
+            Fill: =RGBA(0, 0, 0, 0)
+            Height: =Parent.TemplateHeight
+            HoverBorderColor: =
+            HoverColor: =RGBA(0, 0, 0, 0)
+            HoverFill: =
+            OnSelect: =Select(Parent)
+            PressedBorderColor: =
+            PressedColor: =
+            Text: =//Need this button for the hover-over hand cursor.
+            Tooltip: =ThisItem.Title
+            Width: =Parent.TemplateWidth
+            ZIndex: =10
+
+    icon_Hamburger As icon.Add:
+        BorderColor: =RGBA(32, 54, 71, 1)
+        Color: =LeftNavigationBar.IconColor
+        DisabledFill: =icon_Hamburger.Fill
+        FocusedBorderColor: =icon_Hamburger.BorderColor
+        Height: |
+            =45
+        HoverBorderColor: =ColorFade(icon_Hamburger.BorderColor, 20%)
+        HoverColor: =ColorFade(icon_Hamburger.Color, 20%)
+        HoverFill: =icon_Hamburger.Fill
+        Icon: =If(varOpenMenu, Icon.DockLeft, Icon.DockRight)
+        OnSelect: =Set(varOpenMenu, If(LeftNavigationBar.Width = Parent.FullMenuWidth, false, true))
+        PaddingBottom: =10
+        PaddingLeft: =10
+        PaddingRight: =10
+        PaddingTop: =10
+        PressedBorderColor: =ColorFade(icon_Hamburger.BorderColor, -20%)
+        PressedColor: =ColorFade(icon_Hamburger.Color, -20%)
+        PressedFill: =icon_Hamburger.Fill
+        Tooltip: ="Collapse/Expand"
+        Width: =rect_IsSelected.Width + img_Icon.Width
+        X: =If(varOpenMenu, Parent.Width - Self.Width, 0)
+        ZIndex: =2
+

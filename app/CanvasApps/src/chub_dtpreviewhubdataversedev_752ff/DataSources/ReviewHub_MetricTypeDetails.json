@@ -1,0 +1,149 @@
+[
+  {
+    "CdsFCBContext": "{\"FileType\":true,\"ImageExternalStorage\":true}",
+    "EntitySetName": "craf2_reviewhub_metrictypedetails",
+    "IsHidden": false,
+    "IsSampleData": false,
+    "IsWritable": true,
+    "LogicalName": "craf2_reviewhub_metrictypedetail",
+    "MaxGetRowsCount": 2000,
+    "Name": "ReviewHub_MetricTypeDetails",
+    "NativeCDSDataSourceInfoNameMapping": {
+      "_ownerid_value": "Owner",
+      "craf2_MetricType": "MetricType",
+      "craf2_metrictypedetailpowerbiurl": "MetricTypeDetailPowerBIUrl",
+      "craf2_MetricTypeDetailTemplate": "MetricTypeDetailTemplate",
+      "craf2_metrictypedetailupdatemethod": "MetricTypeDetailUpdateMethod",
+      "craf2_metrictypequaterlycalcmethod": "MetricTypeQuaterlyCalcMethod",
+      "craf2_mtd_BoardType": "mtd_BoardType",
+      "craf2_mtd_displayorder": "mtd_DisplayOrder",
+      "craf2_mtd_Objective": "mtd_Objective",
+      "craf2_reviewhub_metrictypedetail_AsyncOperations": "System Jobs",
+      "craf2_reviewhub_metrictypedetail_BulkDeleteFailures": "Bulk Delete Failures",
+      "craf2_reviewhub_metrictypedetail_DuplicateBaseRecord": "Duplicate Records (craf2_reviewhub_metrictypedetail_DuplicateBaseRecord)",
+      "craf2_reviewhub_metrictypedetail_DuplicateMatchingRecord": "Duplicate Records (craf2_reviewhub_metrictypedetail_DuplicateMatchingRecord)",
+      "craf2_reviewhub_metrictypedetail_MailboxTrackingFolders": "Mailbox Auto Tracking Folders",
+      "craf2_reviewhub_metrictypedetail_PrincipalObjectAttributeAccesses": "Field Sharing",
+      "craf2_reviewhub_metrictypedetail_ProcessSession": "Process Sessions",
+      "craf2_reviewhub_metrictypedetail_SyncErrors": "Sync Errors",
+      "craf2_reviewhub_metrictypedetailid": "ReviewHub_MetricTypeDetail",
+      "craf2_title": "Title",
+      "createdby": "Created By",
+      "createdon": "Created On",
+      "createdonbehalfby": "Created By (Delegate)",
+      "importsequencenumber": "Import Sequence Number",
+      "modifiedby": "Modified By",
+      "modifiedon": "Modified On",
+      "modifiedonbehalfby": "Modified By (Delegate)",
+      "overriddencreatedon": "Record Created On",
+      "owningbusinessunit": "Owning Business Unit",
+      "owningteam": "Owning Team",
+      "owninguser": "Owning User",
+      "statecode": "Status",
+      "statuscode": "Status Reason",
+      "timezoneruleversionnumber": "Time Zone Rule Version Number",
+      "utcconversiontimezonecode": "UTC Conversion Time Zone Code",
+      "versionnumber": "Version Number"
+    },
+    "PreferredName": "ReviewHub_MetricTypeDetails",
+    "Type": "NativeCDSDataSourceInfo"
+  },
+  {
+    "DisplayName": "ReviewHub_MetricTypeDetails (Views)",
+    "Name": "_craf2_reviewhub_metrictypedetail_views",
+    "RelatedEntityName": "ReviewHub_MetricTypeDetails",
+    "TrimmedViewName": true,
+    "Type": "ViewInfo",
+    "ViewInfoNameMapping": {
+      "4208ddc8-69b8-40f1-86ae-23c7e12185e1": "Inactive ReviewHub_MetricTypeDetails",
+      "68a69423-2812-4050-82c0-63d5083db78c": "ReviewHub_MetricTypeDetail Lookup View",
+      "8a478e9d-49d3-46da-ba6c-33b2091a2d48": "ReviewHub_MetricTypeDetail Advanced Find View",
+      "a902b6a7-f92d-4071-b353-828f2b52c159": "Active ReviewHub_MetricTypeDetails",
+      "d29e511f-d49b-4d00-aeb8-9d83671b3d8e": "ReviewHub_MetricTypeDetail Associated View"
+    }
+  },
+  {
+    "DisplayName": "Status (ReviewHub_MetricTypeDetails)",
+    "Name": "craf2_reviewhub_metrictypedetail_statecode",
+    "OptionSetInfoNameMapping": {
+      "0": "Active",
+      "1": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statecode",
+        "OptionSetReferenceEntityName": "ReviewHub_MetricTypeDetails"
+      }
+    },
+    "OptionSetTypeKey": "StateType",
+    "RelatedColumnInvariantName": "statecode",
+    "RelatedEntityName": "ReviewHub_MetricTypeDetails",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Status Reason (ReviewHub_MetricTypeDetails)",
+    "Name": "craf2_reviewhub_metrictypedetail_statuscode",
+    "OptionSetInfoNameMapping": {
+      "1": "Active",
+      "2": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statuscode",
+        "OptionSetReferenceEntityName": "ReviewHub_MetricTypeDetails"
+      }
+    },
+    "OptionSetTypeKey": "StatusType",
+    "RelatedColumnInvariantName": "statuscode",
+    "RelatedEntityName": "ReviewHub_MetricTypeDetails",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "ReviewHub_MetricTypeUpdateMethod",
+    "Name": "craf2_reviewhub_metrictypeupdatemethod",
+    "OptionSetInfoNameMapping": {
+      "803840000": "BAG IA automated",
+      "803840001": "Manual"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": true,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "craf2_metrictypedetailupdatemethod",
+        "OptionSetReferenceEntityName": "ReviewHub_MetricTypeDetails"
+      },
+      "OptionSetReferenceItem1": {
+        "OptionSetReferenceColumnName": "craf2_updatemethod",
+        "OptionSetReferenceEntityName": "ReviewHub ProductMetricUpdateMethods"
+      }
+    },
+    "OptionSetTypeKey": "PicklistType",
+    "RelatedColumnInvariantName": "craf2_metrictypedetailupdatemethod",
+    "RelatedEntityName": "ReviewHub_MetricTypeDetails",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "ReviewHub_QuaterlyCalculationMethod",
+    "Name": "craf2_reviewhub_quaterlycalculationmethod",
+    "OptionSetInfoNameMapping": {
+      "803840000": "Average",
+      "803840001": "Sum"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": true,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "craf2_metrictypequaterlycalcmethod",
+        "OptionSetReferenceEntityName": "ReviewHub_MetricTypeDetails"
+      }
+    },
+    "OptionSetTypeKey": "PicklistType",
+    "RelatedColumnInvariantName": "craf2_metrictypequaterlycalcmethod",
+    "RelatedEntityName": "ReviewHub_MetricTypeDetails",
+    "Type": "OptionSetInfo"
+  }
+]

@@ -1,0 +1,201 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_office365users_1": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "chub_sharedoffice365users_3cce7"
+        },
+        "api": {
+          "name": "shared_office365users"
+        }
+      },
+      "shared_azuread_1": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "chub_sharedazuread_edb08"
+        },
+        "api": {
+          "name": "shared_azuread"
+        }
+      },
+      "shared_commondataserviceforapps_1": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "chub_sharedcommondataserviceforapps_72f86"
+        },
+        "api": {
+          "name": "shared_commondataserviceforapps"
+        }
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        },
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        },
+        "EnvVar - ReviewHub - Read Write Access Group (chub_EnvVarReviewHubReadWriteAccessGroup)": {
+          "defaultValue": "4d2c1c28-ad21-4bb5-a8b9-b7d33c105b39",
+          "type": "String",
+          "metadata": {
+            "schemaName": "chub_EnvVarReviewHubReadWriteAccessGroup"
+          }
+        }
+      },
+      "triggers": {
+        "When_a_row_is_added,_modified_or_deleted": {
+          "metadata": {
+            "operationMetadataId": "fbf2c1a4-ef54-4a37-8006-dfe206b1b8ce"
+          },
+          "type": "OpenApiConnectionWebhook",
+          "inputs": {
+            "host": {
+              "connectionName": "shared_commondataserviceforapps_1",
+              "operationId": "SubscribeWebhookTrigger",
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+            },
+            "parameters": {
+              "subscriptionRequest/message": 4,
+              "subscriptionRequest/entityname": "craf2_reviewhub_factmetricboard",
+              "subscriptionRequest/scope": 4,
+              "subscriptionRequest/filteringattributes": "craf2_fmb_reviewownerprincipal"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        }
+      },
+      "actions": {
+        "ReviewHubAccess-ReadWriteGroup": {
+          "runAfter": {
+            "Initialize_reviewOwnerEmail": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "8da86aee-5503-4b49-aa97-1ca1fd54a3c1"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "ReviewHubAccess-ReadWriteGroup",
+                "type": "string",
+                "value": "@parameters('EnvVar - ReviewHub - Read Write Access Group (chub_EnvVarReviewHubReadWriteAccessGroup)')"
+              }
+            ]
+          }
+        },
+        "Initialize_reviewOwnerEmail": {
+          "runAfter": {},
+          "metadata": {
+            "operationMetadataId": "96eb5012-74f0-4591-be5a-a470fa5e5a47"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "reviewOwnerEmail",
+                "type": "string",
+                "value": "@triggerOutputs()?['body/craf2_fmb_reviewownerprincipal']"
+              }
+            ]
+          }
+        },
+        "If_a_review_owner_belongs_to_ReadWrite_group": {
+          "actions": {
+            "Get_user_profile": {
+              "runAfter": {},
+              "metadata": {
+                "operationMetadataId": "a77a6477-5b7b-4839-a1e2-f40e15b0610f"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "connectionName": "shared_office365users_1",
+                  "operationId": "UserProfile_V2",
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365users"
+                },
+                "parameters": {
+                  "id": "@variables('reviewOwnerEmail')"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "Add_review_owner_to_ReadWrite_group": {
+              "runAfter": {
+                "Get_user_profile": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "473619ad-00a1-4e34-a3f7-f354bb6d6cff"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "connectionName": "shared_azuread_1",
+                  "operationId": "AddUserToGroup",
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_azuread"
+                },
+                "parameters": {
+                  "id": "@variables('ReviewHubAccess-ReadWriteGroup')",
+                  "body/@odata.id": "@outputs('Get_user_profile')?['body/id']"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            }
+          },
+          "runAfter": {
+            "Check_group_membership_of_a_review_owner": [
+              "Succeeded"
+            ]
+          },
+          "expression": {
+            "equals": [
+              "@length(outputs('Check_group_membership_of_a_review_owner')?['body/value'])",
+              0
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "308ec4fa-3879-4aab-91e3-c5b28197d6ff"
+          },
+          "type": "If"
+        },
+        "Check_group_membership_of_a_review_owner": {
+          "runAfter": {
+            "ReviewHubAccess-ReadWriteGroup": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "ee11e37a-b820-47d8-a404-d699305276ff"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "connectionName": "shared_azuread_1",
+              "operationId": "CheckMemberGroupsV2",
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_azuread"
+            },
+            "parameters": {
+              "id": "@variables('reviewOwnerEmail')",
+              "body/groupIds": [
+                "@variables('ReviewHubAccess-ReadWriteGroup')"
+              ]
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        }
+      }
+    },
+    "templateName": ""
+  },
+  "schemaVersion": "1.0.0.0"
+}

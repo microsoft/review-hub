@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<savedqueries xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <savedquery>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>0</CanBeDeleted>
+    <isquickfindquery>0</isquickfindquery>
+    <isprivate>0</isprivate>
+    <isdefault>1</isdefault>
+    <savedqueryid>{a902b6a7-f92d-4071-b353-828f2b52c159}</savedqueryid>
+    <layoutxml>
+      <grid name="resultset" jump="craf2_title" select="1" icon="1" preview="1">
+        <row name="result" id="craf2_reviewhub_metrictypedetailid">
+          <cell name="craf2_metrictype" width="227" />
+          <cell name="a_81ac16cd9ed745a7a6322b46db617f47.craf2_metrictypeid" width="201" />
+          <cell name="craf2_mtd_objective" width="197" />
+          <cell name="craf2_metrictypedetailupdatemethod" width="190" />
+          <cell name="craf2_metrictypedetailpowerbiurl" width="243" />
+          <cell name="a_81ac16cd9ed745a7a6322b46db617f47.craf2_metrictypestage" width="184" />
+          <cell name="craf2_metrictypedetailtemplate" width="200" />
+          <cell name="craf2_mtd_boardtype" width="143" />
+          <cell name="craf2_mtd_displayorder" width="155" />
+          <cell name="a_81ac16cd9ed745a7a6322b46db617f47.craf2_metrictypedeprecateddate" width="214" />
+          <cell name="createdby" width="100" />
+          <cell name="createdon" width="100" />
+          <cell name="modifiedon" width="100" />
+        </row>
+      </grid>
+    </layoutxml>
+    <querytype>0</querytype>
+    <fetchxml>
+      <fetch version="1.0" mapping="logical">
+        <entity name="craf2_reviewhub_metrictypedetail">
+          <attribute name="craf2_reviewhub_metrictypedetailid" />
+          <filter type="and">
+            <condition attribute="statecode" operator="eq" value="0" />
+          </filter>
+          <attribute name="craf2_metrictypedetailtemplate" />
+          <attribute name="craf2_metrictype" />
+          <link-entity alias="a_81ac16cd9ed745a7a6322b46db617f47" name="craf2_reviewhub_metrictype" to="craf2_metrictype" from="craf2_reviewhub_metrictypeid" link-type="inner">
+            <attribute name="craf2_metrictypedeprecateddate" />
+            <attribute name="craf2_metrictypeid" />
+            <attribute name="craf2_metrictypestage" />
+            <filter type="and">
+              <condition attribute="craf2_metrictypeid" operator="eq" value="27" />
+            </filter>
+          </link-entity>
+          <attribute name="craf2_metrictypedetailupdatemethod" />
+          <attribute name="craf2_metrictypedetailpowerbiurl" />
+          <attribute name="createdby" />
+          <attribute name="createdon" />
+          <attribute name="craf2_mtd_boardtype" />
+          <attribute name="craf2_mtd_displayorder" />
+          <attribute name="modifiedon" />
+          <order attribute="modifiedon" descending="true" />
+          <attribute name="craf2_mtd_objective" />
+        </entity>
+      </fetch>
+    </fetchxml>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <LocalizedNames>
+      <LocalizedName description="Active ReviewHub_MetricTypeDetails" languagecode="1033" />
+    </LocalizedNames>
+  </savedquery>
+</savedqueries>

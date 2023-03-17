@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<optionset Name="craf2_reviewhub_metrictypeupdatemethod" localizedName="ReviewHub_MetricTypeUpdateMethod" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <OptionSetType>picklist</OptionSetType>
+  <IsGlobal>1</IsGlobal>
+  <IntroducedVersion>1.0.0.0</IntroducedVersion>
+  <IsCustomizable>1</IsCustomizable>
+  <displaynames>
+    <displayname description="ReviewHub_MetricTypeUpdateMethod" languagecode="1033" />
+  </displaynames>
+  <Descriptions>
+    <Description description="" languagecode="1033" />
+  </Descriptions>
+  <options>
+    <option value="803840000">
+      <labels>
+        <label description="BAG IA automated" languagecode="1033" />
+      </labels>
+    </option>
+    <option value="803840001">
+      <labels>
+        <label description="Manual" languagecode="1033" />
+      </labels>
+    </option>
+  </options>
+</optionset>

@@ -1,0 +1,29 @@
+TESTScreen1 As screen:
+    OnVisible: =
+
+    Button2 As button:
+        Fill: =RGBA(54, 176, 75, 1)
+        Height: =53
+        OnSelect: |
+            =/*
+            ForAll(
+                AddColumns(
+                    Filter(ReviewHub_MetricTypeDetails, IsBlank(ThisRecord.craf2_mtd_Objective.craf2_objectivename)),
+                    "TypeID", ThisRecord.craf2_MetricType.craf2_metrictypeid,
+                    "MT_Subgroup", Text(ThisRecord.craf2_MetricType.MetricTypeSubgroup),
+                    "BTID", ThisRecord.craf2_mtd_BoardType.craf2_boardtypeid
+                ),
+                Patch(
+                    ReviewHub_MetricTypeDetails,
+                    LookUp(ReviewHub_MetricTypeDetails, ThisRecord.craf2_MetricType.craf2_metrictypeid = TypeID && ThisRecord.craf2_mtd_BoardType.craf2_boardtypeid = BTID && IsBlank(ThisRecord.craf2_mtd_Objective.craf2_objectivename)),
+                    {
+                        craf2_mtd_Objective: LookUp(ReviewHub_MetricTypeObjectives, ThisRecord.craf2_objectivename = MT_Subgroup && ThisRecord.craf2_mto_boardtypeid = BTID)
+                    }
+                )
+            );*/
+        Text: ="populate mtd_Objective column in the ReviewHub_MetricTypeDetail Table"
+        Width: =503
+        X: =35
+        Y: =695
+        ZIndex: =2
+
