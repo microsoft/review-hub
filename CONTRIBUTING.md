@@ -41,3 +41,41 @@ pac solution unpack --zipfile path-to-exported-zip-file --folder path-to-repo/Re
 ```
 
 - Once done commit your changes and create a pull request.
+
+## Branch Permission Guidelines
+The following guidelines describe the branch permissions for contributing to this project:
+
+### Main Branch
+The main branch (usually named "main" or "master") is the primary branch for this project. It should always reflect a stable state of the project and only trusted collaborators should have write access to this branch.
+- Only trusted collaborators have write access to the main branch.
+- Pull requests into the main branch must be reviewed and approved by at least one trusted collaborator.
+- Pull requests into the main branch must pass all status checks, including automated tests, code formatting checks, and any other checks required by the project.
+
+### Feature Branches
+Feature branches are used for developing new features or making changes to existing code. They are created from the main branch and are intended to be temporary.
+- Contributors are allowed to create and push changes to their own feature branches.
+- Pull requests from feature branches must be reviewed and approved by at least one trusted collaborator before they can be merged into the main branch.
+- Pull requests from feature branches must pass all status checks before they can be merged.
+
+### Code Reviews
+Code reviews help ensure that changes are high quality and aligned with the project's goals.
+- Pull requests must be reviewed and approved by at least one trusted collaborator before they can be merged.
+- Pull requests must be reviewed by a code owner (i.e. a trusted collaborator who is responsible for maintaining the affected code) before they can be merged.
+
+### Write Access
+Write access to the repository is granted selectively to trusted collaborators who have a proven track record of contributing positively to the project.
+- Only trusted collaborators are granted write access to the repository.
+- The "collaborators" permission level is used for trusted collaborators.
+
+### Status Checks
+Status checks help ensure that changes meet the project's standards and requirements.
+- Status checks must pass before pull requests can be merged.
+- Status checks include automated tests, code formatting checks, and any other checks required by the project.
+
+### Protected Branches
+Protected branches prevent unauthorized changes to important branches in the repository.
+- Important branches, such as the main branch and release branches, are protected.
+- Only trusted collaborators can push changes to protected branches.
+
+### Documentation
+These guidelines are documented in the CONTRIBUTING.md file, which should be read by all contributors before submitting changes to the repository.
