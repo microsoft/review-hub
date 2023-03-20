@@ -81,4 +81,4 @@ jobs:
           
       - name: Confirm Quality of Solution
         if: ${{ steps.critical-count-calculated.outputs.stdout }} > 0 && ${{ steps.high-count-calculated.outputs.stdout }} > 0
-        run: echo "::error ::There are ${{ steps.critical-count-calculated.outputs.stdout }} critical findings and ${{ steps.high-count-calculated.outputs.stdout }} high findings. Run solution checker on your solution, resolve findings and try again."
+        run: echo "::error file=app.js,line=1::There are ${{ steps.critical-count-calculated.outputs.stdout }} critical findings and ${{ steps.high-count-calculated.outputs.stdout }} high findings. Run solution checker on your solution, resolve findings and try again."
