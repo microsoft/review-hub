@@ -54,5 +54,5 @@ jobs:
         with:
           name: CheckSolutionLogs
       - name: Count Number of Critical
-        run: grep -o "critical" *_ReviewHub.sarif | wc -l
+        run: grep -o "Critical" *_ReviewHub.sarif | wc -l
       
