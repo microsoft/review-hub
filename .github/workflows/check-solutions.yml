@@ -44,7 +44,7 @@ jobs:
           tenant-id: ${{ vars.SERVICEPRINCIPALTENANTID }}
           
           
-  get-output-check-solution:
+  assert-quality-check:
     runs-on: ubuntu-latest
     needs: [quality-check]
     steps:
@@ -71,17 +71,17 @@ jobs:
         uses: mathiasvr/command-output@v2.0.0
         id: high-count-calculated
         with:
-          run: echo $(((${{ steps.high-count.outputs.stdout }} / 3) - 9))
+          run: $(((${{ steps.high-count.outputs.stdout }} / 3) - 9))
           
       - name: Convert critical count to number
         uses: mathiasvr/command-output@v2.0.0
         id: critical-count-calculated
         with:
-          run: echo $(((${{ steps.critical-count.outputs.stdout }} / 3) - 7))
+          run: $(((${{ steps.critical-count.outputs.stdout }} / 3) - 7))
           
       - name: Confirm Quality of Solution
         if: ${{ steps.critical-count-calculated.outputs.stdout }} > 0 && ${{ steps.high-count-calculated.outputs.stdout }} > 0
         uses: actions/github-script@v3
         with:
           script: |
-              core.setFailed(' There are ${{ steps.critical-count-calculated.outputs.stdout }} critical findings and ${{ steps.high-count-calculated.outputs.stdout }} high findings. Run solution checker on your solution resolve findings and try again.')
+              core.setFailed(' There are ${{ steps.critical-count-calculated.outputs.stdout }} critical findings and ${{ steps.high-count-calculated.outputs.stdout }} high findings. Run solution checker on your solution, resolve findings and try again.')
