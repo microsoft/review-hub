@@ -56,12 +56,32 @@ jobs:
           name: CheckSolutionLogs
           
       - name: Count Number of Critical
+        id: critical-count
         uses: mathiasvr/command-output@v2.0.0
         with:
             run: grep -o "Critical" *_ReviewHub.sarif | wc -l
         
       - name: Count Number of High
+        id: high-count
         uses: mathiasvr/command-output@v2.0.0
         with:
           run: grep -o "High" *_ReviewHub.sarif | wc -l
       
+      - name: Convert high count to number
+        uses: mathiasvr/command-output@v2.0.0
+        id: high-count-calculated
+        with:
+          run: (${{ steps.high-count.outputs.stdout }} / 3) - 9 | bc
+          
+      - name: Convert critical count to number
+        uses: mathiasvr/command-output@v2.0.0
+        id: critical-count-calculated
+        with:
+          run: (${{ steps.critical-count.outputs.stdout }} / 3) - 7  | bc
+          
+      - name: Confirm Quality of Solution
+        if: ${{ steps.critical-count-calculated.outputs.stdout }} > 0 && ${{ steps.high-count-calculated.outputs.stdout }} > 0
+        uses: actions/github-script@v3
+        with:
+          script: |
+              core.setFailed(' There are ${{ steps.critical-count-calculated.outputs.stdout }} critical findings and ${{ steps.high-count-calculated.outputs.stdout }} high findings. Run solution checker on your solution resolve findings and try again.')
