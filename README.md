@@ -39,7 +39,7 @@ The following connections are utilized within the solution. There a Data Loss Po
 ```
 git clone https://github.com/microsoft/review-hub.git
 ```
-- Import the zipped solution file, present within the solution files folder into your environment.
+- Import the zipped solution file named Review Hub from the latest release into your environment.
 
 - After providing all the connections, you will be required to provide values for all the environment variables viable for your use case. The description for these variables are present within the solution.
 
