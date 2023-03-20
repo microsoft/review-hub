@@ -56,8 +56,12 @@ jobs:
           name: CheckSolutionLogs
           
       - name: Count Number of Critical
-        run: echo "grep -o 'Critical' *_ReviewHub.sarif | wc -l" >> "$GITHUB_OUTPUT"
+        uses: mathiasvr/command-output@v2.0.0
+        with:
+            run: grep -o "Critical" *_ReviewHub.sarif | wc -l
         
       - name: Count Number of High
-        run: echo "grep -o 'High' *_ReviewHub.sarif | wc -l" >> "$GITHUB_OUTPUT"
+        uses: mathiasvr/command-output@v2.0.0
+        with:
+          run: grep -o "High" *_ReviewHub.sarif | wc -l
       
