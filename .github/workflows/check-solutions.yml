@@ -43,13 +43,16 @@ jobs:
           app-id: ${{ vars.SERVICEPRINCIPALCLIENTID }}
           tenant-id: ${{ vars.SERVICEPRINCIPALTENANTID }}
           
+          
   get-output-check-solution:
     runs-on: ubuntu-latest
     needs: [quality-check]
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - name: Download log
+        uses: actions/download-artifact@v3
         with:
-          node-version: '14'
-      - run: echo ${{steps.quality-check.outputs.result}}
+          name: CheckSolutionLogs
+      - name: Test Artifact Download
+        run: ls -R
       
