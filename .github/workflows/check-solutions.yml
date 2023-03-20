@@ -56,8 +56,8 @@ jobs:
           name: CheckSolutionLogs
           
       - name: Count Number of Critical
-        run: (grep -o "Critical" *_ReviewHub.sarif | wc -l) / 3 >> "$GITHUB_OUTPUT"
+        run: grep -o "Critical" *_ReviewHub.sarif | wc -l >> "$GITHUB_OUTPUT"
         
       - name: Count Number of High
-        run: (grep -o "High" *_ReviewHub.sarif | wc -l) / 3 >> "$GITHUB_OUTPUT"
+        run: grep -o "High" *_ReviewHub.sarif | wc -l >> "$GITHUB_OUTPUT"
       
