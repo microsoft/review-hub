@@ -53,6 +53,6 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: CheckSolutionLogs
-      - name: Test Artifact Download
-        run: ls -R
+      - name: Count Number of Critical
+        run: grep -o "critical" *_ReviewHub.sarif | wc -l
       
