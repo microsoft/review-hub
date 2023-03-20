@@ -21,7 +21,7 @@
 - Pack the solution file using power platform cli, as shown in the code snippet.
 
 ```
-pac solution pack --zipfile desired-zip-file-name --folder path-to-repo/ReviewHubDev -ad -aw -c -pca -p Unmanaged
+pac solution pack --zipfile desired-zip-file-name --folder path-to-repo/app -ad -aw -c -pca -p Unmanaged
 ```
 
 - Import the generated zip file into your environment.
@@ -37,7 +37,7 @@ pac solution pack --zipfile desired-zip-file-name --folder path-to-repo/ReviewHu
 - Extract the zip file using the power apps cli to unpack the solution, as shown in the code snippet.
 
 ```
-pac solution unpack --zipfile path-to-exported-zip-file --folder path-to-repo/ReviewHubDev -ad -aw -c -pca -p Unmanaged
+pac solution unpack --zipfile path-to-exported-zip-file --folder path-to-repo/app -ad -aw -c -pca -p Unmanaged
 ```
 
 - Once done commit your changes and create a pull request.
