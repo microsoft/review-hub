@@ -71,13 +71,13 @@ jobs:
         uses: mathiasvr/command-output@v2.0.0
         id: high-count-calculated
         with:
-          run: echo "(${{ steps.high-count.outputs.stdout }} / 3) - 9" | bc
+          run: echo $(((${{ steps.high-count.outputs.stdout }} / 3) - 9))
           
       - name: Convert critical count to number
         uses: mathiasvr/command-output@v2.0.0
         id: critical-count-calculated
         with:
-          run: echo "(${{ steps.critical-count.outputs.stdout }} / 3) - 7"  | bc
+          run: echo $(((${{ steps.critical-count.outputs.stdout }} / 3) - 7))
           
       - name: Confirm Quality of Solution
         if: ${{ steps.critical-count-calculated.outputs.stdout }} > 0 && ${{ steps.high-count-calculated.outputs.stdout }} > 0
