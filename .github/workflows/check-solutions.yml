@@ -33,7 +33,7 @@ jobs:
           solution-type: 'Unmanaged'
           
       - name: Check Solution
-        id: check-soltuion
+        id: check-solution
         uses: microsoft/powerplatform-actions/check-solution@v0
         with:
           path: 'ReviewHub.zip'
