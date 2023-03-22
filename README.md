@@ -47,6 +47,10 @@ git clone https://github.com/microsoft/review-hub.git
 
 - Then lastly you could upload the exported dataverse tables sample data located in the Exported Tables folder under Sample Files to your environment to get started with.
 
+  - First you would have to update the factmetricboard and the users excel sheet by changing the placeholders "Your Name" and "youremali@domain.com" with the details of the account you want to utilize to setup this project. Be careful not to add any personal details to the repo when contributing.
+ 
+  - Then the excel files have to be uploaded in a certain order to avoid errors, the order is as follows users -> boardhealth -> boardtype -> product -> metricobjective -> metrictemplate -> metrictype -> metrictypedetails -> factmetricboard -> productmetric -> factmetric.
+
 ## Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
