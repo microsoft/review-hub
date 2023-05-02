@@ -20,7 +20,7 @@ To utilize review hub you will need a power apps premium plan as some of the con
 - Azure subscription.
 - Azure Devops.
 
-The following connections are utilized within the solution. There a Data Loss Policy(DLP) which allows the use of all these connections should be assigned. To learn more about DLPs please visit [Data Loss Prevention Policies](https://learn.microsoft.com/en-us/power-platform/admin/wp-data-loss-prevention)
+The following connections are utilized within the solution. A Data Loss Policy(DLP) which allows the use of all these connections should be assigned. To learn more about DLPs please visit [Data Loss Prevention Policies](https://learn.microsoft.com/en-us/power-platform/admin/wp-data-loss-prevention)
 
 - Azure Devops
 - Power BI
