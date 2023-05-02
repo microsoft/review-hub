@@ -21,7 +21,7 @@ Select the Issue template that matches the solution for which you want to submit
 
 [Report a Bug](https://github.com/microsoft/review-hub/issues/new?assignees=yondiame&labels=bug&template=bug_report.md&title=%5BBUG%5D%3A)
 
-![image](https://user-images.githubusercontent.com/8174072/167647654-4c9947ce-23cf-437a-9d20-96960a9e4580.png)
+![167647654-4c9947ce-23cf-437a-9d20-96960a9e4580](https://user-images.githubusercontent.com/25781258/235675239-baf16b22-781b-4366-a8db-cc83b1bd7a7c.png)
 
 - File a single issue per problem and feature request. Do not enumerate multiple bugs or feature requests in the same issue.
 - Do not add your issue as a comment to an existing issue unless it's for the identical input. Many issues look similar, but have different causes.
