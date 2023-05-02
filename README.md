@@ -35,7 +35,7 @@ The following connections are utilized within the solution. There a Data Loss Po
 
 ## Installation
 
-To install the solution, you can download the zipped powerplatform solution from this repo's release. Then import the downloaded zipped file as a solution to your Power Apps Platform environment. Refer to the [INSTALLATION.md](installation guide) for details.
+To install the solution, you can download the zipped powerplatform solution from this repo's release. Then import the downloaded zipped file as a solution to your Power Apps Platform environment. Refer to the [installation guide](INSTALLATION.md) for details.
 
 ## Contributing
 
