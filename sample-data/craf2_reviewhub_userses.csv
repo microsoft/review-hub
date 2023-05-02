@@ -1,2 +1,2 @@
-importsequencenumber,craf2_reviewhub_usersid,statuscode,statecode,timezoneruleversionnumber,craf2_userdisplayname,craf2_userprincipalemail,craf2_userrole,utcconversiontimezonecode,versionnumber,owningbusinessunit
-,a667f57f-5ec6-ed11-b597-002248049d5d,Active,Active,,Your Name,youremail@domain.com,Administrator,,638911015,
+importsequencenumber,craf2_reviewhub_usersid,timezoneruleversionnumber,craf2_userdisplayname,craf2_userprincipalemail,craf2_userrole,utcconversiontimezonecode,versionnumber,owningbusinessunit
+,a667f57f-5ec6-ed11-b597-002248049d5d,,Your Name,youremail@domain.com,Administrator,,638911015,
